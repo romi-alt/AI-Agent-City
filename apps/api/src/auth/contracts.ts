@@ -46,3 +46,19 @@ export const AUTH_ERRORS = {
 export const DEVICE_PROOF_HEADER = 'x-device-proof';
 export const SESSION_COOKIE = 'ac_session';
 export const LOGIN_COOKIE = 'ac_login';
+
+/**
+ * Resolves a session outside the HTTP guard (Socket.IO handshakes, periodic socket re-checks). Provided by the auth
+ * module under SESSION_RESOLVER; other modules inject it and never read identity tables themselves.
+ */
+export interface SessionResolver {
+  /** Cookie header + device proof (`htm` GET, `htu` PUBLIC_ORIGIN + "/socket.io") → session, or null if not valid. */
+  resolveHandshake(input: {
+    cookieHeader: string | undefined;
+    proof: string | undefined;
+    origin: string | undefined;
+  }): Promise<SessionContext | null>;
+  /** Re-read a session: null if it is revoked, expired, or its person/device lost access. */
+  current(sessionId: string): Promise<SessionContext | null>;
+}
+export const SESSION_RESOLVER = Symbol('SESSION_RESOLVER');

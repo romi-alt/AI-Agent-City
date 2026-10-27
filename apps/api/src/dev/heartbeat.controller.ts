@@ -1,3 +1,4 @@
+import { Public } from '../auth/decorators.js';
 import {
   BadRequestException,
   Body,
@@ -19,6 +20,7 @@ import { API_ENV, type ApiEnv } from '../env.js';
  * ENABLE_DEV_ROUTES=true (refused in production). No authentication yet (that is M03), which is why it is
  * development-only. It contacts nothing outside our own services.
  */
+@Public()
 @ApiExcludeController()
 @Controller('dev/heartbeat')
 export class HeartbeatController implements OnModuleDestroy {

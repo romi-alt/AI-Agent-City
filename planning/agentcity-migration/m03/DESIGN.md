@@ -66,6 +66,9 @@ browser ──https──► web (Next, :3000) ──/api/* proxy──► API (
   The guard attaches `req.session: SessionContext`.
 - **Revalidation:** the session's refresh token is encrypted with `SESSION_ENCRYPTION_KEY`. At most every few
   minutes it is used to check the person is still active at the IdP; a failure revokes the session.
+- **Global guard:** `SessionGuard` is registered as a global guard by the auth module. Routes without a session
+  are marked `@Public()` (`auth/decorators.ts`). Other modules read `req.session` (`AuthenticatedRequest`) and never
+  import the guard. Socket handshakes use `SESSION_RESOLVER` (`contracts.ts`), which the auth module provides.
 - **`@RequireStepUp(reason)`** (credential, billing, permission) needs `stepUpAt` within `STEP_UP_MAX_AGE_SECONDS`
   and `acr >= 2`. Otherwise the response is 403 `{ error: 'step_up_required', reason }`.
 

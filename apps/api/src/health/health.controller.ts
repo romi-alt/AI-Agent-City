@@ -1,3 +1,4 @@
+import { Public } from '../auth/decorators.js';
 import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import { ApiOkResponse, ApiServiceUnavailableResponse, ApiTags } from '@nestjs/swagger';
 import type { Liveness, ReadinessReport } from '@agentcity/contracts';
@@ -7,6 +8,7 @@ import { LivenessDto, ReadinessReportDto } from './health.dto.js';
 
 export const SERVICE_VERSION = '0.0.0';
 
+@Public()
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
