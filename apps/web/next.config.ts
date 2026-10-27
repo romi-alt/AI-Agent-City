@@ -9,6 +9,8 @@ const config: NextConfig = {
   // The browser smoke test (test/browser-smoke.ts) builds into its own folder so it never replaces the real build.
   distDir: process.env.NEXT_DIST_DIR || '.next',
   reactStrictMode: true,
+  // The 3D city is a workspace package shipped as TypeScript source.
+  transpilePackages: ['@agentcity/city-scene'],
   poweredByHeader: false,
   async rewrites() {
     return [{ source: '/api/:path*', destination: `${apiUrl}/api/:path*` }];

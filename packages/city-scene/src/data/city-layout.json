@@ -1,0 +1,3490 @@
+{
+  "version": 1,
+  "districts": [
+    {
+      "key": "campus",
+      "name": "Fast Sales Campus"
+    },
+    {
+      "key": "dealer-row",
+      "name": "Dealer Row"
+    },
+    {
+      "key": "rental-park",
+      "name": "Rental Park"
+    }
+  ],
+  "buildings": [
+    {
+      "key": "audi",
+      "id": "fd3a95c8-deea-56f8-b34b-00546ceac2dd",
+      "district": "dealer-row",
+      "name": "Audi Dealership",
+      "shortName": "Audi",
+      "kind": "dealership",
+      "brand": "Audi",
+      "color": "#e8e4dc",
+      "accent": "#bb0a30",
+      "x": -40,
+      "z": -20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "HR Dept.",
+          "info": "Recruiting and onboarding new associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "recruiting",
+              "name": "Juno"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "onboarding",
+              "name": "Axel"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Administrative Dept.",
+          "info": "Store manager runs the reports and keeps leads moving.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "manager",
+              "name": "Cleo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "scheduling",
+              "name": "Remy"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Body Shop Dept.",
+          "info": "Estimates, repairs and post-repair CSI.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "estimates",
+              "name": "Rio"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Noa"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Parts Dept.",
+          "info": "Parts orders and follow-up with service and retail customers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "parts orders",
+              "name": "Jude"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Sage"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Service Dept.",
+          "info": "Service visits, CSI and birthday / anniversary touches.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "service visits",
+              "name": "Maya"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CSI",
+              "name": "Arlo"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "recalls",
+              "name": "Ivy"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Social Media Dept.",
+          "info": "Content, ads and community for the dealership.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "content",
+              "name": "Finn"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Lena"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "community",
+              "name": "Hugo"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Finance Dept.",
+          "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "F&I",
+              "name": "Nora"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "lease end",
+              "name": "Eli"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "credit",
+              "name": "Ruby"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Internet Sales Dept.",
+          "info": "Web, chat and third-party leads – fastest response wins.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "web leads",
+              "name": "Leo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "chat",
+              "name": "Zara"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Omar"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales Dept.",
+          "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Ava"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Kai"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "greeter",
+              "name": "Mila"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "honda",
+      "id": "c4ef0936-bc43-5979-b953-3641898c1d98",
+      "district": "dealer-row",
+      "name": "Honda Dealership",
+      "shortName": "Honda",
+      "kind": "dealership",
+      "brand": "Honda",
+      "color": "#f28b82",
+      "accent": "#cc0000",
+      "x": -20,
+      "z": -20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "HR Dept.",
+          "info": "Recruiting and onboarding new associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "recruiting",
+              "name": "Mae"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "onboarding",
+              "name": "Ava"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Administrative Dept.",
+          "info": "Store manager runs the reports and keeps leads moving.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "manager",
+              "name": "Kira"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "scheduling",
+              "name": "Lio"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Body Shop Dept.",
+          "info": "Estimates, repairs and post-repair CSI.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "estimates",
+              "name": "Ines"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Jax"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Parts Dept.",
+          "info": "Parts orders and follow-up with service and retail customers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "parts orders",
+              "name": "Gus"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Hana"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Service Dept.",
+          "info": "Service visits, CSI and birthday / anniversary touches.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "service visits",
+              "name": "Dex"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CSI",
+              "name": "Elle"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "recalls",
+              "name": "Faye"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Social Media Dept.",
+          "info": "Content, ads and community for the dealership.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "content",
+              "name": "Zed"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Bea"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "community",
+              "name": "Cruz"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Finance Dept.",
+          "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "F&I",
+              "name": "Vik"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "lease end",
+              "name": "Wren"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "credit",
+              "name": "Yara"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Internet Sales Dept.",
+          "info": "Web, chat and third-party leads – fastest response wins.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "web leads",
+              "name": "Rex"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "chat",
+              "name": "Tess"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Uma"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales Dept.",
+          "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Lux"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Otis"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "greeter",
+              "name": "Pia"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "hyundai",
+      "id": "dc6e8c46-1e18-5717-a058-a23ba329d2e6",
+      "district": "dealer-row",
+      "name": "Hyundai Dealership",
+      "shortName": "Hyundai",
+      "kind": "dealership",
+      "brand": "Hyundai",
+      "color": "#7fa7d9",
+      "accent": "#002c5f",
+      "x": 0,
+      "z": -20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "HR Dept.",
+          "info": "Recruiting and onboarding new associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "recruiting",
+              "name": "Axel"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "onboarding",
+              "name": "Lux"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Administrative Dept.",
+          "info": "Store manager runs the reports and keeps leads moving.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "manager",
+              "name": "Remy"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "scheduling",
+              "name": "Juno"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Body Shop Dept.",
+          "info": "Estimates, repairs and post-repair CSI.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "estimates",
+              "name": "Noa"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Cleo"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Parts Dept.",
+          "info": "Parts orders and follow-up with service and retail customers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "parts orders",
+              "name": "Sage"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Rio"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Service Dept.",
+          "info": "Service visits, CSI and birthday / anniversary touches.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "service visits",
+              "name": "Arlo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CSI",
+              "name": "Ivy"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "recalls",
+              "name": "Jude"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Social Media Dept.",
+          "info": "Content, ads and community for the dealership.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "content",
+              "name": "Lena"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Hugo"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "community",
+              "name": "Maya"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Finance Dept.",
+          "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "F&I",
+              "name": "Eli"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "lease end",
+              "name": "Ruby"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "credit",
+              "name": "Finn"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Internet Sales Dept.",
+          "info": "Web, chat and third-party leads – fastest response wins.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "web leads",
+              "name": "Zara"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "chat",
+              "name": "Omar"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Nora"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales Dept.",
+          "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Kai"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Mila"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "greeter",
+              "name": "Leo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "genesis",
+      "id": "f8d7227d-ae44-58e1-9778-e5c1f848964b",
+      "district": "dealer-row",
+      "name": "Genesis Dealership",
+      "shortName": "Genesis",
+      "kind": "dealership",
+      "brand": "Genesis",
+      "color": "#b9a58c",
+      "accent": "#1a1a1a",
+      "x": 20,
+      "z": -20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "HR Dept.",
+          "info": "Recruiting and onboarding new associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "recruiting",
+              "name": "Ava"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "onboarding",
+              "name": "Kai"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Administrative Dept.",
+          "info": "Store manager runs the reports and keeps leads moving.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "manager",
+              "name": "Lio"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "scheduling",
+              "name": "Mae"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Body Shop Dept.",
+          "info": "Estimates, repairs and post-repair CSI.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "estimates",
+              "name": "Jax"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Kira"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Parts Dept.",
+          "info": "Parts orders and follow-up with service and retail customers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "parts orders",
+              "name": "Hana"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Ines"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Service Dept.",
+          "info": "Service visits, CSI and birthday / anniversary touches.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "service visits",
+              "name": "Elle"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CSI",
+              "name": "Faye"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "recalls",
+              "name": "Gus"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Social Media Dept.",
+          "info": "Content, ads and community for the dealership.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "content",
+              "name": "Bea"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Cruz"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "community",
+              "name": "Dex"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Finance Dept.",
+          "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "F&I",
+              "name": "Wren"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "lease end",
+              "name": "Yara"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "credit",
+              "name": "Zed"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Internet Sales Dept.",
+          "info": "Web, chat and third-party leads – fastest response wins.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "web leads",
+              "name": "Tess"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "chat",
+              "name": "Uma"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Vik"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales Dept.",
+          "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Otis"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Pia"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "greeter",
+              "name": "Rex"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "acura",
+      "id": "f8850725-3066-5cc0-8ec6-9449eaf05a7e",
+      "district": "dealer-row",
+      "name": "Acura Dealership",
+      "shortName": "Acura",
+      "kind": "dealership",
+      "brand": "Acura",
+      "color": "#9ad1c4",
+      "accent": "#2b2b2b",
+      "x": 40,
+      "z": -20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "HR Dept.",
+          "info": "Recruiting and onboarding new associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "recruiting",
+              "name": "Lux"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "onboarding",
+              "name": "Otis"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Administrative Dept.",
+          "info": "Store manager runs the reports and keeps leads moving.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "manager",
+              "name": "Juno"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "scheduling",
+              "name": "Axel"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Body Shop Dept.",
+          "info": "Estimates, repairs and post-repair CSI.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "estimates",
+              "name": "Cleo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Remy"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Parts Dept.",
+          "info": "Parts orders and follow-up with service and retail customers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "parts orders",
+              "name": "Rio"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Noa"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Service Dept.",
+          "info": "Service visits, CSI and birthday / anniversary touches.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "service visits",
+              "name": "Ivy"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CSI",
+              "name": "Jude"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "recalls",
+              "name": "Sage"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Social Media Dept.",
+          "info": "Content, ads and community for the dealership.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "content",
+              "name": "Hugo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Maya"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "community",
+              "name": "Arlo"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Finance Dept.",
+          "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "F&I",
+              "name": "Ruby"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "lease end",
+              "name": "Finn"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "credit",
+              "name": "Lena"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Internet Sales Dept.",
+          "info": "Web, chat and third-party leads – fastest response wins.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "web leads",
+              "name": "Omar"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "chat",
+              "name": "Nora"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Eli"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales Dept.",
+          "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Mila"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Leo"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "greeter",
+              "name": "Zara"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "rental-1",
+      "id": "fac4be30-8d3a-5761-ab58-2b6864e102cd",
+      "district": "rental-park",
+      "name": "Rental Building 1",
+      "shortName": "Rental 1",
+      "kind": "rental",
+      "brand": null,
+      "color": "#f6c26b",
+      "accent": "#ffffff",
+      "x": -40,
+      "z": 0,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 5,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 6,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 7,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 8,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 9,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 10,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 11,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 12,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        }
+      ]
+    },
+    {
+      "key": "rc-new",
+      "id": "0fbd1c67-8d71-5058-bba6-d59face6f026",
+      "district": "campus",
+      "name": "Rick Case Honda · New Cars Sales Associates",
+      "shortName": "RC New Cars",
+      "kind": "associates",
+      "brand": "Honda",
+      "color": "#f4a6c1",
+      "accent": "#ffffff",
+      "x": -20,
+      "z": 0,
+      "w": 8,
+      "d": 8,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Pia"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Rex"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Tess"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Uma"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Vik"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Wren"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Yara"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Zed"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Bea"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Cruz"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Dex"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Elle"
+            }
+          ]
+        },
+        {
+          "level": 13,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Faye"
+            }
+          ]
+        },
+        {
+          "level": 14,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Gus"
+            }
+          ]
+        },
+        {
+          "level": 15,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Hana"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "fast-sales",
+      "id": "6e70d9fa-7be5-577b-8352-a7c2e9bbba71",
+      "district": "campus",
+      "name": "Fast Sales Training Center",
+      "shortName": "Fast Sales",
+      "kind": "training",
+      "brand": null,
+      "color": "#f2efe6",
+      "accent": "#f5b335",
+      "x": 0,
+      "z": 0,
+      "w": 14,
+      "d": 12,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Affiliates",
+          "info": "Affiliate partners who refer students and dealers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "new affiliates",
+              "name": "Noa"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "affiliate follow-up",
+              "name": "Cleo"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "name": "Amazon Books",
+          "info": "Fast Sales books on Amazon.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "book sales",
+              "name": "Sage"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "reviews",
+              "name": "Rio"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Dealership Packages",
+          "info": "Training packages sold to dealerships.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "dealers",
+              "name": "Arlo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Ivy"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "contracts",
+              "name": "Jude"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "The Essential Auto Dealership Guide",
+          "info": "The dealership guide course.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "enrollment",
+              "name": "Lena"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Hugo"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "students",
+              "name": "Maya"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "How to Overcome Auto Sales Objections",
+          "info": "Objection-handling course.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "enrollment",
+              "name": "Eli"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Ruby"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "students",
+              "name": "Finn"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "How to Improve Auto Sales Phone Skills",
+          "info": "Phone skills course.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "enrollment",
+              "name": "Zara"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Omar"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "students",
+              "name": "Nora"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "How to Become an Auto Broker",
+          "info": "Auto Broker Program.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "enrollment",
+              "name": "Kai"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Mila"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "students",
+              "name": "Leo"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "How to Become an Auto F&I Manager",
+          "info": "F&I Manager Program.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "enrollment",
+              "name": "Lio"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Mae"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "students",
+              "name": "Ava"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "How to Become an Auto Sales Associate",
+          "info": "Individual Program – enroll new sales associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "enrollment",
+              "name": "Ines"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Jax"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "students",
+              "name": "Kira"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Admin / CEO / Accounting",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "owner",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CEO",
+              "name": "Max"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Vera"
+            },
+            {
+              "slot": 3,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Nico"
+            },
+            {
+              "slot": 4,
+              "kind": "ai",
+              "role": "content",
+              "name": "Luna"
+            },
+            {
+              "slot": 5,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Teo"
+            },
+            {
+              "slot": 6,
+              "kind": "ai",
+              "role": "students",
+              "name": "Iris"
+            },
+            {
+              "slot": 7,
+              "kind": "ai",
+              "role": "dealers",
+              "name": "Dante"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "rc-used",
+      "id": "26630607-6b88-55e6-a942-e2783bdf22e2",
+      "district": "campus",
+      "name": "Rick Case Honda · Used Cars Sales Associates",
+      "shortName": "RC Used Cars",
+      "kind": "associates",
+      "brand": "Honda",
+      "color": "#a8d58a",
+      "accent": "#ffffff",
+      "x": 20,
+      "z": 0,
+      "w": 8,
+      "d": 8,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Remy"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Juno"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Axel"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Lux"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Otis"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Sales associate office",
+          "info": null,
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "human",
+              "role": "associate",
+              "name": null
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": null
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "social",
+              "name": "Pia"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 8,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 9,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 10,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 11,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 12,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        }
+      ]
+    },
+    {
+      "key": "rental-2",
+      "id": "8b9bf09e-fe58-5314-89a2-54128fc28c03",
+      "district": "rental-park",
+      "name": "Rental Building 2",
+      "shortName": "Rental 2",
+      "kind": "rental",
+      "brand": null,
+      "color": "#c6b3f0",
+      "accent": "#ffffff",
+      "x": 40,
+      "z": 0,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 5,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 6,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 7,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 8,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 9,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 10,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 11,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 12,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        }
+      ]
+    },
+    {
+      "key": "volkswagen",
+      "id": "d2139e4e-5859-5e2b-81a2-02edc0184b69",
+      "district": "dealer-row",
+      "name": "Volkswagen Dealership",
+      "shortName": "Volkswagen",
+      "kind": "dealership",
+      "brand": "Volkswagen",
+      "color": "#8fb8e8",
+      "accent": "#001e50",
+      "x": -40,
+      "z": 20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "HR Dept.",
+          "info": "Recruiting and onboarding new associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "recruiting",
+              "name": "Mila"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "onboarding",
+              "name": "Leo"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Administrative Dept.",
+          "info": "Store manager runs the reports and keeps leads moving.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "manager",
+              "name": "Ava"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "scheduling",
+              "name": "Kai"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Body Shop Dept.",
+          "info": "Estimates, repairs and post-repair CSI.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "estimates",
+              "name": "Lio"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Mae"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Parts Dept.",
+          "info": "Parts orders and follow-up with service and retail customers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "parts orders",
+              "name": "Jax"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Kira"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Service Dept.",
+          "info": "Service visits, CSI and birthday / anniversary touches.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "service visits",
+              "name": "Gus"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CSI",
+              "name": "Hana"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "recalls",
+              "name": "Ines"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Social Media Dept.",
+          "info": "Content, ads and community for the dealership.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "content",
+              "name": "Dex"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Elle"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "community",
+              "name": "Faye"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Finance Dept.",
+          "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "F&I",
+              "name": "Zed"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "lease end",
+              "name": "Bea"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "credit",
+              "name": "Cruz"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Internet Sales Dept.",
+          "info": "Web, chat and third-party leads – fastest response wins.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "web leads",
+              "name": "Vik"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "chat",
+              "name": "Wren"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Yara"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales Dept.",
+          "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Rex"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Tess"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "greeter",
+              "name": "Uma"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "alfa-romeo",
+      "id": "13e85f3f-7712-594d-80bc-ff2aba495969",
+      "district": "dealer-row",
+      "name": "Alfa Romeo Dealership",
+      "shortName": "Alfa Romeo",
+      "kind": "dealership",
+      "brand": "Alfa Romeo",
+      "color": "#e57373",
+      "accent": "#8f0c19",
+      "x": -20,
+      "z": 20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "HR Dept.",
+          "info": "Recruiting and onboarding new associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "recruiting",
+              "name": "Pia"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "onboarding",
+              "name": "Rex"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Administrative Dept.",
+          "info": "Store manager runs the reports and keeps leads moving.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "manager",
+              "name": "Lux"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "scheduling",
+              "name": "Otis"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Body Shop Dept.",
+          "info": "Estimates, repairs and post-repair CSI.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "estimates",
+              "name": "Juno"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Axel"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Parts Dept.",
+          "info": "Parts orders and follow-up with service and retail customers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "parts orders",
+              "name": "Cleo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Remy"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Service Dept.",
+          "info": "Service visits, CSI and birthday / anniversary touches.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "service visits",
+              "name": "Sage"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CSI",
+              "name": "Rio"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "recalls",
+              "name": "Noa"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Social Media Dept.",
+          "info": "Content, ads and community for the dealership.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "content",
+              "name": "Arlo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Ivy"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "community",
+              "name": "Jude"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Finance Dept.",
+          "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "F&I",
+              "name": "Lena"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "lease end",
+              "name": "Hugo"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "credit",
+              "name": "Maya"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Internet Sales Dept.",
+          "info": "Web, chat and third-party leads – fastest response wins.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "web leads",
+              "name": "Eli"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "chat",
+              "name": "Ruby"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Finn"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales Dept.",
+          "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Zara"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Omar"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "greeter",
+              "name": "Nora"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "maserati",
+      "id": "1e1206a7-87d1-510d-baba-391cc081e7c2",
+      "district": "dealer-row",
+      "name": "Maserati Dealership",
+      "shortName": "Maserati",
+      "kind": "dealership",
+      "brand": "Maserati",
+      "color": "#5c6f91",
+      "accent": "#0c2340",
+      "x": 0,
+      "z": 20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "HR Dept.",
+          "info": "Recruiting and onboarding new associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "recruiting",
+              "name": "Leo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "onboarding",
+              "name": "Zara"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Administrative Dept.",
+          "info": "Store manager runs the reports and keeps leads moving.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "manager",
+              "name": "Kai"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "scheduling",
+              "name": "Mila"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Body Shop Dept.",
+          "info": "Estimates, repairs and post-repair CSI.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "estimates",
+              "name": "Mae"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Ava"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Parts Dept.",
+          "info": "Parts orders and follow-up with service and retail customers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "parts orders",
+              "name": "Kira"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Lio"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Service Dept.",
+          "info": "Service visits, CSI and birthday / anniversary touches.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "service visits",
+              "name": "Hana"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CSI",
+              "name": "Ines"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "recalls",
+              "name": "Jax"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Social Media Dept.",
+          "info": "Content, ads and community for the dealership.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "content",
+              "name": "Elle"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Faye"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "community",
+              "name": "Gus"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Finance Dept.",
+          "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "F&I",
+              "name": "Bea"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "lease end",
+              "name": "Cruz"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "credit",
+              "name": "Dex"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Internet Sales Dept.",
+          "info": "Web, chat and third-party leads – fastest response wins.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "web leads",
+              "name": "Wren"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "chat",
+              "name": "Yara"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Zed"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales Dept.",
+          "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Tess"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Uma"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "greeter",
+              "name": "Vik"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "fiat",
+      "id": "0d20e24b-d39e-5525-a751-8b2bb15edc13",
+      "district": "dealer-row",
+      "name": "Fiat Dealership",
+      "shortName": "Fiat",
+      "kind": "dealership",
+      "brand": "Fiat",
+      "color": "#f7a072",
+      "accent": "#a6192e",
+      "x": 20,
+      "z": 20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Empty Floor",
+          "info": null,
+          "rentable": false,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "HR Dept.",
+          "info": "Recruiting and onboarding new associates.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "recruiting",
+              "name": "Rex"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "onboarding",
+              "name": "Tess"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "name": "Administrative Dept.",
+          "info": "Store manager runs the reports and keeps leads moving.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "manager",
+              "name": "Otis"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "scheduling",
+              "name": "Pia"
+            }
+          ]
+        },
+        {
+          "level": 6,
+          "name": "Body Shop Dept.",
+          "info": "Estimates, repairs and post-repair CSI.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "estimates",
+              "name": "Axel"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Lux"
+            }
+          ]
+        },
+        {
+          "level": 7,
+          "name": "Parts Dept.",
+          "info": "Parts orders and follow-up with service and retail customers.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "parts orders",
+              "name": "Remy"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Juno"
+            }
+          ]
+        },
+        {
+          "level": 8,
+          "name": "Service Dept.",
+          "info": "Service visits, CSI and birthday / anniversary touches.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "service visits",
+              "name": "Rio"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "CSI",
+              "name": "Noa"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "recalls",
+              "name": "Cleo"
+            }
+          ]
+        },
+        {
+          "level": 9,
+          "name": "Social Media Dept.",
+          "info": "Content, ads and community for the dealership.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "content",
+              "name": "Ivy"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "ads",
+              "name": "Jude"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "community",
+              "name": "Sage"
+            }
+          ]
+        },
+        {
+          "level": 10,
+          "name": "Finance Dept.",
+          "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "F&I",
+              "name": "Hugo"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "lease end",
+              "name": "Maya"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "credit",
+              "name": "Arlo"
+            }
+          ]
+        },
+        {
+          "level": 11,
+          "name": "Internet Sales Dept.",
+          "info": "Web, chat and third-party leads – fastest response wins.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "web leads",
+              "name": "Ruby"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "chat",
+              "name": "Finn"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Lena"
+            }
+          ]
+        },
+        {
+          "level": 12,
+          "name": "Sales Dept.",
+          "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+          "rentable": false,
+          "desks": [
+            {
+              "slot": 0,
+              "kind": "ai",
+              "role": "closer",
+              "name": "Omar"
+            },
+            {
+              "slot": 1,
+              "kind": "ai",
+              "role": "follow-up",
+              "name": "Nora"
+            },
+            {
+              "slot": 2,
+              "kind": "ai",
+              "role": "greeter",
+              "name": "Eli"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "rental-3",
+      "id": "ea56aa40-2428-5f2b-95d3-d1c8e41492db",
+      "district": "rental-park",
+      "name": "Rental Building 3",
+      "shortName": "Rental 3",
+      "kind": "rental",
+      "brand": null,
+      "color": "#80cbc4",
+      "accent": "#ffffff",
+      "x": 40,
+      "z": 20,
+      "w": 9,
+      "d": 9,
+      "floors": [
+        {
+          "level": 1,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 2,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 3,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 4,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 5,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 6,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 7,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 8,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 9,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 10,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 11,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        },
+        {
+          "level": 12,
+          "name": "Floor for Rent",
+          "info": null,
+          "rentable": true,
+          "desks": []
+        }
+      ]
+    }
+  ],
+  "streets": {
+    "roadsX": [-50, -30, -10, 10, 30, 50],
+    "roadsZ": [-30, -10, 10, 30],
+    "extent": 60
+  }
+}

@@ -56,6 +56,14 @@ const Env = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform(v => v === 'true'),
+
+  // Demo funnel (X01). Without a provisioner client the demo request endpoint answers 503 demo_unavailable.
+  /** Keycloak service-account client allowed to create demo users and send their verification email. */
+  PROVISIONER_CLIENT_ID: z.string().min(1).optional(),
+  PROVISIONER_CLIENT_SECRET: z.string().min(16).optional(),
+  DEMO_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(14),
+  /** Spam defence: a form submitted faster than this after it was shown is refused. */
+  DEMO_FORM_MIN_SECONDS: z.coerce.number().int().min(0).max(60).default(3),
 });
 export type ApiEnv = z.infer<typeof Env>;
 

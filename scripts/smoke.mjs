@@ -130,7 +130,7 @@ async function main() {
   void web;
 
   await waitFor('API liveness', async () => (await getJson(`${API}/health/live`)).status === 200);
-  await waitFor('web app', async () => (await fetch(WEB)).ok);
+  await waitFor('web app', async () => (await fetch(`${WEB}/status`)).ok);
 
   await check('API liveness', async () => {
     const r = await getJson(`${API}/health/live`);
@@ -174,7 +174,7 @@ async function main() {
   });
 
   await check('web app renders the API readiness (web -> API request)', async () => {
-    const html = await (await fetch(WEB)).text();
+    const html = await (await fetch(`${WEB}/status`)).text();
     assert(
       /data-testid="overall"[^]*?ready/.test(html) && !/not ready|API unreachable/.test(html),
       'page does not show ready',
@@ -247,7 +247,7 @@ async function main() {
         });
         const failed = down.body.checks.filter(c => !c.ok).map(c => c.name);
         assert(down.body.status === 'not-ready' && failed.includes(depName), JSON.stringify(down.body));
-        const html = await (await fetch(WEB)).text();
+        const html = await (await fetch(`${WEB}/status`)).text();
         assert(html.includes('not ready'), 'web page should show "not ready"');
       } finally {
         compose('start', service);

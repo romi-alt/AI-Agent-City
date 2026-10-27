@@ -1,0 +1,36 @@
+{
+  "name": "@agentcity/city-scene",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The AgentCity 3D city (React Three Fiber): buildings, streets, life, weather, camera, interiors. Browser-only; consumed as source by apps/web.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "layout:generate": "node --import tsx scripts/generate-layout.ts",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "peerDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "@react-three/postprocessing": "3.2.2",
+    "postprocessing": "6.39.5",
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@agentcity/domain": "workspace:*",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/three": "0.186.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
+  }
+}

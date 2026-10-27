@@ -4,6 +4,7 @@ import { type DynamicModule, Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { AccessModule } from './access/access.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { DemoModule } from './demo/demo.module.js';
 import { HeartbeatController } from './dev/heartbeat.controller.js';
 import { API_ENV, type ApiEnv } from './env.js';
 import { HealthController } from './health/health.controller.js';
@@ -29,6 +30,7 @@ export class AppModule {
         AuthModule,
         AccessModule,
         RealtimeModule,
+        DemoModule,
         GraphQLModule.forRoot<ApolloDriverConfig>({
           driver: ApolloDriver,
           // Code-first: the schema is generated from the resolvers and written for consumers to compile against.
