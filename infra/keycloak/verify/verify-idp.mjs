@@ -569,6 +569,48 @@ try {
   );
 
   await check(
+    'second-passkey-needs-passkey',
+    'A person who has a passkey cannot add another from an acr 1 session; additions are notified by email',
+    async () => {
+      await clearBruteForce(ssoUser.id);
+      const device = async () => {
+        const context = await L.newAppContext(browser);
+        const page = await context.context.newPage();
+        await L.addVirtualAuthenticator(context.context, page);
+        const signIn = L.authRequest({ kc_idp_hint: 'agency-sso' });
+        await L.navigate(page, signIn.url);
+        await agencyPassword(page);
+        const session = await finish(page, context.captured, signIn);
+        assert(session.claims?.acr === '1', 'no acr 1 SSO session');
+        const add = L.authRequest({ kc_action: 'webauthn-register-passwordless' });
+        await L.navigate(page, add.url);
+        await page.waitForLoadState();
+        const shown = await L.pageText(page);
+        if (await page.locator('#registerWebAuthn').count()) await page.click('#registerWebAuthn');
+        const callback = await L.waitForCallback(page, context.captured, add.state, 5000);
+        await context.context.close();
+        return { shown, status: callback?.kc_action_status ?? null };
+      };
+      try {
+        const since = Date.now() - 1000;
+        const first = await device();
+        assert(first.status === 'success', `first passkey: ${first.status}`);
+        const notice = await L.waitForMail(SSO_EMAIL, { since });
+        const second = await device();
+        const { data: credentials } = await api('GET', `agentcity/users/${ssoUser.id}/credentials`);
+        assert(second.status !== 'success', 'second passkey added from an acr 1 session');
+        assert(/Strong authentication required/i.test(second.shown), `page: ${second.shown}`);
+        assert(credentials.length === 1, `${credentials.length} credentials`);
+        assert(notice?.subject === 'Update credential', `notification: ${notice?.subject}`);
+        return { firstPasskey: first.status, notification: notice.subject, secondAttemptPage: second.shown };
+      } finally {
+        const { data: credentials } = await api('GET', `agentcity/users/${ssoUser.id}/credentials`);
+        for (const c of credentials) await api('DELETE', `agentcity/users/${ssoUser.id}/credentials/${c.id}`);
+      }
+    },
+  );
+
+  await check(
     'sso-first-login-new-account',
     'First SSO sign-in creates the account only after the email is verified',
     async () => {
@@ -825,6 +867,7 @@ try {
           ...client,
           attributes: { ...client.attributes, 'backchannel.logout.url': configured },
         });
+        server.closeAllConnections();
         server.close();
       }
     },
@@ -911,6 +954,91 @@ try {
       const { data: restored } = await api('GET', `agentcity/clients/${client.id}/client-secret`);
       assert(restored.value === L.CLIENT_SECRET, 'local secret not restored');
       return { oldSecretAfterRotation: oldSecret.body.error, newSecretWorked: true, restoredLocalSecret: true };
+    },
+  );
+
+  await check(
+    'break-glass-lost-passkey-recovery',
+    'Lost device: an operator removes the passkey (old one stops working) and sends a fresh enrolment link',
+    async () => {
+      const { data: before } = await api('GET', `agentcity/users/${passkeyUser.id}/credentials`);
+      for (const c of before) await api('DELETE', `agentcity/users/${passkeyUser.id}/credentials/${c.id}`);
+      await api('POST', `agentcity/users/${passkeyUser.id}/logout`);
+      await pk.context.clearCookies();
+      const oldDevice = L.authRequest();
+      await L.navigate(pkPage, oldDevice.url);
+      await pkPage.fill('#username', passkeyEmail);
+      await pkPage.click('#kc-login');
+      await pkPage.waitForLoadState();
+      const oldResult = await finish(pkPage, pk.captured, oldDevice, 2000);
+      assert(!oldResult.callback?.code, 'removed passkey still signs in');
+      await clearBruteForce(passkeyUser.id);
+      // The replacement device: a new virtual authenticator.
+      await authenticator.cdp.send('WebAuthn.removeVirtualAuthenticator', {
+        authenticatorId: authenticator.authenticatorId,
+      });
+      const replacement = await L.addVirtualAuthenticator(pk.context, pkPage);
+      const since = Date.now() - 1000;
+      await api('PUT', `agentcity/users/${passkeyUser.id}/execute-actions-email?lifespan=900`, [
+        'webauthn-register-passwordless',
+      ]);
+      const mail = await L.waitForMail(passkeyEmail, { since });
+      assert(mail, 'no enrolment email');
+      await L.navigate(
+        pkPage,
+        mail.links.find(l => l.includes('/login-actions/action-token')),
+      );
+      await pkPage.click('text=Click here to proceed');
+      await pkPage.click('#registerWebAuthn');
+      await pkPage.locator('text=Your account has been updated').waitFor({ timeout: 10000 });
+      await pk.context.clearCookies();
+      const req = L.authRequest();
+      await L.navigate(pkPage, req.url);
+      await pkPage.fill('#username', passkeyEmail);
+      await pkPage.click('#kc-login');
+      await clickPasskey(pkPage);
+      const result = await finish(pkPage, pk.captured, req);
+      assert(result.claims?.amr?.includes('passkey'), `new passkey does not sign in: ${result.page ?? ''}`);
+      assert((await replacement.credentials()).length === 1, 'replacement authenticator has no credential');
+      return {
+        oldPasskeyPage: oldResult.page,
+        enrolmentMail: mail.subject,
+        newSignIn: pick(result.claims, ['acr', 'amr']),
+      };
+    },
+  );
+
+  await check(
+    'break-glass-disable-agency-sso',
+    'Disabling the agency-sso identity provider stops SSO sign-in (then re-enabled)',
+    async () => {
+      const { data: idp } = await api('GET', 'agentcity/identity-provider/instances/agency-sso');
+      let page;
+      let req;
+      let result;
+      const context = await L.newAppContext(browser);
+      try {
+        await api('PUT', 'agentcity/identity-provider/instances/agency-sso', { ...idp, enabled: false });
+        page = await context.context.newPage();
+        req = L.authRequest({ kc_idp_hint: 'agency-sso' });
+        await L.navigate(page, req.url);
+        await page.waitForLoadState();
+        result = await finish(page, context.captured, req, 2000);
+      } finally {
+        await api('PUT', 'agentcity/identity-provider/instances/agency-sso', idp);
+        await context.context.close();
+      }
+      assert(!result.callback?.code, 'SSO still worked');
+      const buttonsAfterReenable = await (async () => {
+        const ctx = await L.newAppContext(browser);
+        const p = await ctx.context.newPage();
+        await L.navigate(p, L.authRequest().url);
+        const count = await p.locator('#social-agency-sso').count();
+        await ctx.context.close();
+        return count;
+      })();
+      assert(buttonsAfterReenable === 1, 'agency-sso not restored');
+      return { pageWhileDisabled: result.page, restored: true };
     },
   );
 
@@ -1029,5 +1157,5 @@ try {
   mkdirSync(dirname(evidencePath), { recursive: true });
   writeFileSync(evidencePath, `${JSON.stringify(report, null, 2)}\n`);
   console.error(`\n${report.summary.passed}/${report.summary.total} passed. Evidence: ${evidencePath}`);
-  process.exitCode = failed.length ? 1 : 0;
+  process.exit(failed.length ? 1 : 0);
 }

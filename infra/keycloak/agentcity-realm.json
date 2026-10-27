@@ -44,6 +44,7 @@
   "maxFailureWaitSeconds": 900,
   "maxDeltaTimeSeconds": 43200,
   "eventsEnabled": true,
+  "eventsListeners": ["jboss-logging", "email"],
   "eventsExpiration": 604800,
   "adminEventsEnabled": true,
   "adminEventsDetailsEnabled": true,

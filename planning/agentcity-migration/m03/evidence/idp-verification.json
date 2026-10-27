@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-27T18:57:29.233Z",
+  "generatedAt": "2026-10-27T19:19:29.749Z",
   "keycloak": "http://localhost:58080",
   "command": "node --env-file=infra/local-dev.env infra/keycloak/verify/verify-idp.mjs",
   "summary": {
-    "total": 31,
-    "passed": 29,
+    "total": 34,
+    "passed": 32,
     "failed": [
       "email-code-provider",
       "email-code-sign-in"
@@ -22,7 +22,7 @@
           "sso.user@agency.example"
         ]
       },
-      "ms": 2
+      "ms": 7
     },
     {
       "id": "seed-guards",
@@ -32,7 +32,7 @@
         "production": "Refusing to run: NODE_ENV=production. Development users and realm tweaks are never applied to production.",
         "remoteHost": "Refusing to run: Keycloak host must be localhost or 127.0.0.1, got \"keycloak.example.com\"."
       },
-      "ms": 47
+      "ms": 54
     },
     {
       "id": "discovery",
@@ -55,7 +55,7 @@
         "claims_supported_includes_amr": false,
         "keycloakVersion": "26.8.1"
       },
-      "ms": 3
+      "ms": 5
     },
     {
       "id": "client-config",
@@ -83,7 +83,7 @@
           "security-admin-console"
         ]
       },
-      "ms": 4
+      "ms": 8
     },
     {
       "id": "client-rejects-misuse",
@@ -96,7 +96,7 @@
         "implicit": "unauthorized_client",
         "foreignRedirect": 400
       },
-      "ms": 22
+      "ms": 31
     },
     {
       "id": "passkeyless-no-enrolment",
@@ -105,7 +105,7 @@
       "details": {
         "page": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... Invalid username or password. « Back to Application"
       },
-      "ms": 2361
+      "ms": 2370
     },
     {
       "id": "passkey-enrolment",
@@ -119,7 +119,7 @@
         "virtualCredentials": 1,
         "residentKey": true
       },
-      "ms": 433
+      "ms": 466
     },
     {
       "id": "passkey-sign-in",
@@ -129,17 +129,17 @@
         "idTokenHeader": {
           "alg": "RS256",
           "typ": "JWT",
-          "kid": "eoeKCfTJomaWrlN_fdaGf3NyFWXkoIJMPq_YSks-Pdc"
+          "kid": "eyqAZwyCxL1cSZAXy8lEIVwOGxC0MugwJH2p-2MlhqY"
         },
         "idToken": {
           "iss": "http://localhost:58080/realms/agentcity",
           "aud": "agentcity-bff",
           "azp": "agentcity-bff",
-          "sub": "b6c175c0-749e-4a13-bf02-ada9d3704415",
-          "email": "verify.passkey.1793127399878@agentcity.test",
+          "sub": "62adbbce-6289-43b8-8702-2de19b0a1a33",
+          "email": "verify.passkey.1793128706434@agentcity.test",
           "email_verified": true,
-          "sid": "7flR7LVket2cVbCJmxkFcLAi",
-          "auth_time": 1793127403,
+          "sid": "7CEtqwYhNvAikmMW0QcvgY3o",
+          "auth_time": 1793128710,
           "acr": "1",
           "amr": [
             "passkey"
@@ -168,7 +168,7 @@
           "typ"
         ]
       },
-      "ms": 396
+      "ms": 565
     },
     {
       "id": "step-up-forces-passkey",
@@ -181,20 +181,20 @@
           "amr": [
             "passkey"
           ],
-          "auth_time": 1793127403,
-          "sid": "7flR7LVket2cVbCJmxkFcLAi"
+          "auth_time": 1793128710,
+          "sid": "7CEtqwYhNvAikmMW0QcvgY3o"
         },
         "after": {
           "acr": "2",
           "amr": [
             "passkey"
           ],
-          "auth_time": 1793127405,
-          "sid": "7flR7LVket2cVbCJmxkFcLAi"
+          "auth_time": 1793128711,
+          "sid": "7CEtqwYhNvAikmMW0QcvgY3o"
         },
         "sameKeycloakSession": true
       },
-      "ms": 1794
+      "ms": 1840
     },
     {
       "id": "step-up-acr-values-only",
@@ -207,10 +207,10 @@
             "passkey",
             "passkey"
           ],
-          "auth_time": 1793127406
+          "auth_time": 1793128713
         }
       },
-      "ms": 1804
+      "ms": 1778
     },
     {
       "id": "silent-sso-is-acr1",
@@ -223,11 +223,11 @@
             "passkey",
             "passkey"
           ],
-          "auth_time": 1793127406,
-          "sid": "7flR7LVket2cVbCJmxkFcLAi"
+          "auth_time": 1793128713,
+          "sid": "7CEtqwYhNvAikmMW0QcvgY3o"
         }
       },
-      "ms": 23
+      "ms": 50
     },
     {
       "id": "fresh-acr2-single-passkey",
@@ -239,10 +239,10 @@
           "amr": [
             "passkey"
           ],
-          "auth_time": 1793127407
+          "auth_time": 1793128714
         }
       },
-      "ms": 389
+      "ms": 404
     },
     {
       "id": "code-exchange-guards",
@@ -254,7 +254,7 @@
         "replay": "Code not valid",
         "refreshOfFirstTokensAfterReplay": "Session doesn't have required client"
       },
-      "ms": 69
+      "ms": 90
     },
     {
       "id": "refresh-rotation",
@@ -265,7 +265,7 @@
         "accessTokenLifetime": 300,
         "refreshLifetime": 43200
       },
-      "ms": 28
+      "ms": 48
     },
     {
       "id": "rp-logout",
@@ -273,10 +273,10 @@
       "passed": true,
       "details": {
         "postLogoutRedirect": "http://localhost:3000/signed-out?state=bye",
-        "loggedOutSid": "Jy5AiDmxvQW3PLQPlTD-rXM7",
+        "loggedOutSid": "toOMHB_b_jIrCmYMXpC_s2zZ",
         "otherSessionsOfUser": [
           {
-            "id": "7flR7LVket2cVbCJmxkFcLAi",
+            "id": "7CEtqwYhNvAikmMW0QcvgY3o",
             "clients": [
               "agentcity-bff"
             ]
@@ -285,7 +285,7 @@
         "refreshAfter": "Session not active",
         "nextAuthorizeShowsSignIn": true
       },
-      "ms": 168
+      "ms": 245
     },
     {
       "id": "sso-sign-in",
@@ -297,11 +297,11 @@
           "iss": "http://localhost:58080/realms/agentcity",
           "aud": "agentcity-bff",
           "azp": "agentcity-bff",
-          "sub": "c5360bbe-6723-496e-a076-e332ac9a681e",
+          "sub": "7ea351f9-19ef-4d78-af45-1ae1f7019e00",
           "email": "sso.user@agency.example",
           "email_verified": true,
-          "sid": "qwdyumjIzIPM40DYPvCMdg9i",
-          "auth_time": 1793127407,
+          "sid": "6YXEU4QWp8dGV_n-b3B5fsX7",
+          "auth_time": 1793128715,
           "acr": "1",
           "amr": [
             "sso"
@@ -309,7 +309,7 @@
           "idp": "agency-sso"
         }
       },
-      "ms": 336
+      "ms": 446
     },
     {
       "id": "sso-hint",
@@ -324,7 +324,7 @@
           "idp": "agency-sso"
         }
       },
-      "ms": 271
+      "ms": 338
     },
     {
       "id": "sso-cannot-step-up",
@@ -334,7 +334,7 @@
         "viaAgencySso": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... Agency SSO cannot confirm this action. Sign in with your passkey instead. « Back to Application",
         "viaSignInForm": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... A passkey is required for this action. Add a passkey to your account first. « Back to Application"
       },
-      "ms": 6085
+      "ms": 6242
     },
     {
       "id": "sso-user-adds-passkey",
@@ -348,20 +348,31 @@
             "passkey"
           ],
           "idp": "agency-sso",
-          "sid": "qZGO9QKyDk-L-C4dZtkk2Tx9"
+          "sid": "LalP03Y_fVBw45AllKc15bPA"
         }
       },
-      "ms": 1066
+      "ms": 1097
+    },
+    {
+      "id": "second-passkey-needs-passkey",
+      "title": "A person who has a passkey cannot add another from an acr 1 session; additions are notified by email",
+      "passed": true,
+      "details": {
+        "firstPasskey": "success",
+        "notification": "Update credential",
+        "secondAttemptPage": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Email Strong authentication required to continue Sign In or Sign in with Agency SSO"
+      },
+      "ms": 6214
     },
     {
       "id": "sso-first-login-new-account",
       "title": "First SSO sign-in creates the account only after the email is verified",
       "passed": true,
       "details": {
-        "verifyPage": "AGENTCITY (LOCAL DEVELOPMENT) Email verification You need to verify your email address to activate your account. An email with instructions to verify your email address has been sent to your address verify.sso-new.1793127399878@agency.example. Haven't received a verification code in your email? Click here to re-send the email.",
+        "verifyPage": "AGENTCITY (LOCAL DEVELOPMENT) Email verification You need to verify your email address to activate your account. An email with instructions to verify your email address has been sent to your address verify.sso-new.1793128706434@agency.example. Haven't received a verification code in your email? Click here to re-send the email.",
         "mailSubject": "Verify email",
         "claims": {
-          "email": "verify.sso-new.1793127399878@agency.example",
+          "email": "verify.sso-new.1793128706434@agency.example",
           "email_verified": true,
           "acr": "1",
           "amr": [
@@ -373,29 +384,29 @@
           "agency-sso"
         ]
       },
-      "ms": 1635
+      "ms": 1605
     },
     {
       "id": "sso-no-silent-link",
       "title": "An SSO identity with the email of an existing account is not linked without confirmation + mailbox proof",
       "passed": true,
       "details": {
-        "existsPage": "AGENTCITY (LOCAL DEVELOPMENT) Account already exists User with email verify.collide.1793127399878@agentcity.test already exists. How do you want to continue? Review profile Add to existing account",
-        "emailPage": "AGENTCITY (LOCAL DEVELOPMENT) Link Agency SSO You need to verify your email address to link your account with Agency SSO. An email with instructions to link Agency SSO account verify.collide.1793127399878@agentcity.test with your AgentCity (local development) account has been sent to you. Haven't received the email? Click here to re-send the email. If you already confirmed linking the account in a",
+        "existsPage": "AGENTCITY (LOCAL DEVELOPMENT) Account already exists User with email verify.collide.1793128706434@agentcity.test already exists. How do you want to continue? Review profile Add to existing account",
+        "emailPage": "AGENTCITY (LOCAL DEVELOPMENT) Link Agency SSO You need to verify your email address to link your account with Agency SSO. An email with instructions to link Agency SSO account verify.collide.1793128706434@agentcity.test with your AgentCity (local development) account has been sent to you. Haven't received the email? Click here to re-send the email. If you already confirmed linking the account in a",
         "linksBeforeProof": 0,
         "mailSubject": "Link Agency SSO",
         "linksAfterProof": [
           "agency-sso"
         ],
         "claims": {
-          "sub": "c80835bd-39cf-4fed-ab13-7eeff37d926e",
+          "sub": "672a979d-3a32-4c1f-9a11-c6877d7315d2",
           "amr": [
             "sso"
           ],
           "idp": "agency-sso"
         }
       },
-      "ms": 2614
+      "ms": 2706
     },
     {
       "id": "sso-issuer-validation",
@@ -411,18 +422,18 @@
           "idp": "agency-sso"
         }
       },
-      "ms": 5687
+      "ms": 5712
     },
     {
       "id": "agency-backchannel-logout",
       "title": "Ending the agency session (admin logout in agency-idp) ends the brokered agentcity session",
       "passed": true,
       "details": {
-        "sessionsBefore": 6,
+        "sessionsBefore": 7,
         "sessionsAfter": 0,
         "refreshAfter": "invalid_grant"
       },
-      "ms": 572
+      "ms": 698
     },
     {
       "id": "loa1-expiry",
@@ -434,18 +445,18 @@
           "amr": [
             "sso"
           ],
-          "auth_time": 1793127426
+          "auth_time": 1793128740
         },
         "silentAfterExpiry": {
           "acr": "0",
           "amr": [
             "sso"
           ],
-          "auth_time": 1793127426
+          "auth_time": 1793128740
         },
         "acrValues1AfterExpiry": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Email Sign In or Sign in with Agency SSO"
       },
-      "ms": 11560
+      "ms": 11629
     },
     {
       "id": "backchannel-logout-token",
@@ -460,24 +471,24 @@
         "header": {
           "alg": "RS256",
           "typ": "logout+jwt",
-          "kid": "eoeKCfTJomaWrlN_fdaGf3NyFWXkoIJMPq_YSks-Pdc"
+          "kid": "eyqAZwyCxL1cSZAXy8lEIVwOGxC0MugwJH2p-2MlhqY"
         },
         "claims": {
-          "exp": 1793127557,
-          "iat": 1793127437,
-          "jti": "281ac051-da19-ac46-70c7-62ad9aac51b6",
+          "exp": 1793128871,
+          "iat": 1793128751,
+          "jti": "54f95345-7af1-e4d7-2bf1-143e201131d1",
           "iss": "http://localhost:58080/realms/agentcity",
           "aud": "agentcity-bff",
-          "sub": "c5360bbe-6723-496e-a076-e332ac9a681e",
+          "sub": "7ea351f9-19ef-4d78-af45-1ae1f7019e00",
           "typ": "Logout",
-          "sid": "B-3WBkIWkq9YFzCiAtOf1Cyt",
+          "sid": "kuTjS1ucAgYUjL0FkaYYqvW2",
           "events": {
             "http://schemas.openid.net/event/backchannel-logout": {},
             "revoke_offline_access": true
           }
         }
       },
-      "ms": 318
+      "ms": 413
     },
     {
       "id": "brute-force",
@@ -485,13 +496,13 @@
       "passed": true,
       "details": {
         "status": {
-          "failedLoginNotBefore": 1793127498,
+          "failedLoginNotBefore": 1793128812,
           "numFailures": 2,
           "numTemporaryLockouts": 0,
           "disabled": true,
           "numSecondaryAuthFailures": 0,
           "lastIPFailure": "172.18.0.1",
-          "lastFailure": 1793127438363
+          "lastFailure": 1793128752462
         },
         "lastDeniedPage": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Email Email Invalid username or password. Sign In or Sign in with Agency SSO",
         "lockedSignInPage": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... Account is disabled, contact your administrator. « Back to Application",
@@ -503,7 +514,7 @@
           "permanentLockout": false
         }
       },
-      "ms": 4975
+      "ms": 5721
     },
     {
       "id": "break-glass-rotate-client-secret",
@@ -514,7 +525,33 @@
         "newSecretWorked": true,
         "restoredLocalSecret": true
       },
-      "ms": 536
+      "ms": 647
+    },
+    {
+      "id": "break-glass-lost-passkey-recovery",
+      "title": "Lost device: an operator removes the passkey (old one stops working) and sends a fresh enrolment link",
+      "passed": true,
+      "details": {
+        "oldPasskeyPage": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... Invalid username or password. « Back to Application",
+        "enrolmentMail": "Update Your Account",
+        "newSignIn": {
+          "acr": "1",
+          "amr": [
+            "passkey"
+          ]
+        }
+      },
+      "ms": 3133
+    },
+    {
+      "id": "break-glass-disable-agency-sso",
+      "title": "Disabling the agency-sso identity provider stops SSO sign-in (then re-enabled)",
+      "passed": true,
+      "details": {
+        "pageWhileDisabled": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Email Sign In",
+        "restored": true
+      },
+      "ms": 2342
     },
     {
       "id": "break-glass-disable-user",
@@ -527,21 +564,21 @@
         "sessionsAfterAdminLogout": 0,
         "signInPage": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Account is disabled, contact your administrator. Email Sign In or Sign in with Agency SSO"
       },
-      "ms": 5714
+      "ms": 5915
     },
     {
       "id": "email-code-provider",
       "title": "Email sign-in code step (agentcity-email-code)",
       "passed": false,
       "error": "provider not installed: email codes NOT verified (see m03/IDP.md, release blocker until it is)",
-      "ms": 31
+      "ms": 14
     },
     {
       "id": "email-code-sign-in",
       "title": "Email sign-in code: passkeyless person signs in with a code from Mailpit (acr 1, amr email-code)",
       "passed": false,
       "error": "provider not installed: not run",
-      "ms": 2
+      "ms": 5
     },
     {
       "id": "break-glass-logout-all",
@@ -553,12 +590,12 @@
             "offline": "0",
             "clientId": "agentcity-bff",
             "active": "5",
-            "id": "0250e65c-351a-4ea2-982f-73569df3d264"
+            "id": "5a3f6ef7-7de3-49bf-ba78-64aa79ceb0ac"
           }
         ],
         "after": []
       },
-      "ms": 17
+      "ms": 32
     }
   ]
 }
