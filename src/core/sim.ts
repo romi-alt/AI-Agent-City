@@ -6,7 +6,7 @@ import {
 import { CHANNELS, DEALERSHIP_TASKS, FAST_SALES_TASKS } from './data/tasks';
 import type {
   Agent, Approval, ApprovalKind, Building, Channel, ContentItem, FeedItem, Floor, InboxItem, Insight, Lead, Message,
-  MessageStatus, Patch, Report, Settings, Snapshot, StageEvent, StatsDump, Task, Tenant,
+  MessageStatus, Neighbour, Patch, Report, Settings, Snapshot, StageEvent, StatsDump, Task, Tenant,
 } from './types';
 
 export const TRAINING_STAGES = ['New lead', 'Contacted', 'Call booked', 'Training started', 'Active student', 'Completed / placed'];
@@ -75,6 +75,8 @@ export class Sim {
   revenue: Snapshot['revenue'] = [];
   stageLog: StageEvent[] = [];
   settings: Settings;
+  /** Browser mirror for a client: other clients' buildings as bare shapes (never saved or sent back). */
+  neighbours: Neighbour[] = [];
   hooks: SimHooks = {};
   private seq: number;
   private agentIx = new Map<string, Agent>();
@@ -117,6 +119,7 @@ export class Sim {
     this.stageLog = s.stageLog;
     this.settings = { ...DEFAULT_SETTINGS, ...s.settings };
     this.seq = s.seq;
+    this.neighbours = s.neighbours ?? [];
     this.reindex();
   }
 

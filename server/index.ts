@@ -10,6 +10,7 @@ import type { Patch } from '../src/core/types';
 import { AuthStore, DEVICE_MS, type Session, type User } from './auth';
 import { attachBrain, brainStatus } from './brain';
 import { attachDelivery, providers, sendTestEmail } from './delivery';
+import { authorize, ROLES, scopeFor, scopePatch, scopeSnapshot, type Scope } from './scope';
 import { otpauthUrl } from './totp';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -40,18 +41,32 @@ function saveSim() {
   renameSync(tmp, STATE_FILE);
 }
 
-/** Send whatever changed to every signed-in browser. */
+/** What this person may see, worked out fresh from their account every time. */
+function scopeOfUser(u: User): Scope { return scopeFor(u, auth.clients); }
+
+/** Send whatever changed to every signed-in browser, cut down to what each one may see. */
 function flush() {
   const p = sim.takePatch();
-  if (p) broadcast('patch', p);
+  if (p) broadcast('patch', s => scopePatch(p, s));
 }
 
-function broadcast(event: string, data: Patch | object) {
-  const msg = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-  for (const [res, s] of streams) {
-    if (!auth.sessions.has(s.hash) || s.stage !== 'full' || s.locked) { res.end(); streams.delete(res); continue; }
+function broadcast(event: string, data: (s: Scope) => Patch | object) {
+  const cache = new Map<string, string>();
+  for (const [res, sess] of streams) {
+    const u = auth.byId(sess.userId);
+    if (!u || !auth.sessions.has(sess.hash) || sess.stage !== 'full' || sess.locked) { res.end(); streams.delete(res); continue; }
+    const scope = scopeOfUser(u);
+    // People who share a scope get the same message; build it once.
+    const key = scope.all ? '*' : `${scope.clientId}|${[...scope.buildings].join()}`;
+    let msg = cache.get(key);
+    if (!msg) cache.set(key, (msg = `event: ${event}\ndata: ${JSON.stringify(data(scope))}\n\n`));
     res.write(msg);
   }
+}
+
+/** Close the live streams of someone who was just signed out. */
+function dropStreams(userId: string) {
+  for (const [res, sess] of streams) if (sess.userId === userId) { res.end(); streams.delete(res); }
 }
 
 attachDelivery(sim, flush);
@@ -126,8 +141,8 @@ function signedIn(req: Authed, res: Response, next: NextFunction) {
   next();
 }
 
-function admin(req: Authed, res: Response, next: NextFunction) {
-  if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Admins only.' });
+function owner(req: Authed, res: Response, next: NextFunction) {
+  if (req.user?.role !== 'owner') return res.status(403).json({ error: 'Only the agency owner can do that.' });
   next();
 }
 
@@ -141,9 +156,10 @@ function me(req: Authed) {
   const s = req.session2;
   const u = req.user;
   const state = !s || !u ? 'anon' : s.stage === 'password' ? 'code' : s.locked ? 'locked' : 'in';
+  const scope = u ? scopeOfUser(u) : undefined;
   return {
     state,
-    user: u && state !== 'anon' ? { ...auth.publicUser(u), recoveryLeft: u.recovery.length } : undefined,
+    user: u && state !== 'anon' ? { ...auth.publicUser(u), recoveryLeft: u.recovery.length, clientName: scope && !scope.all ? scope.clientName : undefined } : undefined,
     setupNeeded: !auth.activeUsers().length,
   };
 }
@@ -249,7 +265,8 @@ app.get('/api/public/pulse', (_req, res) => {
 });
 
 app.get('/api/state', signedIn, (req: Authed, res) => {
-  const body = JSON.stringify({ snapshot: sim.snapshot(), me: me(req), integrations: integrations(), people: people() });
+  const scope = scopeOfUser(req.user!);
+  const body = JSON.stringify({ snapshot: scopeSnapshot(sim.snapshot(), scope), me: me(req), integrations: integrations(), people: people(scope) });
   if ((req.get('accept-encoding') ?? '').includes('gzip')) {
     res.setHeader('Content-Encoding', 'gzip');
     res.type('json').send(gzipSync(body));
@@ -267,8 +284,11 @@ app.get('/api/stream', signedIn, (req: Authed, res) => {
 function integrations() {
   return { ...providers(), claude: brainStatus() };
 }
-function people() {
-  return auth.users.map(u => ({ id: u.id, name: u.name, onDuty: u.onDuty, agentId: u.agentId }));
+/** The agency sees everyone; a client sees only its own people. */
+function people(scope: Scope) {
+  return auth.users
+    .filter(u => scope.all || (!!scope.clientId && u.clientId === scope.clientId))
+    .map(u => ({ id: u.id, name: u.name, onDuty: u.onDuty, agentId: u.agentId }));
 }
 
 const Tenant = z.object({ name: z.string().min(1).max(80), contact: z.string().max(80).default(''), email: z.string().max(120).default(''), phone: z.string().max(40).default('') });
@@ -292,11 +312,14 @@ app.post('/api/action', signedIn, (req: Authed, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0]?.message ?? 'Bad request' });
   const a = parsed.data;
   const u = req.user!;
+  const scope = scopeOfUser(u);
+  const verdict = authorize(a, scope, sim);
+  if (!verdict.ok) return res.status(verdict.status).json({ error: verdict.error });
   const by = u.name;
   let result: unknown = { ok: true };
   switch (a.type) {
     case 'approve': sim.resolve(a.id, a.ok, by, a.edit); break;
-    case 'approveAll': for (const p of sim.approvals.filter(x => !a.buildingId || x.buildingId === a.buildingId)) sim.resolve(p.id, true, by); break;
+    case 'approveAll': for (const p of sim.approvals.filter(x => (!a.buildingId || x.buildingId === a.buildingId) && (scope.all || scope.buildings.has(x.buildingId)))) sim.resolve(p.id, true, by); break;
     case 'rent': if (!sim.rentFloor(a.buildingId, a.level, a.tenant)) return res.status(400).json({ error: 'That floor is not available.' }); break;
     case 'vacate': if (!sim.vacateFloor(a.buildingId, a.level)) return res.status(400).json({ error: 'That floor has no tenant.' }); break;
     case 'leadCreate': result = { id: sim.createLead(a.lead, by).id }; break;
@@ -309,7 +332,7 @@ app.post('/api/action', signedIn, (req: Authed, res) => {
       u.onDuty = a.onDuty;
       if (u.agentId) sim.setDuty(u.agentId, a.onDuty);
       auth.save();
-      broadcast('people', people());
+      broadcast('people', people);
       break;
     case 'desk': {
       const agent = a.agentId ? sim.agent(a.agentId) : undefined;
@@ -318,7 +341,7 @@ app.post('/api/action', signedIn, (req: Authed, res) => {
       sim.linkUser(u.agentId, u.id);
       if (u.agentId) sim.setDuty(u.agentId, u.onDuty);
       auth.save();
-      broadcast('people', people());
+      broadcast('people', people);
       break;
     }
   }
@@ -342,7 +365,7 @@ const Settings = z.object({
   speed: z.number().min(0).max(20).optional(),
 });
 
-app.put('/api/admin/settings', signedIn, admin, (req, res) => {
+app.put('/api/admin/settings', signedIn, owner, (req, res) => {
   const parsed = Settings.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0]?.message ?? 'Bad settings' });
   sim.updateSettings(parsed.data);
@@ -350,33 +373,75 @@ app.put('/api/admin/settings', signedIn, admin, (req, res) => {
   res.json(sim.settings);
 });
 
-app.get('/api/admin/users', signedIn, admin, (_req, res) => res.json(auth.users.map(u => auth.publicUser(u))));
+app.get('/api/admin/users', signedIn, owner, (_req, res) => res.json(auth.users.map(u => auth.publicUser(u))));
 
-app.post('/api/admin/users', signedIn, admin, (req, res) => {
-  const p = z.object({ username: z.string().regex(/^[a-zA-Z0-9._-]{3,32}$/, 'Usernames are 3–32 letters, numbers, dots or dashes.'), name: z.string().min(1).max(60), role: z.enum(['admin', 'member']) }).safeParse(req.body);
+const RoleField = z.enum(ROLES as [string, ...string[]]).transform(r => r as (typeof ROLES)[number]);
+
+app.post('/api/admin/users', signedIn, owner, (req, res) => {
+  const p = z.object({ username: z.string().regex(/^[a-zA-Z0-9._-]{3,32}$/, 'Usernames are 3–32 letters, numbers, dots or dashes.'), name: z.string().min(1).max(60), role: RoleField, clientId: z.string().optional() }).safeParse(req.body);
   if (!p.success) return res.status(400).json({ error: p.error.issues[0]?.message });
   try {
-    const { user, token } = auth.createUser(p.data.username, p.data.name, p.data.role);
+    const { user, token } = auth.createUser(p.data.username, p.data.name, p.data.role, p.data.clientId || undefined);
     res.json({ user: auth.publicUser(user), link: `/?enroll=${token}` });
   } catch (e) { res.status(400).json({ error: (e as Error).message }); }
 });
 
-app.post('/api/admin/users/:id/reset', signedIn, admin, (req: Authed, res) => {
+// Changing someone's role or client signs them out, so their browser can't keep data they may no longer see.
+app.put('/api/admin/users/:id/access', signedIn, owner, (req: Authed, res) => {
+  const p = z.object({ role: RoleField, clientId: z.string().optional() }).safeParse(req.body);
+  if (!p.success) return res.status(400).json({ error: p.error.issues[0]?.message });
+  if (req.params.id === req.user!.id && p.data.role !== 'owner') return res.status(400).json({ error: 'You can\'t change your own role.' });
+  try {
+    const u = auth.updateAccess(String(req.params.id), p.data.role, p.data.clientId || undefined);
+    dropStreams(u.id);
+    broadcast('people', people);
+    res.json(auth.publicUser(u));
+  } catch (e) { res.status(400).json({ error: (e as Error).message }); }
+});
+
+// ── clients ───────────────────────────────────────────────────
+const ClientBody = z.object({ name: z.string().min(1).max(80), buildingIds: z.array(z.string()).max(50) });
+const realBuildings = (ids: string[]) => ids.filter(id => sim.buildings.some(b => b.id === id));
+
+app.get('/api/admin/clients', signedIn, owner, (_req, res) => res.json(auth.clients));
+
+app.post('/api/admin/clients', signedIn, owner, (req, res) => {
+  const p = ClientBody.safeParse(req.body);
+  if (!p.success) return res.status(400).json({ error: p.error.issues[0]?.message });
+  try { res.json(auth.saveClient({ name: p.data.name, buildingIds: realBuildings(p.data.buildingIds) })); } catch (e) { res.status(400).json({ error: (e as Error).message }); }
+});
+
+app.put('/api/admin/clients/:id', signedIn, owner, (req, res) => {
+  const p = ClientBody.safeParse(req.body);
+  if (!p.success) return res.status(400).json({ error: p.error.issues[0]?.message });
+  try {
+    const c = auth.saveClient({ id: String(req.params.id), name: p.data.name, buildingIds: realBuildings(p.data.buildingIds) });
+    // saveClient signed out this client's people if its buildings changed; close their live streams too.
+    for (const [res2, sess] of streams) if (!auth.sessions.has(sess.hash)) { res2.end(); streams.delete(res2); }
+    res.json(c);
+  } catch (e) { res.status(400).json({ error: (e as Error).message }); }
+});
+
+app.delete('/api/admin/clients/:id', signedIn, owner, (req, res) => {
+  try { auth.deleteClient(String(req.params.id)); res.json({ ok: true }); } catch (e) { res.status(400).json({ error: (e as Error).message }); }
+});
+
+app.post('/api/admin/users/:id/reset', signedIn, owner, (req: Authed, res) => {
   try { res.json({ link: `/?enroll=${auth.resetUser(String(req.params.id))}` }); } catch (e) { res.status(400).json({ error: (e as Error).message }); }
 });
 
-app.delete('/api/admin/users/:id', signedIn, admin, (req: Authed, res) => {
+app.delete('/api/admin/users/:id', signedIn, owner, (req: Authed, res) => {
   if (req.params.id === req.user!.id) return res.status(400).json({ error: 'You can\'t remove yourself.' });
   const u = auth.byId(String(req.params.id));
   if (u?.agentId) sim.linkUser(undefined, u.id);
   auth.deleteUser(String(req.params.id));
-  broadcast('people', people());
+  broadcast('people', people);
   res.json({ ok: true });
 });
 
-app.get('/api/admin/signins', signedIn, admin, (_req, res) => res.json(auth.signins.slice(0, 200)));
-app.get('/api/admin/integrations', signedIn, admin, (_req, res) => res.json(integrations()));
-app.post('/api/admin/test-email', signedIn, admin, async (req, res) => {
+app.get('/api/admin/signins', signedIn, owner, (_req, res) => res.json(auth.signins.slice(0, 200)));
+app.get('/api/admin/integrations', signedIn, owner, (_req, res) => res.json(integrations()));
+app.post('/api/admin/test-email', signedIn, owner, async (req, res) => {
   try { await sendTestEmail(String(req.body?.to ?? '')); res.json({ ok: true }); } catch (e) { res.status(400).json({ error: (e as Error).message }); }
 });
 

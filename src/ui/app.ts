@@ -36,7 +36,7 @@ export class App {
   agentId?: string;
   leadId?: string;
   /** Building the CRM board / content wall is looking at. */
-  boardBuilding = 'fast-sales';
+  boardBuilding = '';
   crmQuery = '';
   realOnly = false;
   outboxFilter = 'all';
@@ -79,9 +79,11 @@ export class App {
     this.sim.onChange(() => this.refresh(false));
     this.stopStream = stream(p => this.sim.applyPatch(p), p => { this.people = p; this.syncMe(); this.refresh(false); }, () => this.signedOut());
 
-    // Start in "your office" like the reference: your desk's floor, else the Training Center's leadership floor.
+    root.dataset.role = this.me.role;
+    this.boardBuilding = this.home.id;
+    // Start in "your office" like the reference: your desk's floor, else your home building's top floor.
     const desk = this.me.agentId ? this.sim.agent(this.me.agentId) : undefined;
-    this.enterFloor(desk?.buildingId ?? 'fast-sales', desk?.floor ?? 12);
+    this.enterFloor(desk?.buildingId ?? this.home.id, desk?.floor ?? this.homeLevel);
   }
 
   private syncMe() {
@@ -95,7 +97,13 @@ export class App {
     this.onSignedOut();
   }
 
-  get isAdmin() { return this.me.role === 'admin'; }
+  get isOwner() { return this.me.role === 'owner'; }
+  /** Owner and staff run the agency; client people only see their own buildings. */
+  get isAgency() { return this.me.role === 'owner' || this.me.role === 'staff'; }
+  get readOnly() { return this.me.role === 'client-viewer'; }
+  /** The Training Center for the agency; a client's first building otherwise. */
+  get home(): Building { return this.sim.buildings.find(b => b.id === 'fast-sales') ?? this.sim.buildings[0]!; }
+  get homeLevel() { return this.home.floors.find(f => !f.vacant)?.level ?? this.home.floors[0]!.level; }
   get building(): Building | undefined { return this.buildingId ? this.sim.building(this.buildingId) : undefined; }
   get floor(): Floor | undefined { return this.building?.floors.find(f => f.level === this.level); }
   /** The floor that is "Your office" in the floor picker. */
@@ -135,7 +143,7 @@ export class App {
     this.overlay = undefined;
     if (m === 'office') {
       const mine = this.myFloor;
-      return this.enterFloor(this.buildingId ?? mine?.buildingId ?? 'fast-sales', this.level ?? mine?.level);
+      return this.enterFloor(this.buildingId ?? mine?.buildingId ?? this.home.id, this.level ?? mine?.level);
     }
     this.mode = m;
     if (m === 'city' && this.engine.view !== this.city) {
@@ -171,12 +179,13 @@ export class App {
   }
 
   async loadAdmin() {
-    if (!this.isAdmin) { this.adminData = { users: [], signins: [] }; return; }
+    if (!this.isOwner) { this.adminData = { users: [], signins: [], clients: [] }; return; }
     try {
-      const [users, signins, integrations] = await Promise.all([
+      const [users, signins, integrations, clients] = await Promise.all([
         api.get<V.AdminData['users']>('/api/admin/users'), api.get<V.AdminData['signins']>('/api/admin/signins'), api.get<Integrations>('/api/admin/integrations'),
+        api.get<V.AdminData['clients']>('/api/admin/clients'),
       ]);
-      this.adminData = { users, signins };
+      this.adminData = { users, signins, clients };
       this.integrations = integrations;
       this.refresh();
     } catch (e) { toast((e as Error).message, 'err'); }
@@ -221,7 +230,7 @@ export class App {
     const duty = this.$('#duty');
     duty.textContent = this.me.onDuty ? '● ON DUTY' : '○ OFF DUTY';
     duty.classList.toggle('off', !this.me.onDuty);
-    this.$('#speed').innerHTML = this.isAdmin ? SPEEDS.map(([v, l]) => `<button data-act="speed:${v}" class="${Math.abs(this.sim.settings.speed - v) < 1e-6 ? 'on' : ''}">${l}</button>`).join('') : '';
+    this.$('#speed').innerHTML = this.isOwner ? SPEEDS.map(([v, l]) => `<button data-act="speed:${v}" class="${Math.abs(this.sim.settings.speed - v) < 1e-6 ? 'on' : ''}">${l}</button>`).join('') : '';
     this.$('#night').textContent = this.engine.night ? '☀' : '☾';
 
     this.$('#chip').innerHTML = this.mode === 'office' && b && f
@@ -277,12 +286,14 @@ export class App {
       const el = (e.target as HTMLElement).closest<HTMLElement>('[data-act]');
       if (!el) return;
       const [act, ...args] = el.dataset.act!.split(':');
+      if (this.readOnly && WRITE_ACTS.has(act)) return toast(VIEW_ONLY, 'err');
       this.act(act, args, el).catch(err => toast(err instanceof Error ? err.message : String(err), 'err'));
     });
     this.root.addEventListener('submit', e => {
       const form = (e.target as HTMLElement).closest<HTMLFormElement>('form[data-form]');
       if (!form) return;
       e.preventDefault();
+      if (this.readOnly && WRITE_FORMS.has(form.dataset.form!)) return toast(VIEW_ONLY, 'err');
       const btn = form.querySelector<HTMLButtonElement>('button[type=submit]');
       if (btn) btn.disabled = true;
       this.submit(form.dataset.form!, formData(form), form)
@@ -296,7 +307,7 @@ export class App {
       if (ch === 'board') { this.boardBuilding = el.value; el.blur(); this.refresh(); }
       if (ch === 'realOnly') { this.realOnly = (el as HTMLInputElement).checked; this.refresh(); }
       if (ch === 'outbox') { this.outboxFilter = el.value; el.blur(); this.refresh(); }
-      if (ch === 'stage' && this.leadId) { api.action({ type: 'leadUpdate', id: this.leadId, fields: { stage: el.value } }).catch(err => toast(err.message, 'err')); el.blur(); }
+      if (ch === 'stage' && this.leadId && !this.readOnly) { api.action({ type: 'leadUpdate', id: this.leadId, fields: { stage: el.value } }).catch(err => toast(err.message, 'err')); el.blur(); }
     });
     this.root.addEventListener('input', e => {
       const el = e.target as HTMLInputElement;
@@ -334,7 +345,7 @@ export class App {
       case 'ctab': this.contentTab = a1 as ContentTab; return this.refresh();
       case 'building': return this.selectBuilding(a1 || undefined);
       case 'floor': return this.enterFloor(a1, Number(a2));
-      case 'myoffice': { const m = this.myFloor; return m ? this.enterFloor(m.buildingId, m.level) : this.enterFloor('fast-sales', 12); }
+      case 'myoffice': { const m = this.myFloor; return m ? this.enterFloor(m.buildingId, m.level) : this.enterFloor(this.home.id, this.homeLevel); }
       case 'agent': return this.selectAgent(a1, a2 === 'focus');
       case 'cam': return this.engine.nudge(a1 as never);
       case 'night': {
@@ -381,6 +392,12 @@ export class App {
       case 'user-delete':
         if (!confirm('Remove this person? They will be signed out everywhere.')) return;
         await api.del(`/api/admin/users/${a1}`);
+        return this.loadAdmin();
+      case 'client-edit': return this.modal(V.clientForm(this, a1 || undefined));
+      case 'client-delete':
+        if (!confirm('Delete this client? Its buildings go back to the agency.')) return;
+        await api.del(`/api/admin/clients/${a1}`);
+        toast('Client deleted');
         return this.loadAdmin();
       case 'new-codes': {
         if (!confirm('Make new recovery codes? Your old ones stop working.')) return;
@@ -437,9 +454,21 @@ export class App {
         return toast('Settings saved');
       }
       case 'user': {
-        const r = await api.post<{ link: string }>('/api/admin/users', { username: f.username, name: f.name, role: f.role });
+        const r = await api.post<{ link: string }>('/api/admin/users', { username: f.username, name: f.name, role: f.role, clientId: f.clientId });
         form.reset();
         this.modal(V.linkModal(`Setup link for ${f.name}`, r.link));
+        return this.loadAdmin();
+      }
+      case 'access':
+        await api.put(`/api/admin/users/${f.id}/access`, { role: f.role, clientId: f.clientId });
+        toast('Access changed. They\'ll need to sign in again.');
+        return this.loadAdmin();
+      case 'client': {
+        const buildingIds = [...form.querySelectorAll<HTMLInputElement>('input[name=b]:checked')].map(x => x.value);
+        const body = { name: f.name, buildingIds };
+        if (f.id) await api.put(`/api/admin/clients/${f.id}`, body); else await api.post('/api/admin/clients', body);
+        this.closeModal();
+        toast(f.id ? 'Client saved' : 'Client added');
         return this.loadAdmin();
       }
       case 'test-email':
@@ -448,6 +477,10 @@ export class App {
     }
   }
 }
+
+const VIEW_ONLY = 'Your account can view this client but not change anything.';
+const WRITE_ACTS = new Set(['approve', 'approve-all', 'rent', 'vacate', 'new-lead']);
+const WRITE_FORMS = new Set(['lead', 'lead-edit', 'lead-note', 'lead-send', 'post', 'reply', 'rent']);
 
 export function isAuthError(e: unknown) {
   return e instanceof ApiError && (e.status === 401 || e.status === 423);

@@ -11,6 +11,14 @@ async function boot() {
   if (me.state !== 'in' || new URLSearchParams(location.search).has('enroll')) await signIn(root, me);
   root.innerHTML = '<div class="auth"><p class="muted">Opening the office…</p></div>';
   const state = await api.state();
+  // A client account whose client owns no buildings yet has nothing to show.
+  if (!state.snapshot.buildings.length) {
+    root.innerHTML = `<div class="empty-scope"><div><h2>Nothing to show yet</h2>
+      <p class="muted">Your account isn't linked to any buildings yet. Ask the agency to add your buildings to your client.</p>
+      <button class="btn-line" id="out">Sign out</button></div></div>`;
+    root.querySelector('#out')!.addEventListener('click', async () => { await api.post('/api/auth/logout').catch(() => {}); location.reload(); });
+    return;
+  }
   // Signing out or locking reloads into the sign-in screen.
   new App(root, state, () => location.reload());
 }

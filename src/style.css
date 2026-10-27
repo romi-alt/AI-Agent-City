@@ -482,3 +482,16 @@ label.check input { width: auto; }
 .ov-screen .ov-h, .ov-screen .ov-body { padding-left: 20px; }
 .top .box, .top .pill, .top .seg button { white-space: nowrap; }
 .top .right { gap: 6px; }
+
+/* multi-client: hide what a role can't do (the server refuses it anyway) */
+[data-role^="client"] [data-act^="rent:"], [data-role^="client"] [data-act^="vacate:"] { display: none !important; }
+[data-role="client-viewer"] :is([data-act^="approve"], [data-act^="new-lead"]),
+[data-role="client-viewer"] :is(form[data-form="lead-note"], form[data-form="lead-send"], form[data-form="reply"]),
+[data-role="client-viewer"] :is(form[data-form="lead-edit"], form[data-form="post"]) button[type=submit] { display: none !important; }
+.checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 14px; max-height: 50vh; overflow: auto; }
+.row.tight { gap: 4px; flex-direction: column; align-items: stretch; min-width: 140px; }
+.row.tight select { width: 100%; padding: 4px 6px; font-size: 12px; }
+.row.tight button { align-self: flex-start; }
+.view-only { color: #b45309; background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.35); border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
+.empty-scope { position: fixed; inset: 0; display: grid; place-items: center; padding: 16px; background: var(--bg); color: var(--text); }
+.empty-scope div { max-width: 420px; display: flex; flex-direction: column; gap: 12px; text-align: center; }

@@ -32,6 +32,7 @@ export class CityView implements View {
     this.onSelect = onSelect;
     this.ground();
     sim.buildings.forEach((b, i) => this.building(b, i));
+    this.neighbours();
     this.decor();
     this.traffic();
 
@@ -45,9 +46,11 @@ export class CityView implements View {
   }
 
   home(cam: THREE.PerspectiveCamera, controls: OrbitControls) {
-    // Look down on the Training Center from high enough that no neighbour hides it.
-    controls.target.set(0, 8, 0);
-    cam.position.set(46, 84, 72);
+    // Look down on the Training Center from high enough that no neighbour hides it. A client, who can't
+    // see the Training Center, looks at its own first building instead.
+    const at = this.sim.buildings.some(b => b.id === 'fast-sales') ? { x: 0, z: 0 } : this.sim.buildings[0] ?? { x: 0, z: 0 };
+    controls.target.set(at.x, 8, at.z);
+    cam.position.set(at.x + 46, 84, at.z + 72);
     controls.minDistance = 15;
     controls.maxDistance = 190;
   }
@@ -276,6 +279,17 @@ export class CityView implements View {
     this.beam.rotation.z = 0.18;
     this.beam.visible = false;
     g.add(this.beam);
+  }
+
+  /** Other clients' buildings: plain grey shapes with no name, label or click target. */
+  private neighbours() {
+    for (const n of this.sim.neighbours) {
+      const lot = new THREE.Mesh(new THREE.BoxGeometry(16, 0.15, 16), flat('#e1e3e6'));
+      lot.position.set(n.x, 0.07, n.z);
+      const shape = decorBuilding(n.w, n.d, n.floors, '#c4c9cf', '#9aa1a9', 0);
+      shape.position.set(n.x, 0.15, n.z);
+      this.root.add(lot, shape);
+    }
   }
 
   private decor() {

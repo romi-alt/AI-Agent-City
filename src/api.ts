@@ -1,9 +1,13 @@
 import type { Patch, Snapshot } from './core/types';
 
+export type Role = 'owner' | 'staff' | 'client-admin' | 'client-viewer';
+export const ROLES: Role[] = ['owner', 'staff', 'client-admin', 'client-viewer'];
+export const ROLE_LABEL: Record<Role, string> = { owner: 'Agency owner', staff: 'Agency staff', 'client-admin': 'Client admin', 'client-viewer': 'Client viewer' };
+
 export interface Me {
   state: 'anon' | 'code' | 'locked' | 'in';
   setupNeeded: boolean;
-  user?: { id: string; username: string; name: string; role: 'admin' | 'member'; onDuty: boolean; agentId?: string; recoveryLeft: number };
+  user?: { id: string; username: string; name: string; role: Role; clientId?: string; clientName?: string; onDuty: boolean; agentId?: string; recoveryLeft: number };
 }
 export interface Person { id: string; name: string; onDuty: boolean; agentId?: string }
 export interface Integrations { email: boolean; sms: boolean; from: string; claude: { configured: boolean; model: string; perHour: number; usedLastHour: number } }

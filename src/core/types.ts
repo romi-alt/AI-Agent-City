@@ -223,6 +223,9 @@ export interface Settings {
   speed: number;
 }
 
+/** A building outside what the viewer may see: a shape on the skyline with no name or contents. */
+export interface Neighbour { x: number; z: number; w: number; d: number; floors: number }
+
 export interface Snapshot {
   version: number;
   startDate: string;
@@ -244,6 +247,8 @@ export interface Snapshot {
   stageLog: StageEvent[];
   settings: Settings;
   seq: number;
+  /** Only in what a client's browser receives: other clients' buildings, as bare shapes. */
+  neighbours?: Neighbour[];
 }
 
 export type StatsDump = [string, [string, Record<string, number>][]][];

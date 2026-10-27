@@ -1,3 +1,4 @@
+import { ROLE_LABEL, ROLES, type Role } from '../api';
 import { SOCIAL_TASKS } from '../core/data/tasks';
 import { AFFILIATE_STAGES, clock, DEALER_STAGES, TRAINING_STAGES } from '../core/sim';
 import type { Agent, Approval, Building, Lead } from '../core/types';
@@ -5,8 +6,9 @@ import type { App, Overlay } from './app';
 import { age, esc, hhmm, money } from './util';
 
 export interface AdminData {
-  users: { id: string; username: string; name: string; role: string; onDuty: boolean; agentId?: string; enrolled: boolean; createdAt: number }[];
+  users: { id: string; username: string; name: string; role: Role; clientId?: string; onDuty: boolean; agentId?: string; enrolled: boolean; createdAt: number }[];
   signins: { t: number; username: string; ip: string; ua: string; result: string }[];
+  clients: { id: string; name: string; buildingIds: string[] }[];
 }
 
 const STATUS_COLOR: Record<string, string> = {
@@ -22,6 +24,7 @@ export function shell(app: App) {
   <nav class="seg"><button data-act="mode:office">Office</button><button data-act="mode:city">City</button><button data-act="mode:dashboard">Dashboard</button></nav>
   <div class="right">
     <button class="pill" id="duty" data-act="duty" title="Toggle on duty"></button>
+    ${app.readOnly ? '<span class="view-only" title="You can look but not change anything">VIEW ONLY</span>' : ''}
     <span class="seg small" id="speed" title="Simulation speed"></span>
     <span class="box mono" id="clock"></span>
     <span class="box who">${esc(app.me.name)}</span>
@@ -37,8 +40,8 @@ export function shell(app: App) {
     <nav class="menu">
       <button data-act="myoffice">View office</button>
       <button data-act="mode:city">City view</button>
-      <button data-act="agent:fast-sales-L12-0:focus">Elvis's desk</button>
-      <button data-act="agent:fast-sales-L12-1:focus">Max</button>
+      ${app.sim.agent('fast-sales-L12-0') ? '<button data-act="agent:fast-sales-L12-0:focus">Elvis\'s desk</button>' : ''}
+      ${app.sim.agent('fast-sales-L12-1') ? '<button data-act="agent:fast-sales-L12-1:focus">Max</button>' : ''}
       <button data-act="tab:team">Agents</button>
       <button data-act="overlay:screen">Big screen</button>
       <button data-act="overlay:content">Content wall</button>
@@ -440,14 +443,19 @@ function admin(app: App) {
   const s = app.sim.settings, i = app.integrations, d = app.adminData;
   const humans = app.sim.agents().filter(a => a.kind === 'human');
   const me = `<section><h4>My account</h4>
-    <p>${esc(app.me.name)} · <code>${esc(app.me.username)}</code> · ${app.me.role}</p>
+    <p>${esc(app.me.name)} · <code>${esc(app.me.username)}</code> · ${ROLE_LABEL[app.me.role]}${app.me.clientName ? ` · ${esc(app.me.clientName)}` : ''}</p>
     <p class="muted small">${app.me.recoveryLeft} recovery code(s) left.</p>
     <button class="btn-line sm" data-act="new-codes">New recovery codes</button>
     <h4>My desk</h4><p class="muted small">Your desk is "Your office" in the floor picker and shows your on-duty status.</p>
     <div class="chips">${humans.map(a => `<button class="chip ${app.me.agentId === a.id ? 'on' : ''}" data-act="desk:${app.me.agentId === a.id ? '' : a.id}">${esc(a.name)} <small>${esc(app.sim.building(a.buildingId).short)} L${a.floor}</small></button>`).join('')}</div></section>`;
-  if (!app.isAdmin) return `<div class="dash-cols">${me}</div>`;
+  if (!app.isOwner) return `<div class="dash-cols">${me}</div>`;
+  const clients = d?.clients ?? [];
+  const clientName = (id?: string) => clients.find(c => c.id === id)?.name ?? '—';
+  const roleOptions = (sel: Role) => ROLES.map(r => `<option value="${r}" ${r === sel ? 'selected' : ''}>${ROLE_LABEL[r]}</option>`).join('');
+  const clientOptions = (sel?: string) => `<option value="">No client</option>${clients.map(c => `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}`;
+  const bname = (id: string) => app.sim.buildings.find(b => b.id === id)?.short ?? id;
   return `<div class="dash-cols">
-    <section><h4>Office settings</h4>
+    <section><h4>Agency settings</h4>
     <form data-form="settings" class="form">
       <label>Company name<input name="companyName" value="${esc(s.companyName)}" required></label>
       <label>Daily report recipients (comma separated)<input name="reportRecipients" value="${esc(s.reportRecipients.join(', '))}" placeholder="owner@example.com, manager@example.com"></label>
@@ -465,10 +473,21 @@ function admin(app: App) {
     </ul>
     ${i.email ? `<form data-form="test-email" class="row"><input name="to" type="email" placeholder="you@example.com" required><button class="btn-line sm" type="submit">Send test email</button></form>` : ''}
     ${me}</section>
-    <section><h4>People</h4>
-      <form data-form="user" class="form row wrap"><input name="name" placeholder="Name" required><input name="username" placeholder="username" required pattern="[a-zA-Z0-9._\\-]{3,32}"><select name="role"><option value="member">Member</option><option value="admin">Admin</option></select><button class="btn-gold sm" type="submit">Add person</button></form>
-      <table class="tbl"><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>
-      ${(d?.users ?? []).map(u => `<tr><td>${esc(u.name)}</td><td><code>${esc(u.username)}</code></td><td>${u.role}</td><td>${u.enrolled ? (u.onDuty ? 'on duty' : 'off duty') : 'setup pending'}</td>
+    <section><h4>Clients</h4>
+      <p class="muted small">Each client owns one or more buildings. Client people see only their client's buildings; everything else in the city shows as unnamed shapes.</p>
+      <table class="tbl"><thead><tr><th>Client</th><th>Buildings</th><th>People</th><th></th></tr></thead><tbody>
+      ${clients.map(c => `<tr><td>${esc(c.name)}</td><td>${c.buildingIds.map(id => esc(bname(id))).join(', ') || '<span class="muted">none</span>'}</td><td>${(d?.users ?? []).filter(u => u.clientId === c.id).length}</td>
+        <td class="nowrap"><button class="link" data-act="client-edit:${c.id}">Edit</button> · <button class="link red" data-act="client-delete:${c.id}">Delete</button></td></tr>`).join('') || '<tr><td colspan="4" class="muted">No clients yet. Everyone is agency staff.</td></tr>'}</tbody></table>
+      <button class="btn-line sm" data-act="client-edit:">Add client</button>
+
+      <h4>People</h4>
+      <form data-form="user" class="form row wrap"><input name="name" placeholder="Name" required><input name="username" placeholder="username" required pattern="[a-zA-Z0-9._\\-]{3,32}"><select name="role">${roleOptions('staff')}</select><select name="clientId">${clientOptions()}</select><button class="btn-gold sm" type="submit">Add person</button></form>
+      <p class="muted small">Client admins and client viewers need a client. Changing someone's access signs them out.</p>
+      <table class="tbl"><thead><tr><th>Name</th><th>Access</th><th>Status</th><th></th></tr></thead><tbody>
+      ${(d?.users ?? []).map(u => `<tr><td>${esc(u.name)}<br><code class="small">${esc(u.username)}</code></td>
+        <td>${u.id === app.me.id ? `${ROLE_LABEL[u.role]}` : `<form data-form="access" class="row wrap tight"><input type="hidden" name="id" value="${u.id}"><select name="role">${roleOptions(u.role)}</select><select name="clientId">${clientOptions(u.clientId)}</select><button class="btn-line sm" type="submit">Save</button></form>`}
+          ${u.clientId ? `<small class="muted">${esc(clientName(u.clientId))}</small>` : ''}</td>
+        <td>${u.enrolled ? (u.onDuty ? 'on duty' : 'off duty') : 'setup pending'}</td>
         <td class="nowrap"><button class="link" data-act="user-reset:${u.id}">Reset</button>${u.id !== app.me.id ? ` · <button class="link red" data-act="user-delete:${u.id}">Remove</button>` : ''}</td></tr>`).join('')}</tbody></table>
       <h4>Sign-in log</h4><table class="tbl small"><thead><tr><th>When</th><th>Who</th><th>Result</th><th>IP</th></tr></thead><tbody>
       ${(d?.signins ?? []).slice(0, 40).map(e => `<tr><td class="nowrap">${new Date(e.t).toLocaleString()}</td><td>${esc(e.username)}</td><td class="${e.result.startsWith('ok') || e.result === 'enrolled' || e.result === 'unlocked' ? '' : 'red'}">${e.result}</td><td>${esc(e.ip)}</td></tr>`).join('')}</tbody></table>
@@ -519,8 +538,9 @@ export function rentForm(app: App, buildingId: string, level: number) {
 }
 
 export function leadForm(app: App, buildingId: string) {
-  const b = app.sim.buildings.find(x => x.id === buildingId) ?? app.sim.building('fast-sales');
-  const courses = app.sim.building('fast-sales').floors.filter(f => f.level >= 3 && f.level <= 11);
+  const b = app.sim.buildings.find(x => x.id === buildingId) ?? app.home;
+  const training = app.sim.buildings.find(x => x.id === 'fast-sales');
+  const courses = training ? training.floors.filter(f => f.level >= 3 && f.level <= 11) : [];
   return `<div class="sheet-h"><b>Add a real lead</b><button data-act="close">✕</button></div>
     <form data-form="lead" class="form sheet-b">
       <p class="muted small">Real leads are only ever contacted after you approve each message.</p>
@@ -529,8 +549,25 @@ export function leadForm(app: App, buildingId: string) {
       <div class="row"><label>Email<input name="email" type="email"></label><label>Phone<input name="phone" placeholder="+1…"></label></div>
       <div class="row"><label>Source<input name="source" placeholder="Website, walk-in, referral…"></label><label>Interest<input name="interest" placeholder="Model or program"></label></div>
       <div class="row"><label>Type<select name="kind"><option value="customer">Customer / student</option><option value="affiliate">Affiliate</option></select></label>
-      <label>Course floor (Training Center)<select name="floor"><option value="">—</option>${courses.map(f => `<option value="${f.level}">L${f.level} ${esc(f.name)}</option>`).join('')}</select></label></div>
+      ${courses.length ? `<label>Course floor (Training Center)<select name="floor"><option value="">—</option>${courses.map(f => `<option value="${f.level}">L${f.level} ${esc(f.name)}</option>`).join('')}</select></label>` : ''}</div>
       <button class="btn-gold" type="submit">Add lead</button></form>`;
+}
+
+/** Add or edit a client: its name and the buildings it owns. Buildings owned by another client are greyed out. */
+export function clientForm(app: App, id?: string) {
+  const clients = app.adminData?.clients ?? [];
+  const c = clients.find(x => x.id === id);
+  const owner = (bid: string) => clients.find(x => x.id !== id && x.buildingIds.includes(bid));
+  return `<div class="sheet-h"><b>${c ? `Edit ${esc(c.name)}` : 'Add client'}</b><button data-act="close">✕</button></div>
+    <form data-form="client" class="form sheet-b">
+      <input type="hidden" name="id" value="${c?.id ?? ''}">
+      <label>Client name<input name="name" required maxlength="80" value="${esc(c?.name ?? '')}" placeholder="Rick Case Honda"></label>
+      <p class="muted small">Buildings this client owns. Its people will see only these.${c ? ' Changing them signs this client\'s people out.' : ''}</p>
+      <div class="checks">${app.sim.buildings.map(b => {
+        const other = owner(b.id);
+        return `<label class="check ${other ? 'muted' : ''}"><input type="checkbox" name="b" value="${b.id}" ${c?.buildingIds.includes(b.id) ? 'checked' : ''} ${other ? 'disabled' : ''}> ${esc(b.name)}${other ? ` <small>(${esc(other.name)})</small>` : ''}</label>`;
+      }).join('')}</div>
+      <button class="btn-gold" type="submit">${c ? 'Save client' : 'Add client'}</button></form>`;
 }
 
 export function postEditor(app: App, id: string) {

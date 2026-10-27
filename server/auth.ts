@@ -1,15 +1,18 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { isClientRole, type Client, type Role } from './scope';
 import { newSecret, verifyTotp } from './totp';
 
-export type Role = 'admin' | 'member';
+export type { Role } from './scope';
 
 export interface User {
   id: string;
   username: string;
   name: string;
   role: Role;
+  /** The client a client-admin or client-viewer belongs to. Agency people have none. */
+  clientId?: string;
   passHash?: string;
   salt?: string;
   totpSecret?: string;
@@ -81,6 +84,7 @@ function recoveryCodes() {
 
 export class AuthStore {
   users: User[] = [];
+  clients: Client[] = [];
   sessions = new Map<string, Session>();
   devices: Device[] = [];
   signins: SignIn[] = [];
@@ -93,6 +97,13 @@ export class AuthStore {
     if (existsSync(file)) {
       const d = JSON.parse(readFileSync(file, 'utf8'));
       this.users = d.users ?? [];
+      this.clients = d.clients ?? [];
+      // Accounts from before multi-client isolation: admins become agency owners, members agency staff.
+      for (const u of this.users) {
+        const r = u.role as string;
+        if (r === 'admin') u.role = 'owner';
+        else if (r === 'member') u.role = 'staff';
+      }
       this.devices = d.devices ?? [];
       this.signins = d.signins ?? [];
       for (const s of d.sessions ?? []) this.sessions.set(s.hash, s);
@@ -103,14 +114,14 @@ export class AuthStore {
   save() {
     mkdirSync(dirname(this.file), { recursive: true });
     const tmp = `${this.file}.tmp`;
-    writeFileSync(tmp, JSON.stringify({ users: this.users, devices: this.devices, signins: this.signins, sessions: [...this.sessions.values()] }), { mode: 0o600 });
+    writeFileSync(tmp, JSON.stringify({ users: this.users, clients: this.clients, devices: this.devices, signins: this.signins, sessions: [...this.sessions.values()] }), { mode: 0o600 });
     renameSync(tmp, this.file);
   }
 
   activeUsers() { return this.users.filter(u => u.totpSecret); }
   byId(id: string) { return this.users.find(u => u.id === id); }
   publicUser(u: User) {
-    return { id: u.id, username: u.username, name: u.name, role: u.role, onDuty: u.onDuty, agentId: u.agentId, enrolled: !!u.totpSecret, createdAt: u.createdAt };
+    return { id: u.id, username: u.username, name: u.name, role: u.role, clientId: u.clientId, onDuty: u.onDuty, agentId: u.agentId, enrolled: !!u.totpSecret, createdAt: u.createdAt };
   }
 
   log(e: Omit<SignIn, 't'>) {
@@ -143,6 +154,12 @@ export class AuthStore {
 
   endSession(t: string | undefined) {
     if (t) this.sessions.delete(sha(t));
+    this.save();
+  }
+
+  /** Sign someone out everywhere, e.g. after what they may see has changed. */
+  endSessionsFor(userId: string) {
+    for (const s of [...this.sessions.values()]) if (s.userId === userId) this.sessions.delete(s.hash);
     this.save();
   }
 
@@ -225,16 +242,58 @@ export class AuthStore {
   }
 
   // ── enrollment (first admin, new users, resets) ─────────────
-  createUser(username: string, name: string, role: Role) {
+  createUser(username: string, name: string, role: Role, clientId?: string) {
     if (this.users.some(u => u.username.toLowerCase() === username.toLowerCase())) throw new Error('That username is taken.');
+    this.checkClient(role, clientId);
     const t = token();
     const u: User = {
-      id: randomBytes(8).toString('hex'), username, name, role, recovery: [], onDuty: true, createdAt: Date.now(),
+      id: randomBytes(8).toString('hex'), username, name, role, clientId: isClientRole(role) ? clientId : undefined, recovery: [], onDuty: true, createdAt: Date.now(),
       enrollHash: sha(t), enrollExpires: Date.now() + ENROLL_MS, failed: 0,
     };
     this.users.push(u);
     this.save();
     return { user: u, token: t };
+  }
+
+  /** Change what someone may see. They are signed out so their browser drops what it already has. */
+  updateAccess(id: string, role: Role, clientId?: string) {
+    const u = this.byId(id);
+    if (!u) throw new Error('No such user.');
+    this.checkClient(role, clientId);
+    if (u.role === 'owner' && role !== 'owner' && this.users.filter(x => x.role === 'owner').length === 1) throw new Error('Keep at least one agency owner.');
+    u.role = role;
+    u.clientId = isClientRole(role) ? clientId : undefined;
+    this.endSessionsFor(id);
+    return u;
+  }
+
+  private checkClient(role: Role, clientId?: string) {
+    if (isClientRole(role) && !this.clients.some(c => c.id === clientId)) throw new Error('Pick the client this person belongs to.');
+  }
+
+  // ── clients ─────────────────────────────────────────────────
+  /** Save a client and the buildings it owns. A building belongs to at most one client. */
+  saveClient(input: { id?: string; name: string; buildingIds: string[] }) {
+    const name = input.name.trim();
+    if (!name) throw new Error('Give the client a name.');
+    const taken = this.clients.find(c => c.id !== input.id && c.buildingIds.some(b => input.buildingIds.includes(b)));
+    if (taken) throw new Error(`A building you picked already belongs to ${taken.name}.`);
+    let c = input.id ? this.clients.find(x => x.id === input.id) : undefined;
+    if (input.id && !c) throw new Error('No such client.');
+    if (!c) { c = { id: randomBytes(6).toString('hex'), name, buildingIds: [], createdAt: Date.now() }; this.clients.push(c); }
+    const changed = c.buildingIds.join() !== [...input.buildingIds].sort().join();
+    c.name = name;
+    c.buildingIds = [...new Set(input.buildingIds)].sort();
+    // Its people must reload to see the new set of buildings.
+    if (changed) for (const u of this.users) if (u.clientId === c.id) this.endSessionsFor(u.id);
+    this.save();
+    return c;
+  }
+
+  deleteClient(id: string) {
+    if (this.users.some(u => u.clientId === id)) throw new Error('Move or remove this client\'s people first.');
+    this.clients = this.clients.filter(c => c.id !== id);
+    this.save();
   }
 
   resetUser(id: string) {
@@ -270,7 +329,7 @@ export class AuthStore {
     if (target === 'bootstrap') {
       if (!username?.trim() || !name?.trim()) throw new Error('Enter your name and a username.');
       const existing = this.users.find(u => u.enrollHash === sha(t));
-      target = existing ?? this.createUser(username.trim(), name.trim(), 'admin').user;
+      target = existing ?? this.createUser(username.trim(), name.trim(), 'owner').user;
       target.enrollHash = sha(t);
       target.enrollExpires = Date.now() + ENROLL_MS;
     }
