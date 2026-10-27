@@ -1,0 +1,6841 @@
+[
+  {
+    "id": "audi",
+    "name": "Audi Dealership",
+    "short": "Audi",
+    "kind": "dealership",
+    "color": "#e8e4dc",
+    "accent": "#bb0a30",
+    "x": -40,
+    "z": -20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Sales Dept.",
+        "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "audi-L12-0",
+            "name": "Ava",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest",
+              "Referrals"
+            ],
+            "buildingId": "audi",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L12-1",
+            "name": "Kai",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Orphans",
+              "Lost / out of the market",
+              "Mastermind"
+            ],
+            "buildingId": "audi",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L12-2",
+            "name": "Mila",
+            "role": "greeter",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals",
+              "Customer birthday"
+            ],
+            "buildingId": "audi",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Internet Sales Dept.",
+        "info": "Web, chat and third-party leads – fastest response wins.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "audi-L11-0",
+            "name": "Leo",
+            "role": "web leads",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest"
+            ],
+            "buildingId": "audi",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L11-1",
+            "name": "Zara",
+            "role": "chat",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals"
+            ],
+            "buildingId": "audi",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L11-2",
+            "name": "Omar",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Lost / out of the market",
+              "Orphans"
+            ],
+            "buildingId": "audi",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Finance Dept.",
+        "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "audi-L10-0",
+            "name": "Nora",
+            "role": "F&I",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Sold customers",
+              "Ownership anniversary"
+            ],
+            "buildingId": "audi",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L10-1",
+            "name": "Eli",
+            "role": "lease end",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Lease end",
+              "Ownership anniversary"
+            ],
+            "buildingId": "audi",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L10-2",
+            "name": "Ruby",
+            "role": "credit",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Sold customers"
+            ],
+            "buildingId": "audi",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Social Media Dept.",
+        "info": "Content, ads and community for the dealership.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "audi-L9-0",
+            "name": "Finn",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "audi",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L9-1",
+            "name": "Lena",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "audi",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L9-2",
+            "name": "Hugo",
+            "role": "community",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "audi",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Service Dept.",
+        "info": "Service visits, CSI and birthday / anniversary touches.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "audi-L8-0",
+            "name": "Maya",
+            "role": "service visits",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Customer birthday"
+            ],
+            "buildingId": "audi",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L8-1",
+            "name": "Arlo",
+            "role": "CSI",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Ownership anniversary"
+            ],
+            "buildingId": "audi",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L8-2",
+            "name": "Ivy",
+            "role": "recalls",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "audi",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Parts Dept.",
+        "info": "Parts orders and follow-up with service and retail customers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "audi-L7-0",
+            "name": "Jude",
+            "role": "parts orders",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "audi",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L7-1",
+            "name": "Sage",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Service visits"
+            ],
+            "buildingId": "audi",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Body Shop Dept.",
+        "info": "Estimates, repairs and post-repair CSI.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "audi-L6-0",
+            "name": "Rio",
+            "role": "estimates",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Referrals"
+            ],
+            "buildingId": "audi",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L6-1",
+            "name": "Noa",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Referrals"
+            ],
+            "buildingId": "audi",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Administrative Dept.",
+        "info": "Store manager runs the reports and keeps leads moving.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "audi-L5-0",
+            "name": "Cleo",
+            "role": "manager",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Mastermind",
+              "Orphans"
+            ],
+            "buildingId": "audi",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L5-1",
+            "name": "Remy",
+            "role": "scheduling",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Orphans",
+              "Mastermind",
+              "CSI follow"
+            ],
+            "buildingId": "audi",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "HR Dept.",
+        "info": "Recruiting and onboarding new associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "audi-L4-0",
+            "name": "Juno",
+            "role": "recruiting",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "audi",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "audi-L4-1",
+            "name": "Axel",
+            "role": "onboarding",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "audi",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ],
+    "brand": "Audi"
+  },
+  {
+    "id": "honda",
+    "name": "Honda Dealership",
+    "short": "Honda",
+    "kind": "dealership",
+    "color": "#f28b82",
+    "accent": "#cc0000",
+    "x": -20,
+    "z": -20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Sales Dept.",
+        "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "honda-L12-0",
+            "name": "Lux",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest",
+              "Referrals"
+            ],
+            "buildingId": "honda",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L12-1",
+            "name": "Otis",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Orphans",
+              "Lost / out of the market",
+              "Mastermind"
+            ],
+            "buildingId": "honda",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L12-2",
+            "name": "Pia",
+            "role": "greeter",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals",
+              "Customer birthday"
+            ],
+            "buildingId": "honda",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Internet Sales Dept.",
+        "info": "Web, chat and third-party leads – fastest response wins.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "honda-L11-0",
+            "name": "Rex",
+            "role": "web leads",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest"
+            ],
+            "buildingId": "honda",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L11-1",
+            "name": "Tess",
+            "role": "chat",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals"
+            ],
+            "buildingId": "honda",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L11-2",
+            "name": "Uma",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Lost / out of the market",
+              "Orphans"
+            ],
+            "buildingId": "honda",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Finance Dept.",
+        "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "honda-L10-0",
+            "name": "Vik",
+            "role": "F&I",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Sold customers",
+              "Ownership anniversary"
+            ],
+            "buildingId": "honda",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L10-1",
+            "name": "Wren",
+            "role": "lease end",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Lease end",
+              "Ownership anniversary"
+            ],
+            "buildingId": "honda",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L10-2",
+            "name": "Yara",
+            "role": "credit",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Sold customers"
+            ],
+            "buildingId": "honda",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Social Media Dept.",
+        "info": "Content, ads and community for the dealership.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "honda-L9-0",
+            "name": "Zed",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "honda",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L9-1",
+            "name": "Bea",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "honda",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L9-2",
+            "name": "Cruz",
+            "role": "community",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "honda",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Service Dept.",
+        "info": "Service visits, CSI and birthday / anniversary touches.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "honda-L8-0",
+            "name": "Dex",
+            "role": "service visits",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Customer birthday"
+            ],
+            "buildingId": "honda",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L8-1",
+            "name": "Elle",
+            "role": "CSI",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Ownership anniversary"
+            ],
+            "buildingId": "honda",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L8-2",
+            "name": "Faye",
+            "role": "recalls",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "honda",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Parts Dept.",
+        "info": "Parts orders and follow-up with service and retail customers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "honda-L7-0",
+            "name": "Gus",
+            "role": "parts orders",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "honda",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L7-1",
+            "name": "Hana",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Service visits"
+            ],
+            "buildingId": "honda",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Body Shop Dept.",
+        "info": "Estimates, repairs and post-repair CSI.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "honda-L6-0",
+            "name": "Ines",
+            "role": "estimates",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Referrals"
+            ],
+            "buildingId": "honda",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L6-1",
+            "name": "Jax",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Referrals"
+            ],
+            "buildingId": "honda",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Administrative Dept.",
+        "info": "Store manager runs the reports and keeps leads moving.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "honda-L5-0",
+            "name": "Kira",
+            "role": "manager",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Mastermind",
+              "Orphans"
+            ],
+            "buildingId": "honda",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L5-1",
+            "name": "Lio",
+            "role": "scheduling",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Orphans",
+              "Mastermind",
+              "CSI follow"
+            ],
+            "buildingId": "honda",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "HR Dept.",
+        "info": "Recruiting and onboarding new associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "honda-L4-0",
+            "name": "Mae",
+            "role": "recruiting",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "honda",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "honda-L4-1",
+            "name": "Ava",
+            "role": "onboarding",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "honda",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ],
+    "brand": "Honda"
+  },
+  {
+    "id": "hyundai",
+    "name": "Hyundai Dealership",
+    "short": "Hyundai",
+    "kind": "dealership",
+    "color": "#7fa7d9",
+    "accent": "#002c5f",
+    "x": 0,
+    "z": -20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Sales Dept.",
+        "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "hyundai-L12-0",
+            "name": "Kai",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest",
+              "Referrals"
+            ],
+            "buildingId": "hyundai",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L12-1",
+            "name": "Mila",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Orphans",
+              "Lost / out of the market",
+              "Mastermind"
+            ],
+            "buildingId": "hyundai",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L12-2",
+            "name": "Leo",
+            "role": "greeter",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals",
+              "Customer birthday"
+            ],
+            "buildingId": "hyundai",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Internet Sales Dept.",
+        "info": "Web, chat and third-party leads – fastest response wins.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "hyundai-L11-0",
+            "name": "Zara",
+            "role": "web leads",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest"
+            ],
+            "buildingId": "hyundai",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L11-1",
+            "name": "Omar",
+            "role": "chat",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals"
+            ],
+            "buildingId": "hyundai",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L11-2",
+            "name": "Nora",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Lost / out of the market",
+              "Orphans"
+            ],
+            "buildingId": "hyundai",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Finance Dept.",
+        "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "hyundai-L10-0",
+            "name": "Eli",
+            "role": "F&I",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Sold customers",
+              "Ownership anniversary"
+            ],
+            "buildingId": "hyundai",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L10-1",
+            "name": "Ruby",
+            "role": "lease end",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Lease end",
+              "Ownership anniversary"
+            ],
+            "buildingId": "hyundai",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L10-2",
+            "name": "Finn",
+            "role": "credit",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Sold customers"
+            ],
+            "buildingId": "hyundai",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Social Media Dept.",
+        "info": "Content, ads and community for the dealership.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "hyundai-L9-0",
+            "name": "Lena",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "hyundai",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L9-1",
+            "name": "Hugo",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "hyundai",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L9-2",
+            "name": "Maya",
+            "role": "community",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "hyundai",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Service Dept.",
+        "info": "Service visits, CSI and birthday / anniversary touches.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "hyundai-L8-0",
+            "name": "Arlo",
+            "role": "service visits",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Customer birthday"
+            ],
+            "buildingId": "hyundai",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L8-1",
+            "name": "Ivy",
+            "role": "CSI",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Ownership anniversary"
+            ],
+            "buildingId": "hyundai",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L8-2",
+            "name": "Jude",
+            "role": "recalls",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "hyundai",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Parts Dept.",
+        "info": "Parts orders and follow-up with service and retail customers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "hyundai-L7-0",
+            "name": "Sage",
+            "role": "parts orders",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "hyundai",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L7-1",
+            "name": "Rio",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Service visits"
+            ],
+            "buildingId": "hyundai",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Body Shop Dept.",
+        "info": "Estimates, repairs and post-repair CSI.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "hyundai-L6-0",
+            "name": "Noa",
+            "role": "estimates",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Referrals"
+            ],
+            "buildingId": "hyundai",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L6-1",
+            "name": "Cleo",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Referrals"
+            ],
+            "buildingId": "hyundai",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Administrative Dept.",
+        "info": "Store manager runs the reports and keeps leads moving.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "hyundai-L5-0",
+            "name": "Remy",
+            "role": "manager",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Mastermind",
+              "Orphans"
+            ],
+            "buildingId": "hyundai",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L5-1",
+            "name": "Juno",
+            "role": "scheduling",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Orphans",
+              "Mastermind",
+              "CSI follow"
+            ],
+            "buildingId": "hyundai",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "HR Dept.",
+        "info": "Recruiting and onboarding new associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "hyundai-L4-0",
+            "name": "Axel",
+            "role": "recruiting",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "hyundai",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "hyundai-L4-1",
+            "name": "Lux",
+            "role": "onboarding",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "hyundai",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ],
+    "brand": "Hyundai"
+  },
+  {
+    "id": "genesis",
+    "name": "Genesis Dealership",
+    "short": "Genesis",
+    "kind": "dealership",
+    "color": "#b9a58c",
+    "accent": "#1a1a1a",
+    "x": 20,
+    "z": -20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Sales Dept.",
+        "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "genesis-L12-0",
+            "name": "Otis",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest",
+              "Referrals"
+            ],
+            "buildingId": "genesis",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L12-1",
+            "name": "Pia",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Orphans",
+              "Lost / out of the market",
+              "Mastermind"
+            ],
+            "buildingId": "genesis",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L12-2",
+            "name": "Rex",
+            "role": "greeter",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals",
+              "Customer birthday"
+            ],
+            "buildingId": "genesis",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Internet Sales Dept.",
+        "info": "Web, chat and third-party leads – fastest response wins.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "genesis-L11-0",
+            "name": "Tess",
+            "role": "web leads",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest"
+            ],
+            "buildingId": "genesis",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L11-1",
+            "name": "Uma",
+            "role": "chat",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals"
+            ],
+            "buildingId": "genesis",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L11-2",
+            "name": "Vik",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Lost / out of the market",
+              "Orphans"
+            ],
+            "buildingId": "genesis",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Finance Dept.",
+        "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "genesis-L10-0",
+            "name": "Wren",
+            "role": "F&I",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Sold customers",
+              "Ownership anniversary"
+            ],
+            "buildingId": "genesis",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L10-1",
+            "name": "Yara",
+            "role": "lease end",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Lease end",
+              "Ownership anniversary"
+            ],
+            "buildingId": "genesis",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L10-2",
+            "name": "Zed",
+            "role": "credit",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Sold customers"
+            ],
+            "buildingId": "genesis",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Social Media Dept.",
+        "info": "Content, ads and community for the dealership.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "genesis-L9-0",
+            "name": "Bea",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "genesis",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L9-1",
+            "name": "Cruz",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "genesis",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L9-2",
+            "name": "Dex",
+            "role": "community",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "genesis",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Service Dept.",
+        "info": "Service visits, CSI and birthday / anniversary touches.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "genesis-L8-0",
+            "name": "Elle",
+            "role": "service visits",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Customer birthday"
+            ],
+            "buildingId": "genesis",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L8-1",
+            "name": "Faye",
+            "role": "CSI",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Ownership anniversary"
+            ],
+            "buildingId": "genesis",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L8-2",
+            "name": "Gus",
+            "role": "recalls",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "genesis",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Parts Dept.",
+        "info": "Parts orders and follow-up with service and retail customers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "genesis-L7-0",
+            "name": "Hana",
+            "role": "parts orders",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "genesis",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L7-1",
+            "name": "Ines",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Service visits"
+            ],
+            "buildingId": "genesis",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Body Shop Dept.",
+        "info": "Estimates, repairs and post-repair CSI.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "genesis-L6-0",
+            "name": "Jax",
+            "role": "estimates",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Referrals"
+            ],
+            "buildingId": "genesis",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L6-1",
+            "name": "Kira",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Referrals"
+            ],
+            "buildingId": "genesis",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Administrative Dept.",
+        "info": "Store manager runs the reports and keeps leads moving.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "genesis-L5-0",
+            "name": "Lio",
+            "role": "manager",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Mastermind",
+              "Orphans"
+            ],
+            "buildingId": "genesis",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L5-1",
+            "name": "Mae",
+            "role": "scheduling",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Orphans",
+              "Mastermind",
+              "CSI follow"
+            ],
+            "buildingId": "genesis",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "HR Dept.",
+        "info": "Recruiting and onboarding new associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "genesis-L4-0",
+            "name": "Ava",
+            "role": "recruiting",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "genesis",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "genesis-L4-1",
+            "name": "Kai",
+            "role": "onboarding",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "genesis",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ],
+    "brand": "Genesis"
+  },
+  {
+    "id": "acura",
+    "name": "Acura Dealership",
+    "short": "Acura",
+    "kind": "dealership",
+    "color": "#9ad1c4",
+    "accent": "#2b2b2b",
+    "x": 40,
+    "z": -20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Sales Dept.",
+        "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "acura-L12-0",
+            "name": "Mila",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest",
+              "Referrals"
+            ],
+            "buildingId": "acura",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L12-1",
+            "name": "Leo",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Orphans",
+              "Lost / out of the market",
+              "Mastermind"
+            ],
+            "buildingId": "acura",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L12-2",
+            "name": "Zara",
+            "role": "greeter",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals",
+              "Customer birthday"
+            ],
+            "buildingId": "acura",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Internet Sales Dept.",
+        "info": "Web, chat and third-party leads – fastest response wins.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "acura-L11-0",
+            "name": "Omar",
+            "role": "web leads",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest"
+            ],
+            "buildingId": "acura",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L11-1",
+            "name": "Nora",
+            "role": "chat",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals"
+            ],
+            "buildingId": "acura",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L11-2",
+            "name": "Eli",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Lost / out of the market",
+              "Orphans"
+            ],
+            "buildingId": "acura",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Finance Dept.",
+        "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "acura-L10-0",
+            "name": "Ruby",
+            "role": "F&I",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Sold customers",
+              "Ownership anniversary"
+            ],
+            "buildingId": "acura",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L10-1",
+            "name": "Finn",
+            "role": "lease end",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Lease end",
+              "Ownership anniversary"
+            ],
+            "buildingId": "acura",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L10-2",
+            "name": "Lena",
+            "role": "credit",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Sold customers"
+            ],
+            "buildingId": "acura",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Social Media Dept.",
+        "info": "Content, ads and community for the dealership.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "acura-L9-0",
+            "name": "Hugo",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "acura",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L9-1",
+            "name": "Maya",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "acura",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L9-2",
+            "name": "Arlo",
+            "role": "community",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "acura",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Service Dept.",
+        "info": "Service visits, CSI and birthday / anniversary touches.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "acura-L8-0",
+            "name": "Ivy",
+            "role": "service visits",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Customer birthday"
+            ],
+            "buildingId": "acura",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L8-1",
+            "name": "Jude",
+            "role": "CSI",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Ownership anniversary"
+            ],
+            "buildingId": "acura",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L8-2",
+            "name": "Sage",
+            "role": "recalls",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "acura",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Parts Dept.",
+        "info": "Parts orders and follow-up with service and retail customers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "acura-L7-0",
+            "name": "Rio",
+            "role": "parts orders",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "acura",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L7-1",
+            "name": "Noa",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Service visits"
+            ],
+            "buildingId": "acura",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Body Shop Dept.",
+        "info": "Estimates, repairs and post-repair CSI.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "acura-L6-0",
+            "name": "Cleo",
+            "role": "estimates",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Referrals"
+            ],
+            "buildingId": "acura",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L6-1",
+            "name": "Remy",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Referrals"
+            ],
+            "buildingId": "acura",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Administrative Dept.",
+        "info": "Store manager runs the reports and keeps leads moving.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "acura-L5-0",
+            "name": "Juno",
+            "role": "manager",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Mastermind",
+              "Orphans"
+            ],
+            "buildingId": "acura",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L5-1",
+            "name": "Axel",
+            "role": "scheduling",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Orphans",
+              "Mastermind",
+              "CSI follow"
+            ],
+            "buildingId": "acura",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "HR Dept.",
+        "info": "Recruiting and onboarding new associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "acura-L4-0",
+            "name": "Lux",
+            "role": "recruiting",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "acura",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "acura-L4-1",
+            "name": "Otis",
+            "role": "onboarding",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "acura",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ],
+    "brand": "Acura"
+  },
+  {
+    "id": "rental-1",
+    "name": "Rental Building 1",
+    "short": "Rental 1",
+    "kind": "rental",
+    "color": "#f6c26b",
+    "accent": "#ffffff",
+    "x": -40,
+    "z": 0,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 11,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 10,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 9,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 8,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 7,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 6,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 5,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 4,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 3,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      }
+    ]
+  },
+  {
+    "id": "rc-new",
+    "name": "Rick Case Honda · New Cars Sales Associates",
+    "short": "RC New Cars",
+    "kind": "associates",
+    "color": "#f4a6c1",
+    "accent": "#ffffff",
+    "x": -20,
+    "z": 0,
+    "w": 8,
+    "d": 8,
+    "floors": [
+      {
+        "level": 15,
+        "name": "Anarkis's office",
+        "vacant": false,
+        "info": "Anarkis's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L15-0",
+            "name": "Anarkis",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 15,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L15-1",
+            "name": "Anarkis's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 15,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L15-2",
+            "name": "Hana",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 15,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 14,
+        "name": "Will's office",
+        "vacant": false,
+        "info": "Will's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L14-0",
+            "name": "Will",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 14,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L14-1",
+            "name": "Will's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 14,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L14-2",
+            "name": "Gus",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 14,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 13,
+        "name": "Soco's office",
+        "vacant": false,
+        "info": "Soco's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L13-0",
+            "name": "Soco",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 13,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L13-1",
+            "name": "Soco's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 13,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L13-2",
+            "name": "Faye",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 13,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 12,
+        "name": "Rafael's office",
+        "vacant": false,
+        "info": "Rafael's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L12-0",
+            "name": "Rafael",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L12-1",
+            "name": "Rafael's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L12-2",
+            "name": "Elle",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Jolson's office",
+        "vacant": false,
+        "info": "Jolson's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L11-0",
+            "name": "Jolson",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L11-1",
+            "name": "Jolson's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L11-2",
+            "name": "Dex",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Shaher's office",
+        "vacant": false,
+        "info": "Shaher's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L10-0",
+            "name": "Shaher",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L10-1",
+            "name": "Shaher's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L10-2",
+            "name": "Cruz",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Seyling's office",
+        "vacant": false,
+        "info": "Seyling's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L9-0",
+            "name": "Seyling",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L9-1",
+            "name": "Seyling's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L9-2",
+            "name": "Bea",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Frank's office",
+        "vacant": false,
+        "info": "Frank's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L8-0",
+            "name": "Frank",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L8-1",
+            "name": "Frank's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L8-2",
+            "name": "Zed",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Claudia's office",
+        "vacant": false,
+        "info": "Claudia's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L7-0",
+            "name": "Claudia",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L7-1",
+            "name": "Claudia's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L7-2",
+            "name": "Yara",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Bilal's office",
+        "vacant": false,
+        "info": "Bilal's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L6-0",
+            "name": "Bilal",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L6-1",
+            "name": "Bilal's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L6-2",
+            "name": "Wren",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Abdul's office",
+        "vacant": false,
+        "info": "Abdul's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L5-0",
+            "name": "Abdul",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L5-1",
+            "name": "Abdul's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L5-2",
+            "name": "Vik",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "Luiz's office",
+        "vacant": false,
+        "info": "Luiz's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L4-0",
+            "name": "Luiz",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L4-1",
+            "name": "Luiz's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L4-2",
+            "name": "Uma",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Josiah's office",
+        "vacant": false,
+        "info": "Josiah's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L3-0",
+            "name": "Josiah",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 3,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L3-1",
+            "name": "Josiah's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 3,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L3-2",
+            "name": "Tess",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 3,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 2,
+        "name": "Andre's office",
+        "vacant": false,
+        "info": "Andre's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L2-0",
+            "name": "Andre",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 2,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L2-1",
+            "name": "Andre's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 2,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L2-2",
+            "name": "Rex",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 2,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 1,
+        "name": "Javier's office",
+        "vacant": false,
+        "info": "Javier's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-new-L1-0",
+            "name": "Javier",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-new",
+            "floor": 1,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L1-1",
+            "name": "Javier's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-new",
+            "floor": 1,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-new-L1-2",
+            "name": "Pia",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-new",
+            "floor": 1,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      }
+    ],
+    "brand": "Honda"
+  },
+  {
+    "id": "fast-sales",
+    "name": "Fast Sales Training Center",
+    "short": "Fast Sales",
+    "kind": "training",
+    "color": "#f2efe6",
+    "accent": "#f5b335",
+    "x": 0,
+    "z": 0,
+    "w": 14,
+    "d": 12,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Admin / CEO / Accounting",
+        "vacant": false,
+        "info": "Owner, CEO and the core sales team.",
+        "agents": [
+          {
+            "id": "fast-sales-L12-0",
+            "name": "Elvis",
+            "role": "owner",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "fast-sales",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L12-1",
+            "name": "Max",
+            "role": "CEO",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Follow-up",
+              "Current customers"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L12-2",
+            "name": "Vera",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New leads",
+              "Unsold",
+              "Follow-up"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L12-3",
+            "name": "Nico",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Follow-up",
+              "Unsold",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L12-4",
+            "name": "Luna",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L12-5",
+            "name": "Teo",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L12-6",
+            "name": "Iris",
+            "role": "students",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Current customers",
+              "Sold customers"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L12-7",
+            "name": "Dante",
+            "role": "dealers",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Contract to expire",
+              "New customers",
+              "Current customers"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "How to Become an Auto Sales Associate",
+        "info": "Individual Program – enroll new sales associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fast-sales-L11-0",
+            "name": "Ines",
+            "role": "enrollment",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New leads",
+              "New customers",
+              "Unsold"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L11-1",
+            "name": "Jax",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Follow-up",
+              "Unsold",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L11-2",
+            "name": "Kira",
+            "role": "students",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Current customers",
+              "Sold customers",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "How to Become an Auto F&I Manager",
+        "info": "F&I Manager Program.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fast-sales-L10-0",
+            "name": "Lio",
+            "role": "enrollment",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New leads",
+              "New customers",
+              "Unsold"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L10-1",
+            "name": "Mae",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Follow-up",
+              "Unsold",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L10-2",
+            "name": "Ava",
+            "role": "students",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Current customers",
+              "Sold customers",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "How to Become an Auto Broker",
+        "info": "Auto Broker Program.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fast-sales-L9-0",
+            "name": "Kai",
+            "role": "enrollment",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New leads",
+              "New customers",
+              "Unsold"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L9-1",
+            "name": "Mila",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Follow-up",
+              "Unsold",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L9-2",
+            "name": "Leo",
+            "role": "students",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Current customers",
+              "Sold customers",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "How to Improve Auto Sales Phone Skills",
+        "info": "Phone skills course.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fast-sales-L8-0",
+            "name": "Zara",
+            "role": "enrollment",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New leads",
+              "New customers",
+              "Unsold"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L8-1",
+            "name": "Omar",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Follow-up",
+              "Unsold",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L8-2",
+            "name": "Nora",
+            "role": "students",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Current customers",
+              "Sold customers",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "How to Overcome Auto Sales Objections",
+        "info": "Objection-handling course.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fast-sales-L7-0",
+            "name": "Eli",
+            "role": "enrollment",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New leads",
+              "New customers",
+              "Unsold"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L7-1",
+            "name": "Ruby",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Follow-up",
+              "Unsold",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L7-2",
+            "name": "Finn",
+            "role": "students",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Current customers",
+              "Sold customers",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "The Essential Auto Dealership Guide",
+        "info": "The dealership guide course.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fast-sales-L6-0",
+            "name": "Lena",
+            "role": "enrollment",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New leads",
+              "New customers",
+              "Unsold"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L6-1",
+            "name": "Hugo",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Follow-up",
+              "Unsold",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L6-2",
+            "name": "Maya",
+            "role": "students",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Current customers",
+              "Sold customers",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Dealership Packages",
+        "info": "Training packages sold to dealerships.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fast-sales-L5-0",
+            "name": "Arlo",
+            "role": "dealers",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New customers",
+              "Current customers",
+              "Contract to expire"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L5-1",
+            "name": "Ivy",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New leads",
+              "Unsold",
+              "Follow-up"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L5-2",
+            "name": "Jude",
+            "role": "contracts",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Contract to expire",
+              "Sold customers"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "Amazon Books",
+        "info": "Fast Sales books on Amazon.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fast-sales-L4-0",
+            "name": "Sage",
+            "role": "book sales",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New customers",
+              "Current customers",
+              "Referrals"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L4-1",
+            "name": "Rio",
+            "role": "reviews",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Affiliates",
+        "info": "Affiliate partners who refer students and dealers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fast-sales-L3-0",
+            "name": "Noa",
+            "role": "new affiliates",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "New affiliates"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 3,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fast-sales-L3-1",
+            "name": "Cleo",
+            "role": "affiliate follow-up",
+            "kind": "ai",
+            "taskSet": "fastSales",
+            "categories": [
+              "Affiliates follow-up"
+            ],
+            "buildingId": "fast-sales",
+            "floor": 3,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ]
+  },
+  {
+    "id": "rc-used",
+    "name": "Rick Case Honda · Used Cars Sales Associates",
+    "short": "RC Used Cars",
+    "kind": "associates",
+    "color": "#a8d58a",
+    "accent": "#ffffff",
+    "x": 20,
+    "z": 0,
+    "w": 8,
+    "d": 8,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 11,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 10,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 9,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 8,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 7,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 6,
+        "name": "Clarissa's office",
+        "vacant": false,
+        "info": "Clarissa's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-used-L6-0",
+            "name": "Clarissa",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-used",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L6-1",
+            "name": "Clarissa's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-used",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L6-2",
+            "name": "Pia",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-used",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Wayne's office",
+        "vacant": false,
+        "info": "Wayne's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-used-L5-0",
+            "name": "Wayne",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-used",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L5-1",
+            "name": "Wayne's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-used",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L5-2",
+            "name": "Otis",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-used",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "Reymer's office",
+        "vacant": false,
+        "info": "Reymer's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-used-L4-0",
+            "name": "Reymer",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-used",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L4-1",
+            "name": "Reymer's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-used",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L4-2",
+            "name": "Lux",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-used",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "John's office",
+        "vacant": false,
+        "info": "John's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-used-L3-0",
+            "name": "John",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-used",
+            "floor": 3,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L3-1",
+            "name": "John's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-used",
+            "floor": 3,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L3-2",
+            "name": "Axel",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-used",
+            "floor": 3,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 2,
+        "name": "Jeffrey's office",
+        "vacant": false,
+        "info": "Jeffrey's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-used-L2-0",
+            "name": "Jeffrey",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-used",
+            "floor": 2,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L2-1",
+            "name": "Jeffrey's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-used",
+            "floor": 2,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L2-2",
+            "name": "Juno",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-used",
+            "floor": 2,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 1,
+        "name": "Federico's office",
+        "vacant": false,
+        "info": "Federico's personal sales office with a follow-up AI and a social media AI.",
+        "agents": [
+          {
+            "id": "rc-used-L1-0",
+            "name": "Federico",
+            "role": "associate",
+            "kind": "human",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "rc-used",
+            "floor": 1,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L1-1",
+            "name": "Federico's AI",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Orphans",
+              "Mastermind",
+              "Sold customers",
+              "Customer birthday",
+              "Ownership anniversary",
+              "Referrals",
+              "CSI follow",
+              "Lease end",
+              "Service visits",
+              "Conquest",
+              "Lost / out of the market"
+            ],
+            "buildingId": "rc-used",
+            "floor": 1,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "rc-used-L1-2",
+            "name": "Remy",
+            "role": "social",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "rc-used",
+            "floor": 1,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      }
+    ],
+    "brand": "Honda"
+  },
+  {
+    "id": "rental-2",
+    "name": "Rental Building 2",
+    "short": "Rental 2",
+    "kind": "rental",
+    "color": "#c6b3f0",
+    "accent": "#ffffff",
+    "x": 40,
+    "z": 0,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 11,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 10,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 9,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 8,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 7,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 6,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 5,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 4,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 3,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      }
+    ]
+  },
+  {
+    "id": "volkswagen",
+    "name": "Volkswagen Dealership",
+    "short": "Volkswagen",
+    "kind": "dealership",
+    "color": "#8fb8e8",
+    "accent": "#001e50",
+    "x": -40,
+    "z": 20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Sales Dept.",
+        "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "volkswagen-L12-0",
+            "name": "Rex",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest",
+              "Referrals"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L12-1",
+            "name": "Tess",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Orphans",
+              "Lost / out of the market",
+              "Mastermind"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L12-2",
+            "name": "Uma",
+            "role": "greeter",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals",
+              "Customer birthday"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Internet Sales Dept.",
+        "info": "Web, chat and third-party leads – fastest response wins.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "volkswagen-L11-0",
+            "name": "Vik",
+            "role": "web leads",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L11-1",
+            "name": "Wren",
+            "role": "chat",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L11-2",
+            "name": "Yara",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Lost / out of the market",
+              "Orphans"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Finance Dept.",
+        "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "volkswagen-L10-0",
+            "name": "Zed",
+            "role": "F&I",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Sold customers",
+              "Ownership anniversary"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L10-1",
+            "name": "Bea",
+            "role": "lease end",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Lease end",
+              "Ownership anniversary"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L10-2",
+            "name": "Cruz",
+            "role": "credit",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Sold customers"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Social Media Dept.",
+        "info": "Content, ads and community for the dealership.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "volkswagen-L9-0",
+            "name": "Dex",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L9-1",
+            "name": "Elle",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L9-2",
+            "name": "Faye",
+            "role": "community",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Service Dept.",
+        "info": "Service visits, CSI and birthday / anniversary touches.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "volkswagen-L8-0",
+            "name": "Gus",
+            "role": "service visits",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Customer birthday"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L8-1",
+            "name": "Hana",
+            "role": "CSI",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Ownership anniversary"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L8-2",
+            "name": "Ines",
+            "role": "recalls",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Parts Dept.",
+        "info": "Parts orders and follow-up with service and retail customers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "volkswagen-L7-0",
+            "name": "Jax",
+            "role": "parts orders",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L7-1",
+            "name": "Kira",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Service visits"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Body Shop Dept.",
+        "info": "Estimates, repairs and post-repair CSI.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "volkswagen-L6-0",
+            "name": "Lio",
+            "role": "estimates",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Referrals"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L6-1",
+            "name": "Mae",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Referrals"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Administrative Dept.",
+        "info": "Store manager runs the reports and keeps leads moving.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "volkswagen-L5-0",
+            "name": "Ava",
+            "role": "manager",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Mastermind",
+              "Orphans"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L5-1",
+            "name": "Kai",
+            "role": "scheduling",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Orphans",
+              "Mastermind",
+              "CSI follow"
+            ],
+            "buildingId": "volkswagen",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "HR Dept.",
+        "info": "Recruiting and onboarding new associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "volkswagen-L4-0",
+            "name": "Mila",
+            "role": "recruiting",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "volkswagen",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "volkswagen-L4-1",
+            "name": "Leo",
+            "role": "onboarding",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "volkswagen",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ],
+    "brand": "Volkswagen"
+  },
+  {
+    "id": "alfa-romeo",
+    "name": "Alfa Romeo Dealership",
+    "short": "Alfa Romeo",
+    "kind": "dealership",
+    "color": "#e57373",
+    "accent": "#8f0c19",
+    "x": -20,
+    "z": 20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Sales Dept.",
+        "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "alfa-romeo-L12-0",
+            "name": "Zara",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest",
+              "Referrals"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L12-1",
+            "name": "Omar",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Orphans",
+              "Lost / out of the market",
+              "Mastermind"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L12-2",
+            "name": "Nora",
+            "role": "greeter",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals",
+              "Customer birthday"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Internet Sales Dept.",
+        "info": "Web, chat and third-party leads – fastest response wins.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "alfa-romeo-L11-0",
+            "name": "Eli",
+            "role": "web leads",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L11-1",
+            "name": "Ruby",
+            "role": "chat",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L11-2",
+            "name": "Finn",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Lost / out of the market",
+              "Orphans"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Finance Dept.",
+        "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "alfa-romeo-L10-0",
+            "name": "Lena",
+            "role": "F&I",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Sold customers",
+              "Ownership anniversary"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L10-1",
+            "name": "Hugo",
+            "role": "lease end",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Lease end",
+              "Ownership anniversary"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L10-2",
+            "name": "Maya",
+            "role": "credit",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Sold customers"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Social Media Dept.",
+        "info": "Content, ads and community for the dealership.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "alfa-romeo-L9-0",
+            "name": "Arlo",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L9-1",
+            "name": "Ivy",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L9-2",
+            "name": "Jude",
+            "role": "community",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Service Dept.",
+        "info": "Service visits, CSI and birthday / anniversary touches.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "alfa-romeo-L8-0",
+            "name": "Sage",
+            "role": "service visits",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Customer birthday"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L8-1",
+            "name": "Rio",
+            "role": "CSI",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Ownership anniversary"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L8-2",
+            "name": "Noa",
+            "role": "recalls",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Parts Dept.",
+        "info": "Parts orders and follow-up with service and retail customers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "alfa-romeo-L7-0",
+            "name": "Cleo",
+            "role": "parts orders",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L7-1",
+            "name": "Remy",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Service visits"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Body Shop Dept.",
+        "info": "Estimates, repairs and post-repair CSI.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "alfa-romeo-L6-0",
+            "name": "Juno",
+            "role": "estimates",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Referrals"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L6-1",
+            "name": "Axel",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Referrals"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Administrative Dept.",
+        "info": "Store manager runs the reports and keeps leads moving.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "alfa-romeo-L5-0",
+            "name": "Lux",
+            "role": "manager",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Mastermind",
+              "Orphans"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L5-1",
+            "name": "Otis",
+            "role": "scheduling",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Orphans",
+              "Mastermind",
+              "CSI follow"
+            ],
+            "buildingId": "alfa-romeo",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "HR Dept.",
+        "info": "Recruiting and onboarding new associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "alfa-romeo-L4-0",
+            "name": "Pia",
+            "role": "recruiting",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "alfa-romeo",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "alfa-romeo-L4-1",
+            "name": "Rex",
+            "role": "onboarding",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "alfa-romeo",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ],
+    "brand": "Alfa Romeo"
+  },
+  {
+    "id": "maserati",
+    "name": "Maserati Dealership",
+    "short": "Maserati",
+    "kind": "dealership",
+    "color": "#5c6f91",
+    "accent": "#0c2340",
+    "x": 0,
+    "z": 20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Sales Dept.",
+        "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "maserati-L12-0",
+            "name": "Tess",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest",
+              "Referrals"
+            ],
+            "buildingId": "maserati",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L12-1",
+            "name": "Uma",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Orphans",
+              "Lost / out of the market",
+              "Mastermind"
+            ],
+            "buildingId": "maserati",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L12-2",
+            "name": "Vik",
+            "role": "greeter",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals",
+              "Customer birthday"
+            ],
+            "buildingId": "maserati",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Internet Sales Dept.",
+        "info": "Web, chat and third-party leads – fastest response wins.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "maserati-L11-0",
+            "name": "Wren",
+            "role": "web leads",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest"
+            ],
+            "buildingId": "maserati",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L11-1",
+            "name": "Yara",
+            "role": "chat",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals"
+            ],
+            "buildingId": "maserati",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L11-2",
+            "name": "Zed",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Lost / out of the market",
+              "Orphans"
+            ],
+            "buildingId": "maserati",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Finance Dept.",
+        "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "maserati-L10-0",
+            "name": "Bea",
+            "role": "F&I",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Sold customers",
+              "Ownership anniversary"
+            ],
+            "buildingId": "maserati",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L10-1",
+            "name": "Cruz",
+            "role": "lease end",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Lease end",
+              "Ownership anniversary"
+            ],
+            "buildingId": "maserati",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L10-2",
+            "name": "Dex",
+            "role": "credit",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Sold customers"
+            ],
+            "buildingId": "maserati",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Social Media Dept.",
+        "info": "Content, ads and community for the dealership.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "maserati-L9-0",
+            "name": "Elle",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "maserati",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L9-1",
+            "name": "Faye",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "maserati",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L9-2",
+            "name": "Gus",
+            "role": "community",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "maserati",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Service Dept.",
+        "info": "Service visits, CSI and birthday / anniversary touches.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "maserati-L8-0",
+            "name": "Hana",
+            "role": "service visits",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Customer birthday"
+            ],
+            "buildingId": "maserati",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L8-1",
+            "name": "Ines",
+            "role": "CSI",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Ownership anniversary"
+            ],
+            "buildingId": "maserati",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L8-2",
+            "name": "Jax",
+            "role": "recalls",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "maserati",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Parts Dept.",
+        "info": "Parts orders and follow-up with service and retail customers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "maserati-L7-0",
+            "name": "Kira",
+            "role": "parts orders",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "maserati",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L7-1",
+            "name": "Lio",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Service visits"
+            ],
+            "buildingId": "maserati",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Body Shop Dept.",
+        "info": "Estimates, repairs and post-repair CSI.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "maserati-L6-0",
+            "name": "Mae",
+            "role": "estimates",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Referrals"
+            ],
+            "buildingId": "maserati",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L6-1",
+            "name": "Ava",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Referrals"
+            ],
+            "buildingId": "maserati",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Administrative Dept.",
+        "info": "Store manager runs the reports and keeps leads moving.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "maserati-L5-0",
+            "name": "Kai",
+            "role": "manager",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Mastermind",
+              "Orphans"
+            ],
+            "buildingId": "maserati",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L5-1",
+            "name": "Mila",
+            "role": "scheduling",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Orphans",
+              "Mastermind",
+              "CSI follow"
+            ],
+            "buildingId": "maserati",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "HR Dept.",
+        "info": "Recruiting and onboarding new associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "maserati-L4-0",
+            "name": "Leo",
+            "role": "recruiting",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "maserati",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "maserati-L4-1",
+            "name": "Zara",
+            "role": "onboarding",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "maserati",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ],
+    "brand": "Maserati"
+  },
+  {
+    "id": "fiat",
+    "name": "Fiat Dealership",
+    "short": "Fiat",
+    "kind": "dealership",
+    "color": "#f7a072",
+    "accent": "#a6192e",
+    "x": 20,
+    "z": 20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Sales Dept.",
+        "info": "Showroom sales: follow up on prospects, conquest and referral business.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fiat-L12-0",
+            "name": "Omar",
+            "role": "closer",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest",
+              "Referrals"
+            ],
+            "buildingId": "fiat",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L12-1",
+            "name": "Nora",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Orphans",
+              "Lost / out of the market",
+              "Mastermind"
+            ],
+            "buildingId": "fiat",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L12-2",
+            "name": "Eli",
+            "role": "greeter",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals",
+              "Customer birthday"
+            ],
+            "buildingId": "fiat",
+            "floor": 12,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 11,
+        "name": "Internet Sales Dept.",
+        "info": "Web, chat and third-party leads – fastest response wins.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fiat-L11-0",
+            "name": "Ruby",
+            "role": "web leads",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Unsold prospects",
+              "Conquest"
+            ],
+            "buildingId": "fiat",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L11-1",
+            "name": "Finn",
+            "role": "chat",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "New customers",
+              "Referrals"
+            ],
+            "buildingId": "fiat",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L11-2",
+            "name": "Lena",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Lost / out of the market",
+              "Orphans"
+            ],
+            "buildingId": "fiat",
+            "floor": 11,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 10,
+        "name": "Finance Dept.",
+        "info": "F&I, lease-end and loyalty: keep sold customers in the family.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fiat-L10-0",
+            "name": "Hugo",
+            "role": "F&I",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Sold customers",
+              "Ownership anniversary"
+            ],
+            "buildingId": "fiat",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L10-1",
+            "name": "Maya",
+            "role": "lease end",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Lease end",
+              "Ownership anniversary"
+            ],
+            "buildingId": "fiat",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L10-2",
+            "name": "Arlo",
+            "role": "credit",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Unsold prospects",
+              "Sold customers"
+            ],
+            "buildingId": "fiat",
+            "floor": 10,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 9,
+        "name": "Social Media Dept.",
+        "info": "Content, ads and community for the dealership.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fiat-L9-0",
+            "name": "Ivy",
+            "role": "content",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "fiat",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L9-1",
+            "name": "Jude",
+            "role": "ads",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "fiat",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L9-2",
+            "name": "Sage",
+            "role": "community",
+            "kind": "ai",
+            "taskSet": "social",
+            "categories": [
+              "Content strategy",
+              "Content calendar",
+              "Content creation",
+              "Graphic & video production",
+              "Multi-platform publishing",
+              "Community engagement",
+              "Lead generation",
+              "Trend monitoring",
+              "Competitor analysis",
+              "Performance analytics",
+              "Content optimization",
+              "Weekly reporting"
+            ],
+            "buildingId": "fiat",
+            "floor": 9,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 8,
+        "name": "Service Dept.",
+        "info": "Service visits, CSI and birthday / anniversary touches.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fiat-L8-0",
+            "name": "Rio",
+            "role": "service visits",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Customer birthday"
+            ],
+            "buildingId": "fiat",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L8-1",
+            "name": "Noa",
+            "role": "CSI",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Ownership anniversary"
+            ],
+            "buildingId": "fiat",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L8-2",
+            "name": "Cleo",
+            "role": "recalls",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "fiat",
+            "floor": 8,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 7,
+        "name": "Parts Dept.",
+        "info": "Parts orders and follow-up with service and retail customers.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fiat-L7-0",
+            "name": "Remy",
+            "role": "parts orders",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Sold customers"
+            ],
+            "buildingId": "fiat",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L7-1",
+            "name": "Juno",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Service visits"
+            ],
+            "buildingId": "fiat",
+            "floor": 7,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 6,
+        "name": "Body Shop Dept.",
+        "info": "Estimates, repairs and post-repair CSI.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fiat-L6-0",
+            "name": "Axel",
+            "role": "estimates",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Service visits",
+              "Referrals"
+            ],
+            "buildingId": "fiat",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L6-1",
+            "name": "Lux",
+            "role": "follow-up",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "CSI follow",
+              "Referrals"
+            ],
+            "buildingId": "fiat",
+            "floor": 6,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 5,
+        "name": "Administrative Dept.",
+        "info": "Store manager runs the reports and keeps leads moving.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fiat-L5-0",
+            "name": "Otis",
+            "role": "manager",
+            "kind": "ai",
+            "taskSet": "manager",
+            "categories": [
+              "Mastermind",
+              "Orphans"
+            ],
+            "buildingId": "fiat",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L5-1",
+            "name": "Pia",
+            "role": "scheduling",
+            "kind": "ai",
+            "taskSet": "dealership",
+            "categories": [
+              "Orphans",
+              "Mastermind",
+              "CSI follow"
+            ],
+            "buildingId": "fiat",
+            "floor": 5,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 4,
+        "name": "HR Dept.",
+        "info": "Recruiting and onboarding new associates.",
+        "vacant": false,
+        "agents": [
+          {
+            "id": "fiat-L4-0",
+            "name": "Rex",
+            "role": "recruiting",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "fiat",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          },
+          {
+            "id": "fiat-L4-1",
+            "name": "Tess",
+            "role": "onboarding",
+            "kind": "ai",
+            "taskSet": "none",
+            "categories": [],
+            "buildingId": "fiat",
+            "floor": 4,
+            "status": "idle",
+            "done": 0
+          }
+        ]
+      },
+      {
+        "level": 3,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Empty Floor",
+        "vacant": true,
+        "agents": []
+      }
+    ],
+    "brand": "Fiat"
+  },
+  {
+    "id": "rental-3",
+    "name": "Rental Building 3",
+    "short": "Rental 3",
+    "kind": "rental",
+    "color": "#80cbc4",
+    "accent": "#ffffff",
+    "x": 40,
+    "z": 20,
+    "w": 9,
+    "d": 9,
+    "floors": [
+      {
+        "level": 12,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 11,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 10,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 9,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 8,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 7,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 6,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 5,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 4,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 3,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 2,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      },
+      {
+        "level": 1,
+        "name": "Floor for Rent",
+        "vacant": true,
+        "rent": 199,
+        "agents": []
+      }
+    ]
+  }
+]

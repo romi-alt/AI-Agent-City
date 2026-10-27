@@ -3,17 +3,23 @@ import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
 import type { Sim } from '../src/core/sim';
 import type { Building, ContentItem, Lead, Message } from '../src/core/types';
+import type { OutboundGate } from './outbound';
 
 /**
  * Optional AI drafting with Claude. When enabled (Settings → AI drafts, plus credentials in the environment),
  * agents' social posts and messages to real leads are written by Claude instead of the built-in templates.
  * Everything Claude writes still goes through the same approval step before it is published or sent.
+ * Every request first asks the outbound gate (outbound.ts): in demo mode, or with the kill switch off,
+ * Claude is never called and the template draft stays.
  */
 const MODEL = process.env.CLAUDE_MODEL ?? 'claude-opus-5-5';
 const PER_HOUR = Number(process.env.AI_DRAFTS_PER_HOUR ?? 60);
 
 const configured = !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN || process.env.ANTHROPIC_PROFILE);
 const client = configured ? new Anthropic() : undefined;
+
+/** Sends one drafting request. Injected so tests can count calls with a fake. */
+export type DraftCall = <T>(schema: z.ZodType<T>, prompt: string) => Promise<T | undefined>;
 
 const PostDraft = z.object({
   hook: z.string().describe('Scroll-stopping first line'),
@@ -34,7 +40,9 @@ export function brainStatus() {
   return { configured, model: MODEL, perHour: PER_HOUR, usedLastHour: used.filter(t => t > Date.now() - 3600_000).length };
 }
 
-function schedule(job: () => Promise<void>) {
+function schedule(gate: OutboundGate, job: () => Promise<void>) {
+  // Ask the gate before spending budget: a refused draft never reaches the queue.
+  if (!gate.check('llm').ok) return;
   used = used.filter(t => t > Date.now() - 3600_000);
   if (used.length >= PER_HOUR || queue.length > 20) return; // over budget: the template draft stays
   used.push(Date.now());
@@ -61,7 +69,7 @@ const SYSTEM = `You write for Fast Sales, a car-sales training company, and for 
 Write like a friendly, professional local salesperson: short, specific, no hype words, no made-up prices, discounts or inventory claims.
 Never promise anything the business hasn't stated. Plain text only.`;
 
-async function ask<T>(schema: z.ZodType<T>, prompt: string): Promise<T | undefined> {
+const ask: DraftCall = async (schema, prompt) => {
   if (!client) return;
   const res = await client.beta.messages.parse({
     model: MODEL,
@@ -74,14 +82,14 @@ async function ask<T>(schema: z.ZodType<T>, prompt: string): Promise<T | undefin
   });
   if (res.stop_reason === 'refusal') return;
   return res.parsed_output ?? undefined;
-}
+};
 
-export function attachBrain(sim: Sim, flush: () => void) {
-  if (!client) return;
+export function attachBrain(sim: Sim, flush: () => void, gate: OutboundGate, call: DraftCall | undefined = client ? ask : undefined) {
+  if (!call) return;
   sim.hooks.draftPost = (c: ContentItem, b: Building) => {
     if (!sim.settings.aiDrafts) return;
-    schedule(async () => {
-      const out = await ask(PostDraft, `Write a ${c.platform} ${c.format} post for ${b.name}.
+    schedule(gate, async () => {
+      const out = await call(PostDraft, `Write a ${c.platform} ${c.format} post for ${b.name}.
 Topic: ${c.topic}${c.campaign ? '\nThis is a lead-generation campaign post: drive people to request info or enroll.' : ''}
 Business type: ${b.kind === 'training' ? 'auto-sales training center (courses, books, dealership packages, affiliates)' : `${b.brand ?? ''} car dealership`}.`);
       if (out) { sim.updateContent(c.id, { ...out, by: 'claude' }); flush(); }
@@ -89,9 +97,9 @@ Business type: ${b.kind === 'training' ? 'auto-sales training center (courses, b
   };
   sim.hooks.draftMessage = (m: Message, lead: Lead, b: Building) => {
     if (!sim.settings.aiDrafts) return;
-    schedule(async () => {
+    schedule(gate, async () => {
       const recent = lead.history.slice(0, 5).map(h => `- ${h.text}`).join('\n');
-      const out = await ask(MessageDraft, `Draft a ${m.channel === 'phone' ? 'short call script' : m.channel} from ${m.agentName} at ${b.name} to ${lead.name}.
+      const out = await call(MessageDraft, `Draft a ${m.channel === 'phone' ? 'short call script' : m.channel} from ${m.agentName} at ${b.name} to ${lead.name}.
 Task type: ${m.category}. Lead interest: ${lead.interest}. Lead source: ${lead.source}. Pipeline stage: ${lead.stage}.
 Recent history:\n${recent || '- none'}
 ${m.channel === 'text' ? 'Keep it under 300 characters.' : ''}

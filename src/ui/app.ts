@@ -436,7 +436,10 @@ export class App {
       case 'lead-send':
         await api.action({ type: 'leadSend', id: this.leadId, channel: f.channel, subject: f.subject || undefined, body: f.body });
         form.reset();
-        return toast(f.channel === 'phone' ? 'Call logged' : 'Sent');
+        // Only claim a send when one can really happen: Live mode, the server's outbound switch on and a real lead.
+        if (f.channel === 'phone') return toast('Call logged');
+        return toast(this.sim.settings.deliveryMode === 'live' && this.integrations.outbound.switchOn && this.sim.leads.get(this.leadId!)?.real
+          ? 'Handed to your email / text provider' : 'Saved to the lead. Nothing was sent: outbound is off or the lead is simulated.');
       case 'post':
         await api.action({ type: 'contentUpdate', id: f.id, fields: { topic: f.topic, hook: f.hook, caption: f.caption, cta: f.cta, hashtags: f.hashtags.split(/[\s,]+/).filter(Boolean), time: f.time, platform: f.platform } });
         this.closeModal();

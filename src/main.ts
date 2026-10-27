@@ -24,5 +24,8 @@ async function boot() {
 }
 
 boot().catch(e => {
-  root.innerHTML = `<div class="auth"><div class="auth-card"><h1>Can't reach the office</h1><p class="auth-sub">${String(e?.message ?? e)}</p><button class="btn-gold" onclick="location.reload()">Try again</button></div></div>`;
+  root.innerHTML = `<div class="auth"><div class="auth-card"><h1>Can't reach the office</h1><p class="auth-sub"></p><button class="btn-gold" id="retry">Try again</button></div></div>`;
+  // The error text can echo server or user input, so it is set as text, not HTML.
+  root.querySelector('.auth-sub')!.textContent = String(e?.message ?? e);
+  root.querySelector('#retry')!.addEventListener('click', () => location.reload());
 });

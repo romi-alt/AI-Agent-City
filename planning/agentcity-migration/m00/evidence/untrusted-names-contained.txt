@@ -1,0 +1,16 @@
+# Untrusted-name rendering check against the M00 containment build (branch migration/m00-baseline, working tree)
+rent 200 add person 200
+{
+  "enteredRentedFloor": true,
+  "pwnedRental": false,
+  "pwnedPerson": false,
+  "injectedImg": 0,
+  "injectedBold": false,
+  "deskLabels": [
+    "<img\tsrc=x\tonerror=window.__pwnedRental=1>Evil AI",
+    "<img\tsrc=x\tonerror=window.__pwnedRental=1>Evil Social"
+  ],
+  "personText": true
+}
+RESULT: SAFE - names rendered as literal text, nothing executed
+exit=0

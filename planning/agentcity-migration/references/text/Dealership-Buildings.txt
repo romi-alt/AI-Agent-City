@@ -1,0 +1,304 @@
+AUDI DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorAUDI DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorHYUNDAI DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorHYUNDAI DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorGENESIS DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorGENESIS DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorACURA DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorACURA DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorVOLKSWAGEN DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorVOLKSWAGEN DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorHONDA DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorHONDA DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty Floor
+
+AUDI DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+AUDI DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+HYUNDAI DEALERSHIP BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+HYUNDAI DEALERSHIP BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+GENESIS DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+GENESIS DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+ACURA DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+ACURA DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+VOLKSWAGEN DEALERSHIP BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+VOLKSWAGEN DEALERSHIP BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+HONDA DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+HONDA DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+
+
+
+
+ALFA ROMEO DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorALFA ROMEO DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorMASERATTI DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorMASERATTI DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorFIAT DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty FloorFIAT DEALERSHIP BUILDINGL12: Sales Dept.L11: Internet Sales Dept.L10: Finance Dept.L9: Social Media Dept.L8: Service Dept.L7: Parts Dept.L6: Body Shop Dept.L5: Administrative Dept.L4: HR Dept.L3: Empty FloorL2: Empty FloorL1: Empty Floor
+
+ALFA ROMEO DEALERSHIP BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+ALFA ROMEO DEALERSHIP BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+MASERATTI DEALERSHIP BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+MASERATTI DEALERSHIP BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+FIAT DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor
+
+
+FIAT DEALERSHIP 
+BUILDING
+
+L12: Sales Dept.
+L11: Internet Sales Dept.
+L10: Finance Dept.
+L9: Social Media Dept.
+L8: Service Dept.
+L7: Parts Dept.
+L6: Body Shop Dept.
+L5: Administrative Dept.
+L4: HR Dept.
+L3: Empty Floor
+L2: Empty Floor
+L1: Empty Floor

@@ -1,0 +1,19 @@
+# Backup/restore rehearsal on a throwaway data folder (runbook: take a backup, verify it can be restored, damaged file)
+# Server started as 'node --import tsx server/index.ts' so SIGTERM reaches the server process itself.
+enroll/start HTTP 200
+stopped with SIGTERM; files:
+-rw------- 557 auth.json
+-rw-r--r-- 304504 state.json
+backup fingerprints:
+c7293fb55fc95ae0… state.json
+87d468f0de693803… auth.json
+state.json: OK
+auth.json: OK
+Sales City server on http://localhost:3099
+No users yet. Create the first admin here (one-time link):
+restored server, /api/auth/me:
+{"state":"anon","setupNeeded":true}
+# Damaged file: corrupt the restored copy and start again
+exit=2
+[state] Refusing to start: the saved city is not valid JSON (Expected double-quoted property name in JSON at position 13 (line 1 column 14)).
+state.json hash before=913e500bc5cae19f after=913e500bc5cae19f

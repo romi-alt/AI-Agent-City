@@ -1,0 +1,13 @@
+# Untrusted-name rendering check against the pre-migration checkpoint (tag pre-migration-baseline = 7bad3b8)
+rent 200 add person 200
+{
+  "enteredRentedFloor": true,
+  "pwnedRental": true,
+  "pwnedPerson": false,
+  "injectedImg": 2,
+  "injectedBold": false,
+  "deskLabels": [],
+  "personText": true
+}
+RESULT: UNSAFE - markup in names was parsed and/or executed
+exit=1

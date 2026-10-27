@@ -1,0 +1,112 @@
+# Characterization harness against the M00 working tree (isolated copy; server/scope.ts stripped as for 7bad3b8). PASS = the legacy defect still exists.
+Prepared isolated runtime at $SCRATCH/char/after-rt; original code unchanged. Type stripping is not typechecking.
+(node:14256) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: C01 exact current seed is 15 buildings / 183 floors / 281 AI / 22 human desks
+ok 1 - C01 exact current seed is 15 buildings / 183 floors / 281 AI / 22 human desks
+  ---
+  duration_ms: 1.384195
+  type: 'test'
+  ...
+# Subtest: C02 manual real-dealer Sold transition fabricates revenue and re-entry counts again
+ok 2 - C02 manual real-dealer Sold transition fabricates revenue and re-entry counts again
+  ---
+  duration_ms: 3.001534
+  type: 'test'
+  ...
+# Subtest: C03 real-training enrollment manufactures a fixed 997 revenue value
+ok 3 - C03 real-training enrollment manufactures a fixed 997 revenue value
+  ---
+  duration_ms: 1.224627
+  type: 'test'
+  ...
+# Subtest: C04 scheduled content can change without reapproval; published content also mutable through domain API
+ok 4 - C04 scheduled content can change without reapproval; published content also mutable through domain API
+  ---
+  duration_ms: 1.657073
+  type: 'test'
+  ...
+# Subtest: C05 late AI draft can change recorded message during an approved in-flight send
+ok 5 - C05 late AI draft can change recorded message during an approved in-flight send
+  ---
+  duration_ms: 1.648001
+  type: 'test'
+  ...
+# Subtest: C06 contact reservation is lost on snapshot restore while agent task survives
+ok 6 - C06 contact reservation is lost on snapshot restore while agent task survives
+  ---
+  duration_ms: 3.330114
+  type: 'test'
+  ...
+# Subtest: C07 unanswered real approval can release contact and create a second pending draft
+ok 7 - C07 unanswered real approval can release contact and create a second pending draft
+  ---
+  duration_ms: 1.565318
+  type: 'test'
+  ...
+# Subtest: C08 retention deletes a pending real message still referenced by approval
+ok 8 - C08 retention deletes a pending real message still referenced by approval
+  ---
+  duration_ms: 2.163638
+  type: 'test'
+  ...
+# Subtest: C09 manual real email invokes outbound without a separate approval queue entry
+ok 9 - C09 manual real email invokes outbound without a separate approval queue entry
+  ---
+  duration_ms: 1.044014
+  type: 'test'
+  ...
+# Subtest: C10 rental-floor agent can select another rented floor contact
+ok 10 - C10 rental-floor agent can select another rented floor contact
+  ---
+  duration_ms: 1.768132
+  type: 'test'
+  ...
+# Subtest: C11 failed send still counts outreach and moves real lead to Contacted
+ok 11 - C11 failed send still counts outreach and moves real lead to Contacted
+  ---
+  duration_ms: 1.103524
+  type: 'test'
+  ...
+# Subtest: C12 social publishing fabricates metrics without any platform adapter
+ok 12 - C12 social publishing fabricates metrics without any platform adapter
+  ---
+  duration_ms: 1.264045
+  type: 'test'
+  ...
+# Subtest: C13 changing a contact address does not invalidate a queued message recipient
+ok 13 - C13 changing a contact address does not invalidate a queued message recipient
+  ---
+  duration_ms: 0.924386
+  type: 'test'
+  ...
+# Subtest: C14 renting a floor raises displayed revenue without any payment
+ok 14 - C14 renting a floor raises displayed revenue without any payment
+  ---
+  duration_ms: 1.703636
+  type: 'test'
+  ...
+# Subtest: C15 clock advances 60 business minutes in 30 ticks independent of wall time
+ok 15 - C15 clock advances 60 business minutes in 30 ticks independent of wall time
+  ---
+  duration_ms: 1.066593
+  type: 'test'
+  ...
+# Subtest: C16 password reset removes sessions but retains remembered-device token
+ok 16 - C16 password reset removes sessions but retains remembered-device token
+  ---
+  duration_ms: 74.359077
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 108.144208
+exit=0

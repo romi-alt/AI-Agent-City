@@ -1,0 +1,112 @@
+# Characterization harness against branch HEAD 7bad3b8 (isolated copy). Adaptation: server/scope.ts stripped too, because auth.ts imports it since the isolation work; the pack's prepare script predates that file.
+Prepared isolated runtime at /tmp/claude-0/-home-user/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/char/head-rt; original code unchanged. Type stripping is not typechecking.
+(node:10869) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: C01 exact current seed is 15 buildings / 183 floors / 281 AI / 22 human desks
+ok 1 - C01 exact current seed is 15 buildings / 183 floors / 281 AI / 22 human desks
+  ---
+  duration_ms: 1.449047
+  type: 'test'
+  ...
+# Subtest: C02 manual real-dealer Sold transition fabricates revenue and re-entry counts again
+ok 2 - C02 manual real-dealer Sold transition fabricates revenue and re-entry counts again
+  ---
+  duration_ms: 2.829332
+  type: 'test'
+  ...
+# Subtest: C03 real-training enrollment manufactures a fixed 997 revenue value
+ok 3 - C03 real-training enrollment manufactures a fixed 997 revenue value
+  ---
+  duration_ms: 1.082694
+  type: 'test'
+  ...
+# Subtest: C04 scheduled content can change without reapproval; published content also mutable through domain API
+ok 4 - C04 scheduled content can change without reapproval; published content also mutable through domain API
+  ---
+  duration_ms: 1.593782
+  type: 'test'
+  ...
+# Subtest: C05 late AI draft can change recorded message during an approved in-flight send
+ok 5 - C05 late AI draft can change recorded message during an approved in-flight send
+  ---
+  duration_ms: 1.592556
+  type: 'test'
+  ...
+# Subtest: C06 contact reservation is lost on snapshot restore while agent task survives
+ok 6 - C06 contact reservation is lost on snapshot restore while agent task survives
+  ---
+  duration_ms: 2.255836
+  type: 'test'
+  ...
+# Subtest: C07 unanswered real approval can release contact and create a second pending draft
+ok 7 - C07 unanswered real approval can release contact and create a second pending draft
+  ---
+  duration_ms: 1.047563
+  type: 'test'
+  ...
+# Subtest: C08 retention deletes a pending real message still referenced by approval
+ok 8 - C08 retention deletes a pending real message still referenced by approval
+  ---
+  duration_ms: 1.483649
+  type: 'test'
+  ...
+# Subtest: C09 manual real email invokes outbound without a separate approval queue entry
+ok 9 - C09 manual real email invokes outbound without a separate approval queue entry
+  ---
+  duration_ms: 1.060136
+  type: 'test'
+  ...
+# Subtest: C10 rental-floor agent can select another rented floor contact
+ok 10 - C10 rental-floor agent can select another rented floor contact
+  ---
+  duration_ms: 1.635595
+  type: 'test'
+  ...
+# Subtest: C11 failed send still counts outreach and moves real lead to Contacted
+ok 11 - C11 failed send still counts outreach and moves real lead to Contacted
+  ---
+  duration_ms: 1.018401
+  type: 'test'
+  ...
+# Subtest: C12 social publishing fabricates metrics without any platform adapter
+ok 12 - C12 social publishing fabricates metrics without any platform adapter
+  ---
+  duration_ms: 0.942095
+  type: 'test'
+  ...
+# Subtest: C13 changing a contact address does not invalidate a queued message recipient
+ok 13 - C13 changing a contact address does not invalidate a queued message recipient
+  ---
+  duration_ms: 1.232582
+  type: 'test'
+  ...
+# Subtest: C14 renting a floor raises displayed revenue without any payment
+ok 14 - C14 renting a floor raises displayed revenue without any payment
+  ---
+  duration_ms: 1.013183
+  type: 'test'
+  ...
+# Subtest: C15 clock advances 60 business minutes in 30 ticks independent of wall time
+ok 15 - C15 clock advances 60 business minutes in 30 ticks independent of wall time
+  ---
+  duration_ms: 1.841883
+  type: 'test'
+  ...
+# Subtest: C16 password reset removes sessions but retains remembered-device token
+ok 16 - C16 password reset removes sessions but retains remembered-device token
+  ---
+  duration_ms: 79.259752
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 110.605738
+exit=0

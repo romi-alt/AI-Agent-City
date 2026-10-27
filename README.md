@@ -84,12 +84,20 @@ How it is enforced (`server/scope.ts`):
 - Sign-in is password **plus** a 6-digit authenticator code (or a one-time recovery code). Optional "remember this
   device for 30 days". Five wrong attempts lock the account for five minutes. Every attempt is in the sign-in log.
 - Forgot your password? "Forgot password?" on the sign-in page resets it with your authenticator code **and** one
-  recovery code (both are needed), then signs you out everywhere. No recovery codes left? The agency owner resets you from
+  recovery code (both are needed), then ends your sessions. (Known gap: a "remembered device" stays remembered;
+  see planning/agentcity-migration/AUDIT.md F12.) No recovery codes left? The agency owner resets you from
   Settings → People, which sends a fresh setup link.
   🔒 locks the screen until the code is entered again.
+- **Outbound kill switch.** No email, text or Claude request leaves the server unless it was started with
+  `OUTBOUND_ENABLED=true` **and** Settings → Delivery is **Live**. It is off by default and stays off during the
+  migration. The demo ("simulate") mode never calls a provider. Code: `server/outbound.ts`.
 - The city starts with **simulated** leads (example.com addresses, 555 numbers). They are never contacted.
-- **Real** leads are the ones you add. Agents draft messages to them, but nothing is sent until someone approves it,
-  and only when Settings → Delivery is **Live** and email (SMTP) / texting (Twilio) are configured.
+- **Real** leads are the ones you add. Agents' messages to them wait for someone to approve them. A person pressing
+  **Send** on a lead, and the automatic morning/daily/weekly reports, do **not** go through the approval queue; they
+  are held back only by the kill switch and Delivery mode. Phone "calls" are never placed; people make and log them.
+- If `data/state.json` or `data/auth.json` can't be read or is from an unsupported version, the server refuses to
+  start and leaves the file untouched (see planning/agentcity-migration/m00/BACKUP-AND-RECOVERY.md).
+- The public `/proposal` page shows no live office data.
 - Posts are only scheduled after approval. Sensitive comments are escalated to a person.
 - With `ANTHROPIC_API_KEY` set and **AI drafts** on, Claude writes posts and messages to real leads (capped per
   hour); the same approvals apply.

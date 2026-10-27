@@ -1,0 +1,7 @@
+# f96819d: 36 identical, 0 changed, 0 only in repo, 0 only in ZIP
+# 1dab901: 23 identical, 13 changed, 2 only in repo, 0 only in ZIP
+changed: README.md, package.json, server/auth.ts, server/index.ts, src/api.ts, src/core/sim.ts, src/core/types.ts, src/main.ts, src/scene/cityView.ts, src/style.css, src/ui/app.ts, src/ui/views.ts, tsconfig.server.json
+onlyInRepo: server/scope.ts, test/scope.test.ts
+# 7bad3b8: 20 identical, 16 changed, 3 only in repo, 0 only in ZIP
+changed: README.md, package.json, server/auth.ts, server/index.ts, src/api.ts, src/core/sim.ts, src/core/types.ts, src/main.ts, src/scene/cityView.ts, src/scene/engine.ts, src/scene/meshes.ts, src/scene/textures.ts, src/style.css, src/ui/app.ts, src/ui/views.ts, tsconfig.server.json
+onlyInRepo: server/scope.ts, src/scene/street.ts, test/scope.test.ts

@@ -205,7 +205,8 @@ export interface Report {
   subject: string;
   body: string;
   to: string[];
-  status: 'simulated' | 'sent' | 'failed' | 'pending';
+  /** `skipped`: refused by the server's outbound gate (kill switch off), so nothing was sent. */
+  status: 'simulated' | 'sent' | 'failed' | 'pending' | 'skipped';
   error?: string;
 }
 

@@ -218,7 +218,7 @@ export class OfficeView implements View {
 
   private vacantSign() {
     const text = this.f.rent ? `Floor for rent · $${this.f.rent}/mo` : 'Available floor';
-    const sign = label(`<b>L${this.f.level} · ${text}</b><span>No agents yet</span>`, 'vacant-sign');
+    const sign = label([{ tag: 'b', text: `L${this.f.level} · ${text}` }, { tag: 'span', text: 'No agents yet' }], 'vacant-sign');
     sign.position.set(0, 2, 2);
     this.root.add(sign);
   }
@@ -283,8 +283,9 @@ export class OfficeView implements View {
     ring.position.set(-0.2, 0.07, 1.0);
     g.add(ring);
 
+    // Agent names on rented floors come from the business name a person typed, so they are set as text.
     const tag = label(
-      `<i class="dot"></i><b>${a.name}</b><span class="role">${a.role}</span>`,
+      [{ tag: 'i', cls: 'dot' }, { tag: 'b', text: a.name }, { tag: 'span', cls: 'role', text: a.role }],
       `agent-tag kind-${a.kind}`, () => this.onAgent(a.id));
     tag.position.set(-0.2, 2.6, 0.4);
     g.add(tag);

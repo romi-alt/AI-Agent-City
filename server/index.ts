@@ -1,16 +1,19 @@
 import cookieParser from 'cookie-parser';
 import express, { type NextFunction, type Request, type Response } from 'express';
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, renameSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import QRCode from 'qrcode';
 import { z } from 'zod';
-import { Sim, TRAINING_STAGES } from '../src/core/sim';
+import { buildCity } from '../src/core/data/buildings';
+import { Sim } from '../src/core/sim';
 import type { Patch } from '../src/core/types';
 import { AuthStore, DEVICE_MS, type Session, type User } from './auth';
 import { attachBrain, brainStatus } from './brain';
-import { attachDelivery, providers, sendTestEmail } from './delivery';
+import { createDelivery, envTransport } from './delivery';
+import { createOutboundGate } from './outbound';
 import { authorize, ROLES, scopeFor, scopePatch, scopeSnapshot, type Scope } from './scope';
+import { loadState } from './state';
 import { otpauthUrl } from './totp';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -20,24 +23,23 @@ const SECURE_COOKIES = process.env.COOKIE_SECURE === 'true';
 mkdirSync(DATA, { recursive: true });
 
 // ── state ─────────────────────────────────────────────────────
-const auth = new AuthStore(join(DATA, 'auth.json'));
-const sim = loadSim();
-const streams = new Map<Response, Session>();
-
-function loadSim() {
-  if (existsSync(STATE_FILE)) {
-    try {
-      const snap = JSON.parse(readFileSync(STATE_FILE, 'utf8'));
-      if (snap.version === Sim.VERSION) return new Sim(snap);
-      console.warn('[state] saved city is from an older version – starting a fresh city');
-    } catch (e) { console.warn('[state] could not read saved city, starting fresh:', e); }
-  }
-  return Sim.create();
+// Both files fail closed: if either can't be read, the server stops before anything could write over it.
+function refuseToStart(file: string, reason: string): never {
+  console.error(`\n[state] Refusing to start: ${reason}.\n[state] ${file} has been left exactly as it is. Restore a good copy (see planning/agentcity-migration/m00/BACKUP-AND-RECOVERY.md) or move it aside to start a new city.\n`);
+  process.exit(2);
 }
+const AUTH_FILE = join(DATA, 'auth.json');
+let auth: AuthStore;
+try { auth = new AuthStore(AUTH_FILE); } catch (e) { refuseToStart(AUTH_FILE, `the account file could not be read (${(e as Error).message})`); }
+const loaded = loadState(STATE_FILE);
+if (loaded.kind === 'refused') refuseToStart(STATE_FILE, loaded.reason);
+const sim = loaded.kind === 'loaded' ? loaded.sim : Sim.create();
+const streams = new Map<Response, Session>();
 
 function saveSim() {
   const tmp = `${STATE_FILE}.tmp`;
-  writeFileSync(tmp, JSON.stringify(sim.snapshot()));
+  // Owner-only, like auth.json: the city holds real leads' contact details (M00).
+  writeFileSync(tmp, JSON.stringify(sim.snapshot()), { mode: 0o600 });
   renameSync(tmp, STATE_FILE);
 }
 
@@ -69,8 +71,14 @@ function dropStreams(userId: string) {
   for (const [res, sess] of streams) if (sess.userId === userId) { res.end(); streams.delete(res); }
 }
 
-attachDelivery(sim, flush);
-attachBrain(sim, flush);
+// Every provider call (email, texts, AI drafts) goes through this gate. Off unless OUTBOUND_ENABLED=true.
+const gate = createOutboundGate({ mode: () => sim.settings.deliveryMode });
+const delivery = createDelivery(envTransport(), gate);
+delivery.attach(sim, flush);
+attachBrain(sim, flush, gate);
+console.log(gate.switchOn
+  ? '[outbound] OUTBOUND_ENABLED=true: providers can be called when Settings → Delivery is "live".'
+  : '[outbound] Kill switch is OFF (OUTBOUND_ENABLED is not "true"): no email, text or AI provider will be called.');
 
 // Signed-in people with a desk show as working while on duty.
 for (const u of auth.users) if (u.agentId) { sim.linkUser(u.agentId, u.id); sim.setDuty(u.agentId, u.onDuty); }
@@ -248,20 +256,16 @@ app.post('/api/auth/enroll/finish', limit(20, 10 * 60_000), (req, res) => {
 });
 
 // ── the city ──────────────────────────────────────────────────
-// ── public proposal page: live counts only (no names, contact details or revenue) ──
+// ── public proposal page ──────────────────────────────────────
+// Containment (M00): unauthenticated, so it reads only the fixed building catalog — never the running
+// office, which holds people's names, real contacts and client activity. Computed once at start.
+const CATALOG = (() => {
+  const bs = buildCity();
+  const desks = bs.flatMap(b => b.floors.flatMap(f => f.agents));
+  return { buildings: bs.length, floors: bs.reduce((n, b) => n + b.floors.length, 0), aiDesks: desks.filter(a => a.kind === 'ai').length, humanDesks: desks.filter(a => a.kind === 'human').length };
+})();
 app.get('/api/public/pulse', (_req, res) => {
-  const k = sim.kpis('fast-sales'), city = sim.kpis();
-  const stages = TRAINING_STAGES.map(stage => ({ stage, n: 0 }));
-  for (const l of sim.leads.values()) if (l.buildingId === 'fast-sales') { const st = stages.find(x => x.stage === l.stage); if (st) st.n++; }
-  const team = sim.agents('fast-sales').filter(a => a.floor === 12 && a.kind === 'ai').map(a => ({
-    name: a.name, role: a.role, status: a.status,
-    doing: a.current ? `${a.current.category}${a.current.channel ? ` · ${a.current.channel}` : ''}` : '',
-  }));
-  res.set('Cache-Control', 'no-store').json({
-    now: sim.now,
-    fastSales: { leadsToday: k.leadsToday, booked24h: k.booked24h, closedMonth: k.closedMonth, agentsWorking: k.agentsWorking, agentsTotal: k.agentsTotal, stages, team },
-    city: { buildings: sim.buildings.length, agentsWorking: city.agentsWorking, agentsTotal: city.agentsTotal, tasksToday: city.tasksToday },
-  });
+  res.set('Cache-Control', 'no-store').json({ catalog: CATALOG, live: false });
 });
 
 app.get('/api/state', signedIn, (req: Authed, res) => {
@@ -282,7 +286,7 @@ app.get('/api/stream', signedIn, (req: Authed, res) => {
 });
 
 function integrations() {
-  return { ...providers(), claude: brainStatus() };
+  return { ...delivery.providers(), claude: brainStatus(), outbound: { switchOn: gate.switchOn, blocked: gate.blocked } };
 }
 /** The agency sees everyone; a client sees only its own people. */
 function people(scope: Scope) {
@@ -442,7 +446,7 @@ app.delete('/api/admin/users/:id', signedIn, owner, (req: Authed, res) => {
 app.get('/api/admin/signins', signedIn, owner, (_req, res) => res.json(auth.signins.slice(0, 200)));
 app.get('/api/admin/integrations', signedIn, owner, (_req, res) => res.json(integrations()));
 app.post('/api/admin/test-email', signedIn, owner, async (req, res) => {
-  try { await sendTestEmail(String(req.body?.to ?? '')); res.json({ ok: true }); } catch (e) { res.status(400).json({ error: (e as Error).message }); }
+  try { await delivery.sendTest(String(req.body?.to ?? '')); res.json({ ok: true }); } catch (e) { res.status(400).json({ error: (e as Error).message }); }
 });
 
 // ── the app itself (production build) ─────────────────────────

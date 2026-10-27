@@ -10,7 +10,12 @@ export interface Me {
   user?: { id: string; username: string; name: string; role: Role; clientId?: string; clientName?: string; onDuty: boolean; agentId?: string; recoveryLeft: number };
 }
 export interface Person { id: string; name: string; onDuty: boolean; agentId?: string }
-export interface Integrations { email: boolean; sms: boolean; from: string; claude: { configured: boolean; model: string; perHour: number; usedLastHour: number } }
+export interface Integrations {
+  email: boolean; sms: boolean; from: string;
+  claude: { configured: boolean; model: string; perHour: number; usedLastHour: number };
+  /** The server's outbound kill switch (OUTBOUND_ENABLED). Off means no provider is ever called. */
+  outbound: { switchOn: boolean; blocked: { email: number; sms: number; llm: number } };
+}
 export interface StatePayload { snapshot: Snapshot; me: Me; integrations: Integrations; people: Person[] }
 
 export class ApiError extends Error {

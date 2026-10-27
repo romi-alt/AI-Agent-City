@@ -1,0 +1,24 @@
+✔ C01 exact current seed is 15 buildings / 183 floors / 281 AI / 22 human desks (3.197379ms)
+✔ C02 manual real-dealer Sold transition fabricates revenue and re-entry counts again (3.223328ms)
+✔ C03 real-training enrollment manufactures a fixed 997 revenue value (3.080667ms)
+✔ C04 scheduled content can change without reapproval; published content also mutable through domain API (1.313333ms)
+✔ C05 late AI draft can change recorded message during an approved in-flight send (2.273093ms)
+✔ C06 contact reservation is lost on snapshot restore while agent task survives (2.881212ms)
+✔ C07 unanswered real approval can release contact and create a second pending draft (1.586747ms)
+✔ C08 retention deletes a pending real message still referenced by approval (2.400375ms)
+✔ C09 manual real email invokes outbound without a separate approval queue entry (1.296268ms)
+✔ C10 rental-floor agent can select another rented floor contact (3.480496ms)
+✔ C11 failed send still counts outreach and moves real lead to Contacted (1.586485ms)
+✔ C12 social publishing fabricates metrics without any platform adapter (1.37705ms)
+✔ C13 changing a contact address does not invalidate a queued message recipient (1.431011ms)
+✔ C14 renting a floor raises displayed revenue without any payment (0.925898ms)
+✔ C15 clock advances 60 business minutes in 30 ticks independent of wall time (1.736683ms)
+✔ C16 password reset removes sessions but retains remembered-device token (103.294925ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 143.502238

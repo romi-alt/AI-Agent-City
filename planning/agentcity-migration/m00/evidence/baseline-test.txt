@@ -1,0 +1,177 @@
+$ npm test
+
+> sales-city@0.0.0 test
+> node --import tsx --test test/*.test.ts
+
+TAP version 13
+# Subtest: the city has data to filter
+    # Subtest: has activity in several buildings
+    ok 1 - has activity in several buildings
+      ---
+      duration_ms: 0.530285
+      type: 'test'
+      ...
+    1..1
+ok 1 - the city has data to filter
+  ---
+  duration_ms: 1.126976
+  type: 'suite'
+  ...
+# Subtest: opening snapshot
+    # Subtest: gives the agency everything
+    ok 1 - gives the agency everything
+      ---
+      duration_ms: 0.598639
+      type: 'test'
+      ...
+    # Subtest: gives a client only its own buildings and their records
+    ok 2 - gives a client only its own buildings and their records
+      ---
+      duration_ms: 1.553414
+      type: 'test'
+      ...
+    # Subtest: shows other buildings only as unnamed shapes
+    ok 3 - shows other buildings only as unnamed shapes
+      ---
+      duration_ms: 0.467375
+      type: 'test'
+      ...
+    # Subtest: leaks no other building, agent or lead names
+    ok 4 - leaks no other building, agent or lead names
+      ---
+      duration_ms: 77.856886
+      type: 'test'
+      ...
+    # Subtest: covers a client with several buildings
+    ok 5 - covers a client with several buildings
+      ---
+      duration_ms: 1.923869
+      type: 'test'
+      ...
+    # Subtest: gives a client with no buildings nothing
+    ok 6 - gives a client with no buildings nothing
+      ---
+      duration_ms: 0.240797
+      type: 'test'
+      ...
+    # Subtest: keeps the browser mirror working on a filtered snapshot
+    ok 7 - keeps the browser mirror working on a filtered snapshot
+      ---
+      duration_ms: 0.459847
+      type: 'test'
+      ...
+    1..7
+ok 2 - opening snapshot
+  ---
+  duration_ms: 83.442572
+  type: 'suite'
+  ...
+# Subtest: live updates
+    # Subtest: only ever carry the client's own building
+    ok 1 - only ever carry the client's own building
+      ---
+      duration_ms: 32.901447
+      type: 'test'
+      ...
+    # Subtest: pass through unchanged for the agency
+    ok 2 - pass through unchanged for the agency
+      ---
+      duration_ms: 0.226935
+      type: 'test'
+      ...
+    1..2
+ok 3 - live updates
+  ---
+  duration_ms: 33.227673
+  type: 'suite'
+  ...
+# Subtest: actions
+    # Subtest: lets the agency do anything
+    ok 1 - lets the agency do anything
+      ---
+      duration_ms: 0.245865
+      type: 'test'
+      ...
+    # Subtest: lets a client admin work its own building
+    ok 2 - lets a client admin work its own building
+      ---
+      duration_ms: 0.082478
+      type: 'test'
+      ...
+    # Subtest: answers "not found" for anything in another client's building
+    ok 3 - answers "not found" for anything in another client's building
+      ---
+      duration_ms: 0.182534
+      type: 'test'
+      ...
+    # Subtest: keeps renting floors with the agency
+    ok 4 - keeps renting floors with the agency
+      ---
+      duration_ms: 0.051484
+      type: 'test'
+      ...
+    # Subtest: lets a client viewer look but not change anything
+    ok 5 - lets a client viewer look but not change anything
+      ---
+      duration_ms: 0.049215
+      type: 'test'
+      ...
+    1..5
+ok 4 - actions
+  ---
+  duration_ms: 0.705456
+  type: 'suite'
+  ...
+# Subtest: accounts and clients
+    # Subtest: upgrades old admin and member accounts to agency owner and staff
+    ok 1 - upgrades old admin and member accounts to agency owner and staff
+      ---
+      duration_ms: 0.589543
+      type: 'test'
+      ...
+    # Subtest: never lets two clients own the same building
+    ok 2 - never lets two clients own the same building
+      ---
+      duration_ms: 0.880325
+      type: 'test'
+      ...
+    # Subtest: requires a client for client roles and drops it for agency roles
+    ok 3 - requires a client for client roles and drops it for agency roles
+      ---
+      duration_ms: 1.282218
+      type: 'test'
+      ...
+    # Subtest: signs someone out when their access changes
+    ok 4 - signs someone out when their access changes
+      ---
+      duration_ms: 1.34893
+      type: 'test'
+      ...
+    # Subtest: signs a client's people out when its buildings change, but not when only the name changes
+    ok 5 - signs a client's people out when its buildings change, but not when only the name changes
+      ---
+      duration_ms: 1.851994
+      type: 'test'
+      ...
+    # Subtest: keeps at least one agency owner, and won't delete a client that still has people
+    ok 6 - keeps at least one agency owner, and won't delete a client that still has people
+      ---
+      duration_ms: 1.179123
+      type: 'test'
+      ...
+    1..6
+ok 5 - accounts and clients
+  ---
+  duration_ms: 7.318562
+  type: 'suite'
+  ...
+1..5
+# tests 21
+# suites 5
+# pass 21
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1230.074004
+exit=0

@@ -1,0 +1,270 @@
+$ npm test
+
+> sales-city@0.0.0 test
+> node --import tsx --test --test-concurrency=1 test/*.test.ts
+
+TAP version 13
+# Subtest: outbound kill switch
+    # Subtest: stops every provider call while the switch is off, even in Live mode
+    ok 1 - stops every provider call while the switch is off, even in Live mode
+      ---
+      duration_ms: 428.475179
+      type: 'test'
+      ...
+    # Subtest: treats any value other than "true" as off
+    ok 2 - treats any value other than "true" as off
+      ---
+      duration_ms: 1743.720397
+      type: 'test'
+      ...
+    # Subtest: never calls a provider in demo (simulate) mode, even with the switch on
+    ok 3 - never calls a provider in demo (simulate) mode, even with the switch on
+      ---
+      duration_ms: 339.179911
+      type: 'test'
+      ...
+    # Subtest: never "sends" a phone call: there is no phone provider
+    ok 4 - never "sends" a phone call: there is no phone provider
+      ---
+      duration_ms: 1.157773
+      type: 'test'
+      ...
+    # Subtest: does reach the provider when the switch is on and Delivery is Live (so the tests above are not vacuous)
+    ok 5 - does reach the provider when the switch is on and Delivery is Live (so the tests above are not vacuous)
+      ---
+      duration_ms: 332.112034
+      type: 'test'
+      ...
+    1..5
+ok 1 - outbound kill switch
+  ---
+  duration_ms: 2845.783397
+  type: 'suite'
+  ...
+# Subtest: saved city fails closed
+    # Subtest: refuses to start on malformed JSON and leaves state.json byte-identical
+    ok 1 - refuses to start on malformed JSON and leaves state.json byte-identical
+      ---
+      duration_ms: 414.438563
+      type: 'test'
+      ...
+    # Subtest: refuses to start on unsupported version and leaves state.json byte-identical
+    ok 2 - refuses to start on unsupported version and leaves state.json byte-identical
+      ---
+      duration_ms: 427.93007
+      type: 'test'
+      ...
+    # Subtest: refuses to start on missing lists and leaves state.json byte-identical
+    ok 3 - refuses to start on missing lists and leaves state.json byte-identical
+      ---
+      duration_ms: 479.193518
+      type: 'test'
+      ...
+    # Subtest: refuses to start on malformed account file and leaves auth.json byte-identical
+    ok 4 - refuses to start on malformed account file and leaves auth.json byte-identical
+      ---
+      duration_ms: 448.339365
+      type: 'test'
+      ...
+    # Subtest: saves the city readable by its owner only
+    ok 5 - saves the city readable by its owner only
+      ---
+      duration_ms: 517.065016
+      type: 'test'
+      ...
+    # Subtest: loadState never writes, and loads a good file
+    ok 6 - loadState never writes, and loads a good file
+      ---
+      duration_ms: 4.643306
+      type: 'test'
+      ...
+    1..6
+ok 2 - saved city fails closed
+  ---
+  duration_ms: 2292.265321
+  type: 'suite'
+  ...
+# Subtest: public pulse
+    # Subtest: returns only the fixed catalog: no names, work, status or activity counts
+    ok 1 - returns only the fixed catalog: no names, work, status or activity counts
+      ---
+      duration_ms: 526.866318
+      type: 'test'
+      ...
+    1..1
+ok 3 - public pulse
+  ---
+  duration_ms: 527.072823
+  type: 'suite'
+  ...
+# Subtest: the city has data to filter
+    # Subtest: has activity in several buildings
+    ok 1 - has activity in several buildings
+      ---
+      duration_ms: 0.504778
+      type: 'test'
+      ...
+    1..1
+ok 4 - the city has data to filter
+  ---
+  duration_ms: 1.122578
+  type: 'suite'
+  ...
+# Subtest: opening snapshot
+    # Subtest: gives the agency everything
+    ok 1 - gives the agency everything
+      ---
+      duration_ms: 0.602523
+      type: 'test'
+      ...
+    # Subtest: gives a client only its own buildings and their records
+    ok 2 - gives a client only its own buildings and their records
+      ---
+      duration_ms: 1.515758
+      type: 'test'
+      ...
+    # Subtest: shows other buildings only as unnamed shapes
+    ok 3 - shows other buildings only as unnamed shapes
+      ---
+      duration_ms: 0.458714
+      type: 'test'
+      ...
+    # Subtest: leaks no other building, agent or lead names
+    ok 4 - leaks no other building, agent or lead names
+      ---
+      duration_ms: 70.713151
+      type: 'test'
+      ...
+    # Subtest: covers a client with several buildings
+    ok 5 - covers a client with several buildings
+      ---
+      duration_ms: 2.152923
+      type: 'test'
+      ...
+    # Subtest: gives a client with no buildings nothing
+    ok 6 - gives a client with no buildings nothing
+      ---
+      duration_ms: 0.316993
+      type: 'test'
+      ...
+    # Subtest: keeps the browser mirror working on a filtered snapshot
+    ok 7 - keeps the browser mirror working on a filtered snapshot
+      ---
+      duration_ms: 0.578368
+      type: 'test'
+      ...
+    1..7
+ok 5 - opening snapshot
+  ---
+  duration_ms: 76.730551
+  type: 'suite'
+  ...
+# Subtest: live updates
+    # Subtest: only ever carry the client's own building
+    ok 1 - only ever carry the client's own building
+      ---
+      duration_ms: 33.720876
+      type: 'test'
+      ...
+    # Subtest: pass through unchanged for the agency
+    ok 2 - pass through unchanged for the agency
+      ---
+      duration_ms: 0.277622
+      type: 'test'
+      ...
+    1..2
+ok 6 - live updates
+  ---
+  duration_ms: 34.116311
+  type: 'suite'
+  ...
+# Subtest: actions
+    # Subtest: lets the agency do anything
+    ok 1 - lets the agency do anything
+      ---
+      duration_ms: 0.310292
+      type: 'test'
+      ...
+    # Subtest: lets a client admin work its own building
+    ok 2 - lets a client admin work its own building
+      ---
+      duration_ms: 0.092681
+      type: 'test'
+      ...
+    # Subtest: answers "not found" for anything in another client's building
+    ok 3 - answers "not found" for anything in another client's building
+      ---
+      duration_ms: 0.161392
+      type: 'test'
+      ...
+    # Subtest: keeps renting floors with the agency
+    ok 4 - keeps renting floors with the agency
+      ---
+      duration_ms: 0.046641
+      type: 'test'
+      ...
+    # Subtest: lets a client viewer look but not change anything
+    ok 5 - lets a client viewer look but not change anything
+      ---
+      duration_ms: 0.049463
+      type: 'test'
+      ...
+    1..5
+ok 7 - actions
+  ---
+  duration_ms: 0.749556
+  type: 'suite'
+  ...
+# Subtest: accounts and clients
+    # Subtest: upgrades old admin and member accounts to agency owner and staff
+    ok 1 - upgrades old admin and member accounts to agency owner and staff
+      ---
+      duration_ms: 0.430348
+      type: 'test'
+      ...
+    # Subtest: never lets two clients own the same building
+    ok 2 - never lets two clients own the same building
+      ---
+      duration_ms: 0.80805
+      type: 'test'
+      ...
+    # Subtest: requires a client for client roles and drops it for agency roles
+    ok 3 - requires a client for client roles and drops it for agency roles
+      ---
+      duration_ms: 1.555888
+      type: 'test'
+      ...
+    # Subtest: signs someone out when their access changes
+    ok 4 - signs someone out when their access changes
+      ---
+      duration_ms: 1.992831
+      type: 'test'
+      ...
+    # Subtest: signs a client's people out when its buildings change, but not when only the name changes
+    ok 5 - signs a client's people out when its buildings change, but not when only the name changes
+      ---
+      duration_ms: 1.383143
+      type: 'test'
+      ...
+    # Subtest: keeps at least one agency owner, and won't delete a client that still has people
+    ok 6 - keeps at least one agency owner, and won't delete a client that still has people
+      ---
+      duration_ms: 0.779192
+      type: 'test'
+      ...
+    1..6
+ok 8 - accounts and clients
+  ---
+  duration_ms: 7.134668
+  type: 'suite'
+  ...
+1..8
+# tests 33
+# suites 8
+# pass 33
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 7292.702583
+exit=0

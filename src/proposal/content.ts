@@ -29,7 +29,7 @@ export const P = {
     ),
     cta: t('Enter Sales City →', 'Entrar a Sales City →'),
     cta2: t('See the investment', 'Ver la inversión'),
-    gauge: t('agents working right now', 'agentes trabajando ahora'),
+    gauge: t('AI agent desks in the city', 'puestos de agentes de IA en la ciudad'),
     stats: [
       { v: t('{agents} agents', '{agents} agentes'), l: t('on every floor of the city', 'en cada piso de la ciudad') },
       { v: t('$1,200', '$1,200'), l: t('one-time setup', 'setup único') },
@@ -135,8 +135,8 @@ export const P = {
       doing: t('What your team is doing', 'Lo que hace tu equipo'),
       idle: t('Between tasks', 'Entre tareas'),
       waiting: t('Waiting for your OK', 'Esperando tu OK'),
-      offline: t('Live numbers appear when the Sales City server is running.', 'Los números en vivo aparecen cuando el servidor de Sales City está encendido.'),
-      note: t('Live from the Sales City simulation · sample data until your GHL is connected', 'En vivo desde la simulación de Sales City · datos de ejemplo hasta conectar tu GHL'),
+      offline: t('Live numbers are shown only inside your signed-in office. They are never published here.', 'Los números en vivo solo se muestran dentro de tu oficina, con tu sesión iniciada. Nunca se publican aquí.'),
+      note: t('Sample layout · your live dashboard stays private', 'Diseño de ejemplo · tu panel en vivo es privado'),
       stages: {
         'New lead': t('New lead', 'Lead nuevo'), 'Contacted': t('Contacted', 'Contactado'), 'Call booked': t('Call booked', 'Llamada agendada'),
         'Training started': t('Training started', 'Inició el curso'), 'Active student': t('Active student', 'Alumno activo'), 'Completed / placed': t('Completed / placed', 'Graduado / colocado'),

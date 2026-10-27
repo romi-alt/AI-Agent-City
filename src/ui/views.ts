@@ -239,7 +239,7 @@ function approval(app: App, p: Approval) {
   if (p.kind === 'message' || p.kind === 'call') {
     const m = app.sim.messages.get(p.refId ?? '');
     if (m) body = `<small class="muted">${p.kind === 'call' ? 'Script' : `To ${esc(m.to)}${m.subject ? ` · ${esc(m.subject)}` : ''}`}${m.by === 'claude' ? ' · drafted by Claude' : ''}</small><textarea rows="5">${esc(m.body)}</textarea>`;
-    yes = p.kind === 'call' ? 'Mark called' : app.sim.settings.deliveryMode === 'live' ? 'Approve & send' : 'Approve (simulated)';
+    yes = p.kind === 'call' ? 'Mark called' : sendsForReal(app) ? 'Approve & send' : 'Approve (nothing is sent)';
     no = 'Skip';
   } else if (p.kind === 'post') {
     const c = app.sim.content.get(p.refId ?? '');
@@ -414,7 +414,9 @@ function outbox(app: App) {
   const msgs = [...app.sim.messages.values()].reverse().filter(m => f === 'all' || (f === 'real' ? m.real : f === 'pending' ? m.status === 'pending' : m.channel === f)).slice(0, 150);
   const reports = [...app.sim.reports.values()].reverse();
   const mode = app.sim.settings.deliveryMode;
-  return `<p class="banner ${mode}">${mode === 'live' ? 'Live mode: approved messages to <b>real</b> leads and reports to recipients are sent through your email / text providers.' : 'Simulate mode: nothing leaves the building. Switch to live in Settings once email / texting is configured.'}</p>
+  return `<p class="banner ${sendsForReal(app) ? 'live' : ''}">${!app.integrations.outbound.switchOn
+    ? 'Outbound is switched off on this server: nothing leaves the building, whatever the delivery mode. The server must be started with OUTBOUND_ENABLED=true to send.'
+    : mode === 'live' ? 'Live mode: approved messages to <b>real</b> leads and reports to recipients are sent through your email / text providers.' : 'Simulate mode: nothing leaves the building. Switch to live in Settings once email / texting is configured.'}</p>
     <div class="dash-cols"><section><h4>Messages <span><select data-change="outbox">${[['all', 'All'], ['real', 'Real leads'], ['pending', 'Pending'], ['email', 'Email'], ['text', 'Text'], ['phone', 'Calls']].map(([v, l]) => `<option value="${v}" ${v === f ? 'selected' : ''}>${l}</option>`).join('')}</select></span></h4>
       <table class="tbl"><thead><tr><th>Time</th><th>From</th><th>To</th><th>Message</th><th>Status</th></tr></thead><tbody>
       ${msgs.map(m => `<tr class="click" data-act="message:${m.id}"><td>${clock(m.t)}</td><td>${esc(m.agentName)}<br><small>${esc(app.sim.building(m.buildingId).short)}</small></td><td>${m.channel} · ${esc(m.to)}</td><td><b>${esc(m.subject ?? m.category ?? '')}</b><br><small>${esc(m.body.slice(0, 90))}</small></td><td><span class="tag ms-${m.status}">${m.status}</span></td></tr>`).join('') || '<tr><td colspan="5" class="muted">No messages yet.</td></tr>'}
@@ -436,6 +438,11 @@ function bigScreen(app: App) {
   return `<div class="tv"><div class="tv-h"><div><b>${esc(b?.name ?? app.sim.settings.companyName)}</b><small>${app.sim.dayLabel(app.sim.today)}</small></div><div class="tv-clock">${clock(app.sim.now)}</div><button class="box" data-act="overlay:">✕</button></div>
     <div class="kpis tvk">${kpiTiles(app, b)}</div>
     <div class="tv-cols"><section>${pipelineBars(app, b)}</section><section><h4>Live <span>${k.agentsWorking}/${k.agentsTotal} agents working · ${k.needsYou} need you</span></h4>${feedList(app, b, 12)}</section></div></div>`;
+}
+
+/** True only when an approved message would really be handed to a provider: Live mode AND the server switch on. */
+function sendsForReal(app: App) {
+  return app.sim.settings.deliveryMode === 'live' && app.integrations.outbound.switchOn;
 }
 
 // ── settings ────────────────────────────────────────────────────
@@ -467,6 +474,7 @@ function admin(app: App) {
       <button class="btn-gold" type="submit">Save settings</button>
     </form></section>
     <section><h4>Integrations</h4><ul class="tasks">
+      <li><div><b>Outbound kill switch</b><small>${i.outbound.switchOn ? 'On (OUTBOUND_ENABLED=true): providers are called when Delivery is Live' : `Off: no email, text or AI provider is called${i.outbound.blocked.email + i.outbound.blocked.sms + i.outbound.blocked.llm ? ` · ${i.outbound.blocked.email + i.outbound.blocked.sms + i.outbound.blocked.llm} calls held back since start` : ''}`}</small></div><em class="${i.outbound.switchOn ? 'okc' : ''}">${i.outbound.switchOn ? '●' : '○'}</em></li>
       <li><div><b>Email (SMTP)</b><small>${i.email ? `Configured${i.from ? ` · from ${esc(i.from)}` : ''}` : 'Not configured – set SMTP_URL and MAIL_FROM on the server'}</small></div><em class="${i.email ? 'okc' : ''}">${i.email ? '●' : '○'}</em></li>
       <li><div><b>Text messages (Twilio)</b><small>${i.sms ? 'Configured' : 'Not configured – set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM'}</small></div><em class="${i.sms ? 'okc' : ''}">${i.sms ? '●' : '○'}</em></li>
       <li><div><b>Claude drafting</b><small>${i.claude.configured ? `${esc(i.claude.model)} · ${i.claude.usedLastHour}/${i.claude.perHour} drafts this hour` : 'Not configured – set ANTHROPIC_API_KEY'}</small></div><em class="${i.claude.configured ? 'okc' : ''}">${i.claude.configured ? '●' : '○'}</em></li>
@@ -514,7 +522,7 @@ export function leadDrawer(app: App, l: Lead) {
     <form data-form="lead-send" class="form">
       <div class="row"><select name="channel"><option value="email" ${l.email ? '' : 'disabled'}>Email</option><option value="text" ${l.phone ? '' : 'disabled'}>Text</option><option value="phone" ${l.phone ? '' : 'disabled'}>Log a call</option></select><input name="subject" placeholder="Subject (email)"></div>
       <textarea name="body" rows="4" placeholder="${l.email || l.phone ? 'Write your message or call notes…' : 'Add an email or phone number first'}" required></textarea>
-      <button class="btn-gold sm" type="submit" ${l.email || l.phone ? '' : 'disabled'}>${l.real && app.sim.settings.deliveryMode === 'live' ? 'Send' : 'Send (simulated)'}</button>
+      <button class="btn-gold sm" type="submit" ${l.email || l.phone ? '' : 'disabled'}>${l.real && sendsForReal(app) ? 'Send' : 'Send (nothing is sent)'}</button>
     </form>
     <h4>Notes</h4>
     <form data-form="lead-note" class="row"><input name="text" placeholder="Add a note…" required><button class="btn-line sm" type="submit">Add</button></form>

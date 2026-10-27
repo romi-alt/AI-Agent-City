@@ -219,7 +219,7 @@ export class CityView implements View {
 
     const icon = b.kind === 'training' ? '🎓' : b.kind === 'rental' ? '🏢' : b.kind === 'associates' ? '👥' : '🚗';
     const sign = label(
-      `<span class="badge" style="display:none"></span><b>${icon} ${b.short}</b><span class="sub"></span>`,
+      [{ tag: 'span', cls: 'badge', hidden: true }, { tag: 'b', text: `${icon} ${b.short}` }, { tag: 'span', cls: 'sub' }],
       `bsign kind-${b.kind}`, () => this.onSelect(b.id));
     sign.position.set(0, centre ? h + 18 : h + 3, 0);
     sign.element.style.setProperty('--b', b.accent === '#ffffff' ? b.color : b.accent);

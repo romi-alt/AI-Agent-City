@@ -1,0 +1,186 @@
+{
+  "archive": "sales-city.zip",
+  "sha256": "b7d054c2a1bab73ea6d68d9bfb88f11bad46d799da45c199eb96fb4a69c4775b",
+  "files": [
+    {
+      "path": ".env.example",
+      "bytes": 855,
+      "sha256": "a6041d1f56f97e7c35930d09567157a56890cbef1d83e1b63d2970255d457fda"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 48,
+      "sha256": "0bdff97a278426788f3845aaf087323e08879a8cb1fa233173f410dcb8546954"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5273,
+      "sha256": "c31e77aac47181d89cd3d277a3dd0d722cb0c3a6ce7d6621a3972095f550be3f"
+    },
+    {
+      "path": "SPEC.md",
+      "bytes": 3762,
+      "sha256": "76a9bb00bcd613d87f4af8273776f3b7b7ce68d237fa2907aa1f7c7926dc95c4"
+    },
+    {
+      "path": "index.html",
+      "bytes": 524,
+      "sha256": "9ad12236f9be2141b466f7e094aaafa56e3667ce61ca4c7f9f28666d842b960e"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 115371,
+      "sha256": "86f41f91a0e3240155a1e5982a30d78fc86cbdcd41489e1f29a8f0994fd5b285"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1025,
+      "sha256": "a92e28ef016f568225a00515e573d8badce828894bb53d2532567b3324e61e1d"
+    },
+    {
+      "path": "proposal.html",
+      "bytes": 879,
+      "sha256": "83ae9a2569881d80abc72ee740182136be1215d4206326dacfecc9abe8f2c957"
+    },
+    {
+      "path": "server/auth.ts",
+      "bytes": 12703,
+      "sha256": "de1cebbbb5763edc47f287d41ded64270816c056fcda0ce13bafa11a9d0bdad8"
+    },
+    {
+      "path": "server/brain.ts",
+      "bytes": 4839,
+      "sha256": "8728a93d89800448078d822859b49fe491050447df92b3192eb507fc2c97d44c"
+    },
+    {
+      "path": "server/delivery.ts",
+      "bytes": 2825,
+      "sha256": "1343e8236fd81469dd0c4cacbda4e82b47b78fa7c3a4e210c3a48ff208bc3257"
+    },
+    {
+      "path": "server/index.ts",
+      "bytes": 20165,
+      "sha256": "8ab8e42f90d1844078e265beab15ab6f3aba3a5cc1cc98ccec319a0549fe8178"
+    },
+    {
+      "path": "server/totp.ts",
+      "bytes": 2273,
+      "sha256": "96d41e6f33adabc421ab54b413a0fe7eba46aab98eb0aae16574f04cae6594e2"
+    },
+    {
+      "path": "src/api.ts",
+      "bytes": 2543,
+      "sha256": "72c6fb59e61b3ac9ab98c8379831f81359d083d0f3cf33410182799695f6309b"
+    },
+    {
+      "path": "src/core/data/buildings.ts",
+      "bytes": 11469,
+      "sha256": "08b85111627c82eeb3a03e9eb141ad98612e0e408b3daa154d72c179c4011ab8"
+    },
+    {
+      "path": "src/core/data/tasks.ts",
+      "bytes": 2414,
+      "sha256": "1cb1409374a2be5fc4f60aafe80978d82b9d1ddc07eb6b8d7f42003ef1b676a8"
+    },
+    {
+      "path": "src/core/data/templates.ts",
+      "bytes": 14002,
+      "sha256": "addc7310fc792d2a48acfccd79606a675dd198605a5ddaf43ecd2345b5c0dd01"
+    },
+    {
+      "path": "src/core/sim.ts",
+      "bytes": 56035,
+      "sha256": "3f80364e1d0a0c30e7c0c8d096559529ffa6ca0a782ff65ef2f4d999b7fa08db"
+    },
+    {
+      "path": "src/core/types.ts",
+      "bytes": 6668,
+      "sha256": "74c9ccb8d4f45815305d6d96b4c61493173e0717d0bdd45c13a7ed6062ce92ef"
+    },
+    {
+      "path": "src/main.ts",
+      "bytes": 980,
+      "sha256": "4d2eda7af693bae0981baa6fcd5d5a5493d4a2bdd82fb39776e44623dcff4100"
+    },
+    {
+      "path": "src/proposal/content.ts",
+      "bytes": 21698,
+      "sha256": "d37276180ba4c8d9c6ac8348bbe300e948ec0d03ed8ff6ce2321fa7375cd8fe8"
+    },
+    {
+      "path": "src/proposal/main.ts",
+      "bytes": 13843,
+      "sha256": "504c549c270ad2620ccc1e9f7d98b76bea4dff5253e86d0d64b1daf8b8d77fe5"
+    },
+    {
+      "path": "src/proposal/proposal.css",
+      "bytes": 15591,
+      "sha256": "fd6820fb3c7eb321d2c4828ccf68f56add666c3286035b86178a30597bab1765"
+    },
+    {
+      "path": "src/scene/cityView.ts",
+      "bytes": 13278,
+      "sha256": "a4b26a388577adfb13f1651e837d3de32888fbc67985fee966bd3b80207aa270"
+    },
+    {
+      "path": "src/scene/engine.ts",
+      "bytes": 5732,
+      "sha256": "4eeba7d9b5d6153dc51dab45f8cd11064ec2223bfda07aa77cb44c7b74f4a195"
+    },
+    {
+      "path": "src/scene/meshes.ts",
+      "bytes": 2923,
+      "sha256": "1153753d8bb4be377385464ae34660c030a320c736bf08ca6826e626f8588e1d"
+    },
+    {
+      "path": "src/scene/officeView.ts",
+      "bytes": 16338,
+      "sha256": "559a2e532728166d338f7eddaca1cffd636c438c9b84eda45ea222a3a9d2939a"
+    },
+    {
+      "path": "src/scene/textures.ts",
+      "bytes": 2124,
+      "sha256": "a28c58e9d51591cbcb93293f481b15cb0ff19d989c957efdd8a805383547e1e9"
+    },
+    {
+      "path": "src/style.css",
+      "bytes": 38171,
+      "sha256": "bec086c40b29a6308211ba2bdadd5f304d4ade40eed733733483c2b25dfdbf26"
+    },
+    {
+      "path": "src/ui/app.ts",
+      "bytes": 22136,
+      "sha256": "9d782f815fac387b565b6f590cccaf238d030fb10b9ed2e4abfd8e44b9af7d4b"
+    },
+    {
+      "path": "src/ui/login.ts",
+      "bytes": 26150,
+      "sha256": "534c0db9d1a11f335afb1e170efdac2cfdd434763c5b6eccdbb445fb2d4185e9"
+    },
+    {
+      "path": "src/ui/util.ts",
+      "bytes": 1478,
+      "sha256": "e1083007bfe73aa5ada7f2bc210b2ab75cd6196b9abb9acca82e94d05cf1030e"
+    },
+    {
+      "path": "src/ui/views.ts",
+      "bytes": 50480,
+      "sha256": "7d12f592b1ecfe9cf9888fe806bed523b8060b7de62c61bbe6f6417c17d6a1cb"
+    },
+    {
+      "path": "tsconfig.json",
+      "bytes": 560,
+      "sha256": "132c62cab1e0f7b7cdd6ab4c4ffe9e96dc959f41b7197607d18253a8a9402bd1"
+    },
+    {
+      "path": "tsconfig.server.json",
+      "bytes": 388,
+      "sha256": "5053a274dcc26ed8d8b8baa509547f49f3a0b040795e2a6f35352eedec24467f"
+    },
+    {
+      "path": "vite.config.ts",
+      "bytes": 743,
+      "sha256": "ffe6f662a78de24b60720d2a66e355f32ed94e76c88f43e42f9784800ddd0299"
+    }
+  ]
+}

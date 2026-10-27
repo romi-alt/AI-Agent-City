@@ -1,0 +1,6 @@
+$ npm run typecheck
+
+> sales-city@0.0.0 typecheck
+> tsc -p tsconfig.json && tsc -p tsconfig.server.json
+
+exit=0

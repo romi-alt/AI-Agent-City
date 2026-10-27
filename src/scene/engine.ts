@@ -14,10 +14,19 @@ export interface View {
   setNight?(night: boolean): void;
 }
 
-export function label(html: string, className: string, onClick?: () => void) {
+/** One piece of a 3D label. Text is always set as text, never parsed as HTML (names can come from users). */
+export interface LabelPart { tag: 'b' | 'span' | 'i'; text?: string; cls?: string; hidden?: boolean }
+
+export function label(parts: LabelPart[], className: string, onClick?: () => void) {
   const el = document.createElement('div');
   el.className = className;
-  el.innerHTML = html;
+  for (const p of parts) {
+    const child = document.createElement(p.tag);
+    if (p.cls) child.className = p.cls;
+    if (p.text !== undefined) child.textContent = p.text;
+    if (p.hidden) child.style.display = 'none';
+    el.append(child);
+  }
   if (onClick) {
     el.style.pointerEvents = 'auto';
     el.addEventListener('pointerdown', e => e.stopPropagation());

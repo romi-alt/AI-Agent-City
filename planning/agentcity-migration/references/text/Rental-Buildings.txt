@@ -1,0 +1,102 @@
+RENTALBUILDING 3L12: Floor for Rent - $199/mo.L11: Floor for Rent - $199/mo.L10: Floor for Rent - $199/mo.L9: Floor for Rent - $199/mo.L8: Floor for Rent - $199/mo.L7: Floor for Rent - $199/mo.L6: Floor for Rent - $199/mo.L5: Floor for Rent - $199/mo.L4: Floor for Rent - $199/mo.L3: Floor for Rent - $199/mo.L2: Floor for Rent - $199/mo.L1: Floor for Rent - $199/mo.RENTALBUILDING 3L12: Floor for Rent - $199/mo.L11: Floor for Rent - $199/mo.L10: Floor for Rent - $199/mo.L9: Floor for Rent - $199/mo.L8: Floor for Rent - $199/mo.L7: Floor for Rent - $199/mo.L6: Floor for Rent - $199/mo.L5: Floor for Rent - $199/mo.L4: Floor for Rent - $199/mo.L3: Floor for Rent - $199/mo.L2: Floor for Rent - $199/mo.L1: Floor for Rent - $199/mo.RENTALBUILDING 2L12: Floor for Rent - $199/mo.L11: Floor for Rent - $199/mo.L10: Floor for Rent - $199/mo.L9: Floor for Rent - $199/mo.L8: Floor for Rent - $199/mo.L7: Floor for Rent - $199/mo.L6: Floor for Rent - $199/mo.L5: Floor for Rent - $199/mo.L4: Floor for Rent - $199/mo.L3: Floor for Rent - $199/mo.L2: Floor for Rent - $199/mo.L1: Floor for Rent - $199/mo.RENTALBUILDING 2L12: Floor for Rent - $199/mo.L11: Floor for Rent - $199/mo.L10: Floor for Rent - $199/mo.L9: Floor for Rent - $199/mo.L8: Floor for Rent - $199/mo.L7: Floor for Rent - $199/mo.L6: Floor for Rent - $199/mo.L5: Floor for Rent - $199/mo.L4: Floor for Rent - $199/mo.L3: Floor for Rent - $199/mo.L2: Floor for Rent - $199/mo.L1: Floor for Rent - $199/mo.RENTALBUILDING 1L12: Floor for Rent - $199/mo.L11: Floor for Rent - $199/mo.L10: Floor for Rent - $199/mo.L9: Floor for Rent - $199/mo.L8: Floor for Rent - $199/mo.L7: Floor for Rent - $199/mo.L6: Floor for Rent - $199/mo.L5: Floor for Rent - $199/mo.L4: Floor for Rent - $199/mo.L3: Floor for Rent - $199/mo.L2: Floor for Rent - $199/mo.L1: Floor for Rent - $199/mo.RENTALBUILDING 1L12: Floor for Rent - $199/mo.L11: Floor for Rent - $199/mo.L10: Floor for Rent - $199/mo.L9: Floor for Rent - $199/mo.L8: Floor for Rent - $199/mo.L7: Floor for Rent - $199/mo.L6: Floor for Rent - $199/mo.L5: Floor for Rent - $199/mo.L4: Floor for Rent - $199/mo.L3: Floor for Rent - $199/mo.L2: Floor for Rent - $199/mo.L1: Floor for Rent - $199/mo.
+
+RENTAL
+BUILDING 3
+
+L12: Floor for Rent - $199/mo.
+L11: Floor for Rent - $199/mo.
+L10: Floor for Rent - $199/mo.
+L9: Floor for Rent - $199/mo.
+L8: Floor for Rent - $199/mo.
+L7: Floor for Rent - $199/mo.
+L6: Floor for Rent - $199/mo.
+L5: Floor for Rent - $199/mo.
+L4: Floor for Rent - $199/mo.
+L3: Floor for Rent - $199/mo.
+L2: Floor for Rent - $199/mo.
+L1: Floor for Rent - $199/mo.
+
+
+RENTAL
+BUILDING 3
+
+L12: Floor for Rent - $199/mo.
+L11: Floor for Rent - $199/mo.
+L10: Floor for Rent - $199/mo.
+L9: Floor for Rent - $199/mo.
+L8: Floor for Rent - $199/mo.
+L7: Floor for Rent - $199/mo.
+L6: Floor for Rent - $199/mo.
+L5: Floor for Rent - $199/mo.
+L4: Floor for Rent - $199/mo.
+L3: Floor for Rent - $199/mo.
+L2: Floor for Rent - $199/mo.
+L1: Floor for Rent - $199/mo.
+
+
+RENTAL
+BUILDING 2
+
+L12: Floor for Rent - $199/mo.
+L11: Floor for Rent - $199/mo.
+L10: Floor for Rent - $199/mo.
+L9: Floor for Rent - $199/mo.
+L8: Floor for Rent - $199/mo.
+L7: Floor for Rent - $199/mo.
+L6: Floor for Rent - $199/mo.
+L5: Floor for Rent - $199/mo.
+L4: Floor for Rent - $199/mo.
+L3: Floor for Rent - $199/mo.
+L2: Floor for Rent - $199/mo.
+L1: Floor for Rent - $199/mo.
+
+
+RENTAL
+BUILDING 2
+
+L12: Floor for Rent - $199/mo.
+L11: Floor for Rent - $199/mo.
+L10: Floor for Rent - $199/mo.
+L9: Floor for Rent - $199/mo.
+L8: Floor for Rent - $199/mo.
+L7: Floor for Rent - $199/mo.
+L6: Floor for Rent - $199/mo.
+L5: Floor for Rent - $199/mo.
+L4: Floor for Rent - $199/mo.
+L3: Floor for Rent - $199/mo.
+L2: Floor for Rent - $199/mo.
+L1: Floor for Rent - $199/mo.
+
+
+RENTAL
+BUILDING 1
+
+L12: Floor for Rent - $199/mo.
+L11: Floor for Rent - $199/mo.
+L10: Floor for Rent - $199/mo.
+L9: Floor for Rent - $199/mo.
+L8: Floor for Rent - $199/mo.
+L7: Floor for Rent - $199/mo.
+L6: Floor for Rent - $199/mo.
+L5: Floor for Rent - $199/mo.
+L4: Floor for Rent - $199/mo.
+L3: Floor for Rent - $199/mo.
+L2: Floor for Rent - $199/mo.
+L1: Floor for Rent - $199/mo.
+
+
+RENTAL
+BUILDING 1
+
+L12: Floor for Rent - $199/mo.
+L11: Floor for Rent - $199/mo.
+L10: Floor for Rent - $199/mo.
+L9: Floor for Rent - $199/mo.
+L8: Floor for Rent - $199/mo.
+L7: Floor for Rent - $199/mo.
+L6: Floor for Rent - $199/mo.
+L5: Floor for Rent - $199/mo.
+L4: Floor for Rent - $199/mo.
+L3: Floor for Rent - $199/mo.
+L2: Floor for Rent - $199/mo.
+L1: Floor for Rent - $199/mo.

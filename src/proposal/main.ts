@@ -3,22 +3,17 @@ import { buildCity } from '../core/data/buildings';
 import type { Building, BuildingKind } from '../core/types';
 import { P, type Lang, type T } from './content';
 
-/** The public, bilingual proposal page at /proposal. Live numbers come from /api/public/pulse. */
-
-interface Pulse {
-  now: number;
-  fastSales: {
-    leadsToday: number; booked24h: number; closedMonth: number; agentsWorking: number; agentsTotal: number;
-    stages: { stage: string; n: number }[];
-    team: { name: string; role: string; status: 'idle' | 'working' | 'needs-you'; doing: string }[];
-  };
-  city: { buildings: number; agentsWorking: number; agentsTotal: number; tasksToday: number };
-}
+/**
+ * The public, bilingual proposal page at /proposal. Containment (M00): it shows no live office data. The
+ * running office holds people's names, real contacts and client activity, none of which belongs on a public
+ * page, so the dashboard here is an empty sample layout and the dial shows the fixed building catalog.
+ */
 
 const LANG_KEY = 'fs-proposal-lang';
 const root = document.getElementById('proposal')!;
 const city = buildCity();
 const cityAgents = city.reduce((n, b) => n + b.floors.reduce((m, f) => m + f.agents.filter(a => a.kind === 'ai').length, 0), 0);
+const GAUGE_MAX = Math.ceil(cityAgents / 60) * 60;
 
 let lang: Lang = (() => {
   try {
@@ -28,8 +23,6 @@ let lang: Lang = (() => {
   } catch { /* storage blocked */ }
   return navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en';
 })();
-let pulse: Pulse | undefined;
-let pulseFailed = false;
 
 const esc = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 /** Translate and escape. */
@@ -99,27 +92,21 @@ function cityGroups() {
   }).join('');
 }
 
+/** An empty sample of the signed-in dashboard: labels only, no numbers from the running office. */
 function dashboard() {
   const d = P.access.dash;
-  const f = pulse?.fastSales;
-  const n = (v: number | undefined) => v === undefined ? '–' : String(v);
-  const clock = pulse ? `${String(Math.floor(pulse.now % 1440 / 60)).padStart(2, '0')}:${String(pulse.now % 60).padStart(2, '0')}` : '--:--';
-  const maxStage = Math.max(1, ...(f?.stages.map(s => s.n) ?? [1]));
-  return `<div class="dash-h"><span class="live-dot${pulse ? '' : ' off'}"></span><b>FAST SALES</b><span>${tr(d.title)}</span><time>${clock}</time></div>
+  return `<div class="dash-h"><span class="live-dot off"></span><b>FAST SALES</b><span>${tr(d.title)}</span><time>--:--</time></div>
     <div class="dash-k">
-      <div><small>${tr(d.leads)}</small><b>${n(f?.leadsToday)}</b></div>
-      <div><small>${tr(d.booked)}</small><b>${n(f?.booked24h)}</b></div>
-      <div><small>${tr(d.enrolled)}</small><b>${n(f?.closedMonth)}</b></div>
-      <div><small>${tr(d.working)}</small><b>${f ? `${f.agentsWorking}<i>/${f.agentsTotal}</i>` : '–'}</b></div>
+      <div><small>${tr(d.leads)}</small><b>–</b></div>
+      <div><small>${tr(d.booked)}</small><b>–</b></div>
+      <div><small>${tr(d.enrolled)}</small><b>–</b></div>
+      <div><small>${tr(d.working)}</small><b>–</b></div>
     </div>
     <div class="dash-b">
       <section><h4>${tr(d.pipeline)}</h4>
-        ${(f?.stages ?? Object.keys(d.stages).map(stage => ({ stage, n: 0 }))).map(s => `<div class="bar"><span>${tr(d.stages[s.stage] ?? { en: s.stage, es: s.stage })}</span><i><em style="width:${Math.round(s.n / maxStage * 100)}%"></em></i><b>${f ? s.n : '–'}</b></div>`).join('')}
+        ${Object.keys(d.stages).map(stage => `<div class="bar"><span>${tr(d.stages[stage]!)}</span><i><em style="width:0%"></em></i><b>–</b></div>`).join('')}
       </section>
-      <section><h4>${tr(d.doing)}</h4>
-        ${f ? f.team.map(a => `<div class="doing"><span class="st ${a.status}"></span><b>${esc(a.name)}</b><span>${a.status === 'needs-you' ? tr(d.waiting) : a.doing ? esc(a.doing) : tr(d.idle)}</span></div>`).join('')
-          : `<p class="dash-off">${tr(d.offline)}</p>`}
-      </section>
+      <section><h4>${tr(d.doing)}</h4><p class="dash-off">${tr(d.offline)}</p></section>
     </div>
     <p class="dash-note">${tr(d.note)}</p>`;
 }
@@ -143,7 +130,7 @@ function render() {
       <div class="ctas"><a class="btn red" href="${officeUrl}">${tr(h.cta)}</a><a class="btn line" href="#investment">${tr(h.cta2)}</a></div>
       <dl class="stats">${h.stats.map(s => `<div><dt>${tr(s.v, { agents: cityAgents })}</dt><dd>${tr(s.l)}</dd></div>`).join('')}</dl>
     </div>
-    <div class="gauge">${gaugeSvg(Math.ceil(cityAgents / 60) * 60)}<div class="gauge-c"><b class="gauge-num">0</b><small>${tr(h.gauge)}</small></div></div>
+    <div class="gauge">${gaugeSvg(GAUGE_MAX)}<div class="gauge-c"><b class="gauge-num">0</b><small>${tr(h.gauge)}</small></div></div>
   </section>
 
   <section class="sec wrap" id="found">
@@ -222,7 +209,7 @@ function render() {
   <footer class="wrap foot">${tr(P.footer)}</footer>`;
 
   wire();
-  if (pulse) setGauge(pulse.city.agentsWorking, pulse.city.agentsTotal);
+  setGauge(cityAgents, GAUGE_MAX);
 }
 
 function wire() {
@@ -248,21 +235,6 @@ function wire() {
   });
 }
 
-async function refreshPulse() {
-  try {
-    const r = await fetch('/api/public/pulse', { cache: 'no-store' });
-    if (!r.ok) throw new Error(String(r.status));
-    pulse = await r.json() as Pulse;
-    pulseFailed = false;
-  } catch {
-    if (pulseFailed) return;
-    pulseFailed = true;
-  }
-  const dash = root.querySelector('#dash');
-  if (dash) dash.innerHTML = dashboard();
-  if (pulse) setGauge(pulse.city.agentsWorking, pulse.city.agentsTotal);
-}
-
 render();
-refreshPulse();
-setInterval(() => { if (!document.hidden) refreshPulse(); }, 4000);
+// Let the needle sweep up once the page has painted.
+requestAnimationFrame(() => setGauge(cityAgents, GAUGE_MAX));
