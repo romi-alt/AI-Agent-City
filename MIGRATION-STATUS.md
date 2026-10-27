@@ -1,17 +1,132 @@
 # Migration status
 
-Stage plan and rules: `planning/agentcity-migration/README.md`. Evidence for M00:
-`planning/agentcity-migration/m00/`. Statuses: not started / in progress / local passed / external blocked /
+Stage plan and rules: `planning/agentcity-migration/README.md`. Evidence: `planning/agentcity-migration/m00/`,
+`planning/agentcity-migration/m01/`. Statuses: not started / in progress / local passed / external blocked /
 failed / complete.
 
 | Stage | Status | Commit/files | Evidence | Blockers | Next action |
 |---|---|---|---|---|---|
 | M00 | **Local passed** (code complete and verified locally). Merged into `main` at the owner's request; no separate code review | `main` @ a658918 (fast-forward from f96819d). Built on branch `migration/m00-baseline` (from `city-vibes` @ 7bad3b8). Checkpoint = 7bad3b8, the head of `city-vibes` on GitHub. Tag `pre-migration-baseline` is local only: pushing it from this environment did not reach GitHub. Files below | `planning/agentcity-migration/m00/evidence/` | Real data and pilot exports missing (below) | M01 |
-| M01 | Not started | — | — | No Docker engine in this cloud environment (CLI present, no daemon socket) | Workspace and local infrastructure |
+| M01 | **Local passed** (code complete and verified locally, including a from-zero fresh-clone run). Not merged; no code review yet | Branch `migration/m01-workspace` (from `main` @ d4c0159). Files: section M01.2 | `planning/agentcity-migration/m01/` (ARCHITECTURE.md, evidence/) | CI not yet run on GitHub; Node 22 not 24; MinIO replaced by RustFS locally (ADR-004). See M01.5 | M02 |
 | M02–M10, P01–P10 | Not started | — | — | — | In order, one at a time |
 
-Test environment for everything below: this cloud container, Node v22.22.0, npm 10.9.4, Chromium via Playwright
-with software GL (SwiftShader). No provider credentials were set, and the kill switch was off in every run.
+
+# M01 — workspace and local infrastructure
+
+Prompt: `planning/agentcity-migration/prompts/M01-workspace-and-infrastructure.md`. Prerequisite checked: M00 is
+"local passed" and in `main` (a658918, status update d4c0159); M01 branched from d4c0159.
+
+Test environment: this cloud container, Node v22.22.0, pnpm 10.28.0, Docker 29.9.2 (engine started in the
+container with `dockerd`; M00's "no Docker" blocker was only a stopped daemon). No provider credentials; the legacy
+kill switch stayed off; the new apps make no outbound requests (Next.js telemetry disabled).
+
+## M01.1 What was built
+
+| Prompt requirement | Done | Where |
+|---|---|---|
+| apps/web (Next/React), apps/api (Nest), apps/worker (Temporal), packages as appropriate | Next.js 16.4.3 App Router + React 19.3.1; NestJS 12.3.2 (Express adapter) with REST, GraphQL (Apollo 5) and OpenAPI; Temporal TS SDK 1.24.0 worker; `packages/contracts`, `packages/db`. Other packages deferred to the stage that first fills them (ADR-012) | `apps/*`, `packages/*` |
+| Preserve the legacy app, runnable | Moved unchanged to `apps/legacy` (git renames); exact dependency versions from its old lockfile. 33/33 tests, build, and production start (`/`, `/proposal`, `/api/*` 200) verified | `apps/legacy` |
+| One package manager, pinned toolchain, reproducible lock | pnpm 10.28.0 (`packageManager`), one `pnpm-lock.yaml`, Node 22.22.0 (`.nvmrc`, engine-strict) | ADR-001, ADR-002 |
+| Compose: PostgreSQL/pgvector + verified BM25, Redis, S3-compatible storage, Temporal, Keycloak | ParadeDB 0.26.3 on PG 17.11 (pg_search BM25 + vector 0.8.6), Redis 7.4, **RustFS 1.0.4 instead of MinIO** (ADR-004), Temporal CLI 1.9.1 (Server 1.32.0), Keycloak 26.8.1. Real tags, pinned by digest | `infra/compose.yaml`, ADR-005 |
+| Local-only credentials, env validation | `infra/local-dev.env` (every secret contains `local-dev-only`); zod validation in API and worker; production refuses those values and dev routes | ADR-010 |
+| Health checks, readiness, startup/shutdown docs | Compose health checks on all five services (`up --wait`); API `/health/live`, `/health/ready` (503 when any dependency fails) and GraphQL `readiness`; README "Local development" | `apps/api/src/health/`, `README.md` |
+| Migrations, test fixtures | node-pg-migrate SQL migration (extensions, `platform` schema, least-privilege grants); `createTestDatabase()` throwaway-database fixture | `packages/db` |
+| Shared formatting/type checks | Prettier 3.9.10 (`pnpm format:check`), strict `tsconfig.base.json`, `pnpm typecheck` across all packages | root |
+| Separate browser/server imports | `server-only` guard on the web app's API client; contracts package has no Node APIs; db package not a web dependency | ADR-011 |
+| CI build jobs | `.github/workflows/ci.yml`: static job + infrastructure job (Compose, migrations, BM25, integration, smoke) | **not yet run on GitHub** |
+| Real web→API health request | Web page renders the API's readiness on every request | smoke check 6 |
+| Real worker activity round trip | Heartbeat workflow: API → Temporal → worker activities → PostgreSQL → result | smoke checks 7–8 |
+| Architecture choices, port/secret boundaries | 12 ADRs | `planning/agentcity-migration/m01/ARCHITECTURE.md` |
+
+No business feature moved. The new apps prove wiring only.
+
+## M01.2 Changed files
+
+- **Moved** (renames, content unchanged except `package.json`): `index.html`, `proposal.html`, `server/`, `src/`,
+  `test/`, `tsconfig*.json`, `vite.config.ts`, `.env.example`, `SPEC.md`, `README.md` → `apps/legacy/`.
+  `apps/legacy/package.json`: renamed `@agentcity/legacy`, exact versions. `apps/legacy/README.md`: a "moved" note.
+- **Removed:** `package-lock.json` (replaced by `pnpm-lock.yaml`).
+- **New, root:** `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.nvmrc`, `.npmrc`, `tsconfig.base.json`,
+  `.prettierrc.json`, `.prettierignore`, `README.md`, `.github/workflows/ci.yml`, `scripts/smoke.mjs`.
+- **Changed, root:** `.gitignore`, `CLAUDE.md` (conventions now name pnpm and `apps/legacy`; migration section
+  unchanged).
+- **New:** `infra/` (compose, env, Postgres init, Keycloak realm), `apps/api`, `apps/worker`, `apps/web`,
+  `packages/contracts`, `packages/db` (including generated `apps/api/generated/{openapi.json,schema.graphql}`).
+- **New docs/evidence:** `planning/agentcity-migration/m01/ARCHITECTURE.md`, `m01/evidence/`.
+
+## M01.3 Commands actually run
+
+Final results come from a fresh clone of commit 22dd3d1 with all service volumes deleted first
+(`evidence/fresh-checkout-run.txt`), plus the follow-ups noted.
+
+| Command | Result | Evidence |
+|---|---|---|
+| `git clone` → `pnpm install --frozen-lockfile` (warm store) | exit 0 | `fresh-checkout-run.txt` |
+| Same in a second clone with an **empty** pnpm store | exit 0, 476 packages, 7 s | `fresh-checkout-followup.txt` |
+| `pnpm format:check` | exit 0 | `fresh-checkout-run.txt` |
+| `pnpm infra:reset` then `pnpm infra:up` | all 5 services healthy, 22 s | same |
+| `pnpm infra:init` twice | migration applied, bucket created; second run: nothing to do / already exists | same |
+| `pnpm db:verify-search` | PASSED: BM25 order 2,1,4, non-match excluded, plan uses ParadeDB scan on `docs_bm25`; vector nearest 1,2 | same, `verify-search.json` |
+| `pnpm typecheck` **before** `pnpm build` on the fresh clone | **failed (exit 2)**: apps could not resolve `@agentcity/contracts` types before its `dist` existed | same |
+| Fix (commit "Build shared packages before typecheck…"), then `pnpm typecheck` on a clean tree | exit 0 | `fresh-checkout-followup.txt` |
+| `pnpm build` | exit 0: contracts, db, legacy (large-chunk warning, as before), worker, api, web | `fresh-checkout-run.txt` |
+| `pnpm test` | legacy 33/33, worker 3/3, api 3/3 | same |
+| `pnpm --filter @agentcity/db test:integration` | 4/4: clean apply; app role inserts each step once; app role cannot create, delete or drop and is not superuser/bypassrls; down/up reversible | same |
+| `pnpm smoke` | **PASSED, 10/10** (below) | `smoke.json`, `smoke-logs/` |
+| Legacy production start from the fresh clone (`NODE_ENV=production`, throwaway `DATA_DIR`) | `/`, `/proposal`, `/api/auth/me`, `/api/public/pulse` → 200; kill switch reported OFF | run by hand, not saved (log contained a one-time enrolment link) |
+
+Smoke checks (`scripts/smoke.mjs`, against built apps it starts itself):
+
+1. API liveness
+2. API readiness, all four dependencies ok
+3. GraphQL `liveness` + `readiness`
+4. OpenAPI served; `/dev/*` routes absent from it
+5. Keycloak realm OIDC discovery (issuer matches, PKCE S256 offered)
+6. Web page renders the API's readiness (web → API)
+7. Heartbeat round trip (API → Temporal → worker → PostgreSQL)
+8. **Workflow survives a worker crash:** worker A records `started`, is SIGKILLed during the 15 s timer, worker B
+   starts and finishes. Rows: `started:smoke-worker-a`, `finished:smoke-worker-b`, each exactly once
+9. **Readiness fails without storage:** PostgreSQL stopped → 503, `postgres: unavailable (ECONNREFUSED)`, web shows
+   "not ready"; restarted → ready again
+10. Same with object storage stopped → 503 `objectStorage: unavailable (ECONNREFUSED)`; recovers
+
+Defects found and fixed during M01 (not left in): the API hung on shutdown when Redis had never connected
+(`quit()` on an unconnected client); the typecheck ordering above; a duplicate identifier in the GraphQL resolver.
+
+## M01.4 Not run, or not claimed
+
+- **CI has not run on GitHub.** The workflow is written; its steps were run locally in the same order, but not on
+  GitHub's runners.
+- **Not run:** `pnpm dev:*` (watch mode) for the new apps; the smoke uses built output. `pnpm dev:legacy`
+  (concurrently + Vite) was not started in M01.
+- **Not run:** M00's pack harness and M00 helper scripts after the move. They point at the old root paths (`server/`,
+  `src/`, `test/`) and need `apps/legacy/` as their root.
+- **Not tested:** Keycloak sign-in flows (no users, no app integration — M03); BM25 under RLS/tenant isolation (M02 /
+  knowledge); managed-Postgres availability of pg_search (deployment stage).
+
+## M01.5 Unresolved blockers and risks
+
+1. **Node 24.** The pack targets Node 24; only 22.22 is available here (ADR-002).
+2. **MinIO.** The prompt names MinIO; no pullable real MinIO image was found, so RustFS is used through the
+   standard S3 API (ADR-004). Owner may want to confirm or name a MinIO image/registry.
+3. **Docker Hub rate limit.** Images come from `mirror.gcr.io`/`quay.io`, pinned by digest (ADR-005). A CI runner
+   with Docker Hub access works the same way.
+4. **Extra extensions** pre-created by the ParadeDB image (PostGIS family, `fuzzystrmatch`, `pg_ivm`,
+   `pg_stat_statements`) — decide in M02 (ADR-006).
+5. Unchanged from M00: no real data/pilot material/provider credentials; kill switch process-level only.
+
+## M01.6 Next safe stage
+
+**M02 — PostgreSQL tenancy and import** (`planning/agentcity-migration/prompts/M02-postgres-tenancy-and-import.md`), after this branch is reviewed and merged. Start from `main`
+with M01 merged, run `pnpm infra:up && pnpm infra:init`, keep `OUTBOUND_ENABLED` unset.
+
+# M00 record
+
+M00 test environment: this cloud container, Node v22.22.0, npm 10.9.4, Chromium via Playwright with software GL
+(SwiftShader). No provider credentials were set, and the kill switch was off in every run.
+
+Paths below are as they were in M00. Since M01, the legacy app's files are under `apps/legacy/` (e.g.
+`server/outbound.ts` → `apps/legacy/server/outbound.ts`), and its commands run with pnpm (see CLAUDE.md).
 
 ## 1. The checkout that was baselined
 
@@ -117,7 +232,7 @@ multi-client isolation tests in `test/scope.test.ts`. Plus two browser checks th
 
 ## 6. Unresolved blockers and risks
 
-1. **M01 cannot run its local services here.** The Docker CLI is installed but no engine is running. Either a
+1. *(Resolved in M01: the engine only needed starting.)* **M01 cannot run its local services here.** The Docker CLI is installed but no engine is running. Either a
    Docker-capable environment or a decision on running the services natively is needed. `psql` and `redis-server`
    binaries exist; Temporal, Keycloak and MinIO do not.
 2. **The kill switch is process-level only.** It is not persisted, and nothing audits who turned it on. The

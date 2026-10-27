@@ -1,0 +1,8 @@
+# After the typecheck fix (commit 92c5967), on a clean tree (git clean -xfd, no dist):
+$ pnpm typecheck
+[exit 0] contracts, db built; contracts, legacy, db, web, worker, api typecheck Done
+
+# Cold install (empty pnpm store) in a second fresh clone:
+Packages: +476
+Done in 6.9s using pnpm v10.28.0
+real	0m7.001s

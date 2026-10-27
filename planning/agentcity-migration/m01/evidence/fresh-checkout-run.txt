@@ -1,0 +1,710 @@
+fresh clone of 22dd3d1 at /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh; node v22.22.0; pnpm 10.28.0; Docker version 29.9.2, build a82e528
+
+$ ls node_modules
+ls: cannot access 'node_modules': No such file or directory
+[exit 2, 0s]
+
+$ pnpm install --frozen-lockfile
+Scope: all 7 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +476
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 476, reused 476, downloaded 0, added 476, done
+.../node_modules/@swc/core postinstall$ node postinstall.js
+.../esbuild@0.28.2/node_modules/esbuild postinstall$ node install.js
+.../esbuild@0.28.2/node_modules/esbuild postinstall: Done
+.../node_modules/@swc/core postinstall: Done
+
+devDependencies:
++ prettier 3.9.10
++ typescript 6.0.3
+
+Done in 1.4s using pnpm v10.28.0
+[exit 0, 1s]
+
+$ pnpm format:check
+
+> agentcity@ format:check /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+[exit 0, 1s]
+
+$ pnpm infra:reset
+
+> agentcity@ infra:reset /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> docker compose -f infra/compose.yaml --env-file infra/local-dev.env down -v
+
+ Container agentcity-object-storage-1 Stopping 
+ Container agentcity-temporal-1 Stopping 
+ Container agentcity-keycloak-1 Stopping 
+ Container agentcity-postgres-1 Stopping 
+ Container agentcity-redis-1 Stopping 
+ Container agentcity-redis-1 Stopped 
+ Container agentcity-redis-1 Removing 
+ Container agentcity-redis-1 Removed 
+ Container agentcity-object-storage-1 Stopped 
+ Container agentcity-object-storage-1 Removing 
+ Container agentcity-object-storage-1 Removed 
+ Container agentcity-postgres-1 Stopped 
+ Container agentcity-postgres-1 Removing 
+ Container agentcity-postgres-1 Removed 
+ Container agentcity-temporal-1 Stopped 
+ Container agentcity-temporal-1 Removing 
+ Container agentcity-temporal-1 Removed 
+ Container agentcity-keycloak-1 Stopped 
+ Container agentcity-keycloak-1 Removing 
+ Container agentcity-keycloak-1 Removed 
+ Volume agentcity_s3data Removing 
+ Volume agentcity_temporaldata Removing 
+ Volume agentcity_redisdata Removing 
+ Volume agentcity_pgdata Removing 
+ Network agentcity_default Removing 
+ Volume agentcity_s3data Removed 
+ Volume agentcity_redisdata Removed 
+ Volume agentcity_temporaldata Removed 
+ Network agentcity_default Removed 
+ Volume agentcity_pgdata Removed 
+[exit 0, 2s]
+
+$ pnpm infra:up
+
+> agentcity@ infra:up /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> docker compose -f infra/compose.yaml --env-file infra/local-dev.env up -d --wait
+
+ Network agentcity_default Creating 
+ Network agentcity_default Creating 
+ Volume agentcity_temporaldata Creating 
+ Volume agentcity_temporaldata Creating 
+ Volume agentcity_redisdata Creating 
+ Volume agentcity_redisdata Creating 
+ Volume agentcity_s3data Creating 
+ Volume agentcity_s3data Creating 
+ Volume agentcity_pgdata Creating 
+ Volume agentcity_pgdata Creating 
+ Volume agentcity_temporaldata Created 
+ Volume agentcity_temporaldata Created 
+ Volume agentcity_s3data Created 
+ Volume agentcity_s3data Created 
+ Volume agentcity_redisdata Created 
+ Volume agentcity_redisdata Created 
+ Volume agentcity_pgdata Created 
+ Volume agentcity_pgdata Created 
+ Network agentcity_default Created 
+ Network agentcity_default Created 
+ Container agentcity-temporal-1 Creating 
+ Container agentcity-postgres-1 Creating 
+ Container agentcity-keycloak-1 Creating 
+ Container agentcity-object-storage-1 Creating 
+ Container agentcity-redis-1 Creating 
+ Container agentcity-temporal-1 Created 
+ Container agentcity-object-storage-1 Created 
+ Container agentcity-keycloak-1 Created 
+ Container agentcity-redis-1 Created 
+ Container agentcity-postgres-1 Created 
+ Container agentcity-keycloak-1 Starting 
+ Container agentcity-postgres-1 Starting 
+ Container agentcity-object-storage-1 Starting 
+ Container agentcity-redis-1 Starting 
+ Container agentcity-temporal-1 Starting 
+ Container agentcity-keycloak-1 Started 
+ Container agentcity-postgres-1 Started 
+ Container agentcity-object-storage-1 Started 
+ Container agentcity-redis-1 Started 
+ Container agentcity-temporal-1 Started 
+ Container agentcity-postgres-1 Waiting 
+ Container agentcity-redis-1 Waiting 
+ Container agentcity-object-storage-1 Waiting 
+ Container agentcity-temporal-1 Waiting 
+ Container agentcity-keycloak-1 Waiting 
+ Container agentcity-postgres-1 Healthy 
+ Container agentcity-redis-1 Healthy 
+ Container agentcity-object-storage-1 Healthy 
+ Container agentcity-temporal-1 Healthy 
+ Container agentcity-keycloak-1 Healthy 
+[exit 0, 22s]
+
+$ pnpm infra:ps
+
+> agentcity@ infra:ps /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> docker compose -f infra/compose.yaml --env-file infra/local-dev.env ps
+
+NAME                         IMAGE                                                                                                                 COMMAND                  SERVICE          CREATED          STATUS                    PORTS
+agentcity-keycloak-1         quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b              "/opt/keycloak/bin/k…"   keycloak         21 seconds ago   Up 21 seconds (healthy)   8443/tcp, 127.0.0.1:58080->8080/tcp, 127.0.0.1:59900->9000/tcp
+agentcity-object-storage-1   mirror.gcr.io/rustfs/rustfs:1.0.4@sha256:ed9210d6411d77ffceb70d94b964a3cb7d225983368bc25bebe01e995293dcc2             "/entrypoint.sh rust…"   object-storage   21 seconds ago   Up 20 seconds (healthy)   127.0.0.1:59000->9000/tcp, 127.0.0.1:59001->9001/tcp
+agentcity-postgres-1         mirror.gcr.io/paradedb/paradedb:0.26.3-pg17@sha256:950f68abebc78e28fd2ecfc8ed915aa29d07b5dd8cba25b2f513ca4e211dda70   "docker-entrypoint.s…"   postgres         21 seconds ago   Up 21 seconds (healthy)   127.0.0.1:55432->5432/tcp
+agentcity-redis-1            mirror.gcr.io/library/redis:7.4-alpine@sha256:6ba19c50b56777f5c11c58eff8ddb69d0d5f27ba131cffb63f180ccfd43c66af        "docker-entrypoint.s…"   redis            21 seconds ago   Up 20 seconds (healthy)   127.0.0.1:56379->6379/tcp
+agentcity-temporal-1         mirror.gcr.io/temporalio/temporal:1.9.1@sha256:ad4c82c97bd12b417d1ea942610dbcd511afb250c4d5ed26c694009533df447e       "temporal server sta…"   temporal         21 seconds ago   Up 20 seconds (healthy)   127.0.0.1:57233->7233/tcp, 127.0.0.1:58233->8233/tcp
+[exit 0, 0s]
+
+$ pnpm infra:init
+
+> agentcity@ infra:init /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> pnpm db:migrate && pnpm --filter @agentcity/api run storage:init
+
+
+> agentcity@ db:migrate /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> pnpm --filter @agentcity/db run migrate
+
+
+> @agentcity/db@0.0.0 migrate /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh/packages/db
+> node --env-file-if-exists=../../infra/local-dev.env --import tsx src/cli-migrate.ts up
+
+up: 1792972800000_platform-foundation
+
+> @agentcity/api@0.0.0 storage:init /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh/apps/api
+> node --env-file-if-exists=../../infra/local-dev.env --import tsx src/cli-init-storage.ts
+
+bucket agentcity-dev: created
+[exit 0, 2s]
+
+$ pnpm infra:init
+
+> agentcity@ infra:init /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> pnpm db:migrate && pnpm --filter @agentcity/api run storage:init
+
+
+> agentcity@ db:migrate /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> pnpm --filter @agentcity/db run migrate
+
+
+> @agentcity/db@0.0.0 migrate /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh/packages/db
+> node --env-file-if-exists=../../infra/local-dev.env --import tsx src/cli-migrate.ts up
+
+up: nothing to do
+
+> @agentcity/api@0.0.0 storage:init /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh/apps/api
+> node --env-file-if-exists=../../infra/local-dev.env --import tsx src/cli-init-storage.ts
+
+bucket agentcity-dev: already exists
+[exit 0, 1s]
+
+$ pnpm db:verify-search
+
+> agentcity@ db:verify-search /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> pnpm --filter @agentcity/db run verify-search
+
+
+> @agentcity/db@0.0.0 verify-search /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh/packages/db
+> node --env-file-if-exists=../../infra/local-dev.env --import tsx src/verify-search.ts
+
+{
+  "extensions": {
+    "pg_search": "0.26.3",
+    "vector": "0.8.6"
+  },
+  "bm25": [
+    {
+      "id": 2,
+      "score": 0.6342719
+    },
+    {
+      "id": 1,
+      "score": 0.3884579
+    },
+    {
+      "id": 4,
+      "score": 0.2489934
+    }
+  ],
+  "bm25Plan": "Custom Scan (ParadeDB Base Scan) on docs  (cost=10.00..10.03 rows=3 width=4)\n  Table: docs\n  Index: docs_bm25\n  Segment Count: 1\n  Exec Method: ColumnarExecState\n  Columnar: id\n  Scores: false\n  Tantivy Query: {\"with_index\":{\"query\":{\"parse_with_field\":{\"field\":\"body\",\"query_string\":\"payment\",\"lenient\":null,\"conjunction_mode\":null}}}}",
+  "vectorNearest": [
+    {
+      "id": 1,
+      "distance": 0
+    },
+    {
+      "id": 2,
+      "distance": 0.14142137441313676
+    }
+  ],
+  "result": "PASSED",
+  "failures": []
+}
+[exit 0, 1s]
+
+$ pnpm typecheck
+
+> agentcity@ typecheck /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> pnpm -r run typecheck
+
+Scope: 6 of 7 workspace projects
+apps/legacy typecheck$ tsc -p tsconfig.json && tsc -p tsconfig.server.json
+packages/db typecheck$ tsc -p tsconfig.json --noEmit
+packages/contracts typecheck$ tsc -p tsconfig.json --noEmit
+packages/contracts typecheck: Done
+apps/legacy typecheck: Done
+packages/db typecheck: Done
+apps/api typecheck$ tsc -p tsconfig.json --noEmit
+apps/web typecheck$ tsc --noEmit
+apps/worker typecheck$ tsc -p tsconfig.json --noEmit
+apps/web typecheck: app/page.tsx(34,41): error TS7006: Parameter 'c' implicitly has an 'any' type.
+apps/web typecheck: lib/api.ts(2,33): error TS2307: Cannot find module '@agentcity/contracts' or its corresponding type declarations.
+apps/web typecheck: Failed
+/tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @agentcity/web@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2
+ ELIFECYCLE  Command failed with exit code 2.
+[exit 2, 3s]
+
+$ pnpm build
+
+> agentcity@ build /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> pnpm -r run build
+
+Scope: 6 of 7 workspace projects
+apps/legacy build$ tsc -p tsconfig.json && tsc -p tsconfig.server.json && vite build
+packages/contracts build$ tsc -p tsconfig.json
+packages/db build$ tsc -p tsconfig.json
+packages/contracts build: Done
+packages/db build: Done
+apps/legacy build: vite v8.3.5 building client environment for production...
+apps/legacy build: transforming...
+apps/legacy build: ✓ 29 modules transformed.
+apps/legacy build: rendering chunks...
+apps/legacy build: computing gzip size...
+apps/legacy build: dist/index.html                      0.70 kB │ gzip:   0.40 kB
+apps/legacy build: dist/proposal.html                   1.05 kB │ gzip:   0.54 kB
+apps/legacy build: dist/assets/proposal-fwZmVYx-.css   13.10 kB │ gzip:   3.66 kB
+apps/legacy build: dist/assets/main-DTnLPkD_.css       34.20 kB │ gzip:   7.92 kB
+apps/legacy build: dist/assets/buildings-DtFq3Mok.js    9.83 kB │ gzip:   4.04 kB
+apps/legacy build: dist/assets/proposal-C4E51Ed3.js    28.89 kB │ gzip:  11.24 kB
+apps/legacy build: dist/assets/main-C_VtHRql.js       683.80 kB │ gzip: 183.86 kB
+apps/legacy build: ✓ built in 559ms
+apps/legacy build: [plugin builtin:vite-reporter] 
+apps/legacy build: (!) Some chunks are larger than 500 kB after minification. Consider:
+apps/legacy build: - Using dynamic import() to code-split the application
+apps/legacy build: - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+apps/legacy build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+apps/legacy build: Done
+apps/api build$ tsc -p tsconfig.json
+apps/web build$ NEXT_TELEMETRY_DISABLED=1 next build
+apps/worker build$ tsc -p tsconfig.json
+apps/web build: ▲ Next.js 16.4.3 (Turbopack)
+apps/web build: ✓ Running next.config.ts took 44ms
+apps/web build:   Creating an optimized production build ...
+apps/worker build: Done
+apps/api build: Done
+apps/web build: ✓ Compiled successfully in 3.6s
+apps/web build:   Running TypeScript ...
+apps/web build:   Finished TypeScript in 1370ms ...
+apps/web build:   Collecting page data using 3 workers ...
+apps/web build:   Generating static pages using 3 workers (0/2) ...
+apps/web build: ✓ Generating static pages using 3 workers (2/2) in 77ms
+apps/web build:   Finalizing page optimization ...
+apps/web build: Route (app)
+apps/web build: ┌ ƒ /
+apps/web build: └ ○ /_not-found
+apps/web build: ○  (Static)   prerendered as static content
+apps/web build: ƒ  (Dynamic)  server-rendered on demand
+apps/web build: Done
+[exit 0, 8s]
+
+$ pnpm test
+
+> agentcity@ test /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> pnpm -r run test
+
+Scope: 6 of 7 workspace projects
+apps/legacy test$ node --import tsx --test --test-concurrency=1 test/*.test.ts
+packages/db test$ echo 'packages/db has integration tests only: pnpm --filter @agentcity/db test:integration'
+packages/db test: packages/db has integration tests only: pnpm --filter @agentcity/db test:integration
+packages/db test: Done
+apps/legacy test: TAP version 13
+apps/legacy test: # Subtest: outbound kill switch
+apps/legacy test:     # Subtest: stops every provider call while the switch is off, even in Live mode
+apps/legacy test:     ok 1 - stops every provider call while the switch is off, even in Live mode
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 413.922009
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: treats any value other than "true" as off
+apps/legacy test:     ok 2 - treats any value other than "true" as off
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1715.564109
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: never calls a provider in demo (simulate) mode, even with the switch on
+apps/legacy test:     ok 3 - never calls a provider in demo (simulate) mode, even with the switch on
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 347.105682
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: never "sends" a phone call: there is no phone provider
+apps/legacy test:     ok 4 - never "sends" a phone call: there is no phone provider
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.13751
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: does reach the provider when the switch is on and Delivery is Live (so the tests above are not vacuous)
+apps/legacy test:     ok 5 - does reach the provider when the switch is on and Delivery is Live (so the tests above are not vacuous)
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 344.095734
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..5
+apps/legacy test: ok 1 - outbound kill switch
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 2823.036718
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: saved city fails closed
+apps/legacy test:     # Subtest: refuses to start on malformed JSON and leaves state.json byte-identical
+apps/legacy test:     ok 1 - refuses to start on malformed JSON and leaves state.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 515.797033
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: refuses to start on unsupported version and leaves state.json byte-identical
+apps/legacy test:     ok 2 - refuses to start on unsupported version and leaves state.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 460.978467
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: refuses to start on missing lists and leaves state.json byte-identical
+apps/legacy test:     ok 3 - refuses to start on missing lists and leaves state.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 413.689172
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: refuses to start on malformed account file and leaves auth.json byte-identical
+apps/legacy test:     ok 4 - refuses to start on malformed account file and leaves auth.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 425.673604
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: saves the city readable by its owner only
+apps/legacy test:     ok 5 - saves the city readable by its owner only
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 517.40073
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: loadState never writes, and loads a good file
+apps/legacy test:     ok 6 - loadState never writes, and loads a good file
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 4.757909
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..6
+apps/legacy test: ok 2 - saved city fails closed
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 2338.974852
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: public pulse
+apps/legacy test:     # Subtest: returns only the fixed catalog: no names, work, status or activity counts
+apps/legacy test:     ok 1 - returns only the fixed catalog: no names, work, status or activity counts
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 534.17549
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..1
+apps/legacy test: ok 3 - public pulse
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 534.35495
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: the city has data to filter
+apps/legacy test:     # Subtest: has activity in several buildings
+apps/legacy test:     ok 1 - has activity in several buildings
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.492189
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..1
+apps/legacy test: ok 4 - the city has data to filter
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 1.039329
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: opening snapshot
+apps/legacy test:     # Subtest: gives the agency everything
+apps/legacy test:     ok 1 - gives the agency everything
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.600026
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: gives a client only its own buildings and their records
+apps/legacy test:     ok 2 - gives a client only its own buildings and their records
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.732839
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: shows other buildings only as unnamed shapes
+apps/legacy test:     ok 3 - shows other buildings only as unnamed shapes
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.505042
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: leaks no other building, agent or lead names
+apps/legacy test:     ok 4 - leaks no other building, agent or lead names
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 82.180908
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: covers a client with several buildings
+apps/legacy test:     ok 5 - covers a client with several buildings
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 2.89933
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: gives a client with no buildings nothing
+apps/legacy test:     ok 6 - gives a client with no buildings nothing
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.371451
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: keeps the browser mirror working on a filtered snapshot
+apps/legacy test:     ok 7 - keeps the browser mirror working on a filtered snapshot
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.496192
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..7
+apps/legacy test: ok 5 - opening snapshot
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 89.203081
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: live updates
+apps/legacy test:     # Subtest: only ever carry the client's own building
+apps/legacy test:     ok 1 - only ever carry the client's own building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 36.237227
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: pass through unchanged for the agency
+apps/legacy test:     ok 2 - pass through unchanged for the agency
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.28879
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..2
+apps/legacy test: ok 6 - live updates
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 36.652238
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: actions
+apps/legacy test:     # Subtest: lets the agency do anything
+apps/legacy test:     ok 1 - lets the agency do anything
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.21657
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: lets a client admin work its own building
+apps/legacy test:     ok 2 - lets a client admin work its own building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.082416
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: answers "not found" for anything in another client's building
+apps/legacy test:     ok 3 - answers "not found" for anything in another client's building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.169065
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: keeps renting floors with the agency
+apps/legacy test:     ok 4 - keeps renting floors with the agency
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.048804
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: lets a client viewer look but not change anything
+apps/legacy test:     ok 5 - lets a client viewer look but not change anything
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.05022
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..5
+apps/legacy test: ok 7 - actions
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 0.662656
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: accounts and clients
+apps/legacy test:     # Subtest: upgrades old admin and member accounts to agency owner and staff
+apps/legacy test:     ok 1 - upgrades old admin and member accounts to agency owner and staff
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.504477
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: never lets two clients own the same building
+apps/legacy test:     ok 2 - never lets two clients own the same building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.827971
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: requires a client for client roles and drops it for agency roles
+apps/legacy test:     ok 3 - requires a client for client roles and drops it for agency roles
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.292716
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: signs someone out when their access changes
+apps/legacy test:     ok 4 - signs someone out when their access changes
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.324494
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: signs a client's people out when its buildings change, but not when only the name changes
+apps/legacy test:     ok 5 - signs a client's people out when its buildings change, but not when only the name changes
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.088187
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: keeps at least one agency owner, and won't delete a client that still has people
+apps/legacy test:     ok 6 - keeps at least one agency owner, and won't delete a client that still has people
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.720116
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..6
+apps/legacy test: ok 8 - accounts and clients
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 5.929908
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: 1..8
+apps/legacy test: # tests 33
+apps/legacy test: # suites 8
+apps/legacy test: # pass 33
+apps/legacy test: # fail 0
+apps/legacy test: # cancelled 0
+apps/legacy test: # skipped 0
+apps/legacy test: # todo 0
+apps/legacy test: # duration_ms 7588.239293
+apps/legacy test: Done
+apps/api test$ node --import tsx --test test/*.test.ts
+apps/web test$ echo 'apps/web is covered by the smoke check (pnpm smoke)'
+apps/worker test$ node --import tsx --test test/*.test.ts
+apps/web test: apps/web is covered by the smoke check (pnpm smoke)
+apps/web test: Done
+apps/api test: TAP version 13
+apps/worker test: TAP version 13
+apps/worker test: # Subtest: accepts a complete development configuration
+apps/worker test: ok 1 - accepts a complete development configuration
+apps/worker test:   ---
+apps/worker test:   duration_ms: 1.95224
+apps/worker test:   type: 'test'
+apps/worker test:   ...
+apps/worker test: # Subtest: lists missing settings without printing values
+apps/worker test: ok 2 - lists missing settings without printing values
+apps/worker test:   ---
+apps/worker test:   duration_ms: 0.781683
+apps/worker test:   type: 'test'
+apps/worker test:   ...
+apps/worker test: # Subtest: refuses local-development credentials in production
+apps/worker test: ok 3 - refuses local-development credentials in production
+apps/worker test:   ---
+apps/worker test:   duration_ms: 0.235636
+apps/worker test:   type: 'test'
+apps/worker test:   ...
+apps/api test: # Subtest: accepts a complete configuration with safe defaults
+apps/api test: ok 1 - accepts a complete configuration with safe defaults
+apps/api test:   ---
+apps/api test:   duration_ms: 2.803334
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/api test: # Subtest: lists every missing setting without printing values
+apps/api test: ok 2 - lists every missing setting without printing values
+apps/api test:   ---
+apps/api test:   duration_ms: 0.845346
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/api test: # Subtest: refuses local-development credentials and dev routes in production
+apps/api test: ok 3 - refuses local-development credentials and dev routes in production
+apps/api test:   ---
+apps/api test:   duration_ms: 0.340477
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/worker test: 1..3
+apps/worker test: # tests 3
+apps/worker test: # suites 0
+apps/worker test: # pass 3
+apps/worker test: # fail 0
+apps/worker test: # cancelled 0
+apps/worker test: # skipped 0
+apps/worker test: # todo 0
+apps/worker test: # duration_ms 232.587861
+apps/worker test: Done
+apps/api test: 1..3
+apps/api test: # tests 3
+apps/api test: # suites 0
+apps/api test: # pass 3
+apps/api test: # fail 0
+apps/api test: # cancelled 0
+apps/api test: # skipped 0
+apps/api test: # todo 0
+apps/api test: # duration_ms 243.457356
+apps/api test: Done
+[exit 0, 9s]
+
+$ pnpm --filter @agentcity/db test:integration
+
+> @agentcity/db@0.0.0 test:integration /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh/packages/db
+> node --env-file-if-exists=../../infra/local-dev.env --import tsx --test --test-concurrency=1 test/*.test.ts
+
+TAP version 13
+# Subtest: migrations
+    # Subtest: applies cleanly to an empty database
+    ok 1 - applies cleanly to an empty database
+      ---
+      duration_ms: 0.983074
+      type: 'test'
+      ...
+    # Subtest: lets the app role record heartbeats, once per step
+    ok 2 - lets the app role record heartbeats, once per step
+      ---
+      duration_ms: 10.896203
+      type: 'test'
+      ...
+    # Subtest: does not let the app role change the schema or bypass grants
+    ok 3 - does not let the app role change the schema or bypass grants
+      ---
+      duration_ms: 11.399645
+      type: 'test'
+      ...
+    # Subtest: rolls back and re-applies (reversible)
+    ok 4 - rolls back and re-applies (reversible)
+      ---
+      duration_ms: 61.385692
+      type: 'test'
+      ...
+    1..4
+ok 1 - migrations
+  ---
+  duration_ms: 271.644047
+  type: 'suite'
+  ...
+1..1
+# tests 4
+# suites 1
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 489.843573
+[exit 0, 1s]
+
+$ pnpm smoke
+
+> agentcity@ smoke /tmp/claude-0/-home-user-ai-agent-city/fba6101c-ba02-5dc6-8c39-bad9be972543/scratchpad/fresh
+> node scripts/smoke.mjs
+
+ok   API liveness
+ok   API readiness with every dependency up
+ok   GraphQL readiness query
+ok   OpenAPI document served
+ok   Keycloak serves the agentcity realm (OIDC discovery)
+ok   web app renders the API readiness (web -> API request)
+ok   heartbeat workflow round trip (API -> Temporal -> worker -> PostgreSQL)
+ok   workflow survives a worker crash
+ok   readiness fails while postgres is stopped, and recovers
+ok   readiness fails while object-storage is stopped, and recovers
+smoke: PASSED (10 checks)
+[exit 0, 22s]
+done

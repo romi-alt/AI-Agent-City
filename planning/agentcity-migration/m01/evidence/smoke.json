@@ -1,12 +1,12 @@
 {
-  "ranAt": "2026-10-27T17:20:47.144Z",
+  "ranAt": "2026-10-27T17:22:26.916Z",
   "node": "v22.22.0",
   "passed": true,
   "results": [
     {
       "name": "API liveness",
       "ok": true,
-      "ms": 11,
+      "ms": 5,
       "detail": {
         "status": "alive",
         "service": "agentcity-api",
@@ -16,34 +16,34 @@
     {
       "name": "API readiness with every dependency up",
       "ok": true,
-      "ms": 14,
+      "ms": 9,
       "detail": {
         "status": "ready",
-        "checkedAt": "2026-10-27T17:20:28.120Z",
+        "checkedAt": "2026-10-27T17:22:05.510Z",
         "checks": [
           {
             "name": "postgres",
             "ok": true,
             "detail": "connected; schema \"platform\" readable (SELECT)",
-            "latencyMs": 8
+            "latencyMs": 4
           },
           {
             "name": "redis",
             "ok": true,
             "detail": "connected (PONG)",
-            "latencyMs": 8
+            "latencyMs": 4
           },
           {
             "name": "objectStorage",
             "ok": true,
             "detail": "bucket \"agentcity-dev\" reachable",
-            "latencyMs": 10
+            "latencyMs": 6
           },
           {
             "name": "temporal",
             "ok": true,
             "detail": "connected (server 1.32.0)",
-            "latencyMs": 10
+            "latencyMs": 4
           }
         ]
       }
@@ -82,7 +82,7 @@
     {
       "name": "OpenAPI document served",
       "ok": true,
-      "ms": 4,
+      "ms": 2,
       "detail": {
         "paths": [
           "/health/live",
@@ -93,7 +93,7 @@
     {
       "name": "Keycloak serves the agentcity realm (OIDC discovery)",
       "ok": true,
-      "ms": 22,
+      "ms": 153,
       "detail": {
         "issuer": "http://localhost:58080/realms/agentcity",
         "authorization_endpoint": "http://localhost:58080/realms/agentcity/protocol/openid-connect/auth"
@@ -102,25 +102,25 @@
     {
       "name": "web app renders the API readiness (web -> API request)",
       "ok": true,
-      "ms": 46,
+      "ms": 31,
       "detail": {
-        "bytes": 8459
+        "bytes": 8461
       }
     },
     {
       "name": "heartbeat workflow round trip (API -> Temporal -> worker -> PostgreSQL)",
       "ok": true,
-      "ms": 1444,
+      "ms": 1332,
       "detail": {
-        "runId": "smoke-quick-mvqybj92",
+        "runId": "smoke-quick-mvqydmhh",
         "steps": [
           {
             "step": "started",
-            "recordedAt": "2026-10-27T17:20:28.533Z"
+            "recordedAt": "2026-10-27T17:22:05.940Z"
           },
           {
             "step": "finished",
-            "recordedAt": "2026-10-27T17:20:29.583Z"
+            "recordedAt": "2026-10-27T17:22:06.983Z"
           }
         ],
         "workerIds": [
@@ -131,24 +131,24 @@
     {
       "name": "workflow survives a worker crash",
       "ok": true,
-      "ms": 15365,
+      "ms": 15428,
       "detail": {
-        "runId": "smoke-restart-mvqybkd6",
-        "killedAt": "2026-10-27T17:20:29.811Z",
+        "runId": "smoke-restart-mvqydnih",
+        "killedAt": "2026-10-27T17:22:07.206Z",
         "rows": [
           "started:smoke-worker-a",
           "finished:smoke-worker-b"
         ],
         "result": {
-          "runId": "smoke-restart-mvqybkd6",
+          "runId": "smoke-restart-mvqydnih",
           "steps": [
             {
               "step": "started",
-              "recordedAt": "2026-10-27T17:20:29.702Z"
+              "recordedAt": "2026-10-27T17:22:07.097Z"
             },
             {
               "step": "finished",
-              "recordedAt": "2026-10-27T17:20:44.834Z"
+              "recordedAt": "2026-10-27T17:22:22.287Z"
             }
           ],
           "workerIds": [
@@ -161,17 +161,17 @@
     {
       "name": "readiness fails while postgres is stopped, and recovers",
       "ok": true,
-      "ms": 1100,
+      "ms": 1069,
       "detail": {
         "whileStopped": {
           "status": "not-ready",
-          "checkedAt": "2026-10-27T17:20:45.351Z",
+          "checkedAt": "2026-10-27T17:22:22.778Z",
           "checks": [
             {
               "name": "postgres",
               "ok": false,
               "detail": "unavailable (ECONNREFUSED)",
-              "latencyMs": 5
+              "latencyMs": 6
             },
             {
               "name": "redis",
@@ -183,7 +183,7 @@
               "name": "objectStorage",
               "ok": true,
               "detail": "bucket \"agentcity-dev\" reachable",
-              "latencyMs": 6
+              "latencyMs": 7
             },
             {
               "name": "temporal",
@@ -199,35 +199,35 @@
     {
       "name": "readiness fails while object-storage is stopped, and recovers",
       "ok": true,
-      "ms": 1007,
+      "ms": 3352,
       "detail": {
         "whileStopped": {
           "status": "not-ready",
-          "checkedAt": "2026-10-27T17:20:46.681Z",
+          "checkedAt": "2026-10-27T17:22:24.001Z",
           "checks": [
             {
               "name": "postgres",
               "ok": true,
               "detail": "connected; schema \"platform\" readable (SELECT)",
-              "latencyMs": 5
+              "latencyMs": 4
             },
             {
               "name": "redis",
               "ok": true,
               "detail": "connected (PONG)",
-              "latencyMs": 5
+              "latencyMs": 4
             },
             {
               "name": "objectStorage",
               "ok": false,
               "detail": "unavailable (ECONNREFUSED)",
-              "latencyMs": 198
+              "latencyMs": 150
             },
             {
               "name": "temporal",
               "ok": true,
               "detail": "connected (server 1.32.0)",
-              "latencyMs": 7
+              "latencyMs": 5
             }
           ]
         },
