@@ -1,0 +1,518 @@
+$ pnpm test
+
+> agentcity@ test /home/user/sales-city
+> pnpm -r run test
+
+Scope: 8 of 9 workspace projects
+apps/legacy test$ node --import tsx --test --test-concurrency=1 test/*.test.ts
+packages/db test$ echo 'packages/db has integration tests only: pnpm --filter @agentcity/db test:integration'
+packages/domain test$ node --import tsx --test test/*.test.ts
+packages/db test: packages/db has integration tests only: pnpm --filter @agentcity/db test:integration
+packages/db test: Done
+apps/legacy test: TAP version 13
+packages/domain test: TAP version 13
+packages/domain test: # Subtest: city catalog
+packages/domain test:     # Subtest: keeps the exact legacy inventory (MIGRATION-MAP: 15 / 183 / 281 / 22 / 303)
+packages/domain test:     ok 1 - keeps the exact legacy inventory (MIGRATION-MAP: 15 / 183 / 281 / 22 / 303)
+packages/domain test:       ---
+packages/domain test:       duration_ms: 1.164096
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: keeps every legacy building id as an alias
+packages/domain test:     ok 2 - keeps every legacy building id as an alias
+packages/domain test:       ---
+packages/domain test:       duration_ms: 0.33972
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: keeps Fast Sales as 32 AI agents and Elvis, with seven AI leaders on the leadership floor
+packages/domain test:     ok 3 - keeps Fast Sales as 32 AI agents and Elvis, with seven AI leaders on the leadership floor
+packages/domain test:       ---
+packages/domain test:       duration_ms: 1.849456
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: keeps the 21 named Rick Case associates and Elvis as human desks that can never run an agent
+packages/domain test:     ok 4 - keeps the 21 named Rick Case associates and Elvis as human desks that can never run an agent
+packages/domain test:       ---
+packages/domain test:       duration_ms: 0.175935
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: starts rental buildings empty, with asking rent only
+packages/domain test:     ok 5 - starts rental buildings empty, with asking rent only
+packages/domain test:       ---
+packages/domain test:       duration_ms: 0.603948
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: gives stable ids: the same legacy id always maps to the same uuid
+packages/domain test:     ok 6 - gives stable ids: the same legacy id always maps to the same uuid
+packages/domain test:       ---
+packages/domain test:       duration_ms: 0.337813
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: has an up-to-date generated seed migration
+packages/domain test:     ok 7 - has an up-to-date generated seed migration
+packages/domain test:       ---
+packages/domain test:       duration_ms: 2.756047
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     1..7
+packages/domain test: ok 1 - city catalog
+packages/domain test:   ---
+packages/domain test:   duration_ms: 8.091805
+packages/domain test:   type: 'suite'
+packages/domain test:   ...
+packages/domain test: 1..1
+packages/domain test: # tests 7
+packages/domain test: # suites 1
+packages/domain test: # pass 7
+packages/domain test: # fail 0
+packages/domain test: # cancelled 0
+packages/domain test: # skipped 0
+packages/domain test: # todo 0
+packages/domain test: # duration_ms 193.186915
+packages/domain test: Done
+apps/legacy test: # Subtest: outbound kill switch
+apps/legacy test:     # Subtest: stops every provider call while the switch is off, even in Live mode
+apps/legacy test:     ok 1 - stops every provider call while the switch is off, even in Live mode
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 428.034032
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: treats any value other than "true" as off
+apps/legacy test:     ok 2 - treats any value other than "true" as off
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1785.137267
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: never calls a provider in demo (simulate) mode, even with the switch on
+apps/legacy test:     ok 3 - never calls a provider in demo (simulate) mode, even with the switch on
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 349.571832
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: never "sends" a phone call: there is no phone provider
+apps/legacy test:     ok 4 - never "sends" a phone call: there is no phone provider
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.250275
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: does reach the provider when the switch is on and Delivery is Live (so the tests above are not vacuous)
+apps/legacy test:     ok 5 - does reach the provider when the switch is on and Delivery is Live (so the tests above are not vacuous)
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 352.983547
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..5
+apps/legacy test: ok 1 - outbound kill switch
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 2918.405014
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: saved city fails closed
+apps/legacy test:     # Subtest: refuses to start on malformed JSON and leaves state.json byte-identical
+apps/legacy test:     ok 1 - refuses to start on malformed JSON and leaves state.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 514.954838
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: refuses to start on unsupported version and leaves state.json byte-identical
+apps/legacy test:     ok 2 - refuses to start on unsupported version and leaves state.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 452.434514
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: refuses to start on missing lists and leaves state.json byte-identical
+apps/legacy test:     ok 3 - refuses to start on missing lists and leaves state.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 571.213576
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: refuses to start on malformed account file and leaves auth.json byte-identical
+apps/legacy test:     ok 4 - refuses to start on malformed account file and leaves auth.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 489.990723
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: saves the city readable by its owner only
+apps/legacy test:     ok 5 - saves the city readable by its owner only
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 519.792585
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: loadState never writes, and loads a good file
+apps/legacy test:     ok 6 - loadState never writes, and loads a good file
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 5.160062
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..6
+apps/legacy test: ok 2 - saved city fails closed
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 2554.311469
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: public pulse
+apps/legacy test:     # Subtest: returns only the fixed catalog: no names, work, status or activity counts
+apps/legacy test:     ok 1 - returns only the fixed catalog: no names, work, status or activity counts
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 527.095086
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..1
+apps/legacy test: ok 3 - public pulse
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 527.298865
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: the city has data to filter
+apps/legacy test:     # Subtest: has activity in several buildings
+apps/legacy test:     ok 1 - has activity in several buildings
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.493181
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..1
+apps/legacy test: ok 4 - the city has data to filter
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 1.18518
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: opening snapshot
+apps/legacy test:     # Subtest: gives the agency everything
+apps/legacy test:     ok 1 - gives the agency everything
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.784567
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: gives a client only its own buildings and their records
+apps/legacy test:     ok 2 - gives a client only its own buildings and their records
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 2.679436
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: shows other buildings only as unnamed shapes
+apps/legacy test:     ok 3 - shows other buildings only as unnamed shapes
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.999931
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: leaks no other building, agent or lead names
+apps/legacy test:     ok 4 - leaks no other building, agent or lead names
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 78.242153
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: covers a client with several buildings
+apps/legacy test:     ok 5 - covers a client with several buildings
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 5.039031
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: gives a client with no buildings nothing
+apps/legacy test:     ok 6 - gives a client with no buildings nothing
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.855446
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: keeps the browser mirror working on a filtered snapshot
+apps/legacy test:     ok 7 - keeps the browser mirror working on a filtered snapshot
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.297306
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..7
+apps/legacy test: ok 5 - opening snapshot
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 90.587008
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: live updates
+apps/legacy test:     # Subtest: only ever carry the client's own building
+apps/legacy test:     ok 1 - only ever carry the client's own building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 39.189862
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: pass through unchanged for the agency
+apps/legacy test:     ok 2 - pass through unchanged for the agency
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.279741
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..2
+apps/legacy test: ok 6 - live updates
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 39.597055
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: actions
+apps/legacy test:     # Subtest: lets the agency do anything
+apps/legacy test:     ok 1 - lets the agency do anything
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.239006
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: lets a client admin work its own building
+apps/legacy test:     ok 2 - lets a client admin work its own building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.084783
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: answers "not found" for anything in another client's building
+apps/legacy test:     ok 3 - answers "not found" for anything in another client's building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.185127
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: keeps renting floors with the agency
+apps/legacy test:     ok 4 - keeps renting floors with the agency
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.062621
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: lets a client viewer look but not change anything
+apps/legacy test:     ok 5 - lets a client viewer look but not change anything
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.065523
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..5
+apps/legacy test: ok 7 - actions
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 0.735459
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: accounts and clients
+apps/legacy test:     # Subtest: upgrades old admin and member accounts to agency owner and staff
+apps/legacy test:     ok 1 - upgrades old admin and member accounts to agency owner and staff
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.514978
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: never lets two clients own the same building
+apps/legacy test:     ok 2 - never lets two clients own the same building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.199682
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: requires a client for client roles and drops it for agency roles
+apps/legacy test:     ok 3 - requires a client for client roles and drops it for agency roles
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 2.921159
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: signs someone out when their access changes
+apps/legacy test:     ok 4 - signs someone out when their access changes
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 2.792157
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: signs a client's people out when its buildings change, but not when only the name changes
+apps/legacy test:     ok 5 - signs a client's people out when its buildings change, but not when only the name changes
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 3.069372
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: keeps at least one agency owner, and won't delete a client that still has people
+apps/legacy test:     ok 6 - keeps at least one agency owner, and won't delete a client that still has people
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.117534
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..6
+apps/legacy test: ok 8 - accounts and clients
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 11.897318
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: 1..8
+apps/legacy test: # tests 33
+apps/legacy test: # suites 8
+apps/legacy test: # pass 33
+apps/legacy test: # fail 0
+apps/legacy test: # cancelled 0
+apps/legacy test: # skipped 0
+apps/legacy test: # todo 0
+apps/legacy test: # duration_ms 7978.009503
+apps/legacy test: Done
+apps/api test$ node --import tsx --test test/env.test.ts test/common*.test.ts
+apps/web test$ node --test test/*.test.ts
+apps/worker test$ node --import tsx --test test/*.test.ts
+packages/legacy-import test$ node --import tsx --test test/plan.test.ts
+apps/web test: TAP version 13
+apps/api test: TAP version 13
+apps/worker test: TAP version 13
+packages/legacy-import test: TAP version 13
+apps/web test: # Subtest: the proof is a compact JWS with the header and claims DESIGN.md specifies
+apps/web test: ok 1 - the proof is a compact JWS with the header and claims DESIGN.md specifies
+apps/web test:   ---
+apps/web test:   duration_ms: 9.58261
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: defaults: iat is now in seconds and every proof gets a different jti
+apps/web test: ok 2 - defaults: iat is now in seconds and every proof gets a different jti
+apps/web test:   ---
+apps/web test:   duration_ms: 3.427048
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: the ES256 signature verifies with crypto.subtle.verify against the JWK in the header
+apps/web test: ok 3 - the ES256 signature verifies with crypto.subtle.verify against the JWK in the header
+apps/web test:   ---
+apps/web test:   duration_ms: 2.590226
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: RFC 7638 thumbprint: canonical JSON of crv, kty, x, y hashed with SHA-256
+apps/web test: ok 4 - RFC 7638 thumbprint: canonical JSON of crv, kty, x, y hashed with SHA-256
+apps/web test:   ---
+apps/web test:   duration_ms: 1.527754
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: RFC 7638 section 3.1 vector reproduced with the same canonicalisation code path
+apps/web test: ok 5 - RFC 7638 section 3.1 vector reproduced with the same canonicalisation code path
+apps/web test:   ---
+apps/web test:   duration_ms: 0.571738
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: htu is origin + path: the query string and fragment are dropped
+apps/web test: ok 6 - htu is origin + path: the query string and fragment are dropped
+apps/web test:   ---
+apps/web test:   duration_ms: 0.185127
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: toPublicJwk refuses anything but a P-256 public key
+apps/web test: ok 7 - toPublicJwk refuses anything but a P-256 public key
+apps/web test:   ---
+apps/web test:   duration_ms: 0.287455
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: 1..7
+apps/web test: # tests 7
+apps/web test: # suites 0
+apps/web test: # pass 7
+apps/web test: # fail 0
+apps/web test: # cancelled 0
+apps/web test: # skipped 0
+apps/web test: # todo 0
+apps/web test: # duration_ms 120.735889
+apps/web test: Done
+apps/worker test: # Subtest: accepts a complete development configuration
+apps/worker test: ok 1 - accepts a complete development configuration
+apps/worker test:   ---
+apps/worker test:   duration_ms: 2.013769
+apps/worker test:   type: 'test'
+apps/worker test:   ...
+apps/worker test: # Subtest: lists missing settings without printing values
+apps/worker test: ok 2 - lists missing settings without printing values
+apps/worker test:   ---
+apps/worker test:   duration_ms: 1.011046
+apps/worker test:   type: 'test'
+apps/worker test:   ...
+apps/worker test: # Subtest: refuses local-development credentials in production
+apps/worker test: ok 3 - refuses local-development credentials in production
+apps/worker test:   ---
+apps/worker test:   duration_ms: 0.398894
+apps/worker test:   type: 'test'
+apps/worker test:   ...
+apps/api test: # Subtest: accepts a complete configuration with safe defaults
+apps/api test: ok 1 - accepts a complete configuration with safe defaults
+apps/api test:   ---
+apps/api test:   duration_ms: 3.411493
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/api test: # Subtest: lists every missing setting without printing values
+apps/api test: ok 2 - lists every missing setting without printing values
+apps/api test:   ---
+apps/api test:   duration_ms: 0.938209
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/api test: # Subtest: refuses local-development credentials and dev routes in production
+apps/api test: ok 3 - refuses local-development credentials and dev routes in production
+apps/api test:   ---
+apps/api test:   duration_ms: 0.466436
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/api test: # Subtest: refuses insecure cookies and plain-http identity URLs in production
+apps/api test: ok 4 - refuses insecure cookies and plain-http identity URLs in production
+apps/api test:   ---
+apps/api test:   duration_ms: 0.503462
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/worker test: 1..3
+apps/worker test: # tests 3
+apps/worker test: # suites 0
+apps/worker test: # pass 3
+apps/worker test: # fail 0
+apps/worker test: # cancelled 0
+apps/worker test: # skipped 0
+apps/worker test: # todo 0
+apps/worker test: # duration_ms 304.035626
+apps/worker test: Done
+packages/legacy-import test: # Subtest: import plan
+packages/legacy-import test:     # Subtest: hashes records independently of key order
+packages/legacy-import test:     ok 1 - hashes records independently of key order
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 0.765481
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: reads legacy simulator minutes as UTC from the start date
+packages/legacy-import test:     ok 2 - reads legacy simulator minutes as UTC from the start date
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 0.365065
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: refuses a building-wide ownership rule on a building shared by two clients
+packages/legacy-import test:     ok 3 - refuses a building-wide ownership rule on a building shared by two clients
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 2.396986
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: quarantines a real contact with no explicit owner, and sends simulated ones to the demo tenant
+packages/legacy-import test:     ok 4 - quarantines a real contact with no explicit owner, and sends simulated ones to the demo tenant
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 3.443807
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: assigns a real contact mapped by id to exactly that tenant
+packages/legacy-import test:     ok 5 - assigns a real contact mapped by id to exactly that tenant
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 0.838136
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: never carries credentials into planned rows or quarantine
+packages/legacy-import test:     ok 6 - never carries credentials into planned rows or quarantine
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 0.927797
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: is deterministic: the same input gives the same plan
+packages/legacy-import test:     ok 7 - is deterministic: the same input gives the same plan
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 3.505481
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     1..7
+packages/legacy-import test: ok 1 - import plan
+packages/legacy-import test:   ---
+packages/legacy-import test:   duration_ms: 13.140302
+packages/legacy-import test:   type: 'suite'
+packages/legacy-import test:   ...
+apps/api test: 1..4
+apps/api test: # tests 4
+apps/api test: # suites 0
+apps/api test: # pass 4
+apps/api test: # fail 0
+apps/api test: # cancelled 0
+apps/api test: # skipped 0
+apps/api test: # todo 0
+apps/api test: # duration_ms 313.240503
+apps/api test: Done
+packages/legacy-import test: 1..1
+packages/legacy-import test: # tests 7
+packages/legacy-import test: # suites 1
+packages/legacy-import test: # pass 7
+packages/legacy-import test: # fail 0
+packages/legacy-import test: # cancelled 0
+packages/legacy-import test: # skipped 0
+packages/legacy-import test: # todo 0
+packages/legacy-import test: # duration_ms 311.779336
+packages/legacy-import test: Done
+[exit 0]

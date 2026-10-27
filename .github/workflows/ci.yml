@@ -50,12 +50,16 @@ jobs:
       - run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: '1'
+      - name: Build the first-party Keycloak provider (email sign-in codes)
+        run: pnpm keycloak:providers
       - name: Start services and wait for health checks
         run: pnpm infra:up
+      - name: Seed local Keycloak users and enable the email-code step
+        run: pnpm keycloak:seed
       - name: Apply migrations and create the dev bucket
         run: pnpm infra:init
       - run: pnpm db:verify-search
-      - name: Tenant isolation (RLS, app role) and legacy import integration tests
+      - name: Tenant isolation, legacy import, and API auth/access/realtime integration tests
         run: pnpm db:test
       - name: Backup and restore rehearsal (synthetic fixtures)
         run: pnpm legacy:rehearse-backup

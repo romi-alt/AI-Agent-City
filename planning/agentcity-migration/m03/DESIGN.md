@@ -88,6 +88,31 @@ browser ──https──► web (Next, :3000) ──/api/* proxy──► API (
 - **Membership writes** go through SECURITY DEFINER functions that check the actor's own membership in the
   database. The app role has no direct INSERT/UPDATE on the membership tables.
 
+## Response shapes and error codes (as implemented)
+
+| Endpoint | Success body |
+|---|---|
+| POST `/api/auth/login/start` | `{ authorizeUrl }` |
+| GET `/api/auth/me` | `{ subject, email, emailVerified, amr[], acr, authTime, stepUpAt, device: { id, label }, tenantId, workspaceId }` |
+| POST `/api/auth/logout` | `{ endSessionUrl }` |
+| GET `/api/auth/sessions` | `{ sessions: [{ id, deviceId, amr, acr, authTime, createdAt, lastSeenAt, current }], devices: [{ id, label, createdAt, lastSeenAt, current, … }] }` |
+| GET `/api/access/memberships` | `{ current, memberships: [{ tenantId, tenantName, tenantKind, agencyId, role, workspaceId, workspaces }] }` |
+| POST `/api/invitations` | `{ invitationId, tenantId, role, workspaceId, expiresAt, link }` (`link` = `PUBLIC_ORIGIN/invitations/accept#token=…`, shown once, `Cache-Control: no-store`) |
+| POST `/api/invitations/accept` | `{ tenantId, workspaceId, role }` |
+
+Error codes beyond `AUTH_ERRORS`:
+- **Sign-in:** `login_failed` (400), `invalid_return_to`, `invalid_device_key`, `invalid_request`, `idp_unavailable`.
+- **Invitations:**
+  - 410: `invitation_invalid`, `invitation_expired`, `invitation_used`
+  - 403: `invitation_email_mismatch`, `email_not_verified`
+  - 409: `invitation_not_pending`
+- **Members:** `last_admin` (409), `not_found` (404).
+
+Token rules from `IDP.md`:
+- **Normal sign-in:** sends `acr_values=1`, and refuses levels other than `"1"`/`"2"`.
+- **Step-up:** needs `acr = "2"`, `passkey` in `amr`, a fresh `auth_time` and the same `sub`.
+- **SSO:** recognised from the `idp` claim (`agency-sso`).
+
 ## Device binding
 
 - **Key:** on first use the browser creates an ECDSA P-256 key pair with WebCrypto, `extractable: false`, and keeps

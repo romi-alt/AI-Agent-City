@@ -124,6 +124,8 @@ No business feature was ported. The new apps prove the wiring (web → API → d
 
 ## ADR-008: identity placeholder
 
+- **Superseded in M03:** the public `agentcity-web` client was removed; the API is now a confidential OIDC client
+  (`agentcity-bff`). See `m03/DESIGN.md` and `m03/IDP.md`.
 - **Decision:** Keycloak 26.8.1 runs locally with realm `agentcity` and one public client, `agentcity-web`
   (authorization code + PKCE S256, redirect `http://localhost:3000/*`).
   - The realm has no users.

@@ -22,7 +22,7 @@
     "infra:init": "pnpm db:migrate && pnpm --filter @agentcity/api run storage:init",
     "db:migrate": "pnpm --filter @agentcity/db run migrate",
     "db:verify-search": "pnpm --filter @agentcity/db run verify-search",
-    "db:test": "pnpm --filter @agentcity/db --filter @agentcity/legacy-import run test:integration",
+    "db:test": "pnpm --filter @agentcity/db --filter @agentcity/legacy-import --filter @agentcity/api run test:integration",
     "legacy:import": "pnpm --filter @agentcity/legacy-import run legacy-import",
     "legacy:rehearse-backup": "pnpm --filter @agentcity/legacy-import run rehearse:backup",
     "dev:api": "pnpm --filter @agentcity/api run dev",
