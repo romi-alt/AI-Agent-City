@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { Sim } from '../sim';
-import type { Building } from '../types';
+import type { Sim } from '../core/sim';
+import type { Building } from '../core/types';
 import { label, type View } from './engine';
 import { car, decorBuilding, facadeMaterial, flat, FLOOR_H, tree } from './meshes';
 import { roadTexture } from './textures';

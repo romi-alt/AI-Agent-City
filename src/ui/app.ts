@@ -1,35 +1,69 @@
+import { api, ApiError, stream, type Integrations, type Me, type Person } from '../api';
+import { clock, Sim } from '../core/sim';
+import type { Building, Floor } from '../core/types';
 import { CityView } from '../scene/cityView';
 import { Engine } from '../scene/engine';
-import { OfficeView } from '../scene/officeView';
-import { SOCIAL_TASKS } from '../data/tasks';
-import { clock, DEALER_STAGES, Sim, TRAINING_STAGES } from '../sim';
-import type { Agent, Building } from '../types';
+import { OfficeView, type OfficeScreens } from '../scene/officeView';
+import { editing, esc, formData, money, toast } from './util';
+import * as V from './views';
 
-type ViewMode = 'office' | 'city' | 'dashboard';
-type Tab = 'live' | 'crm' | 'content' | 'team' | 'ok' | 'floors';
+export type ViewMode = 'office' | 'city' | 'dashboard';
+export type Overlay = 'crm' | 'content' | 'outbox' | 'admin' | 'screen';
+export type Tab = 'live' | 'crm' | 'content' | 'team' | 'ok' | 'floors';
+export type ContentTab = 'calendar' | 'posts' | 'inbox' | 'analytics' | 'insights' | 'reports';
 
-const esc = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
-const money = (n: number) => n ? `$${n.toLocaleString()}` : '—';
+const SPEEDS: [number, string][] = [[0, '❚❚'], [1 / 120, 'Real time'], [1, '1×'], [5, '5×']];
+
+function stored(key: string, fallback: string) {
+  try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
+}
+function store(key: string, v: string) {
+  try { localStorage.setItem(key, v); } catch { /* private mode */ }
+}
 
 export class App {
-  sim = new Sim();
+  sim: Sim;
+  me: NonNullable<Me['user']>;
+  people: Person[];
+  integrations: Integrations;
   engine: Engine;
-  mode: ViewMode = 'city';
+  mode: ViewMode = 'office';
+  overlay?: Overlay;
   tab: Tab = 'live';
+  contentTab: ContentTab = 'calendar';
   buildingId?: string;
   level?: number;
   agentId?: string;
-  speed = 1;
+  leadId?: string;
+  /** Building the CRM board / content wall is looking at. */
+  boardBuilding = 'fast-sales';
+  crmQuery = '';
+  realOnly = false;
+  outboxFilter = 'all';
+  adminData?: V.AdminData;
   private city: CityView;
   private office?: OfficeView;
-  private timer?: number;
-  private $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+  private stopStream: () => void;
+  private queued = false;
+  /** Lists only repaint from live updates once a second and never mid-click, so they don't jump under the cursor. */
+  private force = false;
+  private pointerDown = false;
+  private lastHeavy = 0;
+  private later?: number;
+  private root: HTMLElement;
+  private onSignedOut: () => void;
+  $ = <T extends HTMLElement = HTMLElement>(sel: string) => this.root.querySelector<T>(sel)!;
 
-  constructor(root: HTMLElement) {
-    root.innerHTML = SHELL;
+  constructor(root: HTMLElement, state: Awaited<ReturnType<typeof api.state>>, onSignedOut: () => void) {
+    this.root = root;
+    this.onSignedOut = onSignedOut;
+    this.sim = new Sim(state.snapshot);
+    this.me = state.me.user!;
+    this.people = state.people;
+    this.integrations = state.integrations;
+    root.innerHTML = V.shell(this);
     this.engine = new Engine(this.$('#stage-3d'));
     this.city = new CityView(this.sim, id => this.selectBuilding(id));
-    this.engine.setView(this.city);
     this.engine.onPick = o => {
       const d = o.userData;
       if (d.agentId) return this.selectAgent(d.agentId);
@@ -38,19 +72,46 @@ export class App {
         else this.selectBuilding(d.buildingId);
       }
     };
+    const night = stored('fs-theme', 'light') === 'dark';
+    document.documentElement.dataset.theme = night ? 'dark' : 'light';
+    this.engine.setNight(night);
     this.bind();
-    this.sim.onChange(() => this.refresh());
-    this.setSpeed(1);
-    this.refresh();
+    this.sim.onChange(() => this.refresh(false));
+    this.stopStream = stream(p => this.sim.applyPatch(p), p => { this.people = p; this.syncMe(); this.refresh(false); }, () => this.signedOut());
+
+    // Start in "your office" like the reference: your desk's floor, else the Training Center's leadership floor.
+    const desk = this.me.agentId ? this.sim.agent(this.me.agentId) : undefined;
+    this.enterFloor(desk?.buildingId ?? 'fast-sales', desk?.floor ?? 12);
+  }
+
+  private syncMe() {
+    const p = this.people.find(x => x.id === this.me.id);
+    if (p) Object.assign(this.me, { onDuty: p.onDuty, agentId: p.agentId });
+  }
+
+  private signedOut() {
+    this.stopStream();
+    this.engine.renderer.setAnimationLoop(null);
+    this.onSignedOut();
+  }
+
+  get isAdmin() { return this.me.role === 'admin'; }
+  get building(): Building | undefined { return this.buildingId ? this.sim.building(this.buildingId) : undefined; }
+  get floor(): Floor | undefined { return this.building?.floors.find(f => f.level === this.level); }
+  /** The floor that is "Your office" in the floor picker. */
+  get myFloor() {
+    const a = this.me.agentId ? this.sim.agent(this.me.agentId) : undefined;
+    return a ? { buildingId: a.buildingId, level: a.floor } : undefined;
   }
 
   // ── navigation ────────────────────────────────────────────────
   selectBuilding(id: string | undefined) {
     this.buildingId = id;
     this.agentId = undefined;
+    this.overlay = undefined;
     if (this.mode !== 'city') this.setMode('city');
     this.city.focus(id, this.engine.camera, this.engine.controls);
-    if (id) this.tab = this.tab === 'ok' ? 'ok' : 'floors';
+    if (id) { this.tab = this.tab === 'ok' ? 'ok' : 'floors'; this.boardBuilding = id; }
     this.refresh();
   }
 
@@ -59,9 +120,11 @@ export class App {
     level ??= b.floors.find(f => !f.vacant)?.level ?? b.floors[0].level;
     const f = b.floors.find(x => x.level === level)!;
     this.buildingId = buildingId;
+    this.boardBuilding = buildingId;
     this.level = level;
     this.agentId = undefined;
-    this.office = new OfficeView(b, f, id => this.selectAgent(id));
+    this.overlay = undefined;
+    this.office = new OfficeView(b, f, id => this.selectAgent(id), () => this.screens());
     this.mode = 'office';
     this.engine.setView(this.office);
     if (this.tab === 'floors' && !f.vacant) this.tab = 'team';
@@ -69,7 +132,11 @@ export class App {
   }
 
   setMode(m: ViewMode) {
-    if (m === 'office') return this.enterFloor(this.buildingId ?? 'fast-sales', this.level);
+    this.overlay = undefined;
+    if (m === 'office') {
+      const mine = this.myFloor;
+      return this.enterFloor(this.buildingId ?? mine?.buildingId ?? 'fast-sales', this.level ?? mine?.level);
+    }
     this.mode = m;
     if (m === 'city' && this.engine.view !== this.city) {
       this.office = undefined;
@@ -79,265 +146,309 @@ export class App {
     this.refresh();
   }
 
-  selectAgent(id: string) {
+  selectAgent(id: string, focus = false) {
     const a = this.sim.agent(id);
     if (!a) return;
     if (this.mode !== 'office' || this.level !== a.floor || this.buildingId !== a.buildingId) this.enterFloor(a.buildingId, a.floor);
     this.agentId = id;
+    this.overlay = undefined;
     this.tab = a.status === 'needs-you' ? 'ok' : 'team';
+    if (focus) this.office?.focusAgent(id, this.engine.camera, this.engine.controls);
     this.refresh();
   }
 
-  setSpeed(s: number) {
-    this.speed = s;
-    clearInterval(this.timer);
-    if (s) this.timer = window.setInterval(() => this.sim.tick(), 1000 / s);
+  openOverlay(o: Overlay | undefined) {
+    this.overlay = o;
+    if (o === 'admin') this.loadAdmin();
+    if (o === 'screen') document.documentElement.requestFullscreen?.().catch(() => {});
+    else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     this.refresh();
   }
 
-  setNight(n: boolean) {
-    this.engine.setNight(n);
-    document.documentElement.dataset.theme = n ? 'dark' : 'light';
+  openLead(id: string | undefined) {
+    this.leadId = id;
     this.refresh();
+  }
+
+  async loadAdmin() {
+    if (!this.isAdmin) { this.adminData = { users: [], signins: [] }; return; }
+    try {
+      const [users, signins, integrations] = await Promise.all([
+        api.get<V.AdminData['users']>('/api/admin/users'), api.get<V.AdminData['signins']>('/api/admin/signins'), api.get<Integrations>('/api/admin/integrations'),
+      ]);
+      this.adminData = { users, signins };
+      this.integrations = integrations;
+      this.refresh();
+    } catch (e) { toast((e as Error).message, 'err'); }
+  }
+
+  // ── what the office screens show ──────────────────────────────
+  private screens(): OfficeScreens {
+    const b = this.building;
+    const k = this.sim.kpis(b?.id);
+    const t = b?.kind === 'training';
+    const week = Array.from({ length: 7 }, (_, i) => this.sim.today + i);
+    const colors: Record<string, string> = { idea: '#64748b', draft: '#a78bfa', 'asset-ready': '#38bdf8', 'needs-approval': '#ef4444', scheduled: '#f5b335', published: '#22c55e', rejected: '#475569' };
+    return {
+      live: {
+        title: b?.short ?? 'City',
+        lines: [['Leads today', String(k.leadsToday)], [t ? 'Booked calls · 24h' : 'Appointments · 24h', String(k.booked24h)], [t ? 'Enrolled this month' : 'Sold this month', String(k.closedMonth)], ['Revenue this month', money(k.revenueMonth)], ['Waiting over 1h', String(k.waiting)], ['Needs you', String(k.needsYou)]],
+      },
+      wall: week.map(d => ({
+        day: this.sim.dayLabel(d).replace(/,.*/, '') + ' ' + this.sim.dateOf(d).getUTCDate(),
+        items: [...this.sim.content.values()].filter(c => c.day === d && (!b || c.buildingId === b.id)).map(c => ({ text: `${c.time} ${c.platform} · ${c.topic}`, color: colors[c.status] })),
+      })),
+    };
+  }
+
+  // ── rendering (batched to one paint per frame) ────────────────
+  refresh(force = true) {
+    if (force) this.force = true;
+    if (this.queued) return;
+    this.queued = true;
+    requestAnimationFrame(() => { this.queued = false; this.render(); });
+  }
+
+  private render() {
+    const b = this.building, f = this.floor;
+    const now = performance.now();
+    const heavy = this.force || (!this.pointerDown && now - this.lastHeavy > 1000);
+    if (heavy) { this.force = false; this.lastHeavy = now; }
+    else if (!this.later) this.later = window.setTimeout(() => { this.later = undefined; this.refresh(false); }, 1000);
+    this.$('#clock').textContent = `${this.sim.dayLabel(this.sim.today).replace(/,.*/, '')} ${clock(this.sim.now)}`;
+    this.$('#ctx').textContent = this.mode === 'office' && b && f ? `${b.name} · floor L${f.level}` : b ? b.name : 'Sales City · all buildings';
+    this.root.querySelectorAll<HTMLElement>('[data-act^="mode:"]').forEach(el => el.classList.toggle('on', !this.overlay && el.dataset.act === `mode:${this.mode}`));
+    const duty = this.$('#duty');
+    duty.textContent = this.me.onDuty ? '● ON DUTY' : '○ OFF DUTY';
+    duty.classList.toggle('off', !this.me.onDuty);
+    this.$('#speed').innerHTML = this.isAdmin ? SPEEDS.map(([v, l]) => `<button data-act="speed:${v}" class="${Math.abs(this.sim.settings.speed - v) < 1e-6 ? 'on' : ''}">${l}</button>`).join('') : '';
+    this.$('#night').textContent = this.engine.night ? '☀' : '☾';
+
+    this.$('#chip').innerHTML = this.mode === 'office' && b && f
+      ? `<b>${esc(b.short)} · floor L${f.level}</b><span>${esc(f.name)} — tap ${f.agents.slice(0, 2).map(a => esc(a.name)).join(', ') || 'a floor'}${f.agents.length > 2 ? ' or any agent' : ''}. Drag to look around.</span>`
+      : b ? `<b>${esc(b.name)}</b><span>Tap it again or pick a floor to go inside.</span>`
+        : `<b>Sales City</b><span>${this.sim.buildings.length} buildings · tap one to see its floors. Drag to look around.</span>`;
+
+    this.city.refresh();
+    if (this.office) { this.office.selected = this.agentId; this.office.refresh(); }
+    if (!heavy) return;
+
+    const floors = this.$('#floors');
+    if (!editing(floors)) floors.innerHTML = b ? V.floorPicker(this, b) : '';
+
+    const dash = this.$('#dash');
+    const showDash = this.mode === 'dashboard' && !this.overlay;
+    dash.hidden = !showDash;
+    if (showDash && !editing(dash)) dash.innerHTML = V.dashboard(this);
+
+    const ov = this.$('#overlay');
+    ov.hidden = !this.overlay;
+    ov.className = `overlay ov-${this.overlay ?? ''}`;
+    if (this.overlay && !editing(ov)) {
+      const scroll = ov.querySelector('.ov-body')?.scrollTop ?? 0;
+      ov.innerHTML = V.overlay(this, this.overlay);
+      const body = ov.querySelector('.ov-body');
+      if (body) body.scrollTop = scroll;
+    }
+
+    this.$('#panel-head').innerHTML = V.panelHead(this);
+    this.$('#tabs').innerHTML = V.tabs(this);
+    const body = this.$('#panel-body');
+    if (!editing(body)) {
+      const scroll = body.scrollTop;
+      body.innerHTML = V.panel(this);
+      body.scrollTop = scroll;
+    }
+
+    const drawer = this.$('#drawer');
+    drawer.hidden = !this.leadId;
+    if (this.leadId && !editing(drawer)) {
+      const lead = this.sim.leads.get(this.leadId);
+      if (!lead) { this.leadId = undefined; drawer.hidden = true; }
+      else { const s = drawer.querySelector('.drawer-body')?.scrollTop ?? 0; drawer.innerHTML = V.leadDrawer(this, lead); const nb = drawer.querySelector('.drawer-body'); if (nb) nb.scrollTop = s; }
+    }
   }
 
   // ── events ────────────────────────────────────────────────────
   private bind() {
-    document.addEventListener('click', e => {
+    document.addEventListener('pointerdown', () => { this.pointerDown = true; }, true);
+    document.addEventListener('pointerup', () => { this.pointerDown = false; }, true);
+    this.root.addEventListener('click', e => {
       const el = (e.target as HTMLElement).closest<HTMLElement>('[data-act]');
       if (!el) return;
-      const [act, arg, arg2] = el.dataset.act!.split(':');
-      switch (act) {
-        case 'mode': return this.setMode(arg as ViewMode);
-        case 'tab': this.tab = arg as Tab; return this.refresh();
-        case 'building': return arg ? this.selectBuilding(arg) : this.selectBuilding(undefined);
-        case 'floor': return this.enterFloor(arg, Number(arg2));
-        case 'agent': return this.selectAgent(arg);
-        case 'cam': return this.engine.nudge(arg as never);
-        case 'speed': return this.setSpeed(Number(arg));
-        case 'night': return this.setNight(!this.engine.night);
-        case 'approve': return this.sim.resolve(arg, arg2 === 'yes');
-        case 'approve-all': for (const p of [...this.sim.approvals]) this.sim.resolve(p.id, true); return;
-        case 'report': return this.openReport();
-        case 'close': this.$('#modal').hidden = true; return;
-        case 'copy-report': navigator.clipboard?.writeText(this.reportText()); el.textContent = 'Copied ✓'; return;
-        case 'boss': return this.selectAgent('fast-sales-L12-0');
-        case 'rent': {
-          const name = prompt(`Tenant name for L${arg2}?`, 'New Dealer Group');
-          if (name?.trim()) this.sim.rentFloor(arg, Number(arg2), name.trim());
-          if (this.mode === 'office' && this.buildingId === arg && this.level === Number(arg2)) this.enterFloor(arg, Number(arg2));
-          return;
-        }
-      }
+      const [act, ...args] = el.dataset.act!.split(':');
+      this.act(act, args, el).catch(err => toast(err instanceof Error ? err.message : String(err), 'err'));
     });
+    this.root.addEventListener('submit', e => {
+      const form = (e.target as HTMLElement).closest<HTMLFormElement>('form[data-form]');
+      if (!form) return;
+      e.preventDefault();
+      const btn = form.querySelector<HTMLButtonElement>('button[type=submit]');
+      if (btn) btn.disabled = true;
+      this.submit(form.dataset.form!, formData(form), form)
+        .catch(err => toast(err instanceof Error ? err.message : String(err), 'err'))
+        .finally(() => { if (btn) btn.disabled = false; (document.activeElement as HTMLElement | null)?.blur?.(); this.refresh(); });
+    });
+    this.root.addEventListener('change', e => {
+      const el = e.target as HTMLSelectElement | HTMLInputElement;
+      const ch = el.dataset.change;
+      if (!ch) return;
+      if (ch === 'board') { this.boardBuilding = el.value; el.blur(); this.refresh(); }
+      if (ch === 'realOnly') { this.realOnly = (el as HTMLInputElement).checked; this.refresh(); }
+      if (ch === 'outbox') { this.outboxFilter = el.value; el.blur(); this.refresh(); }
+      if (ch === 'stage' && this.leadId) { api.action({ type: 'leadUpdate', id: this.leadId, fields: { stage: el.value } }).catch(err => toast(err.message, 'err')); el.blur(); }
+    });
+    this.root.addEventListener('input', e => {
+      const el = e.target as HTMLInputElement;
+      if (el.dataset.input === 'crmq') { this.crmQuery = el.value; this.renderBoardOnly(); }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      if (this.leadId) this.openLead(undefined);
+      else if (!this.$('#modal').hidden) this.closeModal();
+      else if (this.overlay) this.openOverlay(undefined);
+    });
+    document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && this.overlay === 'screen') this.openOverlay(undefined); });
   }
 
-  // ── rendering ─────────────────────────────────────────────────
-  private refresh() {
-    const b = this.buildingId ? this.sim.building(this.buildingId) : undefined;
-    const f = b && this.level != null ? b.floors.find(x => x.level === this.level) : undefined;
-
-    this.$('#clock').textContent = clock(this.sim.now);
-    this.$('#ctx').textContent = this.mode === 'office' && b && f ? `${b.name} · floor L${f.level}` : b ? b.name : 'Sales City · all buildings';
-    document.querySelectorAll<HTMLElement>('[data-act^="mode:"]').forEach(el => el.classList.toggle('on', el.dataset.act === `mode:${this.mode}`));
-    document.querySelectorAll<HTMLElement>('[data-act^="speed:"]').forEach(el => el.classList.toggle('on', el.dataset.act === `speed:${this.speed}`));
-    this.$('#night').textContent = this.engine.night ? '☀' : '☾';
-
-    const chip = this.$('#chip');
-    chip.innerHTML = this.mode === 'office' && b && f
-      ? `<b>${esc(b.short)} · floor L${f.level}</b><span>${esc(f.name)} — tap an agent. Drag to look around.</span>`
-      : b ? `<b>${esc(b.name)}</b><span>Click again or pick a floor to go inside.</span>`
-        : `<b>Sales City</b><span>${this.sim.buildings.length} buildings · tap one to see its floors. Drag to look around.</span>`;
-
-    this.$('#dash').hidden = this.mode !== 'dashboard';
-    if (this.mode === 'dashboard') this.$('#dash').innerHTML = this.dashboard();
-    this.$('#floors').innerHTML = b ? this.floorPicker(b) : '';
-
-    this.city.refresh();
-    if (this.office) { this.office.selected = this.agentId; this.office.refresh(); }
-
-    const body = this.$('#panel-body');
-    const scroll = body.scrollTop;
-    this.$('#panel-head').innerHTML = `<div class="logo">FS</div><div><b>${esc(b?.name ?? 'Sales City')}</b><small>${b ? `${b.floors.length} floors · ${b.kind}` : 'Virtual sales city'}</small></div>`;
-    const okN = this.sim.approvals.filter(p => !b || p.buildingId === b.id).length;
-    this.$('#tabs').innerHTML = (['live', 'crm', 'content', 'team', 'ok', 'floors'] as Tab[]).map(t =>
-      `<button data-act="tab:${t}" class="${t === this.tab ? 'on' : ''}">${t.toUpperCase()}${t === 'ok' && okN ? `<i class="n">${okN}</i>` : ''}</button>`).join('');
-    body.innerHTML = this[this.tab](b);
-    body.scrollTop = scroll;
+  /** The CRM search box keeps focus, so re-render only the board columns while typing. */
+  private renderBoardOnly() {
+    const cols = this.root.querySelector('.kanban');
+    if (cols) cols.outerHTML = V.kanban(this);
   }
 
-  private floorPicker(b: Building) {
-    return `<div class="fp-head">${esc(b.short)}</div>` + b.floors.map(f => {
-      const here = this.mode === 'office' && f.level === this.level;
-      const needs = f.agents.some(a => a.status === 'needs-you');
-      const label = f.vacant ? (f.rent ? `For rent $${f.rent}` : 'Available') : esc(f.name);
-      return `<button data-act="floor:${b.id}:${f.level}" class="${here ? 'on' : ''} ${f.vacant ? 'vac' : ''}">
-        <i class="dot ${needs ? 'needs' : f.vacant ? '' : 'ok'}"></i>L${f.level} <span>${label}</span></button>`;
-    }).join('');
-  }
-
-  private live(b?: Building) {
-    const k = this.sim.kpis(b?.id);
-    const training = b?.kind === 'training';
-    const stages = training ? TRAINING_STAGES : DEALER_STAGES;
-    const leads = this.sim.leads.filter(l => (b ? l.buildingId === b.id : this.sim.building(l.buildingId).kind !== 'training'));
-    const max = Math.max(1, ...stages.map(s => leads.filter(l => l.stage === s).length));
-    const feed = this.sim.feed.filter(x => !b || x.buildingId === b.id).slice(0, 30);
-    return `
-      <div class="kpis">
-        ${tile('Leads today', k.leadsToday)}${tile(training ? 'Booked calls' : 'Appointments', k.booked)}
-        ${tile(training ? 'Enrolled' : 'Sold', k.closed)}${tile('Revenue', money(k.revenue))}
-        ${tile('Tasks done', k.tasksDone)}${tile('Waiting over 1h', k.waiting, k.waiting > 0)}
-      </div>
-      <button class="cta" data-act="report">Daily email report</button>
-      <h4>${training ? 'Enrollment' : 'Sales'} pipeline <span>${leads.filter(l => l.stage !== stages.at(-1)).length} open</span></h4>
-      ${stages.map(s => { const n = leads.filter(l => l.stage === s).length; return `<div class="bar"><span>${s}</span><i><b style="width:${(n / max) * 100}%"></b></i><em>${n}</em></div>`; }).join('')}
-      <h4>What's happening <span>${k.agentsWorking}/${k.agentsTotal} agents working</span></h4>
-      <ul class="feed">${feed.map(x => `<li class="${x.kind}"><time>${clock(x.t)}</time><div><b>${esc(x.agent)}</b>${b ? '' : ` <small>${esc(this.sim.building(x.buildingId).short)}</small>`} · ${esc(x.text)}</div></li>`).join('') || '<li class="empty">Agents are warming up…</li>'}</ul>`;
-  }
-
-  private crm(b?: Building) {
-    const leads = this.sim.leads.filter(l => !b || l.buildingId === b.id);
-    const stages = b?.kind === 'training' ? TRAINING_STAGES : b ? DEALER_STAGES : [...new Set([...DEALER_STAGES, ...TRAINING_STAGES])];
-    return `<h4>Pipeline <span>${leads.length} leads</span></h4>` + stages.map(s => {
-      const rows = leads.filter(l => l.stage === s).sort((x, y) => x.touchedAt - y.touchedAt);
-      if (!rows.length) return '';
-      return `<div class="stage"><div class="stage-h">${s}<span>${rows.length}</span></div>${rows.slice(0, 25).map(l => `
-        <div class="lead"><div><b>${esc(l.name)}</b><small>${esc(l.source)} · ${esc(l.interest)}${b ? '' : ` · ${esc(this.sim.building(l.buildingId).short)}`}</small></div>
-        <em>${age(this.sim.now - l.touchedAt)}</em></div>`).join('')}</div>`;
-    }).join('');
-  }
-
-  private content(b?: Building) {
-    const social = this.sim.agents(b?.id).filter(a => a.taskSet === 'social');
-    const counts = new Map<string, number>();
-    for (const [bid, byCat] of this.sim.stats) if (!b || bid === b.id) for (const [cat, r] of byCat) counts.set(cat, (counts.get(cat) ?? 0) + Object.values(r).reduce((s, n) => s + n, 0));
-    return `<h4>Social media agents <span>${social.length}</span></h4>
-      <div class="chips">${social.slice(0, 40).map(a => agentChip(a, this.sim)).join('')}</div>
-      <h4>Social tasks</h4>
-      <ul class="tasks">${SOCIAL_TASKS.map(t => `<li><div><b>${t.name}</b><small>${t.detail}</small></div><em>${counts.get(t.name) ?? 0}</em></li>`).join('')}</ul>`;
-  }
-
-  private team(b?: Building) {
-    const a = this.agentId ? this.sim.agent(this.agentId) : undefined;
-    let html = '';
-    if (a) {
-      const hist = this.sim.feed.filter(x => x.agent === a.name && x.buildingId === a.buildingId).slice(0, 12);
-      html += `<div class="agent-card kind-${a.kind}">
-        <div class="ac-h"><b>${esc(a.name)}</b><span class="role">${esc(a.role)}</span><span class="st st-${a.status}">${a.status}</span></div>
-        <small>${a.kind === 'ai' ? 'AI agent' : 'Human'} · ${esc(this.sim.building(a.buildingId).short)} L${a.floor} · ${a.done} tasks done</small>
-        <p>${a.current ? `Now: ${esc(a.current.title)}${a.current.channel ? ` <i class="ch">${a.current.channel}</i>` : ''}` : 'Between tasks'}</p>
-        <ul class="feed">${hist.map(x => `<li class="${x.kind}"><time>${clock(x.t)}</time><div>${esc(x.text)}</div></li>`).join('')}</ul></div>`;
-    }
-    if (this.mode === 'office' && b && this.level != null) {
-      const f = b.floors.find(x => x.level === this.level)!;
-      return html + `<h4>L${f.level} · ${esc(f.name)}</h4>` + (f.agents.map(x => agentRow(x)).join('') || '<p class="muted">No one on this floor yet.</p>');
-    }
-    if (b) return html + b.floors.filter(f => f.agents.length).map(f => `<h4>L${f.level} · ${esc(f.name)}</h4>${f.agents.map(x => agentRow(x)).join('')}`).join('');
-    return html + `<h4>Buildings</h4>` + this.sim.buildings.map(x => {
-      const ag = x.floors.flatMap(f => f.agents);
-      return `<button class="brow" data-act="building:${x.id}"><i style="background:${x.color}"></i><b>${esc(x.name)}</b><em>${ag.filter(y => y.status === 'working').length}/${ag.length}</em></button>`;
-    }).join('');
-  }
-
-  private ok(b?: Building) {
-    const list = this.sim.approvals.filter(p => !b || p.buildingId === b.id);
-    if (!list.length) return '<p class="muted">Nothing needs your OK right now. Agents flag offers and posts here before they go out.</p>';
-    return `<h4>Needs your OK <span><button class="link" data-act="approve-all">Approve all</button></span></h4>` + list.map(p => {
-      const a = this.sim.agent(p.agentId);
-      return `<div class="approval"><div><b>${esc(a?.name ?? '?')}</b> <small>${esc(this.sim.building(p.buildingId).short)} L${a?.floor} · ${clock(p.t)}</small><p>${esc(p.text)}</p></div>
-        <div class="btns"><button data-act="approve:${p.id}:yes" class="yes">Approve</button><button data-act="approve:${p.id}:no">No</button></div></div>`;
-    }).join('');
-  }
-
-  private floors(b?: Building) {
-    if (!b) return `<h4>Pick a building</h4>` + this.sim.buildings.map(x =>
-      `<button class="brow" data-act="building:${x.id}"><i style="background:${x.color}"></i><b>${esc(x.name)}</b><em>${x.floors.length} fl</em></button>`).join('');
-    return `<h4>${esc(b.name)} <span><button class="link" data-act="building:">← all</button></span></h4>` + b.floors.map(f => `
-      <div class="floor-row ${f.vacant ? 'vac' : ''}">
-        <button data-act="floor:${b.id}:${f.level}"><b>L${f.level}</b><span>${esc(f.vacant ? (f.rent ? 'Floor for rent' : 'Empty floor') : f.name)}</span>
-        <em>${f.vacant ? (f.rent ? `$${f.rent}/mo` : 'Available') : `${f.agents.length} agents`}</em></button>
-        ${f.vacant && f.rent ? `<button class="rent" data-act="rent:${b.id}:${f.level}">Rent</button>` : ''}
-      </div>`).join('');
-  }
-
-  private dashboard() {
-    const k = this.sim.kpis();
-    return `<div class="dash-in"><h2>City dashboard <small>${clock(this.sim.now)}</small></h2>
-      <div class="kpis wide">${tile('Leads today', k.leadsToday)}${tile('Booked', k.booked)}${tile('Closed', k.closed)}${tile('Revenue', money(k.revenue))}${tile('Tasks done', k.tasksDone)}${tile('Needs you', this.sim.approvals.length, this.sim.approvals.length > 0)}</div>
-      <div class="cards">${this.sim.buildings.map(b => {
-        const kb = this.sim.kpis(b.id);
-        const vac = b.floors.filter(f => f.vacant).length;
-        return `<button class="card" data-act="building:${b.id}" style="--c:${b.color};--a:${b.accent}">
-          <div class="card-h"><b>${esc(b.name)}</b><small>${b.floors.length} floors · ${vac} available</small></div>
-          <div class="card-k"><span><em>${kb.agentsWorking}/${kb.agentsTotal}</em>working</span><span><em>${kb.tasksDone}</em>tasks</span><span><em>${kb.closed}</em>closed</span><span><em>${kb.waiting}</em>waiting</span></div></button>`;
-      }).join('')}</div></div>`;
-  }
-
-  private openReport() {
-    const b = this.buildingId ? this.sim.building(this.buildingId) : undefined;
-    const rows = this.sim.report(b?.id);
+  modal(html: string) {
     const m = this.$('#modal');
     m.hidden = false;
-    m.innerHTML = `<div class="sheet"><div class="sheet-h"><b>Daily email report — ${esc(b?.name ?? 'All buildings')}</b><button data-act="close">✕</button></div>
-      <table><thead><tr><th>Task</th><th>Email</th><th>Phone</th><th>Text</th><th>Other</th></tr></thead><tbody>
-      ${rows.map(r => `<tr><td>${esc(r.category)}</td><td>${r.email}</td><td>${r.phone}</td><td>${r.text}</td><td>${r.other}</td></tr>`).join('') || '<tr><td colspan="5">No tasks completed yet.</td></tr>'}
-      </tbody></table><div class="sheet-f"><button class="cta" data-act="copy-report">Copy as email</button></div></div>`;
+    m.innerHTML = `<div class="sheet">${html}</div>`;
+    m.querySelector<HTMLInputElement>('input,textarea')?.focus();
+  }
+  closeModal() { this.$('#modal').hidden = true; this.$('#modal').innerHTML = ''; }
+
+  private async act(act: string, args: string[], el: HTMLElement) {
+    const [a1, a2] = args;
+    switch (act) {
+      case 'mode': return this.setMode(a1 as ViewMode);
+      case 'overlay': return this.openOverlay((a1 || undefined) as Overlay | undefined);
+      case 'tab': this.tab = a1 as Tab; return this.refresh();
+      case 'ctab': this.contentTab = a1 as ContentTab; return this.refresh();
+      case 'building': return this.selectBuilding(a1 || undefined);
+      case 'floor': return this.enterFloor(a1, Number(a2));
+      case 'myoffice': { const m = this.myFloor; return m ? this.enterFloor(m.buildingId, m.level) : this.enterFloor('fast-sales', 12); }
+      case 'agent': return this.selectAgent(a1, a2 === 'focus');
+      case 'cam': return this.engine.nudge(a1 as never);
+      case 'night': {
+        const n = !this.engine.night;
+        this.engine.setNight(n);
+        document.documentElement.dataset.theme = n ? 'dark' : 'light';
+        store('fs-theme', n ? 'dark' : 'light');
+        return this.refresh();
+      }
+      case 'speed': await api.put('/api/admin/settings', { speed: Number(a1) }); return;
+      case 'duty': await api.action({ type: 'duty', onDuty: !this.me.onDuty }); this.me.onDuty = !this.me.onDuty; return this.refresh();
+      case 'lock': await api.post('/api/auth/lock'); return this.signedOut();
+      case 'logout': await api.post('/api/auth/logout'); return this.signedOut();
+      case 'lead': return this.openLead(a1 || undefined);
+      case 'approve': {
+        const edit = el.closest('.approval')?.querySelector<HTMLTextAreaElement>('textarea')?.value;
+        await api.action({ type: 'approve', id: a1, ok: a2 === 'yes', edit: a2 === 'yes' ? edit : undefined });
+        return toast(a2 === 'yes' ? 'Approved' : 'Skipped');
+      }
+      case 'approve-all': await api.action({ type: 'approveAll', buildingId: this.buildingId }); return toast('All approved');
+      case 'report': return this.modal(V.reportModal(this, a1));
+      case 'copy': {
+        const text = el.dataset.copy ?? el.closest('.sheet')?.querySelector('pre')?.textContent ?? '';
+        await navigator.clipboard?.writeText(text);
+        el.textContent = 'Copied ✓';
+        return;
+      }
+      case 'close': return this.closeModal();
+      case 'rent': return this.modal(V.rentForm(this, a1, Number(a2)));
+      case 'vacate':
+        if (!confirm('Move this tenant out? Their agents leave the floor.')) return;
+        await api.action({ type: 'vacate', buildingId: a1, level: Number(a2) });
+        return toast('Floor is available again');
+      case 'new-lead': return this.modal(V.leadForm(this, a1 || this.boardBuilding));
+      case 'post': return this.modal(V.postEditor(this, a1));
+      case 'message': return this.modal(V.messageModal(this, a1));
+      case 'desk': await api.action({ type: 'desk', agentId: a1 || null }); this.me.agentId = a1 || undefined; toast(a1 ? 'This is now your desk' : 'Desk cleared'); return this.refresh();
+      case 'user-reset': {
+        if (!confirm('Reset this person\'s password and 2-step sign-in? They\'ll need a new setup link.')) return;
+        const r = await api.post<{ link: string }>(`/api/admin/users/${a1}/reset`);
+        this.modal(V.linkModal('Reset link', r.link));
+        return this.loadAdmin();
+      }
+      case 'user-delete':
+        if (!confirm('Remove this person? They will be signed out everywhere.')) return;
+        await api.del(`/api/admin/users/${a1}`);
+        return this.loadAdmin();
+      case 'new-codes': {
+        if (!confirm('Make new recovery codes? Your old ones stop working.')) return;
+        const r = await api.post<{ codes: string[] }>('/api/me/recovery-codes');
+        this.me.recoveryLeft = r.codes.length;
+        return this.modal(V.codesModal(r.codes));
+      }
+      case 'fullscreen': return document.documentElement.requestFullscreen?.();
+    }
   }
 
-  private reportText() {
-    const b = this.buildingId ? this.sim.building(this.buildingId) : undefined;
-    const k = this.sim.kpis(b?.id);
-    const lines = this.sim.report(b?.id).map(r => `- ${r.category}: ${r.email} email, ${r.phone} phone, ${r.text} text${r.other ? `, ${r.other} other` : ''}`);
-    return `Daily report — ${b?.name ?? 'Sales City'} (${clock(this.sim.now)})\n\nLeads today: ${k.leadsToday}\nBooked: ${k.booked}\nClosed: ${k.closed}\nRevenue: ${money(k.revenue)}\nWaiting over 1h: ${k.waiting}\n\nTasks completed:\n${lines.join('\n')}\n`;
+  private async submit(name: string, f: Record<string, string>, form: HTMLFormElement) {
+    switch (name) {
+      case 'rent':
+        await api.action({ type: 'rent', buildingId: f.buildingId, level: Number(f.level), tenant: { name: f.name, contact: f.contact, email: f.email, phone: f.phone } });
+        this.closeModal();
+        return toast(`${f.name} moved in`);
+      case 'lead': {
+        const r = await api.action<{ id: string }>({
+          type: 'leadCreate', lead: {
+            buildingId: f.buildingId, name: f.name, email: f.email || undefined, phone: f.phone || undefined, source: f.source || undefined,
+            interest: f.interest || undefined, floor: f.floor ? Number(f.floor) : undefined, kind: f.kind as 'customer' | 'affiliate',
+          },
+        });
+        this.closeModal();
+        toast('Lead added');
+        return this.openLead(r.id);
+      }
+      case 'lead-edit':
+        await api.action({ type: 'leadUpdate', id: this.leadId, fields: { name: f.name, email: f.email, phone: f.phone, interest: f.interest } });
+        return toast('Saved');
+      case 'lead-note':
+        await api.action({ type: 'leadNote', id: this.leadId, text: f.text });
+        form.reset();
+        return;
+      case 'lead-send':
+        await api.action({ type: 'leadSend', id: this.leadId, channel: f.channel, subject: f.subject || undefined, body: f.body });
+        form.reset();
+        return toast(f.channel === 'phone' ? 'Call logged' : 'Sent');
+      case 'post':
+        await api.action({ type: 'contentUpdate', id: f.id, fields: { topic: f.topic, hook: f.hook, caption: f.caption, cta: f.cta, hashtags: f.hashtags.split(/[\s,]+/).filter(Boolean), time: f.time, platform: f.platform } });
+        this.closeModal();
+        return toast('Post updated');
+      case 'reply':
+        await api.action({ type: 'inboxReply', id: f.id, text: f.text });
+        return toast('Reply sent');
+      case 'settings': {
+        const recipients = f.reportRecipients.split(/[\s,;]+/).filter(Boolean);
+        const toMin = (s: string) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+        await api.put('/api/admin/settings', {
+          companyName: f.companyName, reportRecipients: recipients, deliveryMode: f.deliveryMode, crmUrlTemplate: f.crmUrlTemplate,
+          morningReportAt: toMin(f.morningReportAt), dailyReportAt: toMin(f.dailyReportAt), aiDrafts: f.aiDrafts === 'on',
+        });
+        return toast('Settings saved');
+      }
+      case 'user': {
+        const r = await api.post<{ link: string }>('/api/admin/users', { username: f.username, name: f.name, role: f.role });
+        form.reset();
+        this.modal(V.linkModal(`Setup link for ${f.name}`, r.link));
+        return this.loadAdmin();
+      }
+      case 'test-email':
+        await api.post('/api/admin/test-email', { to: f.to });
+        return toast('Test email sent');
+    }
   }
 }
 
-function tile(label: string, v: number | string, alert = false) {
-  return `<div class="tile ${alert ? 'alert' : ''}"><small>${label}</small><b>${v}</b></div>`;
+export function isAuthError(e: unknown) {
+  return e instanceof ApiError && (e.status === 401 || e.status === 423);
 }
-function age(min: number) { return min < 60 ? `${Math.max(0, min)}m` : min < 1440 ? `${Math.floor(min / 60)}h` : `${Math.floor(min / 1440)}d`; }
-function agentRow(a: Agent) {
-  return `<button class="arow" data-act="agent:${a.id}"><i class="dot st-${a.status}"></i><b>${esc(a.name)}</b><span class="role kind-${a.kind}">${esc(a.role)}</span>
-    <small>${esc(a.current?.title ?? (a.kind === 'human' ? 'Human' : 'Idle'))}</small><em>${a.done}</em></button>`;
-}
-function agentChip(a: Agent, sim: Sim) {
-  return `<button class="chip" data-act="agent:${a.id}"><i class="dot st-${a.status}"></i>${esc(a.name)} <small>${esc(sim.building(a.buildingId).short)}</small></button>`;
-}
-
-const SHELL = `
-<header class="top">
-  <div class="brand"><div class="logo">FS</div><div><b>FAST SALES</b><small id="ctx"></small></div></div>
-  <nav class="seg"><button data-act="mode:office">Office</button><button data-act="mode:city">City</button><button data-act="mode:dashboard">Dashboard</button></nav>
-  <div class="right">
-    <span class="pill">● ON DUTY</span>
-    <span class="seg small"><button data-act="speed:0">❚❚</button><button data-act="speed:1">1×</button><button data-act="speed:5">5×</button></span>
-    <span class="box" id="clock"></span>
-    <button class="box" id="night" data-act="night" title="Day / night"></button>
-  </div>
-</header>
-<main>
-  <section id="stage">
-    <div id="stage-3d"></div>
-    <nav class="menu">
-      <button data-act="mode:office">View office</button>
-      <button data-act="mode:city">City view</button>
-      <button data-act="boss">Boss's desk</button>
-      <button data-act="tab:content">Content wall</button>
-      <button data-act="tab:live">Live screen</button>
-      <button data-act="report">Daily report</button>
-      <button data-act="tab:crm">My CRM ↗</button>
-    </nav>
-    <div id="chip" class="chip-title"></div>
-    <div id="floors" class="floors"></div>
-    <div class="legend"><span><i class="h"></i>Human</span><span><i class="ai"></i>AI agent</span><span><i class="w"></i>Working</span><span><i class="n"></i>Needs you</span></div>
-    <div class="pad">
-      <button data-act="cam:in">+</button><button data-act="cam:up">▲</button><button data-act="cam:out">−</button>
-      <button data-act="cam:left">⟲</button><button data-act="cam:home">⌂</button><button data-act="cam:right">⟳</button>
-      <span></span><button data-act="cam:down">▼</button><span></span>
-    </div>
-    <div id="dash" class="dash" hidden></div>
-  </section>
-  <aside class="panel"><div id="panel-head" class="panel-head"></div><nav id="tabs" class="tabs"></nav><div id="panel-body" class="panel-body"></div></aside>
-</main>
-<div id="modal" class="modal" hidden></div>`;

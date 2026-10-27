@@ -1,28 +1,82 @@
-# Sales City — Fast Sales virtual city
+# Sales City — Fast Sales virtual office
 
 A 3D city of car dealerships, the Fast Sales Training Center, Rick Case Honda's associate buildings and rental
-buildings. Every floor is staffed by human and AI sales agents who work email / phone / text task lists.
+buildings. Every floor is staffed by people and AI agents who work the task lists from the Fast Sales documents
+(email / phone / text follow-up, social media) and report back through a daily email.
+
+## Run it
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build
+npm run dev            # server on :3001 + web app on :5173
 ```
 
-## Views
-- **City** – orbit the city (day/night). Tap a building sign to pick it; tap again or pick a floor to go inside.
-- **Office** – one floor: desks, labelled agents, status rings, live task board. Tap an agent for its card.
-- **Dashboard** – KPIs and a card per building.
-- Right panel: **LIVE** (KPIs, pipeline, activity feed, daily email report), **CRM**, **CONTENT** (social agents),
-  **TEAM**, **OK** (approvals – offers and posts wait for you), **FLOORS** (rent rental floors at $199/mo).
+The first time, the server prints a **one-time setup link**. Open it to create the first admin: choose a password,
+scan the QR code with an authenticator app (Google / Microsoft Authenticator, 1Password, Authy), and save the
+recovery codes. Add everyone else from **⚙ Settings → People**; each person gets their own setup link.
+
+Production:
+
+```bash
+npm run build
+npm start              # serves the built app and the API on $PORT (default 3001)
+```
+
+Put it behind HTTPS (nginx, Caddy, a load balancer…) and set `COOKIE_SECURE=true`. Configuration lives in
+environment variables – see `.env.example`.
+
+## What's in it
+
+**City** – 15 buildings, 12–15 floors each, exactly as listed in the documents (see `SPEC.md`). Day / night,
+tap a building for its floors, tap again or pick a floor to walk in.
+
+**Office** – one floor: desks with labelled agents (warm = people, blue = AI), status rings
+(working / needs you), the task board, a live TV screen and the content wall. "Your office" is the floor of the desk
+you pick in Settings.
+
+**Agents** – about 300, each with its department's slice of the task lists:
+- Dealership and rental agents: new customers, unsold prospects, orphans, mastermind, sold customers, birthdays,
+  ownership anniversaries, referrals, CSI follow, lease end, service visits, conquest, lost / out of the market.
+- Fast Sales agents: new customers, unsold, sold customers, contract to expire, referrals, follow-up, new affiliates,
+  affiliates follow-up, new leads, current customers.
+- Social media agents: strategy, the 30-day content calendar, captions / hooks / CTAs / hashtags, creative briefs,
+  scheduling, community replies with escalation, lead-gen campaigns, trends, competitors, analytics, optimization,
+  weekly reports.
+- Managers (Max, and each dealership's store manager): flag leads waiting over an hour, send the morning report,
+  propose ad tests.
+
+**Right panel** – LIVE (KPIs, pipeline, activity), CRM, CONTENT, TEAM, OK (everything waiting for you), FLOORS
+(rent rental floors at $199/mo).
+
+**Full-screen views** – My CRM (pipeline board + lead drawer with timeline, notes and messaging), Content wall
+(calendar, posts, inbox, analytics, insights, weekly reports), Outbox & reports, Big screen (TV mode), Settings.
+
+**Reports** – morning report (08:00), the daily email report (18:00, every task item by email / phone / text,
+per building) and the weekly social media report (Mondays 09:00), emailed to the recipients in Settings.
+
+## Safety
+
+- Sign-in is password **plus** a 6-digit authenticator code (or a one-time recovery code). Optional "remember this
+  device for 30 days". Five wrong attempts lock the account for five minutes. Every attempt is in the sign-in log.
+  🔒 locks the screen until the code is entered again.
+- The city starts with **simulated** leads (example.com addresses, 555 numbers). They are never contacted.
+- **Real** leads are the ones you add. Agents draft messages to them, but nothing is sent until someone approves it,
+  and only when Settings → Delivery is **Live** and email (SMTP) / texting (Twilio) are configured.
+- Posts are only scheduled after approval. Sensitive comments are escalated to a person.
+- With `ANTHROPIC_API_KEY` set and **AI drafts** on, Claude writes posts and messages to real leads (capped per
+  hour); the same approvals apply.
 
 ## Code map
-| File | What it holds |
-| --- | --- |
-| `src/data/buildings.ts` | City layout, every building's floors, departments and agents |
-| `src/data/tasks.ts` | Task lists from the docs (dealership, Fast Sales, social media) |
-| `src/sim.ts` | Simulation: agents pick tasks, leads move through the pipeline, approvals, daily report |
-| `src/scene/*` | three.js engine, city view, office view, meshes/textures |
-| `src/ui/app.ts` | Top bar, overlays, right panel, dashboard, report modal |
 
-Agents are **simulated** – nothing is sent to real customers yet. See `SPEC.md` for the source requirements.
+| Path | What it holds |
+| --- | --- |
+| `src/core/data/` | Buildings and floors, task lists, message / post templates (from the documents) |
+| `src/core/sim.ts` | The city: agents, tasks, leads, social workflow, approvals, routines, reports, KPIs |
+| `server/index.ts` | HTTP API, live update stream (SSE), clock, persistence |
+| `server/auth.ts`, `server/totp.ts` | Users, passwords, authenticator codes, recovery codes, sessions, sign-in log |
+| `server/delivery.ts` | Email (SMTP) and text (Twilio) delivery |
+| `server/brain.ts` | Optional Claude drafting |
+| `src/scene/` | three.js city and office |
+| `src/ui/` | Sign-in screens, app shell, panels and full-screen views |
+
+The simulation speed (pause / real time / 1× / 5×) is in the top bar for admins. At 1× a city day takes 12 minutes.

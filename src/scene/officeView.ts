@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { Agent, Building, Floor } from '../types';
+import type { Agent, Building, Floor } from '../core/types';
 import { label, type View } from './engine';
 import { decorBuilding, flat } from './meshes';
 import { woodTexture } from './textures';
@@ -18,6 +18,12 @@ interface Desk {
   phase: number;
 }
 
+/** What the office's wall screens show; supplied by the app from live sim state. */
+export interface OfficeScreens {
+  live: { title: string; lines: [string, string][] };
+  wall: { day: string; items: { text: string; color: string }[] }[];
+}
+
 export class OfficeView implements View {
   root = new THREE.Group();
   pickables: THREE.Object3D[] = [];
@@ -26,11 +32,16 @@ export class OfficeView implements View {
   private b: Building;
   private f: Floor;
   private onAgent: (agentId: string) => void;
+  private screens: () => OfficeScreens;
+  private tv?: { tex: THREE.CanvasTexture; ctx: CanvasRenderingContext2D };
+  private wall?: { tex: THREE.CanvasTexture; ctx: CanvasRenderingContext2D };
+  private deskPos = new Map<string, THREE.Vector3>();
   selected?: string;
 
-  constructor(b: Building, f: Floor, onAgent: (agentId: string) => void) {
-    this.b = b; this.f = f; this.onAgent = onAgent;
+  constructor(b: Building, f: Floor, onAgent: (agentId: string) => void, screens: () => OfficeScreens) {
+    this.b = b; this.f = f; this.onAgent = onAgent; this.screens = screens;
     this.room();
+    this.screensMeshes();
     this.outside();
     if (f.vacant) this.vacantSign();
     else this.layoutDesks();
@@ -38,13 +49,92 @@ export class OfficeView implements View {
   }
 
   home(cam: THREE.PerspectiveCamera, controls: OrbitControls) {
-    controls.target.set(0, 0, 0);
-    cam.position.set(0, 17, 22);
+    // Aim a little left of centre so the leadership corner isn't hidden under the left menu.
+    controls.target.set(-2.5, 0, 0);
+    cam.position.set(-2.5, 17, 22);
     controls.minDistance = 6;
     controls.maxDistance = 45;
   }
 
   setNight() {}
+
+  /** Swing the camera to an agent's desk ("Elvis's desk", "Max"). */
+  focusAgent(id: string, cam: THREE.PerspectiveCamera, controls: OrbitControls) {
+    const p = this.deskPos.get(id);
+    if (!p) return;
+    controls.target.set(p.x, 1.2, p.z);
+    cam.position.set(p.x + 3, 7, p.z + 8);
+  }
+
+  private canvasPlane(w: number, h: number, pw: number, ph: number) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), new THREE.MeshBasicMaterial({ map: tex }));
+    return { mesh, tex, ctx: c.getContext('2d')! };
+  }
+
+  private screensMeshes() {
+    // Live screen: a standing TV on the right, like the reference office.
+    const tv = this.canvasPlane(512, 640, 3.2, 4);
+    tv.mesh.position.set(12.2, 3.1, -5.5);
+    tv.mesh.rotation.y = -0.6;
+    const bezel = new THREE.Mesh(new THREE.BoxGeometry(3.4, 4.2, 0.15), flat('#1b1f24'));
+    bezel.position.copy(tv.mesh.position);
+    bezel.rotation.y = tv.mesh.rotation.y;
+    bezel.translateZ(-0.09);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.1), flat('#333'));
+    pole.position.set(12.2, 0.55, -5.5);
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.08, 20), flat('#333'));
+    foot.position.set(12.2, 0.04, -5.5);
+    this.root.add(bezel, tv.mesh, pole, foot);
+    this.tv = tv;
+
+    // Content wall: this week's posts, on the left glass wall.
+    const wall = this.canvasPlane(1024, 512, 8, 4);
+    wall.mesh.position.set(-14.85, 2.8, 0);
+    wall.mesh.rotation.y = Math.PI / 2;
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.3, 8.3), flat('#b9824f'));
+    frame.position.set(-14.98, 2.8, 0);
+    this.root.add(frame, wall.mesh);
+    this.wall = wall;
+  }
+
+  private drawScreens() {
+    const s = this.screens();
+    if (this.tv) {
+      const g = this.tv.ctx;
+      g.fillStyle = '#0e141b'; g.fillRect(0, 0, 512, 640);
+      g.fillStyle = '#f5b335'; g.font = 'bold 30px system-ui'; g.fillText('LIVE', 24, 50);
+      g.fillStyle = '#9fb3c8'; g.font = '20px system-ui'; g.fillText(s.live.title, 24, 80);
+      s.live.lines.forEach(([k, v], i) => {
+        const y = 140 + i * 78;
+        g.fillStyle = '#1d2733'; g.fillRect(20, y - 40, 472, 64);
+        g.fillStyle = '#9fb3c8'; g.font = '20px system-ui'; g.fillText(k, 36, y - 6);
+        g.fillStyle = '#f5b335'; g.font = 'bold 34px system-ui'; g.textAlign = 'right'; g.fillText(v, 476, y + 4); g.textAlign = 'left';
+      });
+      this.tv.tex.needsUpdate = true;
+    }
+    if (this.wall) {
+      const g = this.wall.ctx;
+      g.fillStyle = '#121a24'; g.fillRect(0, 0, 1024, 512);
+      g.fillStyle = '#f5b335'; g.font = 'bold 30px system-ui'; g.fillText('CONTENT WEEK', 24, 46);
+      const cw = (1024 - 32) / 7;
+      s.wall.slice(0, 7).forEach((d, i) => {
+        const x = 16 + i * cw;
+        g.fillStyle = '#1d2733'; g.fillRect(x + 3, 66, cw - 6, 430);
+        g.fillStyle = '#fff'; g.font = 'bold 18px system-ui'; g.fillText(d.day, x + 10, 92);
+        d.items.slice(0, 5).forEach((it, j) => {
+          const y = 108 + j * 76;
+          g.fillStyle = it.color; g.fillRect(x + 10, y, 5, 64);
+          g.fillStyle = '#e5e7eb'; g.font = '15px system-ui';
+          wrap(g, it.text, x + 22, y + 16, cw - 36, 18, 3);
+        });
+      });
+      this.wall.tex.needsUpdate = true;
+    }
+  }
 
   private room() {
     const W = 30, D = 22;
@@ -203,6 +293,7 @@ export class OfficeView implements View {
     hit.position.set(0, 1.2, 0.5);
     g.add(hit);
     g.userData = { pick: true, agentId: a.id };
+    this.deskPos.set(a.id, new THREE.Vector3(x, 0, z));
     this.pickables.push(g);
     this.root.add(g);
 
@@ -228,6 +319,7 @@ export class OfficeView implements View {
       d.screen.needsUpdate = true;
     }
     this.drawBoard();
+    this.drawScreens();
   }
 
   private drawBoard() {

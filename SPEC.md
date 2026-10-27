@@ -40,8 +40,10 @@ Content strategy · Content calendar · Content creation · Graphic & video prod
 Community engagement · Lead generation · Trend monitoring · Competitor analysis · Performance analytics ·
 Content optimization · Weekly reporting
 
-## Assumptions made (confirm or change)
+## Decisions (confirm or change)
 - Training Center L12 hosts the reference office team (Elvis owner, Max CEO, Vera, Nico, Luna, Teo, Iris, Dante).
-- Department floors get 2–3 AI agents each; associate floors get the human associate + a follow-up AI + a social AI.
-- Renting a rental floor moves in a follow-up AI and a social AI for the tenant.
-- Publishing posts and sending special offers require your OK.
+- Department floors get 2–3 AI agents with that department's task categories; associate floors get the person, a
+  follow-up AI and a social media AI; rented floors get a follow-up AI and a social media AI.
+- "Maseratti" in the document is spelled Maserati; the Honda dealership sits next to the two Rick Case Honda buildings.
+- Anything that reaches a real person (messages to real leads, posts, replies to sensitive comments) needs a human OK.
+- The daily email report lists every task item from both task documents with email / phone / text counts.
