@@ -44,7 +44,7 @@ export interface SignIn {
   username: string;
   ip: string;
   ua: string;
-  result: 'ok' | 'ok-remembered-device' | 'ok-recovery-code' | 'bad-password' | 'bad-code' | 'locked-out' | 'unknown-user' | 'enrolled' | 'unlocked';
+  result: 'ok' | 'ok-remembered-device' | 'ok-recovery-code' | 'bad-password' | 'bad-code' | 'locked-out' | 'unknown-user' | 'enrolled' | 'unlocked' | 'ok-password-reset' | 'bad-reset';
 }
 
 const MAX_FAILS = 5;
@@ -197,6 +197,31 @@ export class AuthStore {
     if (u.failed >= MAX_FAILS) { u.lockedUntil = Date.now() + LOCK_MS; u.failed = 0; }
     this.save();
     return undefined;
+  }
+
+  // ── forgotten password: authenticator code + one recovery code ─
+  /** Both second factors stand in for the password. Signs the person out everywhere. */
+  resetPassword(username: string, code: string, recovery: string, password: string): { user?: User; error?: string; result: SignIn['result'] } {
+    const u = this.users.find(x => x.username.toLowerCase() === username.trim().toLowerCase() && x.totpSecret);
+    const nope = 'Those details didn\'t match. Check your username, the newest code and your recovery code.';
+    if (!u) { scryptSync(password, 'x'.repeat(32), 64); return { error: nope, result: 'unknown-user' }; }
+    if (u.lockedUntil && u.lockedUntil > Date.now()) return { error: 'Too many attempts. Try again in a few minutes.', result: 'locked-out' };
+    if (password.length < 10) return { error: 'Use at least 10 characters for your password.', result: 'bad-reset' };
+    const step = /^\d{6}$/.test(code.replace(/\s/g, '')) ? verifyTotp(u.totpSecret!, code.replace(/\s/g, ''), u.lastStep ?? -1) : undefined;
+    const rec = recovery.replace(/\s/g, '').toUpperCase();
+    const norm = rec.includes('-') ? rec : `${rec.slice(0, 5)}-${rec.slice(5)}`;
+    const ix = u.recovery.indexOf(sha(norm));
+    if (step === undefined || ix < 0) {
+      u.failed++;
+      if (u.failed >= MAX_FAILS) { u.lockedUntil = Date.now() + LOCK_MS; u.failed = 0; }
+      this.save();
+      return { error: nope, result: 'bad-reset' };
+    }
+    u.recovery.splice(ix, 1);
+    Object.assign(u, hashPassword(password), { lastStep: step, failed: 0 });
+    for (const s of [...this.sessions.values()]) if (s.userId === u.id) this.sessions.delete(s.hash);
+    this.save();
+    return { user: u, result: 'ok-password-reset' };
   }
 
   // ── enrollment (first admin, new users, resets) ─────────────

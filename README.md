@@ -58,6 +58,9 @@ per building) and the weekly social media report (Mondays 09:00), emailed to the
 
 - Sign-in is password **plus** a 6-digit authenticator code (or a one-time recovery code). Optional "remember this
   device for 30 days". Five wrong attempts lock the account for five minutes. Every attempt is in the sign-in log.
+- Forgot your password? "Forgot password?" on the sign-in page resets it with your authenticator code **and** one
+  recovery code (both are needed), then signs you out everywhere. No recovery codes left? An admin resets you from
+  Settings → People, which sends a fresh setup link.
   🔒 locks the screen until the code is entered again.
 - The city starts with **simulated** leads (example.com addresses, 555 numbers). They are never contacted.
 - **Real** leads are the ones you add. Agents draft messages to them, but nothing is sent until someone approves it,

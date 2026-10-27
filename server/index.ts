@@ -187,6 +187,14 @@ app.post('/api/auth/verify', limit(20, 5 * 60_000), (req: Authed, res) => {
   res.json({ next: 'in', recoveryLeft: u.recovery.length });
 });
 
+app.post('/api/auth/reset-password', limit(10, 10 * 60_000), (req: Authed, res) => {
+  const { username = '', code = '', recovery = '', password = '' } = req.body ?? {};
+  const r = auth.resetPassword(String(username), String(code), String(recovery), String(password));
+  auth.log({ username: String(username).slice(0, 60), ...who(req), result: r.result });
+  if (!r.user) return res.status(400).json({ error: r.error });
+  res.json({ ok: true, recoveryLeft: r.user.recovery.length });
+});
+
 app.post('/api/auth/lock', signedIn, (req: Authed, res) => {
   req.session2!.locked = true;
   auth.save();
