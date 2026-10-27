@@ -6,7 +6,7 @@ failed / complete.
 
 | Stage | Status | Commit/files | Evidence | Blockers | Next action |
 |---|---|---|---|---|---|
-| M00 | **Local passed** (code complete and verified locally; not reviewed or merged) | Branch `migration/m00-baseline` (from `city-vibes` @ 7bad3b8). Checkpoint = 7bad3b8, the head of `city-vibes` on GitHub. Tag `pre-migration-baseline` is local only: pushing it from this environment did not reach GitHub. Files below | `planning/agentcity-migration/m00/evidence/` | Real data and pilot exports missing (below); M00 branch and its two parent branches unmerged | Review and merge, then M01 |
+| M00 | **Local passed** (code complete and verified locally). Merged into `main` at the owner's request; no separate code review | `main` @ a658918 (fast-forward from f96819d). Built on branch `migration/m00-baseline` (from `city-vibes` @ 7bad3b8). Checkpoint = 7bad3b8, the head of `city-vibes` on GitHub. Tag `pre-migration-baseline` is local only: pushing it from this environment did not reach GitHub. Files below | `planning/agentcity-migration/m00/evidence/` | Real data and pilot exports missing (below) | M01 |
 | M01 | Not started | — | — | No Docker engine in this cloud environment (CLI present, no daemon socket) | Workspace and local infrastructure |
 | M02–M10, P01–P10 | Not started | — | — | — | In order, one at a time |
 
@@ -15,12 +15,15 @@ with software GL (SwiftShader). No provider credentials were set, and the kill s
 
 ## 1. The checkout that was baselined
 
-- **Branch history.** `main` = f96819d. The work this migration starts from is **not merged** into `main`:
+- **Branch history.** When M00 started, `main` was f96819d and this work was on unmerged branches:
   - `multi-client-isolation` = 1dab901
   - `city-vibes` = 7bad3b8, which also contains 1dab901
 
-  M00 branches from `city-vibes` so nothing is lost. Merging order is `multi-client-isolation`, then `city-vibes`,
-  then `migration/m00-baseline`.
+  M00 branched from `city-vibes` so nothing was lost.
+- **Merged.** All three branches are now in `main` (a658918). Because each was built on the one before, the merge
+  was a fast-forward: no merge commits, no conflicts. Before pushing, `npm run typecheck` and `npm test` (33/33)
+  passed on that exact commit. The merged branches can be deleted; deletion from this environment fails, so
+  delete them on GitHub.
 - **The ZIP the audit used is exactly commit f96819d.** All 36 files match `audit/source-manifest.json`
   byte-for-byte. The build review's reference to 8250c96 is an earlier commit; f96819d is the audited code.
 - **Differences from the ZIP.** At 7bad3b8, 16 files differ and 3 are new: `server/scope.ts`, `src/scene/street.ts`
@@ -117,26 +120,24 @@ multi-client isolation tests in `test/scope.test.ts`. Plus two browser checks th
 1. **M01 cannot run its local services here.** The Docker CLI is installed but no engine is running. Either a
    Docker-capable environment or a decision on running the services natively is needed. `psql` and `redis-server`
    binaries exist; Temporal, Keycloak and MinIO do not.
-2. **Three branches are unmerged.** `multi-client-isolation`, `city-vibes` and `migration/m00-baseline` need
-   review and merging, in that order.
-3. **The kill switch is process-level only.** It is not persisted, and nothing audits who turned it on. The
+2. **The kill switch is process-level only.** It is not persisted, and nothing audits who turned it on. The
    durable dispatch policy and ledger are M08.
-4. **Not contained in M00, by design (later stages):**
+3. **Not contained in M00, by design (later stages):**
    - the stream has no replay cursor or session-expiry re-check (F11, M07)
    - Google Fonts are loaded from Google on every page view (self-host in M05)
    - "Reply sent" toasts for simulated social replies (F07/F09)
    - the demo clock (F03)
    - all the C-defects listed above
-5. **Version mismatch.** The pack targets Node 24; this environment has Node 22.22. The harness ran here
+4. **Version mismatch.** The pack targets Node 24; this environment has Node 22.22. The harness ran here
    (`stripTypeScriptTypes` is available but experimental).
-6. **Evidence size.** The evidence folder is about 10 MB, mostly PNG screenshots, committed with the branch.
+5. **Evidence size.** The evidence folder is about 10 MB, mostly PNG screenshots, now part of `main`.
 
 ## 7. Next safe step
 
 **M01 — Create the proposal workspace around the current build** (`planning/agentcity-migration/prompts/M01-workspace-and-infrastructure.md`).
 
 Preconditions:
-- Review and merge the three branches above.
+- Start from `main` (a658918 or later).
 - Keep `OUTBOUND_ENABLED` unset.
 - Run M01 where a Docker engine is available.
 
