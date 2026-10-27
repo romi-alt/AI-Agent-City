@@ -1,4 +1,5 @@
-// Browser smoke test for the marketing landing page (X01 workstream B). No API needed: the page is static.
+// Browser smoke test for the marketing landing page (X01 workstream B). No API needed: the page is static, and the
+// one call the demo form makes (its form token) is answered by the browser context.
 //
 //   node --test test/b-landing.smoke.ts            (builds into .next/b-landing-test first)
 //   SKIP_BUILD=1 node --test test/b-landing.smoke.ts
@@ -11,7 +12,7 @@ import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
 
-const PORT = 3204;
+const PORT = Number(process.env.B_LANDING_PORT ?? 3204);
 const WEB = `http://127.0.0.1:${PORT}`;
 const APP_DIR = join(import.meta.dirname, '..');
 const env = { ...process.env, NEXT_TELEMETRY_DISABLED: '1', NEXT_DIST_DIR: '.next/b-landing-test' };
@@ -55,6 +56,13 @@ after(async () => {
   web?.kill();
 });
 
+/** The demo request form (workstream D) fetches a form token on load; this test runs without an API, so answer it. */
+function stubFormToken(context: any): Promise<void> {
+  return context.route('**/api/demo/form-token', (route: any) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'test-token' }) }),
+  );
+}
+
 /** A page that records console errors and uncaught exceptions. */
 async function open(
   options: { reducedMotion?: 'reduce' | 'no-preference'; viewport?: { width: number; height: number } } = {},
@@ -63,6 +71,7 @@ async function open(
     viewport: options.viewport ?? { width: 1440, height: 900 },
     reducedMotion: options.reducedMotion ?? 'no-preference',
   });
+  await stubFormToken(context);
   const page = await context.newPage();
   const errors: string[] = [];
   page.on('console', (m: any) => m.type() === 'error' && errors.push(m.text()));
@@ -92,9 +101,9 @@ test('"Get My Free Demo Office" scrolls to the demo form section', async () => {
     return Math.abs(top) < 120;
   });
   assert.equal(
-    await page.locator('#get-demo [data-testid=demo-form-slot]').count(),
+    await page.locator('#get-demo [data-testid=demo-request-form]').count(),
     1,
-    'the form slot is in #get-demo',
+    'the demo request form is in #get-demo',
   );
   await page.context().close();
 });
@@ -121,16 +130,21 @@ test('reduced motion keeps the poster and never loads the 3D scene', async () =>
 
 test('without WebGL the poster stays and nothing errors', async () => {
   const noGl = await chromium.launch({ args: ['--disable-webgl', '--disable-webgl2', '--disable-3d-apis'] });
-  const page = await noGl.newPage();
-  const errors: string[] = [];
-  page.on('console', (m: any) => m.type() === 'error' && errors.push(m.text()));
-  page.on('pageerror', (e: Error) => errors.push(String(e)));
-  await page.goto(WEB, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(3000);
-  assert.equal(await page.getAttribute('[data-testid=city-preview]', 'data-mode'), 'poster');
-  assert.match(await page.textContent('[data-testid=city-preview-label]'), /Rendered frame/);
-  assert.deepEqual(errors, []);
-  await noGl.close();
+  try {
+    const context = await noGl.newContext();
+    await stubFormToken(context);
+    const page = await context.newPage();
+    const errors: string[] = [];
+    page.on('console', (m: any) => m.type() === 'error' && errors.push(m.text()));
+    page.on('pageerror', (e: Error) => errors.push(String(e)));
+    await page.goto(WEB, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(3000);
+    assert.equal(await page.getAttribute('[data-testid=city-preview]', 'data-mode'), 'poster');
+    assert.match(await page.textContent('[data-testid=city-preview-label]'), /Rendered frame/);
+    assert.deepEqual(errors, []);
+  } finally {
+    await noGl.close();
+  }
 });
 
 test('the first Tab reaches the skip link, which moves focus to the content', async () => {

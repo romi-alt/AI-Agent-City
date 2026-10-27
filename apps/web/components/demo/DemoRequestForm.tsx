@@ -18,6 +18,7 @@ import {
   type DemoField,
   type DemoFormValues,
 } from './demo-validation';
+import '../marketing/marketing.css';
 import './demo.css';
 
 /** Where the privacy notice lives. A placeholder until the notice is published; the integrator wires it. */
@@ -185,10 +186,11 @@ export function DemoRequestForm({ headingId, className }: DemoRequestFormProps) 
   const describedBy = (f: DemoField, hint?: string) =>
     [hint, errors[f] ? id(`${f}-error`) : null].filter(Boolean).join(' ') || undefined;
 
-  const field = (f: DemoField, input: ReactNode, optional = false, span = false) => (
-    <div className={`dm-field${span ? ' dm-span-2' : ''}`}>
+  const field = (f: DemoField, input: ReactNode, optional = false) => (
+    <div className="dm-field">
       <label htmlFor={id(f)}>
-        {FIELD_LABELS[f]} {optional && <span className="dm-optional">(optional)</span>}
+        {FIELD_LABELS[f]}
+        {optional && <span className="dm-optional"> · optional</span>}
       </label>
       {input}
       {errors[f] && (
@@ -209,7 +211,7 @@ export function DemoRequestForm({ headingId, className }: DemoRequestFormProps) 
 
   return (
     <form
-      className={`dm dm-form ${className ?? ''}`}
+      className={`dm-form ${className ?? ''}`}
       noValidate
       onSubmit={e => void onSubmit(e)}
       aria-labelledby={headingId}
@@ -288,8 +290,13 @@ export function DemoRequestForm({ headingId, className }: DemoRequestFormProps) 
         )}
         {field(
           'industry',
-          <select {...common('industry')} value={values.industry} onChange={e => update('industry', e.target.value)}>
-            <option value="">Choose your industry</option>
+          <select
+            {...common('industry')}
+            data-empty={values.industry === ''}
+            value={values.industry}
+            onChange={e => update('industry', e.target.value)}
+          >
+            <option value="">Choose one</option>
             {INDUSTRIES.map(i => (
               <option key={i.value} value={i.value}>
                 {i.label}
@@ -343,15 +350,6 @@ export function DemoRequestForm({ headingId, className }: DemoRequestFormProps) 
         />
       </div>
 
-      <p className="dm-privacy" id={id('privacy')}>
-        We use your details to prepare your demo office, send you the link to open it, and follow up about your demo.
-        Your demo and its sample data are removed after 14 days. See our{' '}
-        <a href={PRIVACY_NOTICE_HREF} data-testid="demo-privacy-link">
-          privacy notice
-        </a>
-        .
-      </p>
-
       <label className="dm-consent" htmlFor={id('consent')}>
         <input
           id={id('consent')}
@@ -361,10 +359,7 @@ export function DemoRequestForm({ headingId, className }: DemoRequestFormProps) 
           onChange={e => update('marketingConsent', e.target.checked)}
           data-testid="demo-marketing-consent"
         />
-        <span>
-          Also send me occasional news about AgentCity. Optional; you can unsubscribe at any time, and your demo doesn’t
-          depend on it.
-        </span>
+        <span>Send me product news (optional). Unsubscribe any time.</span>
       </label>
 
       {failure && (
@@ -376,13 +371,13 @@ export function DemoRequestForm({ headingId, className }: DemoRequestFormProps) 
           data-testid="demo-failure"
         >
           <p>{failure}</p>
-          <p>Your details are still here, so you can simply send the form again.</p>
+          <p>Your details are still here; send the form again when you’re ready.</p>
         </div>
       )}
 
       <button
         type="submit"
-        className="dm-btn dm-btn-primary dm-submit"
+        className="mk-btn mk-btn-primary dm-submit"
         disabled={submitting}
         aria-describedby={id('privacy')}
         data-testid="demo-submit"
@@ -395,6 +390,13 @@ export function DemoRequestForm({ headingId, className }: DemoRequestFormProps) 
           'Get My Demo Office'
         )}
       </button>
+
+      <p className="dm-privacy" id={id('privacy')}>
+        We use your details to set up your demo and follow up about it. The demo is removed after 14 days.{' '}
+        <a href={PRIVACY_NOTICE_HREF} data-testid="demo-privacy-link">
+          Privacy notice
+        </a>
+      </p>
     </form>
   );
 }

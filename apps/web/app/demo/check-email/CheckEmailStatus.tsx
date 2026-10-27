@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError } from '../../../lib/api-client';
 import { publicApi, type DemoRequestStatus } from '../../../components/demo/demo-api';
+import { CheckIcon, MailIcon } from '../../../components/demo/DemoBits';
 
 type View = DemoRequestStatus | 'unknown' | 'not-found' | 'stopped';
 
@@ -22,7 +23,6 @@ export function CheckEmailStatus({
   devMailboxUrl: string | null;
 }) {
   const [view, setView] = useState<View>(requestId ? 'verification-sent' : 'unknown');
-  const [checks, setChecks] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const delay = useRef(FIRST_DELAY_MS);
   const started = useRef(Date.now());
@@ -43,8 +43,6 @@ export function CheckEmailStatus({
         setView('not-found');
       }
       // Anything else (network, 5xx, rate limit) is passing: keep checking, more slowly.
-    } finally {
-      setChecks(n => n + 1);
     }
   }, [requestId]);
 
@@ -89,27 +87,18 @@ export function CheckEmailStatus({
   return (
     <>
       <section className="dm-card" aria-labelledby="check-title" data-testid="check-email" data-status={view}>
-        <svg width="64" height="48" viewBox="0 0 64 48" aria-hidden="true" focusable="false">
-          <rect x="1" y="1" width="62" height="46" rx="8" fill="#0f1b2d" />
-          <path
-            d="M8 10 L32 28 L56 10"
-            fill="none"
-            stroke="#f5b335"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <circle cx="54" cy="38" r="4" fill="#6fb7e8" />
-        </svg>
-        <span className="dm-eyebrow">One more step</span>
-        <h1 id="check-title" className="dm-title">
-          {view === 'ready' ? 'Your demo office is ready' : 'Your demo office is being prepared'}
-        </h1>
-        <p className="dm-lede">
-          {view === 'ready'
-            ? 'Your email address is confirmed. Sign in with a code and we’ll take you straight to your office.'
-            : 'We’ve sent you an email. Confirm your address and we’ll open your private AI office in AgentCity.'}
-        </p>
+        {view === 'ready' ? <CheckIcon /> : <MailIcon />}
+        <div className="dm-stack">
+          <p className="mk-eyebrow">{view === 'ready' ? 'Email confirmed' : 'Check your email'}</p>
+          <h1 id="check-title" className="dm-title">
+            {view === 'ready' ? 'Your demo office is ready' : 'Your demo office is being prepared'}
+          </h1>
+          <p className="mk-lead">
+            {view === 'ready'
+              ? 'Sign in with a code and we’ll take you straight to your office.'
+              : 'We’ve sent you a link. Confirm your address and your office opens.'}
+          </p>
+        </div>
 
         <div className="dm-status-line" role="status" aria-live="polite" data-testid="check-status">
           <span
@@ -121,25 +110,25 @@ export function CheckEmailStatus({
           {view === 'expired' && 'This demo request has expired.'}
           {view === 'not-found' && 'We couldn’t find this demo request.'}
           {view === 'stopped' && 'We’ve stopped checking automatically.'}
-          {view === 'unknown' && 'Check your inbox for the email from AgentCity.'}
+          {view === 'unknown' && 'Look for the email from AgentCity.'}
         </div>
 
         {view === 'ready' && (
           <div className="dm-actions">
-            <a className="dm-btn dm-btn-primary" href="/demo/verified" data-testid="check-signin">
+            <a className="mk-btn mk-btn-primary" href="/demo/verified" data-testid="check-signin">
               Sign in to your demo office
             </a>
           </div>
         )}
         {(view === 'expired' || view === 'not-found') && (
-          <div className="dm-notice" data-testid="check-restart">
-            <p>
+          <div className="dm-stack" data-testid="check-restart">
+            <p className="dm-muted">
               {view === 'expired'
                 ? 'Demo links last a limited time. Request a new demo office and we’ll send a fresh link.'
-                : 'The link you followed may be incomplete. If you’ve requested a demo, the email we sent still works; otherwise request a new one.'}
+                : 'The link may be incomplete. The email we sent still works, or you can request a new demo.'}
             </p>
             <div className="dm-actions">
-              <a className="dm-btn dm-btn-dark" href="/#get-demo">
+              <a className="mk-btn mk-btn-dark" href="/#get-demo">
                 Request a demo office
               </a>
             </div>
@@ -147,7 +136,7 @@ export function CheckEmailStatus({
         )}
         {view === 'stopped' && (
           <div className="dm-actions">
-            <button type="button" className="dm-btn" onClick={checkAgain} data-testid="check-again">
+            <button type="button" className="mk-btn mk-btn-secondary" onClick={checkAgain} data-testid="check-again">
               Check again
             </button>
           </div>
@@ -155,49 +144,56 @@ export function CheckEmailStatus({
       </section>
 
       <section className="dm-card" aria-labelledby="next-title">
-        <h2 id="next-title" style={{ margin: 0, fontSize: 20 }}>
+        <h2 id="next-title" className="dm-h3">
           What happens next
         </h2>
         <ol className="dm-steps">
           <li>
+            <span className="dm-step-num" aria-hidden="true">
+              1
+            </span>
             <div>
               <strong>Open the email from AgentCity</strong>
-              <span>It’s titled something like “Verify your email”. It can take a minute to arrive.</span>
+              <span className="dm-step-text">It can take a minute to arrive.</span>
             </div>
           </li>
           <li>
+            <span className="dm-step-num" aria-hidden="true">
+              2
+            </span>
             <div>
               <strong>Confirm your address</strong>
-              <span>Select the link in the email. It works once and only for a limited time.</span>
+              <span className="dm-step-text">The link works once, for a limited time.</span>
             </div>
           </li>
           <li>
+            <span className="dm-step-num" aria-hidden="true">
+              3
+            </span>
             <div>
               <strong>Sign in with a code</strong>
-              <span>No password: we email you a short sign-in code, and then your office opens.</span>
+              <span className="dm-step-text">No password. Your office opens straight after.</span>
             </div>
           </li>
         </ol>
-        <p className="small" data-testid="check-resend">
-          Nothing arrived after a few minutes? Check your spam or promotions folder. You can also{' '}
-          <a href="/#get-demo">submit the form again</a> with the same email address: it’s safe, and we’ll send a fresh
-          link to the same demo office.
+        <p className="dm-muted" data-testid="check-resend">
+          Nothing arrived? Check spam, or{' '}
+          <a className="dm-link" href="/#get-demo">
+            send the form again
+          </a>{' '}
+          with the same address. It’s safe: we’ll send a fresh link to the same office.
         </p>
-        {requestId && checks > 0 && view === 'verification-sent' && (
-          <p className="small" aria-hidden="true">
-            You can keep this page open: it updates by itself once you’ve confirmed.
-          </p>
-        )}
       </section>
 
       {devMailboxUrl && (
         <aside className="dm-notice dm-notice-dev" data-testid="check-dev-mailbox" aria-label="Development note">
           <p>
-            <strong>Development only.</strong> Emails aren’t really sent here. Open the local mail inbox at{' '}
+            <strong>Development only.</strong> No real email is sent here. The verification email is in the local inbox
+            at{' '}
             <a href={devMailboxUrl} target="_blank" rel="noreferrer">
               {devMailboxUrl}
-            </a>{' '}
-            to find the verification email.
+            </a>
+            .
           </p>
         </aside>
       )}

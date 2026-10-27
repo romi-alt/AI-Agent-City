@@ -106,7 +106,7 @@ export function GuidedTour({ steps, person, open, startAt, onStep, onClose }: Gu
   if (!open) return null;
   return (
     <div
-      className="dm dm-tour"
+      className="dm-tour"
       role="dialog"
       aria-modal="false"
       aria-labelledby={`${uid}-title`}
@@ -128,19 +128,24 @@ export function GuidedTour({ steps, person, open, startAt, onStep, onClose }: Gu
         {step.title}
       </h2>
       <p id={`${uid}-body`}>{step.body}</p>
-      <div className="dm-actions">
-        <button type="button" className="dm-btn-link" onClick={() => finish('skipped')} data-testid="tour-skip">
+      <div className="dm-tour-foot">
+        <button type="button" className="dm-link-btn" onClick={() => finish('skipped')} data-testid="tour-skip">
           Skip tour
         </button>
         <span className="dm-actions">
           {index > 0 && (
-            <button type="button" className="dm-btn" onClick={() => setIndex(i => i - 1)} data-testid="tour-back">
+            <button
+              type="button"
+              className="mk-btn mk-btn-secondary mk-btn-sm"
+              onClick={() => setIndex(i => i - 1)}
+              data-testid="tour-back"
+            >
               Back
             </button>
           )}
           <button
             type="button"
-            className="dm-btn dm-btn-primary"
+            className="mk-btn mk-btn-primary mk-btn-sm"
             onClick={() => (last ? finish('done') : setIndex(i => i + 1))}
             data-testid="tour-next"
           >

@@ -3,36 +3,42 @@ import { DemoRequestForm } from '../../components/demo/DemoRequestForm';
 
 export const metadata: Metadata = {
   title: 'Get your demo office — AgentCity',
-  description: 'Your own virtual AI office in AgentCity, prepared in minutes with sample data.',
+  description: 'A private sample office in AgentCity with an AI team already at work.',
 };
 
-/** The request form on its own page: the landing page shows the same form at #get-demo. */
+const STEPS = [
+  'Tell us about your business.',
+  'Confirm your email with the one-time link.',
+  'Sign in with a code. No password.',
+  'Meet your sample office in Rental Building 2.',
+];
+
+/** The request form on its own page, in the same card as the landing page's #get-demo section. */
 export default function DemoRequestPage() {
   return (
     <main className="dm-main">
-      <div className="dm-request-layout">
-        <section aria-labelledby="demo-intro-title" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <span className="dm-eyebrow">Free personal demo</span>
-          <h1 id="demo-intro-title" className="dm-title">
-            Your own AI office in AgentCity, ready in minutes
+      <div className="mk-demo-card">
+        <div className="mk-demo-copy">
+          <p className="mk-eyebrow">Free demo</p>
+          <h1 id="demo-intro-title" className="mk-h2">
+            Get your demo office.
           </h1>
-          <p className="dm-lede">
-            Tell us a little about your business and we’ll prepare a private demo office with a sample team of AI agents
-            for you to explore.
+          <p className="mk-lead">A private sample office with an AI team already at work.</p>
+          <ol className="mk-demo-steps">
+            {STEPS.map((s, i) => (
+              <li key={s}>
+                <span aria-hidden="true">{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+          <p className="mk-footnote">
+            Everything inside is Sample or Simulated, and demo agents can&rsquo;t contact anyone.
           </p>
-          <ul className="dm-points">
-            <li>Walk the 3D city and visit your own floor in Rental Building 2.</li>
-            <li>Meet sample agents, see what they work on, and try a few things with them.</li>
-            <li>Everything is simulated: nothing is sent to anyone, and no real records are touched.</li>
-            <li>No password. You sign in with a code we email you.</li>
-          </ul>
-        </section>
-        <section className="dm-card" aria-labelledby="demo-form-title">
-          <h2 id="demo-form-title" style={{ margin: 0, fontSize: 22 }}>
-            Request your demo office
-          </h2>
-          <DemoRequestForm headingId="demo-form-title" />
-        </section>
+        </div>
+        <div className="mk-demo-form">
+          <DemoRequestForm headingId="demo-intro-title" />
+        </div>
       </div>
     </main>
   );

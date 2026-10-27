@@ -2,15 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api, ApiError, describeError, getMe, NavigatingAwayError } from '../../../lib/api-client';
-import {
-  describeAgentStatus,
-  formatExpiry,
-  formatWhen,
-  normaliseWorkspace,
-  type DemoWorkspace,
-} from '../../../components/demo/demo-api';
+import { formatExpiry, formatWhen, normaliseWorkspace, type DemoWorkspace } from '../../../components/demo/demo-api';
 import { DemoAgentPanel } from '../../../components/demo/DemoAgentPanel';
-import { AgentAvatar, ConversionCards, Simulated } from '../../../components/demo/DemoBits';
+import { AgentAvatar, AgentStatus, ConversionCards, Simulated } from '../../../components/demo/DemoBits';
 import { GuidedTour, readTour, type TourStep } from '../../../components/demo/GuidedTour';
 import { DemoOfficeScene } from '../../../components/demo/office-scene';
 import '../../../components/demo/demo.css';
@@ -142,173 +136,181 @@ export function DemoOffice() {
 
   if (problem) {
     return (
-      <main className="dm dm-office">
-        <section className="dm-card" data-testid="office-error" data-kind={problem.kind}>
-          <h1 style={{ margin: 0, fontSize: 26 }}>
-            {problem.kind === 'expired' ? 'This demo office has expired' : 'No demo office here'}
-          </h1>
-          <div className="dm-notice dm-notice-error" role="alert">
-            <p>{problem.text}</p>
-          </div>
-          <div className="dm-actions">
-            {problem.kind === 'other' && (
-              <button type="button" className="dm-btn dm-btn-primary" onClick={() => void load()}>
-                Try again
-              </button>
-            )}
-            {problem.kind === 'not-demo' && (
-              <a className="dm-btn dm-btn-primary" href="/demo/welcome">
-                Open my demo
+      <div className="mk dm-page">
+        <main className="dm-main dm-narrow">
+          <section className="dm-card" data-testid="office-error" data-kind={problem.kind}>
+            <div className="dm-stack">
+              <p className="mk-eyebrow">Demo office</p>
+              <h1 className="dm-title">
+                {problem.kind === 'expired' ? 'This demo office has expired' : 'No demo office here'}
+              </h1>
+            </div>
+            <div className="dm-notice dm-notice-error" role="alert">
+              <p>{problem.text}</p>
+            </div>
+            <div className="dm-actions">
+              {problem.kind === 'other' && (
+                <button type="button" className="mk-btn mk-btn-primary" onClick={() => void load()}>
+                  Try again
+                </button>
+              )}
+              {problem.kind === 'not-demo' && (
+                <a className="mk-btn mk-btn-primary" href="/demo/welcome">
+                  Open my demo
+                </a>
+              )}
+              <a
+                className={`mk-btn ${problem.kind === 'expired' ? 'mk-btn-primary' : 'mk-btn-secondary'}`}
+                href="/#get-demo"
+              >
+                Request a demo office
               </a>
-            )}
-            <a className={`dm-btn${problem.kind === 'expired' ? ' dm-btn-primary' : ''}`} href="/#get-demo">
-              Request a demo office
-            </a>
-          </div>
-        </section>
-      </main>
+            </div>
+          </section>
+        </main>
+      </div>
     );
   }
 
   if (!ws) {
     return (
-      <main className="dm dm-office" aria-busy="true">
-        <p className="dm-status-line" role="status" data-testid="office-loading">
-          <span className="dm-pulse" aria-hidden="true" /> Opening your office…
-        </p>
-      </main>
+      <div className="mk dm-page">
+        <main className="dm-wide" aria-busy="true">
+          <p className="dm-status-line" role="status" data-testid="office-loading">
+            <span className="dm-pulse" aria-hidden="true" /> Opening your office…
+          </p>
+        </main>
+      </div>
     );
   }
 
   const agent = ws.agents.find(a => a.id === selected) ?? null;
   const expiry = formatExpiry(ws.expiresAt);
   return (
-    <main className="dm dm-office" data-testid="office">
-      <div className="dm-office-head">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span className="dm-eyebrow">
-            Demo office <Simulated label="Sample data" />
-          </span>
-          <h1 data-testid="office-title">{ws.company ? `${ws.company}’s AI office` : 'Your AI office'}</h1>
-          <p data-tour="place" data-testid="office-place" style={{ margin: 0 }}>
-            {ws.building.name}
-            {ws.office.level !== null ? ` · Level ${ws.office.level}` : ''} · {ws.office.name}
-            {expiry ? ` · Available until ${expiry}` : ''}
-          </p>
-        </div>
-        <div className="dm-actions">
-          <button
-            type="button"
-            className="dm-btn"
-            ref={tourButton}
-            onClick={() => setTour({ open: true, startAt: 0 })}
-            data-testid="office-tour-button"
-          >
-            Take the tour
-          </button>
-          <a className="dm-btn" href={`/city?building=${encodeURIComponent(ws.building.key)}`}>
-            View in the city
-          </a>
-        </div>
-      </div>
-
-      <div className="dm-office-grid">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
-          <div className="dm-scene" data-tour="scene">
-            <DemoOfficeScene
-              agents={ws.agents}
-              building={ws.building}
-              level={ws.office.level}
-              onSelectAgent={setSelected}
-            />
+    <div className="mk dm-page">
+      <main className="dm-wide" data-testid="office">
+        <div className="dm-office-head">
+          <div>
+            <p className="mk-eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              Demo office <Simulated label="Sample data" />
+            </p>
+            <h1 className="dm-title" data-testid="office-title">
+              {ws.company ? `${ws.company}’s AI office` : 'Your AI office'}
+            </h1>
+            <p className="dm-muted" data-tour="place" data-testid="office-place">
+              {ws.building.name}
+              {ws.office.level !== null ? ` · Level ${ws.office.level}` : ''} · {ws.office.name}
+              {expiry ? ` · Available until ${expiry}` : ''}
+            </p>
           </div>
-          <section className="dm-panel" aria-labelledby="office-activity-title">
-            <h2
-              id="office-activity-title"
-              style={{ margin: 0, fontSize: 18, display: 'flex', gap: 8, alignItems: 'center' }}
+          <div className="dm-actions">
+            <button
+              type="button"
+              className="mk-btn mk-btn-secondary"
+              ref={tourButton}
+              onClick={() => setTour({ open: true, startAt: 0 })}
+              data-testid="office-tour-button"
             >
-              Office activity <Simulated />
-            </h2>
-            {ws.activity.length === 0 ? (
-              <p className="small">It’s quiet in the office right now.</p>
-            ) : (
-              <ul className="dm-list" data-testid="office-activity">
-                {ws.activity.slice(0, 8).map((a, i) => {
-                  const who = ws.agents.find(x => x.id === a.agentId);
-                  return (
-                    <li key={i}>
-                      <span>
-                        {who ? <strong>{who.name}: </strong> : null}
-                        {a.text}
+              Take the tour
+            </button>
+            <a className="mk-btn mk-btn-secondary" href={`/city?building=${encodeURIComponent(ws.building.key)}`}>
+              View in the city
+            </a>
+          </div>
+        </div>
+
+        <div className="dm-office-grid">
+          <div>
+            <div className="dm-scene" data-tour="scene">
+              <DemoOfficeScene
+                agents={ws.agents}
+                building={ws.building}
+                level={ws.office.level}
+                onSelectAgent={setSelected}
+              />
+            </div>
+            <section className="dm-mock" aria-labelledby="office-activity-title">
+              <div className="dm-mock-bar">
+                <h2 id="office-activity-title" className="dm-mock-title">
+                  Office activity
+                </h2>
+                <Simulated />
+              </div>
+              {ws.activity.length === 0 ? (
+                <p className="dm-empty">It’s quiet in the office right now.</p>
+              ) : (
+                <ul className="dm-rows dm-rows-2" data-testid="office-activity">
+                  {ws.activity.slice(0, 8).map((a, i) => {
+                    const who = ws.agents.find(x => x.id === a.agentId);
+                    return (
+                      <li key={i}>
+                        <span className="dm-row-main">
+                          {a.text}
+                          {who && <span className="dm-row-sub">{who.name}</span>}
+                        </span>
+                        {a.when && <span className="dm-row-when">{formatWhen(a.when)}</span>}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </section>
+          </div>
+
+          <div>
+            <section className="dm-mock" aria-labelledby="roster-title" data-tour="roster">
+              <div className="dm-mock-bar">
+                <h2 id="roster-title" className="dm-mock-title">
+                  Your team
+                </h2>
+                <span className="dm-row-when">{ws.agents.length} agents</span>
+              </div>
+              <ul className="dm-roster" data-testid="office-roster">
+                {ws.agents.map(a => (
+                  <li key={a.id}>
+                    <button
+                      type="button"
+                      className="dm-row-btn"
+                      aria-pressed={selected === a.id}
+                      onClick={() => setSelected(a.id)}
+                      data-testid={`office-agent-${a.id}`}
+                    >
+                      <AgentAvatar name={a.name} />
+                      <span className="dm-row-main">
+                        <b>{a.name}</b>
+                        <span className="dm-row-sub">{a.role}</span>
                       </span>
-                      {a.when && <small>{formatWhen(a.when)}</small>}
-                    </li>
-                  );
-                })}
+                      <AgentStatus status={a.status} />
+                    </button>
+                  </li>
+                ))}
               </ul>
-            )}
-          </section>
+            </section>
+            <DemoAgentPanel agent={agent} company={ws.company} activity={ws.activity} />
+          </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
-          <section className="dm-panel" aria-labelledby="roster-title" data-tour="roster">
-            <h2 id="roster-title" style={{ margin: 0, fontSize: 18 }}>
-              Your team
+        <section className="dm-section" aria-labelledby="office-next-title" data-tour="ctas">
+          <div className="dm-stack" style={{ gap: 4 }}>
+            <h2 id="office-next-title" className="dm-h3">
+              Take it further
             </h2>
-            <ul className="dm-list" data-testid="office-roster">
-              {ws.agents.map(a => (
-                <li key={a.id} style={{ padding: 0, background: 'none' }}>
-                  <button
-                    type="button"
-                    className="dm-btn"
-                    style={{ width: '100%', justifyContent: 'flex-start', gap: 12, textAlign: 'left' }}
-                    aria-pressed={selected === a.id}
-                    onClick={() => setSelected(a.id)}
-                    data-testid={`office-agent-${a.id}`}
-                  >
-                    <AgentAvatar name={a.name} id={a.id} />
-                    <span style={{ flex: 1, minWidth: 0 }}>
-                      {a.name}
-                      <span className="small" style={{ display: 'block', fontWeight: 400 }}>
-                        {a.role}
-                      </span>
-                    </span>
-                    <span className="dm-state" data-state={describeAgentStatus(a.status)}>
-                      {describeAgentStatus(a.status)}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-          <DemoAgentPanel agent={agent} company={ws.company} activity={ws.activity} />
-        </div>
-      </div>
+            <p className="dm-muted">An office set up around your real products, team and rules.</p>
+          </div>
+          <ConversionCards />
+        </section>
 
-      <section
-        aria-labelledby="office-next-title"
-        data-tour="ctas"
-        style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-      >
-        <h2 id="office-next-title" style={{ margin: 0, fontSize: 20 }}>
-          Take it further
-        </h2>
-        <p style={{ margin: 0 }}>
-          Like what you see? We can set up an office around your real products, team and rules.
-        </p>
-        <ConversionCards />
-      </section>
-
-      {person && steps.length > 0 && (
-        <GuidedTour
-          steps={steps}
-          person={person}
-          open={tour.open}
-          startAt={tour.startAt}
-          onStep={onStep}
-          onClose={closeTour}
-        />
-      )}
-    </main>
+        {person && steps.length > 0 && (
+          <GuidedTour
+            steps={steps}
+            person={person}
+            open={tour.open}
+            startAt={tour.startAt}
+            onStep={onStep}
+            onClose={closeTour}
+          />
+        )}
+      </main>
+    </div>
   );
 }

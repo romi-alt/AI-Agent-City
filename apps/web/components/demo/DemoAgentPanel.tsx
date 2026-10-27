@@ -4,8 +4,8 @@
 // and a few "try it" buttons. Everything is sample content, labelled "Simulated"; the buttons only reveal canned text
 // written here in the browser. Nothing is sent, and nothing is written to a CRM or any real record.
 import { useEffect, useId, useState } from 'react';
-import { describeAgentStatus, formatWhen, type DemoActivity, type DemoAgent } from './demo-api';
-import { AgentAvatar, Simulated } from './DemoBits';
+import { formatWhen, type DemoActivity, type DemoAgent } from './demo-api';
+import { AgentAvatar, AgentStatus, Simulated } from './DemoBits';
 import './demo.css';
 
 type TryIt = 'follow-up' | 'pipeline' | 'approval';
@@ -72,143 +72,145 @@ export function DemoAgentPanel({ agent, company, activity }: DemoAgentPanelProps
   if (!agent) {
     return (
       <section
-        className="dm-panel"
+        className="dm-mock"
         aria-labelledby={`${uid}-empty`}
         data-testid="agent-panel"
         data-agent=""
         data-tour="agent-panel"
       >
-        <h2 id={`${uid}-empty`} style={{ margin: 0, fontSize: 18 }}>
-          Choose an agent
-        </h2>
-        <p>Select a desk in the office, or a name in your team list, to see what that agent is working on.</p>
+        <div className="dm-mock-bar">
+          <h2 id={`${uid}-empty`} className="dm-mock-title">
+            Agent details
+          </h2>
+        </div>
+        <p className="dm-empty">Choose a desk or a name in your team to see what that agent is doing.</p>
       </section>
     );
   }
 
-  const status = describeAgentStatus(agent.status);
   const mine = activity.filter(a => a.agentId === agent.id);
   const canned = shown ? cannedResponse(shown, agent, company) : null;
 
   return (
     <section
-      className="dm-panel"
+      className="dm-mock"
       aria-labelledby={`${uid}-name`}
       data-testid="agent-panel"
       data-agent={agent.id}
       data-tour="agent-panel"
     >
-      <div className="dm-panel-head">
-        <AgentAvatar name={agent.name} id={agent.id} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 id={`${uid}-name`} data-testid="agent-name">
-            {agent.name}
-          </h2>
-          <p>{agent.role}</p>
-        </div>
-        <span className="dm-state" data-state={status} data-testid="agent-status">
-          {status}
+      <div className="dm-mock-bar">
+        <span style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+          <AgentAvatar name={agent.name} />
+          <span className="dm-row-main">
+            <h2 id={`${uid}-name`} className="dm-mock-title" data-testid="agent-name">
+              {agent.name}
+            </h2>
+            <span className="dm-row-sub">{agent.role}</span>
+          </span>
         </span>
-      </div>
-      {agent.summary && <p style={{ margin: 0 }}>{agent.summary}</p>}
-
-      <div>
-        <h3>
-          Activity <Simulated />
-        </h3>
-        {mine.length === 0 ? (
-          <p className="small">No recent activity.</p>
-        ) : (
-          <ul className="dm-list" data-testid="agent-activity">
-            {mine.slice(0, 5).map((a, i) => (
-              <li key={i}>
-                <span>{a.text}</span>
-                {a.when && <small>{formatWhen(a.when)}</small>}
-              </li>
-            ))}
-          </ul>
-        )}
+        <AgentStatus status={agent.status} testId="agent-status" />
       </div>
 
-      <div>
-        <h3>
-          Sample task history <Simulated />
-        </h3>
-        {agent.tasks.length === 0 ? (
-          <p className="small">No tasks yet.</p>
-        ) : (
-          <ul className="dm-list" data-testid="agent-tasks">
-            {agent.tasks.slice(0, 6).map((t, i) => (
-              <li key={i}>
-                <span>{t.title}</span>
-                <small>{[t.status, formatWhen(t.when)].filter(Boolean).join(' · ')}</small>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <div className="dm-panel-body">
+        {agent.summary && <p className="dm-muted">{agent.summary}</p>}
 
-      {agent.conversations.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <h3>
-            Example conversations <Simulated />
+        <div className="dm-panel-section">
+          <h3 className="dm-label">
+            Activity <Simulated />
           </h3>
-          {agent.conversations.slice(0, 3).map((c, i) => (
-            <details key={i} className="dm-convo" data-testid="agent-conversation">
-              <summary>
-                <span>{c.title}</span>
-                <Simulated />
-              </summary>
-              <ol>
-                {c.messages.map((m, j) => {
-                  const fromAgent = m.from && m.from.toLowerCase() === agent.name.toLowerCase();
-                  return (
-                    <li
-                      key={j}
-                      className={`dm-bubble${fromAgent || /agent|assistant/i.test(m.from) ? ' dm-from-agent' : ''}`}
-                    >
-                      {m.from && <small>{m.from}</small>}
-                      {m.text}
-                    </li>
-                  );
-                })}
-              </ol>
-            </details>
-          ))}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-tour="try-it">
-        <h3>
-          Try it <Simulated />
-        </h3>
-        <div className="dm-tryit" role="group" aria-label={`Things to try with ${agent.name}`}>
-          {TRY_IT.map(t => (
-            <button
-              key={t.key}
-              type="button"
-              className="dm-btn"
-              aria-pressed={shown === t.key}
-              onClick={() => setShown(t.key)}
-              data-testid={`agent-try-${t.key}`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div aria-live="polite">
-          {canned && (
-            <div className="dm-draft" data-testid="agent-canned" data-kind={shown}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-                <strong>{canned.title}</strong>
-                <Simulated />
-              </div>
-              <p>{canned.body}</p>
-              <p className="dm-draft-foot" data-testid="agent-canned-note">
-                Simulated for this demo. Nothing was sent, and nothing was written to a CRM or any real record.
-              </p>
-            </div>
+          {mine.length === 0 ? (
+            <p className="dm-muted">No recent activity.</p>
+          ) : (
+            <ul className="dm-lines" data-testid="agent-activity">
+              {mine.slice(0, 5).map((a, i) => (
+                <li key={i}>
+                  <span>{a.text}</span>
+                  {a.when && <span className="dm-row-when">{formatWhen(a.when)}</span>}
+                </li>
+              ))}
+            </ul>
           )}
+        </div>
+
+        <div className="dm-panel-section">
+          <h3 className="dm-label">
+            Sample task history <Simulated />
+          </h3>
+          {agent.tasks.length === 0 ? (
+            <p className="dm-muted">No tasks yet.</p>
+          ) : (
+            <ul className="dm-lines" data-testid="agent-tasks">
+              {agent.tasks.slice(0, 6).map((t, i) => (
+                <li key={i}>
+                  <span>{t.title}</span>
+                  <span className="dm-row-when">{[t.status, formatWhen(t.when)].filter(Boolean).join(' · ')}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {agent.conversations.length > 0 && (
+          <div className="dm-panel-section">
+            <h3 className="dm-label">
+              Example conversations <Simulated />
+            </h3>
+            {agent.conversations.slice(0, 3).map((c, i) => (
+              <details key={i} className="dm-convo" data-testid="agent-conversation">
+                <summary>
+                  <span>{c.title}</span>
+                  <Simulated />
+                </summary>
+                <ol>
+                  {c.messages.map((m, j) => {
+                    const fromAgent =
+                      (m.from && m.from.toLowerCase() === agent.name.toLowerCase()) || /agent|assistant/i.test(m.from);
+                    return (
+                      <li key={j} className={`dm-bubble${fromAgent ? ' dm-from-agent' : ''}`}>
+                        {m.from && <small>{m.from}</small>}
+                        {m.text}
+                      </li>
+                    );
+                  })}
+                </ol>
+              </details>
+            ))}
+          </div>
+        )}
+
+        <div className="dm-panel-section" data-tour="try-it">
+          <h3 className="dm-label">
+            Try it <Simulated />
+          </h3>
+          <div className="dm-tryit" role="group" aria-label={`Things to try with ${agent.name}`}>
+            {TRY_IT.map(t => (
+              <button
+                key={t.key}
+                type="button"
+                className="mk-btn mk-btn-secondary mk-btn-sm"
+                aria-pressed={shown === t.key}
+                onClick={() => setShown(t.key)}
+                data-testid={`agent-try-${t.key}`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <div aria-live="polite">
+            {canned && (
+              <div className="dm-draft" data-testid="agent-canned" data-kind={shown}>
+                <div className="dm-draft-head">
+                  <span>{canned.title}</span>
+                  <Simulated />
+                </div>
+                <p className="dm-draft-body">{canned.body}</p>
+                <p className="dm-draft-foot" data-testid="agent-canned-note">
+                  Simulated for this demo. Nothing was sent, and nothing was written to a CRM or any real record.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>
