@@ -7,3 +7,5 @@ pnpm-lock.yaml
 **/generated/
 # Hand-written prose and tables (status, ADRs, READMEs): formatting them would rewrite history in diffs.
 **/*.md
+# Synthetic legacy fixtures: generated JSON, kept byte-for-byte as committed.
+packages/legacy-import/fixtures/

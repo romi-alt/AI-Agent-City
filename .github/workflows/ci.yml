@@ -35,7 +35,7 @@ jobs:
       - run: pnpm test
 
   infrastructure:
-    name: local stack, migrations, BM25, integration and smoke
+    name: local stack, migrations, BM25, isolation, import and smoke
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: static
@@ -55,7 +55,10 @@ jobs:
       - name: Apply migrations and create the dev bucket
         run: pnpm infra:init
       - run: pnpm db:verify-search
-      - run: pnpm --filter @agentcity/db test:integration
+      - name: Tenant isolation (RLS, app role) and legacy import integration tests
+        run: pnpm db:test
+      - name: Backup and restore rehearsal (synthetic fixtures)
+        run: pnpm legacy:rehearse-backup
       - name: End-to-end smoke (web -> API, workflow survives worker crash, readiness fails without storage)
         run: pnpm smoke
       - name: Service state and logs on failure
@@ -67,7 +70,9 @@ jobs:
         if: always()
         with:
           name: smoke-evidence
-          path: planning/agentcity-migration/m01/evidence/
+          path: |
+            planning/agentcity-migration/m01/evidence/
+            planning/agentcity-migration/m02/evidence/
           if-no-files-found: ignore
       - name: Stop services
         if: always()

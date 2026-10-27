@@ -3,6 +3,8 @@ import { fileURLToPath } from 'node:url';
 import { runner } from 'node-pg-migrate';
 import pg from 'pg';
 
+export { withScope, type Scope } from './scope.js';
+
 /** Where the SQL migrations live (shipped with the package, next to dist/). */
 export const MIGRATIONS_DIR = resolve(fileURLToPath(import.meta.url), '../../migrations');
 export const MIGRATIONS_TABLE = 'pgmigrations';

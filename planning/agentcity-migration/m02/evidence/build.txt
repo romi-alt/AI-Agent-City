@@ -1,0 +1,56 @@
+$ pnpm build
+
+> agentcity@ build /home/user/sales-city
+> pnpm -r run build
+
+Scope: 8 of 9 workspace projects
+apps/legacy build$ tsc -p tsconfig.json && tsc -p tsconfig.server.json && vite build
+packages/db build$ tsc -p tsconfig.json
+packages/contracts build$ tsc -p tsconfig.json
+packages/domain build$ tsc -p tsconfig.json
+packages/contracts build: Done
+packages/domain build: Done
+packages/db build: Done
+apps/legacy build: vite v8.3.5 building client environment for production...
+apps/legacy build: transforming...
+apps/legacy build: ✓ 29 modules transformed.
+apps/legacy build: rendering chunks...
+apps/legacy build: computing gzip size...
+apps/legacy build: dist/index.html                      0.70 kB │ gzip:   0.40 kB
+apps/legacy build: dist/proposal.html                   1.05 kB │ gzip:   0.54 kB
+apps/legacy build: dist/assets/proposal-fwZmVYx-.css   13.10 kB │ gzip:   3.66 kB
+apps/legacy build: dist/assets/main-DTnLPkD_.css       34.20 kB │ gzip:   7.92 kB
+apps/legacy build: dist/assets/buildings-DtFq3Mok.js    9.83 kB │ gzip:   4.04 kB
+apps/legacy build: dist/assets/proposal-C4E51Ed3.js    28.89 kB │ gzip:  11.24 kB
+apps/legacy build: dist/assets/main-C_VtHRql.js       683.80 kB │ gzip: 183.86 kB
+apps/legacy build: ✓ built in 1.37s
+apps/legacy build: [plugin builtin:vite-reporter] 
+apps/legacy build: (!) Some chunks are larger than 500 kB after minification. Consider:
+apps/legacy build: - Using dynamic import() to code-split the application
+apps/legacy build: - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+apps/legacy build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+apps/legacy build: Done
+apps/api build$ tsc -p tsconfig.json
+apps/web build$ NEXT_TELEMETRY_DISABLED=1 next build
+apps/worker build$ tsc -p tsconfig.json
+packages/legacy-import build$ tsc -p tsconfig.json
+packages/legacy-import build: Done
+apps/web build: ▲ Next.js 16.4.3 (Turbopack)
+apps/worker build: Done
+apps/api build: Done
+apps/web build: ✓ Running next.config.ts took 3.3s
+apps/web build:   Creating an optimized production build ...
+apps/web build: ✓ Compiled successfully in 4.1s
+apps/web build:   Running TypeScript ...
+apps/web build:   Finished TypeScript in 1017ms ...
+apps/web build:   Collecting page data using 3 workers ...
+apps/web build:   Generating static pages using 3 workers (0/2) ...
+apps/web build: ✓ Generating static pages using 3 workers (2/2) in 80ms
+apps/web build:   Finalizing page optimization ...
+apps/web build: Route (app)
+apps/web build: ┌ ƒ /
+apps/web build: └ ○ /_not-found
+apps/web build: ○  (Static)   prerendered as static content
+apps/web build: ƒ  (Dynamic)  server-rendered on demand
+apps/web build: Done
+[exit 0]

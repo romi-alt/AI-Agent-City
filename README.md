@@ -11,7 +11,9 @@ are in [MIGRATION-STATUS.md](MIGRATION-STATUS.md). Decisions are in
 | `apps/api` | NestJS API: REST, GraphQL, OpenAPI | Health and readiness only |
 | `apps/worker` | Temporal worker | Platform heartbeat workflow only |
 | `packages/contracts` | Shared zod schemas | Health and heartbeat |
-| `packages/db` | Migrations, pool, test-database fixture, BM25 check | Platform schema only |
+| `packages/db` | Migrations, scoped connections (`withScope`), test-database fixture, BM25 check | Tenancy schema with RLS, catalog seed |
+| `packages/domain` | City catalog generated from the legacy seed; deterministic ids | 15 buildings / 183 floors / 303 desks |
+| `packages/legacy-import` | Read-only dry run and import of legacy state, with quarantine and reconciliation | Tested on synthetic fixtures only |
 | `infra/` | Docker Compose for local services | PostgreSQL + pg_search + pgvector, Redis, S3-compatible storage, Temporal, Keycloak |
 
 ## Requirements
@@ -53,7 +55,8 @@ pnpm format:check
 pnpm typecheck
 pnpm test                                       # unit tests, including the legacy app's 33
 pnpm db:verify-search                           # BM25 + vector search really work in this PostgreSQL
-pnpm --filter @agentcity/db test:integration    # migrations, app-role permissions, reversibility
+pnpm db:test                                    # tenant isolation (RLS, app role) and the legacy importer
+pnpm legacy:rehearse-backup                     # backup, dump, restore and re-check on synthetic data
 pnpm smoke                                      # end-to-end; needs infra:up, infra:init and build first
 ```
 

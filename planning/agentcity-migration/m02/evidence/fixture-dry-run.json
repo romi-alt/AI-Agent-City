@@ -1,0 +1,655 @@
+{
+  "mode": "dry-run",
+  "sources": {
+    "state": "57a0eb95ae8d5ac37f0f3fa5379f8607d311f61e5239b53576ec4635bd054b1b",
+    "auth": "3131bc5425037b7db4c831a2f2af191aa09a7b2e0c1f4d210c2c85019c1c7348",
+    "mapping": "2a40dc09f564f02d9b94c32725200a6f738c61284545e932746c486a681801f1"
+  },
+  "report": {
+    "asOf": "2026-03-02T14:00:00.000Z",
+    "counts": {
+      "building": {
+        "input": 15,
+        "imported": 0,
+        "quarantined": 0,
+        "skipped": 15
+      },
+      "rental-occupant": {
+        "input": 3,
+        "imported": 0,
+        "quarantined": 1,
+        "skipped": 2
+      },
+      "agent": {
+        "input": 60,
+        "imported": 59,
+        "quarantined": 0,
+        "skipped": 1
+      },
+      "lead": {
+        "input": 392,
+        "imported": 388,
+        "quarantined": 4,
+        "skipped": 0
+      },
+      "message": {
+        "input": 301,
+        "imported": 296,
+        "quarantined": 5,
+        "skipped": 0
+      },
+      "approval": {
+        "input": 77,
+        "imported": 73,
+        "quarantined": 4,
+        "skipped": 0
+      },
+      "content": {
+        "input": 432,
+        "imported": 432,
+        "quarantined": 0,
+        "skipped": 0
+      },
+      "revenue": {
+        "input": 1,
+        "imported": 0,
+        "quarantined": 1,
+        "skipped": 0
+      },
+      "inbox": {
+        "input": 0,
+        "imported": 0,
+        "quarantined": 0,
+        "skipped": 0
+      },
+      "insight": {
+        "input": 200,
+        "imported": 0,
+        "quarantined": 0,
+        "skipped": 200
+      },
+      "report": {
+        "input": 1,
+        "imported": 0,
+        "quarantined": 0,
+        "skipped": 1
+      },
+      "feed": {
+        "input": 300,
+        "imported": 0,
+        "quarantined": 0,
+        "skipped": 300
+      },
+      "stage-log": {
+        "input": 74,
+        "imported": 0,
+        "quarantined": 0,
+        "skipped": 74
+      },
+      "user": {
+        "input": 6,
+        "imported": 4,
+        "quarantined": 2,
+        "skipped": 0
+      },
+      "client": {
+        "input": 2,
+        "imported": 0,
+        "quarantined": 1,
+        "skipped": 1
+      }
+    },
+    "quarantineReasons": {
+      "rental-occupant: rented floor without a mapped tenant": 1,
+      "lead: real contact on a shared rental building: ownership must be mapped lead by lead": 2,
+      "lead: real contact without a verified ownership mapping": 1,
+      "lead: duplicate legacy id": 1,
+      "message: its contact is quarantined": 5,
+      "approval: its message is quarantined": 4,
+      "revenue: simulated revenue is not a payment or invoice fact": 1,
+      "user: no verified email: legacy users have none, and nothing is guessed": 1,
+      "user: mapped tenant does not match the user's legacy client": 1,
+      "client: legacy client is not mapped to a tenant": 1
+    },
+    "skippedReasons": {
+      "building: the physical map comes from the catalog seed": 15,
+      "rental-occupant: floor is placed by the mapping; occupant contact fields are not imported": 2,
+      "agent: human desk: people are never installed as agents": 1,
+      "insight: simulated strategy notes": 200,
+      "report: generated summaries of simulated activity": 1,
+      "feed: activity ticker, rebuilt from real events": 300,
+      "stage-log: derived from lead history (imported per lead)": 74,
+      "client: mapped to a tenant": 1
+    },
+    "duplicates": [
+      {
+        "kind": "contact-email",
+        "detail": "l22 and l36 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l7 and l45 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l28 and l52 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l44 and l57 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l48 and l63 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l10 and l72 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l61 and l98 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l56 and l100 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l95 and l102 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l2 and l104 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l28 and l105 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l30 and l108 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l106 and l109 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l3 and l111 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l112 and l115 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l75 and l133 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l30 and l136 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l42 and l137 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l22 and l139 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l120 and l141 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l74 and l143 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l90 and l144 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l126 and l147 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l35 and l149 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l11 and l150 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l58 and l154 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l116 and l161 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l13 and l164 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l125 and l167 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l175 and l180 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l43 and l181 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l169 and l193 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l188 and l194 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l91 and l200 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l84 and l201 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l169 and l205 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l121 and l207 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l129 and l210 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l166 and l211 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l198 and l212 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l168 and l213 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l41 and l217 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l13 and l219 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l67 and l224 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l134 and l225 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l220 and l228 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l191 and l229 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l153 and l231 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l132 and l234 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l89 and l235 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l89 and l236 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l163 and l243 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l6 and l246 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l227 and l254 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l249 and l265 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l166 and l268 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l119 and l270 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l32 and l271 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l4 and l272 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l188 and l273 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l223 and l277 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l50 and l280 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l134 and l282 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l23 and l283 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l178 and l284 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l132 and l289 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l174 and l290 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l226 and l291 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l259 and l293 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l247 and l294 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l199 and l296 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l60 and l299 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l230 and l307 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l5 and l380 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l173 and l549 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l145 and l901 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l244 and l1022 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l47 and l1163 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l202 and l1338 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l253 and l1410 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l78 and l1433 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l85 and l1717 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l103 and l1792 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l227 and l1888 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l37 and l1990 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l113 and l2030 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l33 and l2067 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l267 and l2292 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l124 and l2461 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l87 and l2486 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l39 and l2507 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l259 and l2622 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l258 and l2742 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l1826 and l2820 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l256 and l2912 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l13 and l2952 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l10 and l3109 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l78 and l3111 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l18 and l3236 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l233 and l3286 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l17 and l3374 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l80 and l3440 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l103 and l3464 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l44 and l3482 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l249 and l3516 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l3025 and l3545 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l127 and l3621 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l67 and l3646 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l304 and l3924 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l253 and l3930 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l76 and l3958 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l244 and l3964 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l84 and l3976 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l26 and l3981 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l230 and l4034 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "contact-email",
+        "detail": "l2465 and l4084 share an email in tenant legacy-demo (both kept for review)"
+      },
+      {
+        "kind": "lead",
+        "detail": "id l1 appears more than once"
+      }
+    ],
+    "dangling": [
+      {
+        "kind": "message",
+        "id": "m-dangling",
+        "refers": "lead l-missing"
+      }
+    ],
+    "rentalOccupants": [
+      {
+        "building": "rental-1",
+        "level": 2,
+        "mappedTo": "rental-two"
+      },
+      {
+        "building": "rental-1",
+        "level": 1,
+        "mappedTo": "rental-one"
+      },
+      {
+        "building": "rental-3",
+        "level": 5,
+        "mappedTo": null
+      }
+    ],
+    "notImportedByDesign": {
+      "passHash": 6,
+      "salt": 6,
+      "totpSecret": 6,
+      "pendingSecret": 0,
+      "recovery": 6,
+      "enrollHash": 0,
+      "sessions": 1,
+      "rememberedDevices": 1,
+      "signInLog": 1
+    },
+    "safety": {
+      "approvalsExpired": 73,
+      "schedulesDisabled": 1,
+      "schedulesEnabled": 0,
+      "dispatchFacts": 0,
+      "moneyFacts": 0,
+      "consentFacts": 0
+    },
+    "plannedRows": {
+      "app.agency": 1,
+      "app.tenant": 5,
+      "app.workspace": 5,
+      "app.workspace_placement": 26,
+      "app.invitation": 4,
+      "app.agent_installation": 59,
+      "app.contact": 388,
+      "app.opportunity": 388,
+      "app.opportunity_stage_event": 314,
+      "app.note": 389,
+      "app.message_evidence": 296,
+      "app.draft_revision": 73,
+      "app.approval": 73,
+      "app.content_item": 432,
+      "app.schedule": 1
+    }
+  }
+}

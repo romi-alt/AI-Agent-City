@@ -1,0 +1,8 @@
+$ pnpm format:check
+
+> agentcity@ format:check /home/user/sales-city
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+[exit 0]

@@ -1,0 +1,11 @@
+$ pnpm db:migrate
+
+> agentcity@ db:migrate /home/user/sales-city
+> pnpm --filter @agentcity/db run migrate
+
+
+> @agentcity/db@0.0.0 migrate /home/user/sales-city/packages/db
+> node --env-file-if-exists=../../infra/local-dev.env --import tsx src/cli-migrate.ts up
+
+up: nothing to do
+[exit 0]

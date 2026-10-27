@@ -1,0 +1,3 @@
+$ pnpm -s legacy:import dry-run --state fixtures/state.v2.fixture.json --auth fixtures/auth.fixture.json --mapping fixtures/mapping.fixture.json --out ../../planning/agentcity-migration/m02/evidence/fixture-dry-run.json
+dry-run: ok
+[exit 0]

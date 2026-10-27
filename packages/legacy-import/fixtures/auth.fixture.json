@@ -1,0 +1,142 @@
+{
+  "users": [
+    {
+      "id": "u-owner",
+      "username": "owner",
+      "name": "Fixture owner",
+      "role": "owner",
+      "passHash": "FIXTURE-NOT-A-REAL-SECRET",
+      "salt": "FIXTURE-NOT-A-REAL-SECRET",
+      "totpSecret": "FIXTURE-NOT-A-REAL-SECRET",
+      "recovery": [
+        "FIXTURE-NOT-A-REAL-SECRET"
+      ],
+      "onDuty": false,
+      "createdAt": 0,
+      "failed": 0
+    },
+    {
+      "id": "u-staff",
+      "username": "staff",
+      "name": "Fixture staff",
+      "role": "staff",
+      "passHash": "FIXTURE-NOT-A-REAL-SECRET",
+      "salt": "FIXTURE-NOT-A-REAL-SECRET",
+      "totpSecret": "FIXTURE-NOT-A-REAL-SECRET",
+      "recovery": [
+        "FIXTURE-NOT-A-REAL-SECRET"
+      ],
+      "onDuty": false,
+      "createdAt": 0,
+      "failed": 0
+    },
+    {
+      "id": "u-honda-admin",
+      "username": "honda.admin",
+      "name": "Fixture honda.admin",
+      "role": "client-admin",
+      "clientId": "c-honda",
+      "passHash": "FIXTURE-NOT-A-REAL-SECRET",
+      "salt": "FIXTURE-NOT-A-REAL-SECRET",
+      "totpSecret": "FIXTURE-NOT-A-REAL-SECRET",
+      "recovery": [
+        "FIXTURE-NOT-A-REAL-SECRET"
+      ],
+      "onDuty": false,
+      "createdAt": 0,
+      "failed": 0
+    },
+    {
+      "id": "u-honda-viewer",
+      "username": "honda.viewer",
+      "name": "Fixture honda.viewer",
+      "role": "client-viewer",
+      "clientId": "c-honda",
+      "passHash": "FIXTURE-NOT-A-REAL-SECRET",
+      "salt": "FIXTURE-NOT-A-REAL-SECRET",
+      "totpSecret": "FIXTURE-NOT-A-REAL-SECRET",
+      "recovery": [
+        "FIXTURE-NOT-A-REAL-SECRET"
+      ],
+      "onDuty": false,
+      "createdAt": 0,
+      "failed": 0
+    },
+    {
+      "id": "u-unmapped",
+      "username": "nobody",
+      "name": "Fixture nobody",
+      "role": "staff",
+      "passHash": "FIXTURE-NOT-A-REAL-SECRET",
+      "salt": "FIXTURE-NOT-A-REAL-SECRET",
+      "totpSecret": "FIXTURE-NOT-A-REAL-SECRET",
+      "recovery": [
+        "FIXTURE-NOT-A-REAL-SECRET"
+      ],
+      "onDuty": false,
+      "createdAt": 0,
+      "failed": 0
+    },
+    {
+      "id": "u-wrong-client",
+      "username": "wrong.client",
+      "name": "Fixture wrong.client",
+      "role": "client-admin",
+      "clientId": "c-honda",
+      "passHash": "FIXTURE-NOT-A-REAL-SECRET",
+      "salt": "FIXTURE-NOT-A-REAL-SECRET",
+      "totpSecret": "FIXTURE-NOT-A-REAL-SECRET",
+      "recovery": [
+        "FIXTURE-NOT-A-REAL-SECRET"
+      ],
+      "onDuty": false,
+      "createdAt": 0,
+      "failed": 0
+    }
+  ],
+  "clients": [
+    {
+      "id": "c-honda",
+      "name": "Fixture Honda Client",
+      "buildingIds": [
+        "honda"
+      ],
+      "createdAt": 0
+    },
+    {
+      "id": "c-orphan",
+      "name": "Fixture Unmapped Client",
+      "buildingIds": [
+        "acura"
+      ],
+      "createdAt": 0
+    }
+  ],
+  "devices": [
+    {
+      "hash": "FIXTURE-NOT-A-REAL-SECRET",
+      "userId": "u-owner",
+      "expires": 0
+    }
+  ],
+  "sessions": [
+    {
+      "hash": "FIXTURE-NOT-A-REAL-SECRET",
+      "userId": "u-owner",
+      "stage": "full",
+      "locked": false,
+      "codeFails": 0,
+      "created": 0,
+      "lastSeen": 0
+    }
+  ],
+  "signins": [
+    {
+      "t": 0,
+      "username": "owner",
+      "ip": "127.0.0.1",
+      "ua": "fixture",
+      "result": "ok"
+    }
+  ]
+}

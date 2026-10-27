@@ -1,0 +1,19 @@
+$ pnpm legacy:rehearse-backup
+
+> agentcity@ legacy:rehearse-backup /home/user/sales-city
+> pnpm --filter @agentcity/legacy-import run rehearse:backup
+
+
+> @agentcity/legacy-import@0.0.0 rehearse:backup /home/user/sales-city/packages/legacy-import
+> node --env-file-if-exists=../../infra/local-dev.env --import tsx scripts/backup-restore-rehearsal.ts
+
+ok   legacy files: backup and restore are byte-identical
+ok   legacy files: a damaged copy is refused and the original is unchanged
+ok   database: fixture imported
+ok   database: pg_dump / pg_restore completed
+ok   database: restored totals and content hashes equal the source
+ok   database: restored copy has no pending migrations
+ok   database: row-level security and ranked search work on the restored copy
+ok   database: importing again into the restored copy adds nothing
+rehearsal: PASSED
+[exit 0]

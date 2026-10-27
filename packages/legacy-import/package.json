@@ -1,0 +1,34 @@
+{
+  "name": "@agentcity/legacy-import",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Read-only dry run and import of legacy (version 2) state into the scoped PostgreSQL model. Server-only.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "legacy-import": "node --env-file-if-exists=../../infra/local-dev.env --import tsx src/cli.ts",
+    "fixtures:generate": "node --import tsx scripts/make-fixtures.ts",
+    "rehearse:backup": "node --env-file-if-exists=../../infra/local-dev.env --import tsx scripts/backup-restore-rehearsal.ts",
+    "test": "node --import tsx --test test/plan.test.ts",
+    "test:integration": "node --env-file-if-exists=../../infra/local-dev.env --import tsx --test --test-concurrency=1 test/import.test.ts"
+  },
+  "dependencies": {
+    "@agentcity/db": "workspace:*",
+    "@agentcity/domain": "workspace:*",
+    "pg": "8.23.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/pg": "8.23.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
+  }
+}

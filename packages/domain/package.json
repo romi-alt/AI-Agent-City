@@ -1,0 +1,24 @@
+{
+  "name": "@agentcity/domain",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Domain model: the city catalog (from the legacy seed) and deterministic identifiers. Server-only.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "catalog:generate": "node --import tsx scripts/generate-catalog.ts",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "note": "FIXTURE mapping for the synthetic fixtures. A real mapping must be written and reviewed by the owner.",
+  "agency": {
+    "key": "fast-sales-agency",
+    "name": "Fixture Agency (Fast Sales)"
+  },
+  "demoTenant": {
+    "key": "legacy-demo",
+    "name": "Legacy simulated city (demo)"
+  },
+  "tenants": [
+    {
+      "key": "fast-sales",
+      "name": "Fixture Fast Sales (own business)",
+      "kind": "agency",
+      "workspaces": [
+        {
+          "key": "training-center",
+          "name": "Training Center",
+          "buildings": [
+            "fast-sales"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "honda-client",
+      "name": "Fixture Honda Client",
+      "kind": "client",
+      "legacyClientIds": [
+        "c-honda"
+      ],
+      "workspaces": [
+        {
+          "key": "store",
+          "name": "Honda store",
+          "buildings": [
+            "honda"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "rental-one",
+      "name": "Fixture Rental One",
+      "kind": "client",
+      "workspaces": [
+        {
+          "key": "floor",
+          "name": "Rental 1 · L1",
+          "floors": [
+            {
+              "building": "rental-1",
+              "level": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "rental-two",
+      "name": "Fixture Rental Two",
+      "kind": "client",
+      "workspaces": [
+        {
+          "key": "floor",
+          "name": "Rental 1 · L2",
+          "floors": [
+            {
+              "building": "rental-1",
+              "level": 2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "contactOwnership": [
+    {
+      "tenant": "honda-client",
+      "workspace": "store",
+      "legacyBuilding": "honda",
+      "evidence": "FIXTURE: owner confirmed the Honda store leads belong to the Honda client"
+    },
+    {
+      "tenant": "fast-sales",
+      "workspace": "training-center",
+      "legacyBuilding": "fast-sales",
+      "evidence": "FIXTURE: Training Center leads are the agency’s own"
+    },
+    {
+      "tenant": "rental-one",
+      "workspace": "floor",
+      "legacyLeadIds": [
+        "l2976"
+      ],
+      "evidence": "FIXTURE: reviewed individually with the L1 client"
+    }
+  ],
+  "users": [
+    {
+      "legacyUserId": "u-owner",
+      "email": "fixture.owner@example.test",
+      "evidence": "FIXTURE: confirmed in person",
+      "tenant": "fast-sales",
+      "role": "agency-owner"
+    },
+    {
+      "legacyUserId": "u-staff",
+      "email": "fixture.staff@example.test",
+      "evidence": "FIXTURE: confirmed in person",
+      "tenant": "fast-sales",
+      "role": "agency-staff"
+    },
+    {
+      "legacyUserId": "u-honda-admin",
+      "email": "Fixture.Honda.Admin@example.test",
+      "evidence": "FIXTURE: confirmed by the client",
+      "tenant": "honda-client",
+      "role": "client-admin"
+    },
+    {
+      "legacyUserId": "u-honda-viewer",
+      "email": "fixture.honda.viewer@example.test",
+      "evidence": "FIXTURE: confirmed by the client",
+      "tenant": "honda-client",
+      "workspace": "store",
+      "role": "client-viewer"
+    },
+    {
+      "legacyUserId": "u-wrong-client",
+      "email": "fixture.wrong@example.test",
+      "evidence": "FIXTURE: deliberately wrong tenant",
+      "tenant": "rental-one",
+      "role": "client-admin"
+    }
+  ]
+}

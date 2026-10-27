@@ -1,0 +1,238 @@
+$ pnpm db:test
+
+> agentcity@ db:test /home/user/sales-city
+> pnpm --filter @agentcity/db --filter @agentcity/legacy-import run test:integration
+
+Scope: 2 of 9 workspace projects
+packages/db test:integration$ node --env-file-if-exists=../../infra/local-dev.env --import tsx --test --test-concurrency=1 test/*.test.ts
+packages/db test:integration: TAP version 13
+packages/db test:integration: # Subtest: migrations
+packages/db test:integration:     # Subtest: applies cleanly to an empty database
+packages/db test:integration:     ok 1 - applies cleanly to an empty database
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 1.175575
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: lets the app role record heartbeats, once per step
+packages/db test:integration:     ok 2 - lets the app role record heartbeats, once per step
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 14.437048
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: does not let the app role change the schema or bypass grants
+packages/db test:integration:     ok 3 - does not let the app role change the schema or bypass grants
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 12.03449
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: rolls back and re-applies (reversible)
+packages/db test:integration:     ok 4 - rolls back and re-applies (reversible)
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 218.892905
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     1..4
+packages/db test:integration: ok 1 - migrations
+packages/db test:integration:   ---
+packages/db test:integration:   duration_ms: 585.968643
+packages/db test:integration:   type: 'suite'
+packages/db test:integration:   ...
+packages/db test:integration: # Subtest: tenant isolation (row-level security, app role)
+packages/db test:integration:     # Subtest: connects as a role that cannot bypass row-level security
+packages/db test:integration:     ok 1 - connects as a role that cannot bypass row-level security
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 8.441875
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: sees nothing in any tenant table without a scope (fails closed)
+packages/db test:integration:     ok 2 - sees nothing in any tenant table without a scope (fails closed)
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 19.751811
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: SELECT and joins return only the scoped tenant
+packages/db test:integration:     ok 3 - SELECT and joins return only the scoped tenant
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 8.402243
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: BM25 search returns only the scoped tenant’s rows, ranked
+packages/db test:integration:     ok 4 - BM25 search returns only the scoped tenant’s rows, ranked
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 147.305675
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: INSERT into another tenant is refused
+packages/db test:integration:     ok 5 - INSERT into another tenant is refused
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 6.036016
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: UPDATE and DELETE cannot reach another tenant, and cannot move a row out of the tenant
+packages/db test:integration:     ok 6 - UPDATE and DELETE cannot reach another tenant, and cannot move a row out of the tenant
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 8.011552
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: a client on rental L1 cannot reach the client on L2 of the same building
+packages/db test:integration:     ok 7 - a client on rental L1 cannot reach the client on L2 of the same building
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 6.378264
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: a member limited to one workspace cannot see the tenant’s other floor
+packages/db test:integration:     ok 8 - a member limited to one workspace cannot see the tenant’s other floor
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 41.972707
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: a pooled connection never carries scope into the next transaction
+packages/db test:integration:     ok 9 - a pooled connection never carries scope into the next transaction
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 6.715929
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: rejects forged, tampered and replayed scope values
+packages/db test:integration:     ok 10 - rejects forged, tampered and replayed scope values
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 10.718059
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: checks who may enter a scope: unknown people, staff assignments, viewers and support
+packages/db test:integration:     ok 11 - checks who may enter a scope: unknown people, staff assignments, viewers and support
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 35.947045
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: foreign keys reject cross-tenant references, even for a role that bypasses RLS
+packages/db test:integration:     ok 12 - foreign keys reject cross-tenant references, even for a role that bypasses RLS
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 4.433891
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: keeps unique keys per tenant: the same external id can exist in two tenants, never twice in one
+packages/db test:integration:     ok 13 - keeps unique keys per tenant: the same external id can exist in two tenants, never twice in one
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 12.219924
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: keeps facts immutable and approvals bound to one revision
+packages/db test:integration:     ok 14 - keeps facts immutable and approvals bound to one revision
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 14.666026
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: gives the demo tenant no provider authority and never records an unverified payment
+packages/db test:integration:     ok 15 - gives the demo tenant no provider authority and never records an unverified payment
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 2.000941
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: places one occupant per floor and installs agents only on occupied floors and AI desks
+packages/db test:integration:     ok 16 - places one occupant per floor and installs agents only on occupied floors and AI desks
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 6.448435
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: classifies every table, and protects every tenant table with forced RLS
+packages/db test:integration:     ok 17 - classifies every table, and protects every tenant table with forced RLS
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 4.340665
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: seeds the catalog with the exact legacy inventory
+packages/db test:integration:     ok 18 - seeds the catalog with the exact legacy inventory
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 2.200544
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     1..18
+packages/db test:integration: ok 2 - tenant isolation (row-level security, app role)
+packages/db test:integration:   ---
+packages/db test:integration:   duration_ms: 706.270558
+packages/db test:integration:   type: 'suite'
+packages/db test:integration:   ...
+packages/db test:integration: 1..2
+packages/db test:integration: # tests 22
+packages/db test:integration: # suites 2
+packages/db test:integration: # pass 22
+packages/db test:integration: # fail 0
+packages/db test:integration: # cancelled 0
+packages/db test:integration: # skipped 0
+packages/db test:integration: # todo 0
+packages/db test:integration: # duration_ms 1702.243852
+packages/db test:integration: Done
+packages/legacy-import test:integration$ node --env-file-if-exists=../../infra/local-dev.env --import tsx --test --test-concurrency=1 test/import.test.ts
+packages/legacy-import test:integration: TAP version 13
+packages/legacy-import test:integration: # Subtest: legacy import (version 2)
+packages/legacy-import test:integration:     # Subtest: dry run reports everything and writes nothing (it runs as the app role)
+packages/legacy-import test:integration:     ok 1 - dry run reports everything and writes nothing (it runs as the app role)
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 114.473526
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: refuses unknown or corrupt input before writing anything
+packages/legacy-import test:integration:     ok 2 - refuses unknown or corrupt input before writing anything
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 130.274051
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: imports, and a second run with the same input changes nothing
+packages/legacy-import test:integration:     ok 3 - imports, and a second run with the same input changes nothing
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 1770.537987
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: refuses a record that changed since it was imported, instead of overwriting
+packages/legacy-import test:integration:     ok 4 - refuses a record that changed since it was imported, instead of overwriting
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 67.185283
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: never imports credentials, sessions or remembered devices
+packages/legacy-import test:integration:     ok 5 - never imports credentials, sessions or remembered devices
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 19.673058
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: derives no sends, payments, consent or pending approvals from legacy state
+packages/legacy-import test:integration:     ok 6 - derives no sends, payments, consent or pending approvals from legacy state
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 4.210951
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: keeps simulated data in the marked demo tenant and real data with its mapped owner only
+packages/legacy-import test:integration:     ok 7 - keeps simulated data in the marked demo tenant and real data with its mapped owner only
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 3.198905
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: gives imported records provenance, a reversible map and deterministic ids
+packages/legacy-import test:integration:     ok 8 - gives imported records provenance, a reversible map and deterministic ids
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 2.241673
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: enforces tenant isolation on imported data: the L1 client cannot see the L2 client in the same building
+packages/legacy-import test:integration:     ok 9 - enforces tenant isolation on imported data: the L1 client cannot see the L2 client in the same building
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 24.895424
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     1..9
+packages/legacy-import test:integration: ok 1 - legacy import (version 2)
+packages/legacy-import test:integration:   ---
+packages/legacy-import test:integration:   duration_ms: 2488.101501
+packages/legacy-import test:integration:   type: 'suite'
+packages/legacy-import test:integration:   ...
+packages/legacy-import test:integration: 1..1
+packages/legacy-import test:integration: # tests 9
+packages/legacy-import test:integration: # suites 1
+packages/legacy-import test:integration: # pass 9
+packages/legacy-import test:integration: # fail 0
+packages/legacy-import test:integration: # cancelled 0
+packages/legacy-import test:integration: # skipped 0
+packages/legacy-import test:integration: # todo 0
+packages/legacy-import test:integration: # duration_ms 2760.587992
+packages/legacy-import test:integration: Done
+[exit 0]

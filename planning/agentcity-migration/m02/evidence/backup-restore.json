@@ -1,0 +1,170 @@
+{
+  "ranAt": "2026-10-27T18:00:18.395Z",
+  "fixtures": "SYNTHETIC",
+  "passed": true,
+  "steps": [
+    {
+      "step": "legacy files: backup and restore are byte-identical",
+      "ok": true,
+      "detail": [
+        {
+          "file": "state.v2.fixture.json",
+          "sha256": "57a0eb95ae8d5ac37f0f3fa5379f8607d311f61e5239b53576ec4635bd054b1b"
+        },
+        {
+          "file": "auth.fixture.json",
+          "sha256": "3131bc5425037b7db4c831a2f2af191aa09a7b2e0c1f4d210c2c85019c1c7348"
+        },
+        {
+          "file": "mapping.fixture.json",
+          "sha256": "2a40dc09f564f02d9b94c32725200a6f738c61284545e932746c486a681801f1"
+        }
+      ]
+    },
+    {
+      "step": "legacy files: a damaged copy is refused and the original is unchanged",
+      "ok": true,
+      "detail": "the legacy state (state.json) is not valid JSON (Expected double-quoted property name in JSON at position 4093 (line 146 column 3))"
+    },
+    {
+      "step": "database: fixture imported",
+      "ok": true,
+      "detail": {
+        "rows": {
+          "app.agency": 1,
+          "app.tenant": 5,
+          "app.workspace": 5,
+          "app.workspace_placement": 26,
+          "app.invitation": 4,
+          "app.agent_installation": 59,
+          "app.contact": 388,
+          "app.opportunity": 388,
+          "app.opportunity_stage_event": 314,
+          "app.note": 389,
+          "app.message_evidence": 296,
+          "app.draft_revision": 73,
+          "app.approval": 73,
+          "app.content_item": 432,
+          "app.schedule": 1
+        },
+        "quarantine": 18
+      }
+    },
+    {
+      "step": "database: pg_dump / pg_restore completed",
+      "ok": true,
+      "detail": {
+        "dumpBytes": 447167
+      }
+    },
+    {
+      "step": "database: restored totals and content hashes equal the source",
+      "ok": true,
+      "detail": {
+        "tables": {
+          "app.agency": {
+            "rows": 1,
+            "sha256": "f77e3d7443088dcdaa382c3d361798904d50a1982d8de1f1119af7e70d95309f"
+          },
+          "app.tenant": {
+            "rows": 5,
+            "sha256": "fc6c5c2e182a5b8abb507ca5d41f76cb582b2b1419d29c28e44e05f16ecc9309"
+          },
+          "app.workspace": {
+            "rows": 5,
+            "sha256": "e53501e21554ad7a65c6b235064531153ca2b8fbb53f7992d04477304739befb"
+          },
+          "app.workspace_placement": {
+            "rows": 26,
+            "sha256": "2070dfc5e8514e4af32f2956f5cabceb13f91accec47dc5e69fc4026c8b3328c"
+          },
+          "app.invitation": {
+            "rows": 4,
+            "sha256": "8bfde24f9fffeb79dcaea6c92ee771fbf86d2e8850278d2858126db35ed7a035"
+          },
+          "app.agent_installation": {
+            "rows": 59,
+            "sha256": "8e4ee3a993c5bfdc9ca7538a2849d496e42bc6cedbb59878327ed5b0da82d9e0"
+          },
+          "app.contact": {
+            "rows": 388,
+            "sha256": "607064224b893971ddc686b00b36ee4d9269f8f91dc5ee1d90caf6f0a5440371"
+          },
+          "app.opportunity": {
+            "rows": 388,
+            "sha256": "00ad8a5c1e9b4a33897ad401f1c9d5c803003d78532eb56ba9d58bc3e0130e2c"
+          },
+          "app.opportunity_stage_event": {
+            "rows": 314,
+            "sha256": "0800a6067aa859d898b3a6ae421952f895e8550933eb4d716ecc2b1e3618da2c"
+          },
+          "app.note": {
+            "rows": 389,
+            "sha256": "b3b1c8c9f774d92f49c7972590c92f56077a044a587519bc8988fb3696acadd1"
+          },
+          "app.message_evidence": {
+            "rows": 296,
+            "sha256": "871ccca00953c724c5f9be0b56df9fdbca9ffca21aba11fcd73ef8ad39c7cb02"
+          },
+          "app.draft_revision": {
+            "rows": 73,
+            "sha256": "c456365017b656f63c356e83215d6609e85eb0b5a00d2d92d61ac761cc3e1336"
+          },
+          "app.approval": {
+            "rows": 73,
+            "sha256": "b706186f523c15307cb25bda6f2a895c6a7af528fa9e7d270a367e231434977b"
+          },
+          "app.content_item": {
+            "rows": 432,
+            "sha256": "9359452700bfe3e34caa9681244f87e7b575200b69ecc986a09815a2dd2495d0"
+          },
+          "app.schedule": {
+            "rows": 1,
+            "sha256": "eb3d710737b891d7c7a187420ac3c13d4c573b4cd1b31c2d885542edafb8500b"
+          }
+        },
+        "quarantine": {
+          "rows": 18,
+          "sha256": "7c3f5adc692ed94c433f056b3780cf2700b8d95912f6307cb8c2ddc3ce5791fd"
+        }
+      }
+    },
+    {
+      "step": "database: restored copy has no pending migrations",
+      "ok": true
+    },
+    {
+      "step": "database: row-level security and ranked search work on the restored copy",
+      "ok": true,
+      "detail": {
+        "unscoped": 0,
+        "scoped": {
+          "contacts": 3,
+          "otherTenants": 0,
+          "search": 1
+        }
+      }
+    },
+    {
+      "step": "database: importing again into the restored copy adds nothing",
+      "ok": true,
+      "detail": {
+        "app.agency": 0,
+        "app.tenant": 0,
+        "app.workspace": 0,
+        "app.workspace_placement": 0,
+        "app.invitation": 0,
+        "app.agent_installation": 0,
+        "app.contact": 0,
+        "app.opportunity": 0,
+        "app.opportunity_stage_event": 0,
+        "app.note": 0,
+        "app.message_evidence": 0,
+        "app.draft_revision": 0,
+        "app.approval": 0,
+        "app.content_item": 0,
+        "app.schedule": 0
+      }
+    }
+  ]
+}

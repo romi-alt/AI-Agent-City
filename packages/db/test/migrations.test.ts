@@ -1,12 +1,17 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
+import { readdirSync } from 'node:fs';
 import pg from 'pg';
-import { migrate } from '../src/index.ts';
+import { MIGRATIONS_DIR, migrate } from '../src/index.ts';
 import { createTestDatabase } from '../src/testing.ts';
 
 /** Needs the local services: `pnpm infra:up`. These tests fail (never skip) when the database is missing. */
 const adminUrl = process.env.DATABASE_ADMIN_URL;
 const appUrl = process.env.DATABASE_URL;
+const ALL = readdirSync(MIGRATIONS_DIR)
+  .filter(f => f.endsWith('.sql'))
+  .map(f => f.replace(/\.sql$/, ''))
+  .sort();
 
 describe('migrations', () => {
   let db: Awaited<ReturnType<typeof createTestDatabase>>;
@@ -29,7 +34,8 @@ describe('migrations', () => {
   };
 
   it('applies cleanly to an empty database', () => {
-    assert.deepEqual(db.applied, ['1792972800000_platform-foundation']);
+    assert.ok(ALL.length >= 2);
+    assert.deepEqual(db.applied, ALL);
   });
 
   it('lets the app role record heartbeats, once per step', async () => {
@@ -56,9 +62,10 @@ describe('migrations', () => {
   });
 
   it('rolls back and re-applies (reversible)', async () => {
-    assert.deepEqual(await migrate(db.adminUrl, 'down'), ['1792972800000_platform-foundation']);
+    assert.deepEqual(await migrate(db.adminUrl, 'down', Infinity), [...ALL].reverse());
     await asApp(async c => assert.rejects(c.query('SELECT 1 FROM platform.heartbeat'), /does not exist/));
-    assert.deepEqual(await migrate(db.adminUrl, 'up'), ['1792972800000_platform-foundation']);
+    await asApp(async c => assert.rejects(c.query('SELECT 1 FROM app.contact'), /does not exist/));
+    assert.deepEqual(await migrate(db.adminUrl, 'up'), ALL);
     assert.deepEqual(await migrate(db.adminUrl, 'up'), [], 'a second run is a no-op');
   });
 });

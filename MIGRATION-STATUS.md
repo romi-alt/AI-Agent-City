@@ -1,15 +1,147 @@
 # Migration status
 
 Stage plan and rules: `planning/agentcity-migration/README.md`. Evidence: `planning/agentcity-migration/m00/`,
-`planning/agentcity-migration/m01/`. Statuses: not started / in progress / local passed / external blocked /
+`planning/agentcity-migration/m01/`, `planning/agentcity-migration/m02/`. Statuses: not started / in progress / local passed / external blocked /
 failed / complete.
 
 | Stage | Status | Commit/files | Evidence | Blockers | Next action |
 |---|---|---|---|---|---|
 | M00 | **Local passed** (code complete and verified locally). Merged into `main` at the owner's request; no separate code review | `main` @ a658918 (fast-forward from f96819d). Built on branch `migration/m00-baseline` (from `city-vibes` @ 7bad3b8). Checkpoint = 7bad3b8, the head of `city-vibes` on GitHub. Tag `pre-migration-baseline` is local only: pushing it from this environment did not reach GitHub. Files below | `planning/agentcity-migration/m00/evidence/` | Real data and pilot exports missing (below) | M01 |
 | M01 | **Local passed** (code complete and verified locally, including a from-zero fresh-clone run). Merged into `main` at the owner's request; no separate code review | `main` @ b3c211c (fast-forward from d4c0159). Built on branch `migration/m01-workspace`, which can now be deleted on GitHub (deletion from this environment fails). Files: section M01.2 | `planning/agentcity-migration/m01/` (ARCHITECTURE.md, evidence/) | CI not yet run on GitHub (first run will be the next push or PR to `main`); Node 22 not 24; MinIO replaced by RustFS locally (ADR-004). See M01.5 | M02 |
-| M02–M10, P01–P10 | Not started | — | — | — | In order, one at a time |
+| M02 | **Local passed** (schema, RLS, catalog and importer built and tested locally on synthetic fixtures). Not merged; no code review yet | Branch `migration/m02-tenancy` (from `main` @ 7cb0642). Files: section M02.2 | `planning/agentcity-migration/m02/` (DATA-MODEL.md, IMPORT-RUNBOOK.md, evidence/) | **Production-input gate open:** no real `state.json`/`auth.json`/mapping provided, so no real import has run. CI not yet run on GitHub. See M02.5 | M03 |
+| M03–M10, P01–P10 | Not started | — | — | — | In order, one at a time |
 
+
+# M02 — scoped PostgreSQL data, tenancy and legacy import
+
+Prompt: `planning/agentcity-migration/prompts/M02-postgres-tenancy-and-import.md`. Prerequisite checked: M01 is
+"local passed" and merged into `main` (b3c211c, status 7cb0642). M02 branched from 7cb0642. Same environment as
+M01 (Node 22.22.0, pnpm 10.28.0, Docker engine started in the container). No provider credentials; the legacy kill
+switch stayed off; nothing outbound.
+
+The legacy app is still the running product. M02 adds the model and the importer; nothing writes to both JSON and
+SQL, and no API route reads tenant tables yet (M03/M04).
+
+## M02.1 What was built
+
+| Prompt requirement | Done | Where |
+|---|---|---|
+| Agency, client tenant, workspace, district/building/floor/desk, assignments, agent installations | `catalog.*` (physical, shared) and `app.*` (tenant-owned): agency, tenant (`client`/`agency`/`demo`), workspace, placement, agency members and staff assignments, tenant members (optionally one workspace), invitations, agent installations | `packages/db/migrations/1793059200000_tenancy-core.sql`, DATA-MODEL.md |
+| Separate rental placement from security ownership | `workspace_placement` is physical: one occupant per floor, and placement grants nothing. Agents can be installed only on occupied floors, and never on human desks | ADR-013 |
+| Classify shared tables; scope every tenant table, join, unique key and reference | `platform.table_classification` covers all 42 tables (enforced by test). Every tenant table: `tenant_id`, forced RLS, composite foreign keys, tenant-scoped unique keys | ADR-015 |
+| Transaction-local authenticated scope; non-bypass app role | `app.enter_scope` checks membership and signs a transaction-bound scope (HMAC); `withScope()` helper; viewers and support are read-only | ADR-014, `packages/db/src/scope.ts` |
+| Durable audit/outbox; immutable money/usage/dispatch facts | `audit_event`, `outbox_event` (id = cursor), `dispatch_attempt`/`receipt`, `usage_fact`, `money_fact`, `draft_revision`, `consent_event`, stage events, `message_evidence`: insert-only for the app, and a trigger refuses change for everyone | ADR-016 |
+| Demo fixture data in a marked isolated tenant | `tenant.kind = 'demo'`; a trigger refuses dispatches, receipts and money facts there; all simulated legacy data goes there | ADR-016 |
+| Stable building IDs through alias mapping | `catalog.building_alias` holds all 15 legacy ids. The catalog seed is generated from the legacy `buildCity()` with deterministic UUIDs | ADR-019, `packages/domain` |
+| Read-only v2 dry run/import: explicit mapping, validation, quarantine, duplicate/dangling report, provenance, deterministic IDs, idempotent re-run, reconciliation | `packages/legacy-import` (CLI `pnpm legacy:import dry-run|apply`) | IMPORT-RUNBOOK.md |
+| Never derive payments, consent or receipts; expire approvals; schedules disabled | Enforced by the planner and tested on the imported database | DATA-MODEL.md "The legacy import" |
+| Test with labelled fixtures; document the missing production-input gate | Synthetic fixtures generated by the legacy simulator, named `Fixture …`; gate recorded below | `packages/legacy-import/fixtures/README.md` |
+
+Two problems were found and fixed during M02, not carried forward:
+- **BM25 under RLS.** Ranked BM25 search does not work through RLS on pg_search 0.26.3: rows are correct but
+  `paradedb.score` fails. Ranked search now goes through a scoped SECURITY DEFINER function (ADR-018).
+- **Support audit.** The first support-access design audited inside the scoped transaction, so a rollback erased
+  the audit. Support now needs a session committed beforehand (ADR-017).
+
+## M02.2 Changed files
+
+- **New migrations:**
+  - `packages/db/migrations/1793059200000_tenancy-core.sql` (schema, RLS, scope, triggers, classification)
+  - `1793059200001_catalog-legacy-city.sql` (generated catalog seed)
+- **packages/db:**
+  - new `src/scope.ts` (`withScope`); changed `src/index.ts` (export)
+  - new `test/tenancy.test.ts`, `test/tenancy-fixture.ts`
+  - changed `test/migrations.test.ts` (all migrations, full down/up)
+- **New package `packages/domain`:** `src/ids.ts`, `src/catalog.ts`, `scripts/` (generator reading `apps/legacy`),
+  `test/catalog.test.ts`.
+- **New package `packages/legacy-import`:**
+  - `src/` (schema, planner, apply/dry run, CLI)
+  - `scripts/make-fixtures.ts`, `scripts/backup-restore-rehearsal.ts`
+  - `fixtures/` (synthetic data + README)
+  - `test/plan.test.ts`, `test/import.test.ts`
+- **Root:** `package.json` (`db:test`, `legacy:import`, `legacy:rehearse-backup`), `pnpm-lock.yaml`,
+  `.prettierignore` (fixtures), `.github/workflows/ci.yml` (isolation, import, rehearsal steps; m02 evidence
+  upload), `README.md`, `CLAUDE.md` (tenant-data conventions).
+- **Docs and evidence:** `planning/agentcity-migration/m02/DATA-MODEL.md`, `IMPORT-RUNBOOK.md`, `evidence/`.
+
+## M02.3 Commands actually run
+
+Last full run on the final code, from the repository root (outputs in `m02/evidence/`):
+
+| Command | Result | Evidence |
+|---|---|---|
+| `pnpm format:check` | exit 0 | `format-check.txt` |
+| `pnpm typecheck` | exit 0 (all 9 packages) | `typecheck.txt` |
+| `pnpm build` | exit 0 | `build.txt` |
+| `pnpm test` (unit) | domain 7/7, legacy 33/33, worker 3/3, api 3/3, legacy-import planner 7/7 | `unit-tests.txt` |
+| `pnpm db:migrate` (development database) | tenancy + catalog applied | `migrate.txt` |
+| `pnpm db:verify-search` | PASSED | `verify-search.txt` |
+| `pnpm db:test` | **db 22/22, legacy-import 9/9** (each on a fresh, migrated database, using the real `agentcity_app` role) | `integration-tests.txt` |
+| `pnpm legacy:import dry-run` on the fixtures | balanced: 2,454 planned rows; quarantine 4 leads, 5 messages, 4 approvals, 1 revenue, 1 rental occupant, 2 users, 1 client | `fixture-dry-run.json` |
+| `pnpm legacy:rehearse-backup` | **PASSED 8/8**: file backup/restore byte-identical; damaged copy refused; pg_dump → restore → identical totals and hashes; RLS and ranked search on the restored copy; re-import adds nothing | `backup-restore.json` |
+| `pnpm smoke` (M01 regression, on the M02 schema) | PASSED 10/10 | `m01-smoke-regression.txt/.json` |
+
+Required evidence, against the tests that prove it:
+
+- **Cross-tenant SELECT/INSERT/UPDATE/DELETE/join/search with the real app role** (`packages/db/test/tenancy.test.ts`):
+  - a role check (not superuser, not BYPASSRLS, owns nothing);
+  - no scope → zero rows in all 27 tenant/agency tables;
+  - SELECT and joins scoped;
+  - INSERT into another tenant refused;
+  - UPDATE/DELETE reach 0 rows, and a row can't be moved out of its tenant;
+  - BM25 search returns only the scoped tenant's rows, directly and ranked.
+- **Rental L1 against L2, same building:** entering the other tenant, or the other tenant's workspace, is refused.
+  Only the client's own placement is visible. Also repeated on imported data (`import.test.ts`). A member limited
+  to one workspace can't see the tenant's other floor in the same building.
+- **Pooled connection reuse:** one-connection pool, same backend PID. No scope after a commit, nor after an error.
+  The next tenant sees only its own rows.
+- **Forged scope:**
+  - a hand-made value with a bad signature is ignored;
+  - a valid value with the tenant swapped fails verification;
+  - a valid value replayed in a later transaction is dead;
+  - `app.tenant_id` is meaningless;
+  - scope can't be switched mid-transaction;
+  - the key, the private functions, the migration tables, `DISABLE ROW LEVEL SECURITY` and `row_security = off`
+    are all refused to the app role.
+- **Foreign keys reject cross-tenant associations:** tested as superuser (RLS bypassed) and as the app role.
+- **Import twice, unchanged totals:** the second apply inserts 0 rows, 0 map entries and 0 quarantine entries, with
+  identical per-table totals and content hashes. A changed record is refused, not overwritten.
+- **Unknown schema rejected without writes:** version 3, version 1, invalid JSON, missing list, wrong type, bad
+  auth file and an unknown mapping field are each refused. A building-wide rule on a shared building is refused,
+  and so is one floor placed twice. Row counts in every app and migration table are unchanged (including no
+  `import_run`), and the input files are byte-identical.
+- **Backup restore:** `backup-restore.json` (above).
+
+## M02.4 Not run, or not claimed
+
+- **No real import.** No real `state.json`, `auth.json` or owner-approved mapping exists here, so all import
+  evidence is synthetic. The production import is the open gate in M02.5.
+- **CI has not run on GitHub** (same as M01).
+- **The API and web do not use the new tables yet.** No HTTP or GraphQL path was tested against RLS. That is
+  M03/M04.
+- **Not done in M02:** cache keys, object-storage keys and socket rooms are not tenant-scoped yet (later stages,
+  DATA-MODEL.md "Known limits"). No load or performance test of RLS was run.
+- **Not run:** the M00 characterization harness (paths still point at the pre-M01 layout, as noted in M01.4).
+
+## M02.5 Unresolved blockers and risks
+
+1. **Production-input gate (open).** Before the real import can run, the owner must provide:
+   - read-only copies of the real `state.json` and `auth.json`;
+   - a reviewed ownership mapping, with tenants, floors, contact ownership with evidence, and user emails.
+
+   The procedure is `m02/IMPORT-RUNBOOK.md`. Until then, nothing real is imported.
+2. **Districts are an assumption** (Dealer Row, Fast Sales Campus, Rental Park); the legacy city had none.
+   ADR-019.
+3. **The scope trusts the API's subject.** The database checks that a subject may act for a tenant, not who the
+   subject is. OIDC (M03) must supply verified subjects.
+4. **Ranked search must use scoped functions** (ADR-018). Any new BM25 table needs the same pattern.
+5. **Carried over from M01:** Node 22 not 24; RustFS instead of MinIO locally; CI not yet run on GitHub.
+
+## M02.6 Next safe stage
+
+**M03 — OIDC access and session cutover** (`planning/agentcity-migration/prompts/M03-oidc-access-and-session-cutover.md`),
+after this branch is reviewed and merged. The production-input gate does not block M03 (it does not need real
+data), but it blocks the real import and cutover.
 
 # M01 — workspace and local infrastructure
 

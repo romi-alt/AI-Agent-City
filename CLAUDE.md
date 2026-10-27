@@ -16,6 +16,12 @@ already follows (from README.md, package.json and the code); the second is the m
 - New code (apps/web, apps/api, apps/worker, packages/*) is ESM TypeScript formatted by Prettier
   (`.prettierrc.json`). Browser-reachable web code must not import server modules; server-only web modules import
   `server-only`. Local credentials live only in `infra/local-dev.env` and contain `local-dev-only`.
+- Tenant data (since M02): every tenant-owned table has `tenant_id`, forced RLS, composite `(tenant_id, …)` foreign
+  keys and an entry in `platform.table_classification` (a test enforces this). App code reaches tenant rows only
+  through `withScope()` from `@agentcity/db`; never set `app.*` settings by hand. Ranked BM25 search goes through a
+  scoped SECURITY DEFINER function (see `planning/agentcity-migration/m02/DATA-MODEL.md`, ADR-018). The catalog
+  seed migration is generated: change `apps/legacy` or `packages/domain`, then `pnpm --filter @agentcity/domain
+  catalog:generate`.
 - TypeScript everywhere, strict, `erasableSyntaxOnly` (no parameter properties or enums), no unused locals.
   Match the surrounding code's style: short functions, plain-English comments that explain why, UI copy written
   from the user's side of the screen.
