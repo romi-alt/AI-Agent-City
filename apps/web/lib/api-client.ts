@@ -128,6 +128,8 @@ export async function startLogin(input: {
   returnTo: string;
   stepUpReason?: StepUpReason;
   idpHint?: 'agency-sso';
+  /** An email address to prefill at the identity provider (X01 demo sign-in after email verification). */
+  loginHint?: string;
 }): Promise<never> {
   const key = await getDeviceKey();
   const res = await api<LoginStartResponse>('POST', '/api/auth/login/start', {
