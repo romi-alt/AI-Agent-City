@@ -47,6 +47,8 @@ export const DemoRequestBody = z.object({
       utmTerm: utm,
       utmContent: utm,
       referrer: z.string().trim().max(2000).optional(),
+      /** The web form sends the referring host only (it never reads the path). */
+      referrerHost: z.string().trim().max(253).optional(),
     })
     .optional(),
 });
@@ -85,6 +87,9 @@ export function attributionOf(input: DemoRequestInput['attribution']): Record<st
     } catch {
       /* not a URL: dropped */
     }
+  }
+  if (!out.referrerHost && input.referrerHost && /^[a-z0-9.-]+(:\d+)?$/i.test(input.referrerHost)) {
+    out.referrerHost = input.referrerHost.toLowerCase();
   }
   return out;
 }
