@@ -83,3 +83,10 @@ per building) and the weekly social media report (Mondays 09:00), emailed to the
 | `src/ui/` | Sign-in screens, app shell, panels and full-screen views |
 
 The simulation speed (pause / real time / 1× / 5×) is in the top bar for admins. At 1× a city day takes 12 minutes.
+
+## Proposal page
+
+A public, bilingual (EN/ES) sales proposal lives at **`/proposal`** (`?lang=es` forces Spanish). All wording, names and
+prices are in `src/proposal/content.ts`; building and agent counts come from the city data. Its live dashboard reads
+`/api/public/pulse`, which returns counts only (no names, contact details or revenue). It never shows a password.
+

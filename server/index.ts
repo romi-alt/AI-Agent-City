@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import QRCode from 'qrcode';
 import { z } from 'zod';
-import { Sim } from '../src/core/sim';
+import { Sim, TRAINING_STAGES } from '../src/core/sim';
 import type { Patch } from '../src/core/types';
 import { AuthStore, DEVICE_MS, type Session, type User } from './auth';
 import { attachBrain, brainStatus } from './brain';
@@ -232,6 +232,22 @@ app.post('/api/auth/enroll/finish', limit(20, 10 * 60_000), (req, res) => {
 });
 
 // ── the city ──────────────────────────────────────────────────
+// ── public proposal page: live counts only (no names, contact details or revenue) ──
+app.get('/api/public/pulse', (_req, res) => {
+  const k = sim.kpis('fast-sales'), city = sim.kpis();
+  const stages = TRAINING_STAGES.map(stage => ({ stage, n: 0 }));
+  for (const l of sim.leads.values()) if (l.buildingId === 'fast-sales') { const st = stages.find(x => x.stage === l.stage); if (st) st.n++; }
+  const team = sim.agents('fast-sales').filter(a => a.floor === 12 && a.kind === 'ai').map(a => ({
+    name: a.name, role: a.role, status: a.status,
+    doing: a.current ? `${a.current.category}${a.current.channel ? ` · ${a.current.channel}` : ''}` : '',
+  }));
+  res.set('Cache-Control', 'no-store').json({
+    now: sim.now,
+    fastSales: { leadsToday: k.leadsToday, booked24h: k.booked24h, closedMonth: k.closedMonth, agentsWorking: k.agentsWorking, agentsTotal: k.agentsTotal, stages, team },
+    city: { buildings: sim.buildings.length, agentsWorking: city.agentsWorking, agentsTotal: city.agentsTotal, tasksToday: city.tasksToday },
+  });
+});
+
 app.get('/api/state', signedIn, (req: Authed, res) => {
   const body = JSON.stringify({ snapshot: sim.snapshot(), me: me(req), integrations: integrations(), people: people() });
   if ((req.get('accept-encoding') ?? '').includes('gzip')) {
@@ -368,6 +384,7 @@ app.post('/api/admin/test-email', signedIn, admin, async (req, res) => {
 const dist = resolve('dist');
 if (existsSync(dist)) {
   app.use(express.static(dist, { index: false, maxAge: '1h' }));
+  app.get(/^\/proposal\/?$/, (_req, res) => res.sendFile(join(dist, 'proposal.html')));
   app.get(/^(?!\/api\/).*/, (_req, res) => res.sendFile(join(dist, 'index.html')));
 }
 
