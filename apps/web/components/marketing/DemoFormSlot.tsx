@@ -4,34 +4,34 @@
 // <DemoRequestForm /> (one import, one line). This placeholder takes no input and sends nothing.
 
 const FIELDS = [
-  { label: 'Full name', required: true },
-  { label: 'Business email', required: true },
-  { label: 'Company', required: true },
-  { label: 'Industry', required: false },
-  { label: 'Phone', required: false },
-  { label: 'Website', required: false },
+  { label: 'Full name', optional: false },
+  { label: 'Business email', optional: false },
+  { label: 'Company', optional: false },
+  { label: 'Industry', optional: true },
+  { label: 'Phone', optional: true },
+  { label: 'Website', optional: true },
 ];
 
 export function DemoFormSlot() {
   return (
     <div className="mk-form-slot" data-testid="demo-form-slot" role="note" aria-label="Demo request form (coming soon)">
-      <p className="mk-form-slot-flag">Demo request form · being connected</p>
-      <ul className="mk-form-slot-fields">
+      <div className="mk-form-fields" aria-hidden="true">
         {FIELDS.map(f => (
-          <li key={f.label}>
-            <span>{f.label}</span>
-            <span className="mk-form-slot-req">{f.required ? 'Required' : 'Optional'}</span>
-          </li>
+          <div key={f.label} className="mk-form-field">
+            <span className="mk-form-label">
+              {f.label}
+              {f.optional && <span className="mk-form-opt"> · optional</span>}
+            </span>
+            <span className="mk-form-input" />
+          </div>
         ))}
-      </ul>
-      <p className="mk-form-slot-consent">
-        <span className="mk-form-slot-box" aria-hidden="true" /> Send me news about AgentCity (optional, unticked)
-      </p>
-      <p className="mk-form-slot-button" aria-hidden="true">
-        Get My Demo Office
-      </p>
-      <p className="mk-form-slot-note">
-        The form will appear here. Until then, explore the <a href="/city">public city</a>.
+        <span className="mk-form-consent">
+          <span className="mk-form-box" /> Send me product news (optional)
+        </span>
+        <span className="mk-form-submit">Get My Demo Office</span>
+      </div>
+      <p className="mk-form-note">
+        The request form is being connected. Until then, <a href="/city">explore the public city</a>.
       </p>
     </div>
   );

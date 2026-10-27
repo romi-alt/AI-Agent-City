@@ -107,17 +107,19 @@ test('"Explore AgentCity" goes to /city', async () => {
   await page.context().close();
 });
 
-test('reduced motion keeps the static skyline and never loads the 3D scene', async () => {
+test('reduced motion keeps the poster and never loads the 3D scene', async () => {
   const { page, errors } = await open({ reducedMotion: 'reduce' });
   await page.waitForTimeout(3000);
-  assert.equal(await page.getAttribute('[data-testid=hero-city]', 'data-mode'), 'static');
-  assert.equal(await page.locator('[data-testid=hero-city] canvas').count(), 0);
-  assert.equal(await page.locator('.mk-hero-skyline').count(), 1);
+  assert.equal(await page.getAttribute('[data-testid=city-preview]', 'data-mode'), 'poster');
+  assert.equal(await page.locator('[data-testid=city-preview] canvas').count(), 0);
+  assert.ok(
+    await page.evaluate(() => (document.querySelector('[data-testid=city-poster]') as HTMLImageElement).complete),
+  );
   assert.deepEqual(errors, []);
   await page.context().close();
 });
 
-test('without WebGL the illustration stays and nothing errors', async () => {
+test('without WebGL the poster stays and nothing errors', async () => {
   const noGl = await chromium.launch({ args: ['--disable-webgl', '--disable-webgl2', '--disable-3d-apis'] });
   const page = await noGl.newPage();
   const errors: string[] = [];
@@ -125,8 +127,8 @@ test('without WebGL the illustration stays and nothing errors', async () => {
   page.on('pageerror', (e: Error) => errors.push(String(e)));
   await page.goto(WEB, { waitUntil: 'networkidle' });
   await page.waitForTimeout(3000);
-  assert.equal(await page.getAttribute('[data-testid=hero-city]', 'data-mode'), 'static');
-  assert.match(await page.textContent('.mk-hero-caption'), /Illustration/);
+  assert.equal(await page.getAttribute('[data-testid=city-preview]', 'data-mode'), 'poster');
+  assert.match(await page.textContent('[data-testid=city-preview-label]'), /Rendered frame/);
   assert.deepEqual(errors, []);
   await noGl.close();
 });
@@ -147,9 +149,17 @@ test('the page is not indexable by default and has Open Graph metadata', async (
   assert.match(html, /<meta property="og:image"/);
 });
 
-test('no horizontal scrolling on a phone', async () => {
-  const { page } = await open({ viewport: { width: 360, height: 780 }, reducedMotion: 'reduce' });
-  const width = await page.evaluate(() => document.documentElement.scrollWidth);
-  assert.ok(width <= 360, `page is ${width}px wide`);
-  await page.context().close();
-});
+for (const width of [360, 390]) {
+  test(`nothing overflows or is clipped on a ${width}px phone`, async () => {
+    const { page } = await open({ viewport: { width, height: 800 }, reducedMotion: 'reduce' });
+    assert.ok((await page.evaluate(() => document.documentElement.scrollWidth)) <= width, 'no horizontal scroll');
+    // The marketing wrapper clips overflow, so also check that no text block runs past the viewport.
+    const overflowing = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('.mk h1, .mk h2, .mk h3, .mk p, .mk li, .mk figure'))
+        .filter(el => el.getBoundingClientRect().right > window.innerWidth + 1)
+        .map(el => el.textContent?.trim().slice(0, 40)),
+    );
+    assert.deepEqual(overflowing, []);
+    await page.context().close();
+  });
+}

@@ -2,21 +2,20 @@ import { HeaderScroll } from './HeaderScroll';
 import { CtaLink, Mark } from './Primitives';
 
 const NAV = [
-  { href: '#city', label: 'How it works' },
-  { href: '#buildings', label: 'Buildings' },
-  { href: '#capabilities', label: 'AI teams' },
+  { href: '#how-it-works', label: 'How it works' },
+  { href: '#product', label: 'Product' },
   { href: '#security', label: 'Security' },
   { href: '#faq', label: 'FAQ' },
 ];
 
 export function SiteHeader() {
   return (
-    <header className="mk-site-header on-light">
+    <header className="mk-header">
       <HeaderScroll />
       <a className="mk-skip" href="#main">
         Skip to content
       </a>
-      <div className="mk-site-header-inner">
+      <div className="mk-header-inner">
         <a className="mk-wordmark" href="/" aria-label="AgentCity home">
           <Mark className="mk-wordmark-mark" />
           <span>AgentCity</span>
@@ -30,12 +29,12 @@ export function SiteHeader() {
             ))}
           </ul>
         </nav>
-        <div className="mk-site-header-actions">
+        <div className="mk-header-actions">
           <a className="mk-header-link" href="/signin">
             Sign in
           </a>
-          <CtaLink href="#get-demo" testId="header-cta">
-            Free demo
+          <CtaLink href="#get-demo" variant="dark" size="sm" testId="header-cta">
+            Get a demo
           </CtaLink>
         </div>
       </div>

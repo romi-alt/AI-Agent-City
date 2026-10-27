@@ -1,15 +1,11 @@
 'use client';
-// Loaded only on demand (see HeroCity): this module pulls in the 3D city, so it must never be imported statically
-// by the landing page.
+// Loaded only on demand (see CityPreview): this module pulls in the 3D city, so it must never be imported
+// statically by the landing page.
 import { CityScene, createCityStore } from '@agentcity/city-scene';
 import { useEffect, useState } from 'react';
 
-export interface HeroCityCanvasProps {
-  paused: boolean;
-}
-
-/** The public city at low quality, as a backdrop: no tenant data, simulated activity, not interactive. */
-export default function HeroCityCanvas({ paused }: HeroCityCanvasProps) {
+/** The public city at low quality, golden hour: no tenant data, simulated activity, not interactive here. */
+export default function CityPreviewCanvas({ paused }: { paused: boolean }) {
   // Created once; later changes go through store.set below.
   const [store] = useState(() =>
     createCityStore({
@@ -22,15 +18,13 @@ export default function HeroCityCanvas({ paused }: HeroCityCanvasProps) {
       paused,
     }),
   );
-
   useEffect(() => {
     store.set({ paused });
   }, [store, paused]);
-
   return (
     <CityScene
       store={store}
-      className="mk-hero-canvas"
+      className="mk-preview-canvas"
       label="Live preview of the public AgentCity map: office towers, streets and simulated activity"
     />
   );

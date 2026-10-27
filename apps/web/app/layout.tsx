@@ -4,20 +4,11 @@ import type { ReactNode } from 'react';
 import './globals.css';
 import './theme.css';
 
-// Self-hosted (OFL, see public/fonts/LICENSES.md): the build needs no network, and next/font adds size-adjusted
-// fallbacks so swapping the font in causes no layout shift.
-const display = localFont({
-  src: [
-    { path: '../public/fonts/instrument-serif-latin-400-normal.woff2', weight: '400', style: 'normal' },
-    { path: '../public/fonts/instrument-serif-latin-400-italic.woff2', weight: '400', style: 'italic' },
-  ],
-  variable: '--font-instrument-serif',
-  display: 'swap',
-  fallback: ['Georgia', 'serif'],
-});
-const text = localFont({
-  src: [{ path: '../public/fonts/instrument-sans-latin-wght-normal.woff2', weight: '400 700', style: 'normal' }],
-  variable: '--font-instrument-sans',
+// Geist, self-hosted (OFL, see public/fonts/LICENSES.md): the build needs no network, and next/font adds a
+// size-adjusted fallback so swapping the font in causes no layout shift.
+const sans = localFont({
+  src: [{ path: '../public/fonts/Geist-Variable.woff2', weight: '100 900', style: 'normal' }],
+  variable: '--font-geist',
   display: 'swap',
   fallback: ['system-ui', 'sans-serif'],
 });
@@ -34,13 +25,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0f1b2d',
+  themeColor: '#fafaf9',
   colorScheme: 'light dark',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${text.variable}`}>
+    <html lang="en" className={sans.variable}>
       <body>{children}</body>
     </html>
   );
