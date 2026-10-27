@@ -7,13 +7,9 @@ import { instanceAttr, PartBuilder, Placer } from '../mesh-utils.ts';
 import { createRng } from '../rng.ts';
 import type { StreetSim } from '../street-sim.ts';
 import { BODY, personGeometry, personLook, personMaterials } from './body.ts';
+import { PERSON_SCALE } from './proportions.ts';
 import { MODE } from './sim.ts';
 
-/**
- * People are drawn at 85% of the body model: still a little larger than life next to the legacy-scale cars, so
- * they read from the default camera, but no longer giants beside them.
- */
-export const PERSON_SCALE = 0.85;
 /** Seat height of the benches (above the sidewalk): a seated person's lower leg reaches the ground. */
 const SEAT = 0.29 * PERSON_SCALE;
 

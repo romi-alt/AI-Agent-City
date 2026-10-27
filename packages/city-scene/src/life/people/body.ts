@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PartBuilder, taperedBox } from '../mesh-utils.ts';
+import { HIP_HEIGHT, HIP_SWING } from './proportions.ts';
 
 /**
  * A low-poly person facing +x with feet on y = 0, about 1.3 units tall. Limbs are tagged with `aPart` and posed
@@ -22,7 +23,7 @@ export const PART = {
 export const PSLOT = { skin: 0, top: 1, bottom: 2, hair: 3, fixed: 4 } as const;
 
 export const BODY = {
-  hip: 0.56,
+  hip: HIP_HEIGHT,
   knee: 0.29,
   shoulder: 0.99,
   neck: 1.06,
@@ -123,7 +124,7 @@ void acPose(inout vec3 p, inout vec3 n) {
   float t = uTime;
   float sw = sin(phase);
   float cw = cos(phase);
-  float hipL = sw * 0.52 * gait;
+  float hipL = sw * ${HIP_SWING} * gait;
   float hipR = -hipL;
   float kneeL = -max(0.0, cw) * 0.9 * gait;
   float kneeR = -max(0.0, -cw) * 0.9 * gait;

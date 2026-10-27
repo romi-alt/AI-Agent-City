@@ -10,6 +10,7 @@ import {
 } from '../geometry.ts';
 import { createRng, range, type Rng } from '../rng.ts';
 import { walkSignal } from '../signals.ts';
+import { STRIDE } from './proportions.ts';
 import type { Network } from '../traffic/network.ts';
 
 /**
@@ -99,8 +100,6 @@ interface Walker {
 const WALK_SPEED: [number, number] = [0.85, 1.45];
 const CROSS_SPEED = 1.4;
 const TURN_RATE = 5;
-/** Stride geometry from the body model (people/body.ts): one walk cycle covers about this distance. */
-export const STRIDE = 1.05 * 0.85;
 
 export interface PeopleOptions {
   seed?: number;
@@ -446,7 +445,7 @@ export class PeopleSim {
     const f = w.len > 0 ? w.s / w.len : 1;
     p.x = w.x0 + (w.x1 - w.x0) * f;
     p.z = w.z0 + (w.z1 - w.z0) * f;
-    p.phase += (ds / STRIDE) * Math.PI * 2;
+    p.phase += (ds / (STRIDE * p.scale)) * Math.PI * 2;
     p.gait += (Math.min(1, w.v / 0.9) - p.gait) * Math.min(1, dt * 6);
     p.mode = w.state === 'wait' ? MODE.wait : MODE.walk;
     if (w.len > 0.02 && w.state !== 'wait') {
@@ -505,7 +504,7 @@ export class PeopleSim {
     }
     const v = 0.7;
     r.s += (r.dir * v * dt) / len;
-    p.phase += ((v * dt) / STRIDE) * Math.PI * 2;
+    p.phase += ((v * dt) / (STRIDE * p.scale)) * Math.PI * 2;
     if (r.s >= 1 || r.s <= 0) {
       r.s = Math.max(0, Math.min(1, r.s));
       r.dir = r.dir === 1 ? -1 : 1;

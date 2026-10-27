@@ -106,7 +106,8 @@ function screenMaterial(
         float a0 = i0 < 4.0 ? texture2D(uAtlas, vec2(x, (3.0 - i0 + vUv.y) / 4.0)).a : 0.0;
         float a1 = i1 < 4.0 ? texture2D(uAtlas, vec2(x, (3.0 - i1 + vUv.y) / 4.0)).a : 0.0;
         vec3 ink = vec3(0.97, 0.96, 0.93);
-        col = mix(col, ink, mix(a0, a1, f));
+        // Fade the old message out, then the new one in, so two texts never overlap.
+        col = mix(col, ink, f < 0.5 ? a0 * (1.0 - 2.0 * f) : a1 * (2.0 * f - 1.0));
         // Screens are self-lit: a little brighter at night.
         col *= 0.85 + uNight * 0.3;
         gl_FragColor = vec4(col, 1.0);

@@ -1,3 +1,4 @@
+// @ts-nocheck -- dev-only harness, never shipped or typechecked: its JSX scenery resolves @react-three/fiber against a second copy of @types/three.
 // Dev-only visual harness for city life (A2). Not shipped: it stands in for A1's ground, roads and buildings and
 // A3's camera so the life systems can be screenshotted. URL: ?view=street|corner|skyline|top&time=day|night
 // &quality=ultra|balanced|low&reduced=1&wait=<seconds>
@@ -18,6 +19,7 @@ const view = q.get('view') ?? 'street';
 const time = (q.get('time') ?? 'day') as TimeOfDay;
 const quality = (q.get('quality') ?? 'ultra') as QualityLevel;
 const reduced = q.get('reduced') === '1';
+const withLife = q.get('life') !== '0';
 const night = time === 'night' || time === 'evening';
 
 const VIEWS: Record<string, { pos: [number, number, number]; look: [number, number, number]; fov: number }> = {
@@ -67,7 +69,7 @@ function Stage() {
   });
   return (
     <>
-      <hemisphereLight args={[night ? '#3a4c70' : '#dfefff', night ? '#101418' : '#6b6255', night ? 0.35 : 1.1]} />
+      <hemisphereLight args={[night ? '#5a6c98' : '#dfefff', night ? '#1a2028' : '#6b6255', night ? 0.75 : 1.1]} />
       <directionalLight
         position={[60, 90, 40]}
         intensity={night ? 0.15 : 2.4}
@@ -146,7 +148,7 @@ function Stage() {
           <group key={b.key}>
             <mesh position={[b.x, h / 2, b.z]} castShadow receiveShadow>
               <boxGeometry args={[b.w, h, b.d]} />
-              <meshStandardMaterial color={b.color} emissive={night ? '#3a2a10' : '#000'} />
+              <meshStandardMaterial color={b.color} emissive={night ? '#1b1a22' : '#000'} />
             </mesh>
             <mesh position={[b.x, h + 0.15, b.z]} receiveShadow>
               <boxGeometry args={[b.w + 0.2, 0.3, b.d + 0.2]} />
@@ -243,7 +245,7 @@ function App() {
       <Canvas shadows dpr={1} gl={{ antialias: true, preserveDrawingBuffer: true }} camera={{ near: 0.3, far: 2500 }}>
         <CityContext.Provider value={ctx}>
           <Stage />
-          <Life />
+          {withLife && <Life />}
           <Stats />
           {(view === 'plane' || view === 'heli') && <Follow what={view} />}
         </CityContext.Provider>
