@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthController } from './auth.controller.js';
 import { SESSION_RESOLVER } from './contracts.js';
@@ -14,6 +14,8 @@ import { SessionService } from './session.service.js';
  * (in that order), and provides SESSION_RESOLVER for Socket.IO handshakes. Needs API_ENV, APP_POOL, REDIS and
  * RevocationBus from the global env and platform modules.
  */
+// Global so realtime and access can inject SESSION_RESOLVER and SessionService without importing this module.
+@Global()
 @Module({
   controllers: [AuthController],
   providers: [

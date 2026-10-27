@@ -259,7 +259,7 @@ test('invitations: accepted, expired and wrong-email each get a clear message', 
     ['wrong-email-token', 'bad', /different email address .*ada@example\.test/],
   ];
   for (const [token, kind, text] of cases) {
-    await page.goto(`${WEB}/invite?token=${token}`);
+    await page.goto(`${WEB}/invitations/accept#token=${token}`);
     await page.getByTestId('invite-signed-in-as').getByText('ada@example.test').waitFor();
     const n = mock.requests.length;
     await page.getByTestId('invite-accept').click();
@@ -268,9 +268,12 @@ test('invitations: accepted, expired and wrong-email each get a clear message', 
     assert.match((await result.textContent()) ?? '', text);
     assert.deepEqual(find(n, 'POST', '/api/invitations/accept')?.body, { token });
   }
-  await page.goto(`${WEB}/invite`);
-  await page.locator('[data-testid="invite-result"][data-result="missing"]').waitFor();
   await page.context().close();
+  // A fresh tab with no token in the link (and none pending) explains what is missing.
+  const fresh = await newPage(true);
+  await fresh.goto(`${WEB}/invitations/accept`);
+  await fresh.locator('[data-testid="invite-result"][data-result="missing"]').waitFor();
+  await fresh.context().close();
 });
 
 test('sign out posts logout and follows endSessionUrl', async () => {

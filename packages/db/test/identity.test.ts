@@ -43,11 +43,12 @@ describe('identity schema', () => {
     return d.rows[0].id as string;
   }
 
+  // 'private' is stricter (the app role cannot read it; checked in tenancy.test.ts), e.g. invitation tokens.
   it('classifies every identity table', async () => {
     const r = await admin.query(
       `SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
        LEFT JOIN platform.table_classification t ON t.table_schema = n.nspname AND t.table_name = c.relname
-       WHERE n.nspname = 'identity' AND c.relkind IN ('r', 'p') AND t.class IS DISTINCT FROM 'identity'`,
+       WHERE n.nspname = 'identity' AND c.relkind IN ('r', 'p') AND (t.class IS NULL OR t.class NOT IN ('identity', 'private'))`,
     );
     assert.deepEqual(r.rows, []);
   });

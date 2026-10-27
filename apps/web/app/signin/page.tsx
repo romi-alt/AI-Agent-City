@@ -26,7 +26,7 @@ export default async function SignInPage({
           {reason}
         </p>
       )}
-      {returnTo.startsWith('/invite') && <p>Sign in with the email address your invitation was sent to.</p>}
+      {returnTo.startsWith('/invitations/accept') && <p>Sign in with the email address your invitation was sent to.</p>}
       <SignInForm returnTo={returnTo} />
     </main>
   );

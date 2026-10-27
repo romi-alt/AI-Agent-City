@@ -1,9 +1,11 @@
 import { Query, Resolver } from '@nestjs/graphql';
+import { Public } from '../auth/decorators.js';
 import { LivenessDto, ReadinessReportDto } from './health.dto.js';
 import { SERVICE_VERSION } from './health.controller.js';
 import { ReadinessService } from './readiness.service.js';
 
 /** GraphQL view of the same health data as REST, from the same service. */
+@Public()
 @Resolver()
 export class HealthResolver {
   constructor(private readonly readinessService: ReadinessService) {}

@@ -1,9 +1,38 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MEMBERSHIPS_CHANGED } from '../../../components/AppHeader';
-import { api, ApiError, describeError, getMe, NavigatingAwayError } from '../../../lib/api-client';
-import { describeRole, type AuthMeResponse } from '../../../lib/auth-types';
+import { MEMBERSHIPS_CHANGED } from '../../../../components/AppHeader';
+import { api, ApiError, describeError, getMe, NavigatingAwayError } from '../../../../lib/api-client';
+import { describeRole, type AuthMeResponse } from '../../../../lib/auth-types';
+
+const PENDING = 'agentcity:pending-invitation';
+
+/**
+ * Takes the token from the link's fragment, keeps it in this tab only (sessionStorage) and removes it from the address
+ * bar. If the person has to sign in first, the token survives the round trip without ever being sent anywhere except
+ * to the accept endpoint.
+ */
+function takeToken(): string | null {
+  const fromLink = new URLSearchParams(window.location.hash.slice(1)).get('token');
+  try {
+    if (fromLink) {
+      sessionStorage.setItem(PENDING, fromLink);
+      history.replaceState(null, '', window.location.pathname);
+      return fromLink;
+    }
+    return sessionStorage.getItem(PENDING);
+  } catch {
+    return fromLink;
+  }
+}
+
+function forgetToken() {
+  try {
+    sessionStorage.removeItem(PENDING);
+  } catch {
+    // storage unavailable: nothing to forget
+  }
+}
 
 type Result =
   { kind: 'ok'; text: string; tenantId: string | null; workspaceId: string | null } | { kind: 'bad'; text: string };
@@ -31,17 +60,28 @@ export function explainInviteError(err: unknown, email: string | null | undefine
   return describeError(err);
 }
 
-export function AcceptInvitation({ token }: { token: string | null }) {
+export function AcceptInvitation() {
+  const [token, setToken] = useState<string | null | undefined>(undefined);
   const [me, setMe] = useState<AuthMeResponse | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
 
   useEffect(() => {
+    // A second invitation link opened in the same tab only changes the fragment, so listen for that too.
+    const onHash = () => {
+      if (!window.location.hash) return;
+      setResult(null);
+      setToken(takeToken());
+    };
+    window.addEventListener('hashchange', onHash);
+    setToken(takeToken());
     getMe().then(setMe, err => {
       if (!(err instanceof NavigatingAwayError)) setResult({ kind: 'bad', text: describeError(err) });
     });
+    return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  if (token === undefined) return null;
   if (!token) {
     return (
       <p className="notice bad" role="alert" data-testid="invite-result" data-result="missing">
@@ -63,8 +103,10 @@ export function AcceptInvitation({ token }: { token: string | null }) {
         tenantId: typeof body.tenantId === 'string' ? body.tenantId : null,
         workspaceId: typeof body.workspaceId === 'string' ? body.workspaceId : null,
       });
+      forgetToken();
       window.dispatchEvent(new Event(MEMBERSHIPS_CHANGED));
     } catch (err) {
+      if (err instanceof ApiError && err.status === 410) forgetToken(); // used or expired: it will never work
       if (!(err instanceof NavigatingAwayError)) setResult({ kind: 'bad', text: explainInviteError(err, me?.email) });
     } finally {
       setBusy(false);
