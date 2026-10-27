@@ -2,6 +2,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo } from 'react';
 import { useCity, useCityContext } from '../context.tsx';
+import { useSharedUniforms } from '../environment/palette.ts';
 import { QUALITY } from '../quality/quality.ts';
 import { Air } from './air/Air.tsx';
 import { Birds } from './birds/Birds.tsx';
@@ -16,12 +17,16 @@ import { Traffic } from './traffic/Traffic.tsx';
 const WARM_UP = 40;
 
 function Stepper({ sim, clock, animate }: { sim: StreetSim; clock: LifeClock; animate: boolean }) {
-  useFrame((state, delta) => {
-    clock.signalT = state.clock.elapsedTime;
+  // Signals run on A1's animation clock (shared uTime), the same clock its signal heads read, so cars and lights
+  // agree even after the city has been paused.
+  const shared = useSharedUniforms();
+  useFrame((_, delta) => {
+    const signalT = shared.uTime.value;
+    clock.signalT = signalT;
     clock.dt = animate ? Math.min(delta, 0.25) : 0;
     if (!animate) return;
     clock.t += clock.dt;
-    sim.step(clock.dt, state.clock.elapsedTime);
+    sim.step(clock.dt, signalT);
   });
   return null;
 }

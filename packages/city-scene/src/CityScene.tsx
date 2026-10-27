@@ -8,13 +8,24 @@ import layoutJson from './data/city-layout.json';
 import { Environment } from './environment/Environment.tsx';
 import { Interior } from './interior/Interior.tsx';
 import { Life } from './life/Life.tsx';
+import { signalPhase } from './life/signals.ts';
 import { QUALITY } from './quality/quality.ts';
 import { QualityManager } from './quality/QualityManager.tsx';
 import { createCityStore, type CityStore, useCityState } from './store.ts';
+import { type SignalLight, type SignalSource, SignalSourceContext } from './streets/signal-source.ts';
 import { Streets } from './streets/Streets.tsx';
 import type { CityLayout, CityState } from './types.ts';
 
 export const CITY_LAYOUT = layoutJson as CityLayout;
+
+const HEAD: Record<'green' | 'amber' | 'red', SignalLight> = { green: 'g', amber: 'y', red: 'r' };
+/** The signal heads (A1) show the same phase the traffic (A2) obeys. A2's `ew` is traffic along x. */
+const SIGNALS: SignalSource = {
+  phase(t) {
+    const p = signalPhase(t);
+    return { x: HEAD[p.ew], z: HEAD[p.ns] };
+  },
+};
 
 export interface CitySceneProps {
   store?: CityStore;
@@ -48,13 +59,15 @@ export function CityScene({ store: given, initial, overlay, onNavigate, classNam
           camera={{ position: [70, 55, 90], fov: 42, near: 0.5, far: 2500 }}
         >
           <CityContext.Provider value={ctx}>
-            <QualityManager />
-            <Environment />
-            <Streets />
-            <Buildings />
-            <Life />
-            <Interior />
-            <CameraRig />
+            <SignalSourceContext.Provider value={SIGNALS}>
+              <QualityManager />
+              <Environment />
+              <Streets />
+              <Buildings />
+              <Life />
+              <Interior />
+              <CameraRig />
+            </SignalSourceContext.Provider>
           </CityContext.Provider>
         </Canvas>
         {overlay}
