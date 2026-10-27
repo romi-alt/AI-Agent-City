@@ -2,14 +2,15 @@
   "name": "@agentcity/web",
   "version": "0.0.0",
   "private": true,
-  "description": "Next.js (App Router) web app. M01: a platform status page that calls the API.",
+  "description": "Next.js (App Router) web app. M01: a platform status page that calls the API; M03: sign-in, account, devices, tenant switching, invitations.",
   "type": "module",
   "scripts": {
     "build": "NEXT_TELEMETRY_DISABLED=1 next build",
     "typecheck": "tsc --noEmit",
     "start": "NEXT_TELEMETRY_DISABLED=1 node --env-file-if-exists=../../infra/local-dev.env ./node_modules/next/dist/bin/next start -p 3000 -H 127.0.0.1",
     "dev": "NEXT_TELEMETRY_DISABLED=1 node --env-file-if-exists=../../infra/local-dev.env ./node_modules/next/dist/bin/next dev -p 3000 -H 127.0.0.1",
-    "test": "echo 'apps/web is covered by the smoke check (pnpm smoke)'"
+    "test": "node --test test/*.test.ts",
+    "test:browser": "node --test --test-concurrency=1 test/browser.smoke.ts"
   },
   "dependencies": {
     "@agentcity/contracts": "workspace:*",
