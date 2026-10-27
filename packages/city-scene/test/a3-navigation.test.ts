@@ -56,6 +56,7 @@ describe('mode transitions', () => {
       building: 'honda',
     });
     assert.deepEqual(reduceMode(f, { type: 'home' }, publicCtx), explore);
+    assert.equal(reduceMode(explore, { type: 'home' }, publicCtx), explore, 'home in the city is a no-op (view reset)');
   });
   it('ends the arrival at the visitor’s building, or in the open city', () => {
     const arrival: CityMode = { kind: 'arrival' };

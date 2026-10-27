@@ -55,9 +55,10 @@ export function CityClient() {
 
   return (
     <main className="ac-city-page">
-      <h1 className="sr-only">Explore AgentCity</h1>
       {view === 'webgl' ? (
         <SceneErrorBoundary onShowMap={() => setView('failed')}>
+          {/* The 2D map has its own visible heading. */}
+          <h1 className="sr-only">Explore AgentCity</h1>
           <CityScene
             store={store}
             label="AgentCity: a 3D city of office towers where AI agents work. Use the panel or the list of buildings to explore."

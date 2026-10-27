@@ -293,7 +293,7 @@ function Arrival({
       <div className="ac-progress" aria-hidden="true">
         <i style={{ transform: `scaleX(${progress})` }} />
       </div>
-      <button type="button" className="ac-btn" onClick={onSkip}>
+      <button type="button" className="ac-btn ac-glass" onClick={onSkip}>
         Skip intro
       </button>
     </div>

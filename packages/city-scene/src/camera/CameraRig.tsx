@@ -208,13 +208,14 @@ export function CameraRig() {
         r.motion = null;
         return;
       }
-      if (reduced || opts.quick) {
-        r.motion = fadeTo(to, reduced ? 0.5 : 0.7);
-        return;
-      }
       const from = currentPose();
       if (dist(from.pos, to.pos) < 0.05 && dist(from.target, to.target) < 0.05) {
+        // Already there (e.g. the arrival ended on this framing): nothing to fly or fade.
         r.motion = null;
+        return;
+      }
+      if (reduced || opts.quick) {
+        r.motion = fadeTo(to, reduced ? 0.5 : 0.7);
         return;
       }
       r.motion = { kind: 'flight', flight: planFlight(from, to), t: 0 };
@@ -436,7 +437,7 @@ export function CameraRig() {
       const c = keyToCommand(e);
       if (!c) return;
       // Arrow keys on buttons belong to the scene only when the focus is the scene itself or the page.
-      const onControl = t && t !== document.body && tag !== 'CANVAS' && !t.dataset.cityFocus;
+      const onControl = t && t !== document.body && tag !== 'CANVAS' && t.dataset.cityFocus === undefined;
       if (onControl && c.type === 'pan' && e.key.startsWith('Arrow')) return;
       e.preventDefault();
       if (c.type === 'reset') bus.emit({ type: 'reset' });

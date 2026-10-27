@@ -58,7 +58,12 @@ function Map2D({ title, reason, panel }: { title: string; reason?: string; panel
       </header>
       <div>
         {/* The map is a picture you can click; the list beside it offers the same choices to keyboards and screen readers. */}
-        <svg viewBox={`${minX} ${minZ} ${maxX - minX} ${maxZ - minZ}`} aria-hidden="true" focusable="false">
+        <svg
+          className="ac-map-svg"
+          viewBox={`${minX} ${minZ} ${maxX - minX} ${maxZ - minZ}`}
+          aria-hidden="true"
+          focusable="false"
+        >
           {layout.streets.roadsX.map(x => (
             <rect key={`x${x}`} x={x - 2} y={-e} width={4} height={e * 2} fill="#22344d" />
           ))}

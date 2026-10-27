@@ -9,7 +9,7 @@ export const HUD_CSS = `
 .ac-city-page { position: fixed; inset: 0; max-width: none; margin: 0; padding: 0; display: block; background: #0f1b2d; color: #f6f3ec; overflow: hidden; }
 .ac-hud { position: absolute; inset: 0; pointer-events: none; font: 15px/1.45 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ac-fg); z-index: 40; }
 .ac-hud > * { pointer-events: auto; }
-.ac-hud button, .ac-map2d button, .ac-hud a.ac-btn, .ac-map2d a.ac-btn { font: inherit; color: inherit; cursor: pointer; }
+.ac-hud button, .ac-map2d button, .ac-hud a.ac-btn, .ac-map2d a.ac-btn, .ac-desk-tag { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .ac-glass { background: var(--ac-bg); border: 1px solid var(--ac-line); border-radius: var(--ac-radius); box-shadow: var(--ac-shadow);
   -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); }
 .ac-hud :focus-visible, .ac-map2d :focus-visible, .ac-desk-tag:focus-visible { outline: 3px solid var(--ac-gold); outline-offset: 2px; }
@@ -65,7 +65,7 @@ export const HUD_CSS = `
 
 /* Side panel (desktop) / bottom sheet (phones). */
 .ac-panel { position: absolute; top: 84px; right: 16px; bottom: 16px; width: min(380px, calc(100vw - 32px)); display: flex; flex-direction: column; overflow: hidden; }
-.ac-panel-scroll { overflow-y: auto; padding: 20px; display: grid; gap: 16px; align-content: start; overscroll-behavior: contain; }
+.ac-panel-scroll { overflow-y: auto; padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-content: start; overscroll-behavior: contain; }
 .ac-panel-head { display: grid; gap: 4px; }
 .ac-kicker { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ac-gold); font-weight: 700; }
 .ac-panel h2 { margin: 0; font-size: 22px; line-height: 1.2; outline: none; }
@@ -104,7 +104,7 @@ export const HUD_CSS = `
 .ac-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* Labels in the 3D scene. */
-.ac-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 30; }
+.ac-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
 .ac-label { position: absolute; left: 0; top: 0; will-change: transform; margin-top: -6px; }
 .ac-labels .ac-desk-tag { pointer-events: auto; }
 .ac-callout { display: grid; gap: 2px; text-align: center; padding: 8px 14px; border-radius: 12px; background: rgba(15, 27, 45, 0.88); color: #f6f3ec;
@@ -132,7 +132,7 @@ export const HUD_CSS = `
 .ac-map2d header { grid-column: 1 / -1; display: grid; gap: 6px; }
 .ac-map2d header h1 { margin: 0; font-size: 26px; color: var(--ac-fg); }
 .ac-map2d header p { margin: 0; color: var(--ac-muted); }
-.ac-map2d svg { width: 100%; height: auto; display: block; border-radius: var(--ac-radius); background: #13243b; border: 1px solid var(--ac-line); }
+.ac-map2d svg.ac-map-svg { width: 100%; height: auto; display: block; border-radius: var(--ac-radius); background: #13243b; border: 1px solid var(--ac-line); }
 .ac-map2d .ac-panel { position: static; width: auto; max-height: none; }
 .ac-map-lot { cursor: pointer; }
 .ac-map-lot rect { transition: fill 0.2s ease; }

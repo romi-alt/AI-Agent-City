@@ -57,7 +57,8 @@ export function parentMode(mode: CityMode, ctx: NavContext): CityMode {
 export function reduceMode(mode: CityMode, action: NavAction, ctx: NavContext): CityMode {
   switch (action.type) {
     case 'home':
-      return { kind: 'explore' };
+      // Already in the city: unchanged, so callers know to reset the view instead.
+      return mode.kind === 'explore' ? mode : { kind: 'explore' };
     case 'back':
       return parentMode(mode, ctx);
     case 'arrival-done':

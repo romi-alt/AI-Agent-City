@@ -18,6 +18,7 @@ import { detectWebGL } from '../../src/ui/webgl.ts';
 import { shouldPlayArrival } from '../../src/camera/arrival.ts';
 
 const layout = layoutJson as CityLayout;
+(window as unknown as { __layout: CityLayout }).__layout = layout;
 const params = new URLSearchParams(location.search);
 
 const AGENTS = [

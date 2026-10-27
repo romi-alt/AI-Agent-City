@@ -547,7 +547,7 @@ function Desk({
         }
       : null,
     anchor,
-    [0, 1.72, -0.74],
+    [0, 1.5, -0.74],
   );
   return (
     <group
