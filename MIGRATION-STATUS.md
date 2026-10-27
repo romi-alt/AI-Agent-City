@@ -6,7 +6,7 @@ failed / complete.
 
 | Stage | Status | Commit/files | Evidence | Blockers | Next action |
 |---|---|---|---|---|---|
-| M00 | **Local passed** (code complete and verified locally; not reviewed or merged) | Branch `migration/m00-baseline` (from `city-vibes` @ 7bad3b8); checkpoint tag `pre-migration-baseline`. Files below | `planning/agentcity-migration/m00/evidence/` | Real data and pilot exports missing (below); M00 branch and its two parent branches unmerged | Review and merge, then M01 |
+| M00 | **Local passed** (code complete and verified locally; not reviewed or merged) | Branch `migration/m00-baseline` (from `city-vibes` @ 7bad3b8). Checkpoint = 7bad3b8, the head of `city-vibes` on GitHub. Tag `pre-migration-baseline` is local only: pushing it from this environment did not reach GitHub. Files below | `planning/agentcity-migration/m00/evidence/` | Real data and pilot exports missing (below); M00 branch and its two parent branches unmerged | Review and merge, then M01 |
 | M01 | Not started | — | — | No Docker engine in this cloud environment (CLI present, no daemon socket) | Workspace and local infrastructure |
 | M02–M10, P01–P10 | Not started | — | — | — | In order, one at a time |
 
@@ -34,6 +34,7 @@ with software GL (SwiftShader). No provider credentials were set, and the kill s
 | Command (repo root unless noted) | Result | Log |
 |---|---|---|
 | `git checkout -b migration/m00-baseline` from `city-vibes`; `git tag -a pre-migration-baseline` | ok | — |
+| `git push -u origin migration/m00-baseline`; `git push origin pre-migration-baseline`; `git ls-remote origin` | Branch pushed; **tag not on GitHub** (push printed "Everything up-to-date"; ls-remote shows no tags) | — |
 | `node planning/agentcity-migration/m00/compare-manifest.mjs …` for f96819d, 1dab901, 7bad3b8 | f96819d identical (36/36) | `evidence/manifest-comparison.txt` |
 | `npm ci` (lockfile) | exit 0, 0 vulnerabilities | `evidence/baseline-npm-ci.txt` |
 | `npm run typecheck` before / after M00 | exit 0 / exit 0 | `evidence/baseline-typecheck.txt`, `after-typecheck.txt` |
