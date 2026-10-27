@@ -10,6 +10,7 @@ import { CityContext } from '../../src/context.tsx';
 import layoutJson from '../../src/data/city-layout.json';
 import { Life } from '../../src/life/Life.tsx';
 import { signalPhase } from '../../src/life/signals.ts';
+import { vehicleGeometry } from '../../src/life/traffic/vehicles.ts';
 import { createCityStore } from '../../src/store.ts';
 import { FLOOR_HEIGHT, type CityLayout, type QualityLevel, type TimeOfDay } from '../../src/types.ts';
 
@@ -26,7 +27,9 @@ const VIEWS: Record<string, { pos: [number, number, number]; look: [number, numb
   street: { pos: [17.5, 2.2, 15.5], look: [6, 1.2, 10.5], fov: 50 },
   corner: { pos: [17, 4.2, 18], look: [10, 0.4, 10], fov: 45 },
   avenue: { pos: [30.5, 2.4, 22], look: [30.5, 0.8, 0], fov: 50 },
-  people: { pos: [-15, 2.6, 4.5], look: [-20, 0.8, 7.5], fov: 45 },
+  people: { pos: [-17.2, 1.3, 6.6], look: [-20, 0.45, 5.2], fov: 40 },
+  group: { pos: [-37.2, 1.0, -8.0], look: [-40, 0.4, -6.3], fov: 40 },
+  models: { pos: [-1.5, 1.7, 85.5], look: [-2.8, 0.2, 78.5], fov: 45 },
   walk: { pos: [-24, 1.3, 10.6], look: [-30, 0.6, 12.4], fov: 40 },
   skyline: { pos: [70, 55, 90], look: [0, 10, 0], fov: 42 },
   roofs: { pos: [52, 27, 14], look: [40, 17, 1], fov: 45 },
@@ -192,6 +195,27 @@ function Follow({ what }: { what: 'plane' | 'heli' }) {
   return null;
 }
 
+/** ?view=models: every vehicle kind side by side, in plain vertex colours (paint shows white). */
+function Models() {
+  const kinds = ['sedan', 'taxi', 'suv', 'van', 'emergency', 'bus'] as const;
+  const geos = useMemo(() => kinds.map(k => vehicleGeometry(k)), []);
+  return (
+    <group position={[0, 0, 80]}>
+      {geos.map((g, i) => (
+        <mesh
+          key={i}
+          geometry={g}
+          position={[-6 + (i % 3) * 3.2, 0, -Math.floor(i / 3) * 2.2]}
+          rotation-y={0.5}
+          castShadow
+        >
+          <meshStandardMaterial vertexColors roughness={0.35} metalness={0.2} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 function Stats() {
   const gl = useThree(s => s.gl);
   const scene = useThree(s => s.scene);
@@ -247,6 +271,7 @@ function App() {
           <Stage />
           {withLife && <Life />}
           <Stats />
+          {view === 'models' && <Models />}
           {(view === 'plane' || view === 'heli') && <Follow what={view} />}
         </CityContext.Provider>
       </Canvas>

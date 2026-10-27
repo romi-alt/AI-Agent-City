@@ -289,7 +289,7 @@ export class PeopleSim {
           const cz = door.z + door.nz * 1.35;
           for (let i = 0; i < size; i++) {
             const a = (i / size) * Math.PI * 2 + this.rng() * 0.5;
-            const r = size === 2 ? 0.3 : 0.4;
+            const r = size === 2 ? 0.22 : 0.3;
             const p = this.newPose();
             p.x = cx + Math.cos(a) * r;
             p.z = cz + Math.sin(a) * r * 0.8;
@@ -305,7 +305,7 @@ export class PeopleSim {
           const seats = Math.min(left, this.rng() < 0.6 ? 2 : 1);
           for (let i = 0; i < seats; i++) {
             const p = this.newPose();
-            const off = seats === 1 ? (this.rng() - 0.5) * 0.6 : i === 0 ? -0.38 : 0.38;
+            const off = seats === 1 ? (this.rng() - 0.5) * 0.4 : i === 0 ? -0.27 : 0.27;
             p.x = bx + tx * off;
             p.z = bz;
             p.yaw = yaw;

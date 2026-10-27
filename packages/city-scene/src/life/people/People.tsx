@@ -2,6 +2,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
+import type { LifeEnv } from '../env-adapter.ts';
 import { SIDEWALK_Y } from '../geometry.ts';
 import { instanceAttr, PartBuilder, Placer } from '../mesh-utils.ts';
 import { createRng } from '../rng.ts';
@@ -11,7 +12,9 @@ import { PERSON_SCALE } from './proportions.ts';
 import { MODE } from './sim.ts';
 
 /** Seat height of the benches (above the sidewalk): a seated person's lower leg reaches the ground. */
-const SEAT = 0.29 * PERSON_SCALE;
+const SEAT = (BODY.knee - 0.02) * PERSON_SCALE;
+/** Benches are sized for the people on them. */
+const BS = PERSON_SCALE / 0.85;
 
 function benchGeometry(benches: { x: number; z: number; yaw: number }[]) {
   const b = new PartBuilder();
@@ -25,31 +28,33 @@ function benchGeometry(benches: { x: number; z: number; yaw: number }[]) {
       bench.z + s * fx + c * fz,
     ];
     const rot: [number, number, number] = [0, bench.yaw, 0];
-    b.add(new THREE.BoxGeometry(0.36, 0.05, 1.5), { at: at(0, SEAT - 0.025, 0), rot, color: '#7a5a3c' });
-    b.add(new THREE.BoxGeometry(0.05, 0.3, 1.5), {
-      at: at(-0.2, SEAT + 0.17, 0),
+    b.add(new THREE.BoxGeometry(0.36 * BS, 0.04, 1.5 * BS), { at: at(0, SEAT - 0.025, 0), rot, color: '#7a5a3c' });
+    b.add(new THREE.BoxGeometry(0.04, 0.3 * BS, 1.5 * BS), {
+      at: at(-0.17 * BS, SEAT + 0.17 * BS, 0),
       rot: [0, bench.yaw, 0.12],
       color: '#7a5a3c',
     });
-    for (const fz of [-0.62, 0.62])
-      b.add(new THREE.BoxGeometry(0.34, SEAT, 0.05), { at: at(0, SEAT / 2, fz), rot, color: '#2e3135' });
+    for (const fz of [-0.62 * BS, 0.62 * BS])
+      b.add(new THREE.BoxGeometry(0.32 * BS, SEAT, 0.04), { at: at(0, SEAT / 2, fz), rot, color: '#2e3135' });
   }
   return b.build();
 }
 
 interface Props {
   sim: StreetSim;
+  env: LifeEnv;
   shadows: boolean;
   /** Limb animation runs only when true (paused or reduced motion: people hold a calm standing pose). */
   animate: boolean;
 }
 
 /** Everyone on foot: one instanced draw for all bodies (posed in the vertex shader) and one for the benches. */
-export function People({ sim, shadows, animate }: Props) {
+export function People({ sim, env, shadows, animate }: Props) {
   const poses = sim.people.poses;
   const built = useMemo(() => {
     const uTime = { value: 0 };
-    const mats = personMaterials(uTime);
+    const uNight = { value: 0 };
+    const mats = personMaterials(uTime, uNight);
     const mesh = new THREE.InstancedMesh(personGeometry(), mats.color, poses.length);
     mesh.name = 'life-people';
     mesh.customDepthMaterial = mats.depth;
@@ -89,7 +94,7 @@ export function People({ sim, shadows, animate }: Props) {
       benches.castShadow = shadows;
       benches.receiveShadow = shadows;
     }
-    return { mesh, mats, uTime, anim, benches };
+    return { mesh, mats, uTime, uNight, anim, benches };
   }, [poses, sim.people.benches, shadows]);
 
   useEffect(
@@ -107,13 +112,14 @@ export function People({ sim, shadows, animate }: Props) {
 
   const placer = useMemo(() => new Placer(), []);
   useFrame(state => {
+    built.uNight.value = env.nightFactor;
     if (animate) built.uTime.value = state.clock.elapsedTime;
     const { mesh, anim } = built;
     poses.forEach((p, i) => {
       const seated = p.mode === MODE.seated;
       const k = p.scale * PERSON_SCALE;
       const y = seated ? SIDEWALK_Y + SEAT + (0.065 - BODY.hip) * k : p.y;
-      const back = seated ? -0.12 : 0;
+      const back = seated ? -0.09 : 0;
       mesh.setMatrixAt(i, placer.set(p.x + Math.cos(p.yaw) * back, y, p.z - Math.sin(p.yaw) * back, p.yaw, k));
       anim.setX(i, p.phase);
       anim.setY(i, animate ? p.gait : 0);

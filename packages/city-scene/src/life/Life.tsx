@@ -54,8 +54,15 @@ export function Life() {
   return (
     <group name="life">
       <Stepper sim={sim} clock={clock} animate={animate} />
-      <Traffic sim={sim} env={env} shadows={budget.shadows} pools={quality !== 'low'} animate={animate} />
-      <People sim={sim} shadows={budget.shadows} animate={animate} />
+      <Traffic
+        sim={sim}
+        env={env}
+        shadows={budget.shadows}
+        pools={quality !== 'low'}
+        animate={animate}
+        detail={quality === 'low' ? 'low' : 'full'}
+      />
+      <People sim={sim} env={env} shadows={budget.shadows} animate={animate} />
       {!reduced && budget.aircraft + budget.helicopters > 0 && (
         <Air layout={layout} clock={clock} env={env} aircraft={budget.aircraft} helicopters={budget.helicopters} />
       )}
