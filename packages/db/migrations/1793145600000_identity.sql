@@ -46,8 +46,11 @@ CREATE TABLE identity.session (
   amr text[] NOT NULL,
   acr text,
   auth_time timestamptz NOT NULL,
-  idp_session_id text,
+  idp_session_id text, -- the IdP's `sid`, for back-channel logout
+  -- AES-256-GCM (key derived from SESSION_ENCRYPTION_KEY, bound to this row's id). Never sent to the browser.
   refresh_token_enc bytea,
+  id_token_enc bytea, -- kept only as the `id_token_hint` for RP-initiated logout
+  revalidated_at timestamptz NOT NULL DEFAULT now(), -- last successful refresh-token check at the IdP
   created_at timestamptz NOT NULL DEFAULT now(),
   last_seen_at timestamptz NOT NULL DEFAULT now(),
   idle_expires_at timestamptz NOT NULL,
@@ -61,6 +64,7 @@ CREATE TABLE identity.session (
 );
 CREATE INDEX session_subject ON identity.session (subject) WHERE revoked_at IS NULL;
 CREATE INDEX session_device ON identity.session (device_id) WHERE revoked_at IS NULL;
+CREATE INDEX session_idp_session ON identity.session (idp_session_id) WHERE revoked_at IS NULL;
 
 -- One sign-in (or step-up) in progress: PKCE verifier, nonce and the device it must finish on.
 CREATE TABLE identity.login_attempt (
@@ -69,14 +73,17 @@ CREATE TABLE identity.login_attempt (
   code_verifier text NOT NULL,
   device_jkt text NOT NULL,
   device_jwk jsonb NOT NULL,
+  device_label text,
   purpose text NOT NULL CHECK (purpose IN ('login', 'step-up')),
   step_up_reason text,
   session_id uuid REFERENCES identity.session,
-  return_to text NOT NULL CHECK (return_to ~ '^/[^/\\]'),
+  return_to text NOT NULL CHECK (return_to ~ '^/([^/\\]|$)'),
   created_at timestamptz NOT NULL DEFAULT now(),
   expires_at timestamptz NOT NULL,
-  used_at timestamptz
+  used_at timestamptz,
+  CHECK (purpose = 'login' OR (session_id IS NOT NULL AND step_up_reason IN ('credential', 'billing', 'permission')))
 );
+CREATE INDEX login_attempt_expires ON identity.login_attempt (expires_at);
 
 -- Sign-ins, step-ups, revocations, role changes: append-only.
 CREATE TABLE identity.security_event (
@@ -91,6 +98,8 @@ CREATE TRIGGER immutable BEFORE UPDATE OR DELETE ON identity.security_event FOR 
 CREATE TRIGGER immutable_truncate BEFORE TRUNCATE ON identity.security_event FOR EACH STATEMENT EXECUTE FUNCTION app_private.forbid_change();
 
 GRANT SELECT, INSERT, UPDATE ON identity.person, identity.device, identity.session, identity.login_attempt TO agentcity_app;
+-- Expired, unused sign-in attempts are purged by the API; nothing else is ever deleted.
+GRANT DELETE ON identity.login_attempt TO agentcity_app;
 GRANT SELECT, INSERT ON identity.security_event TO agentcity_app;
 GRANT USAGE ON SEQUENCE identity.security_event_id_seq TO agentcity_app;
 
