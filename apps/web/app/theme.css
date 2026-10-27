@@ -1,0 +1,231 @@
+/*
+ * AgentCity design tokens (X01, workstream B). Imported by the root layout after globals.css, so the existing app
+ * pages (sign-in, account, status) pick up the same palette and type through the variables globals.css already uses.
+ *
+ * Palette: x01-cinematic-city/PLAN.md "Visual direction". Contrast ratios of the text pairs used are in the report
+ * (all ≥ 4.5:1 for body text, ≥ 3:1 for large display text and UI outlines).
+ */
+:root {
+  /* Brand palette (PLAN.md). */
+  --c-midnight: #0f1b2d;
+  --c-midnight-2: #16263d;
+  --c-midnight-3: #213650;
+  --c-gold: #f5b335;
+  --c-gold-deep: #8a5a00; /* gold for text on light surfaces (5.35:1 on paper) */
+  --c-teal: #1f8a8a;
+  --c-teal-deep: #146b6b; /* teal for text on light surfaces (5.66:1 on paper) */
+  --c-teal-night: #0e4a4c;
+  --c-sky: #6fb7e8;
+  --c-coral: #ff7a5c;
+  --c-coral-deep: #9f3d27; /* coral for text on light surfaces (5.98:1 on paper, 5.43:1 on its tag tint) */
+  --c-green: #5b9a5b;
+  --c-green-deep: #3f7a3f;
+  --c-paper: #f6f3ec;
+  --c-stone: #e7e1d6;
+  --c-stone-2: #d6cebf;
+  --c-ink-muted: #4a5568; /* 6.79:1 on paper, 5.78:1 on stone */
+  --c-night-muted: #a9b4c4; /* 8.24:1 on midnight */
+
+  /* Semantic surface tokens (light by default; .on-dark and .on-teal flip them). */
+  --surface: var(--c-paper);
+  --surface-raised: #fffdf8;
+  --surface-sunken: var(--c-stone);
+  --text: var(--c-midnight);
+  --text-muted: var(--c-ink-muted);
+  --rule: #d9d1c3;
+  --accent: var(--c-teal-deep);
+  --accent-strong: var(--c-gold);
+  --focus: var(--c-teal-deep);
+
+  /* Type: Instrument Serif (display) + Instrument Sans (text), self-hosted, OFL (public/fonts/LICENSES.md). */
+  --font-display: var(--font-instrument-serif), 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-text: var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  /* Fluid type scale (≈1.25 at 360px → ≈1.333 at 1440px). */
+  --step--2: clamp(0.72rem, 0.7rem + 0.08vw, 0.78rem);
+  --step--1: clamp(0.84rem, 0.82rem + 0.1vw, 0.9rem);
+  --step-0: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --step-1: clamp(1.15rem, 1.08rem + 0.3vw, 1.35rem);
+  --step-2: clamp(1.4rem, 1.25rem + 0.65vw, 1.85rem);
+  --step-3: clamp(1.8rem, 1.5rem + 1.3vw, 2.75rem);
+  --step-4: clamp(2.3rem, 1.8rem + 2.3vw, 4rem);
+  --step-5: clamp(2.9rem, 2rem + 4vw, 6.25rem);
+  --leading-tight: 0.98;
+  --leading-snug: 1.15;
+  --leading-body: 1.6;
+  --tracking-label: 0.14em;
+
+  /* Spacing (4px base). */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+  --section-pad: clamp(64px, 9vw, 136px);
+  --gutter: clamp(16px, 4vw, 48px);
+  --measure: 62ch;
+  --container: 1240px;
+
+  /* Radii: architectural, used sparingly. Chips are the only round things. */
+  --radius-s: 2px;
+  --radius-m: 6px;
+  --radius-pill: 999px;
+
+  /* Motion. */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur-med: 260ms;
+  --dur-slow: 700ms;
+
+  /* Focus ring shared by every interactive element. */
+  --focus-ring: 0 0 0 3px var(--surface), 0 0 0 6px var(--focus);
+
+  /* Map the variables the existing app pages use (globals.css) onto the palette. */
+  --bg: var(--c-paper);
+  --fg: var(--c-midnight);
+  --muted: var(--c-ink-muted);
+  --line: #d9d1c3;
+  --ok: var(--c-green-deep);
+  --bad: #a93a2a;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: var(--c-midnight);
+    --surface-raised: var(--c-midnight-2);
+    --surface-sunken: #0b1422;
+    --text: var(--c-paper);
+    --text-muted: var(--c-night-muted);
+    --rule: #2a3b55;
+    --accent: var(--c-sky);
+    --focus: var(--c-gold);
+    --bg: var(--c-midnight);
+    --fg: var(--c-paper);
+    --muted: var(--c-night-muted);
+    --line: #2a3b55;
+    --ok: #7cc47c;
+    --bad: #ff9a82;
+    color-scheme: dark;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur-med: 1ms;
+    --dur-slow: 1ms;
+  }
+}
+
+/* Surfaces that flip the semantic tokens for everything inside them. */
+.on-dark {
+  --surface: var(--c-midnight);
+  --surface-raised: var(--c-midnight-2);
+  --surface-sunken: #0b1422;
+  --text: var(--c-paper);
+  --text-muted: var(--c-night-muted);
+  --rule: #2a3b55;
+  --accent: var(--c-sky);
+  --focus: var(--c-gold);
+  --bg: var(--surface);
+  --fg: var(--text);
+  --muted: var(--text-muted);
+  --line: var(--rule);
+  color-scheme: dark;
+}
+.on-teal {
+  --surface: var(--c-teal-night);
+  --surface-raised: #125a5c;
+  --surface-sunken: #0a3a3c;
+  --text: var(--c-paper);
+  --text-muted: #b9d6d3;
+  --rule: #2c6a6b;
+  --accent: var(--c-gold);
+  --focus: var(--c-gold);
+  --bg: var(--surface);
+  --fg: var(--text);
+  --muted: var(--text-muted);
+  --line: var(--rule);
+  color-scheme: dark;
+}
+.on-light {
+  --surface: var(--c-paper);
+  --surface-raised: #fffdf8;
+  --surface-sunken: var(--c-stone);
+  --text: var(--c-midnight);
+  --text-muted: var(--c-ink-muted);
+  --rule: #d9d1c3;
+  --accent: var(--c-teal-deep);
+  --focus: var(--c-teal-deep);
+  --bg: var(--surface);
+  --fg: var(--text);
+  --muted: var(--text-muted);
+  --line: var(--rule);
+  color-scheme: light;
+}
+
+/* Base type for every page. */
+body {
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+main > h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-3);
+  line-height: var(--leading-snug);
+  letter-spacing: -0.01em;
+}
+::selection {
+  background: var(--c-gold);
+  color: var(--c-midnight);
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+button.primary,
+.button.primary {
+  background: var(--c-midnight);
+  border-color: var(--c-midnight);
+  color: var(--c-paper);
+}
+@media (prefers-color-scheme: dark) {
+  button.primary,
+  .button.primary {
+    background: var(--c-gold);
+    border-color: var(--c-gold);
+    color: var(--c-midnight);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+button:focus-visible,
+.button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
