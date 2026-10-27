@@ -24,6 +24,8 @@ const BRICKS = ['#b4583d', '#a64f36', '#c06a4c', '#9c4a34', '#b86b4f', '#a85d45'
 const STONES = ['#efe7d8', '#e6dcc8', '#f3efe6', '#ddd3c1', '#e9dfcb', '#d8d2c6'];
 const GLASS_FRAMES = ['#b9c1c8', '#8b98a3', '#d5d9dc', '#6f7c87', '#a6b0b8', '#55616b'];
 const GLASS_TINTS = ['#3f6d93', '#4a7f99', '#3a6382', '#5683a5', '#3f7a82', '#46708f', '#5f8098'];
+const DARK_FRAMES = ['#2b2e33', '#3a3128', '#24272b', '#43392d'];
+const DARK_TINTS = ['#4a3b2a', '#2a2d31', '#3b3026', '#22262b', '#3d3a34'];
 const AWNINGS = ['#0f1b2d', '#1f8a8a', '#7a2e2e', '#2f5d3a', '#3b3f45', '#b5462f', '#5b4a3a'];
 
 const pick = <T>(r: () => number, xs: readonly T[]): T => xs[Math.floor(r() * xs.length)]!;
@@ -71,6 +73,16 @@ function splitBlock(r: () => number, bx: number, bz: number, half: number): Lot[
   return lots;
 }
 
+type Archetype = 'plain' | 'glass' | 'cake' | 'dark' | 'deco' | 'pyramid';
+function archetype(r: () => number, floors: number): Archetype {
+  const k = r();
+  if (floors >= 26 && k < 0.1) return 'deco';
+  if (k < 0.36) return 'cake';
+  if (k < 0.58) return 'dark';
+  if (floors >= 20 && k < 0.66) return 'pyramid';
+  return 'glass';
+}
+
 function styleFor(r: () => number, floors: number): FacadeStyle {
   const k = r();
   if (floors < 10) return k < 0.55 ? 'brick' : k < 0.85 ? 'stone' : 'ribbon';
@@ -88,16 +100,27 @@ function colours(r: () => number, style: FacadeStyle) {
  * Height in floors for a building at (x, z): low walk-ups right around the lots (so the 15 lots stay the focus),
  * rising ring by ring, tallest behind the campus (-z), where the skyline frames the view.
  */
+/** Tower clusters behind and beside the campus: heights swell around them, so the skyline has peaks and valleys. */
+const HUBS: [number, number, number][] = [
+  [-95, -150, 1],
+  [75, -170, 0.85],
+  [-175, -55, 0.65],
+  [165, -95, 0.55],
+  [5, -125, 0.45],
+];
+
 function floorsAt(r: () => number, x: number, z: number): number {
   const ring = Math.max(Math.max(0, Math.abs(x) - 50), Math.max(0, Math.abs(z) - 30));
-  const back = Math.min(1, Math.max(0, -z / 140));
   let [lo, hi] = [3, 7];
-  if (ring > 20) [lo, hi] = [5, 12];
-  if (ring > 40) [lo, hi] = [8, 20];
-  if (ring > 70) [lo, hi] = [10, 24];
+  if (ring > 20) [lo, hi] = [5, 11];
+  if (ring > 40) [lo, hi] = [7, 16];
+  if (ring > 70) [lo, hi] = [8, 18];
   let f = lo + Math.floor(r() * (hi - lo + 1));
-  f = Math.round(f * (1 + back * (ring > 20 ? 0.6 : 0.25)) * (z > 30 && ring < 60 ? 0.85 : 1));
-  if (ring > 50 && r() < 0.06) f = 36 + Math.floor(r() * 20);
+  let hub = 0;
+  for (const [hx, hz, w] of HUBS) hub += w * Math.exp(-((x - hx) ** 2 + (z - hz) ** 2) / (2 * 42 * 42));
+  if (ring > 20) f = Math.round(f * (1 + 1.7 * Math.min(1, hub)));
+  if (z > 30 && ring < 60) f = Math.round(f * 0.85);
+  if (ring > 50 && r() < 0.03 + 0.3 * hub) f = 34 + Math.floor(r() * 22);
   return Math.max(3, f);
 }
 
@@ -120,8 +143,19 @@ function addBuilding(out: Tagged, r: () => number, lot: Lot, floors: number, far
     parts: { push: (p: Part, l: Lod = 2) => out.parts.push([p, cap(l)]) },
     trees: { push: (t: [number, number, number, number], l: Lod = 2) => out.trees.push([t, cap(l)]) },
   };
-  const style = styleFor(r, floors);
-  const { wall, glass } = colours(r, style);
+  // Tall buildings take one of several archetypes, so the skyline is not a wall of similar glass slabs.
+  const kind = floors >= 16 ? archetype(r, floors) : 'plain';
+  let style = styleFor(r, floors);
+  let { wall, glass } = colours(r, style);
+  if (kind === 'cake' || kind === 'deco') {
+    style = kind === 'deco' || r() < 0.6 ? 'stone' : 'brick';
+    wall = pick(r, style === 'stone' ? STONES : BRICKS);
+    glass = pick(r, GLASS_TINTS);
+  } else if (kind === 'dark') {
+    style = r() < 0.6 ? 'glass' : 'fins';
+    wall = pick(r, DARK_FRAMES);
+    glass = pick(r, DARK_TINTS);
+  }
   const seed = Math.floor(r() * 997);
   const lit = 0.1 + r() * 0.22;
   const base: Omit<Mass, 'x' | 'z' | 'w' | 'd' | 'y0' | 'y1'> = {
@@ -133,20 +167,34 @@ function addBuilding(out: Tagged, r: () => number, lot: Lot, floors: number, far
     baseY: CURB_H,
     ground: 1,
   };
-  // Setbacks: tall buildings step back once or twice (zoning-law wedding cakes).
+  // Tiers: [from floor, to floor, inset per side].
   const tiers: [number, number, number][] = [];
-  if (floors > 14 && r() < 0.65) {
-    const steps = floors > 26 ? 2 + Math.floor(r() * 2) : 1;
+  const stepped = (steps: number, insetLo: number, insetHi: number, firstShare: number) => {
     let from = 0;
     let inset = 0;
-    for (let i = 0; i <= steps; i++) {
-      const to = i === steps ? floors : from + Math.max(4, Math.round((floors - from) * (0.45 + r() * 0.2)));
+    for (let i = 0; i <= steps && from < floors; i++) {
+      const left = floors - from;
+      const to =
+        i === steps ? floors : from + Math.max(3, Math.round(left * (i === 0 ? firstShare : 0.45 + r() * 0.15)));
       tiers.push([from, Math.min(to, floors), inset]);
       from = Math.min(to, floors);
-      inset += 0.6 + r() * 0.9;
-      if (from >= floors) break;
+      inset += insetLo + r() * (insetHi - insetLo);
     }
-  } else tiers.push([0, floors, 0]);
+  };
+  if (kind === 'cake') stepped(2 + Math.floor(r() * 2), 0.9, 1.6, 0.4 + r() * 0.15);
+  else if (kind === 'deco') stepped(3, 0.8, 1.3, 0.45);
+  else if (kind === 'pyramid') {
+    const body = Math.round(floors * 0.7);
+    tiers.push([0, body, 0]);
+    const steps = 4;
+    for (let i = 0; i < steps; i++) {
+      const f0 = body + Math.round(((floors - body) * i) / steps);
+      const f1 = body + Math.round(((floors - body) * (i + 1)) / steps);
+      if (f1 > f0) tiers.push([f0, f1, 0.7 * (i + 1)]);
+    }
+  } else if (kind === 'dark') stepped(r() < 0.5 ? 0 : 1, 0.5, 0.9, 0.7);
+  else if (floors > 14 && r() < 0.55) stepped(floors > 26 ? 2 : 1, 0.6, 1.4, 0.5);
+  else tiers.push([0, floors, 0]);
   let top = CURB_H;
   let tw = lot.w;
   let td = lot.d;
@@ -162,6 +210,73 @@ function addBuilding(out: Tagged, r: () => number, lot: Lot, floors: number, far
         1,
       );
     top = y1;
+  }
+  // Signature tops (always drawn: they are the silhouette).
+  let crowned = false;
+  if (kind === 'deco') {
+    // Art-deco lantern: three narrowing lit tiers and a needle spire.
+    let y = top;
+    for (const [k, h] of [
+      [0.7, 2.2],
+      [0.48, 2.0],
+      [0.28, 2.6],
+    ] as const) {
+      plan.masses.push({
+        ...base,
+        style: 'crown',
+        wall: '#c9a86a',
+        x: lot.cx,
+        z: lot.cz,
+        w: tw * k,
+        d: td * k,
+        y0: y,
+        y1: y + h,
+        ground: 0,
+      });
+      y += h;
+    }
+    plan.parts.push({ shape: 'cone', mat: 'steel', x: lot.cx, y: y + 5, z: lot.cz, sx: 0.4, sy: 10, sz: 0.4 }, 0);
+    plan.parts.push(
+      { shape: 'sphere', mat: 'beacon', x: lot.cx, y: y + 10.1, z: lot.cz, sx: 0.25, sy: 0.25, sz: 0.25 },
+      1,
+    );
+    crowned = true;
+  } else if (kind === 'cake' && r() < 0.5) {
+    plan.parts.push(
+      {
+        shape: 'pyramid',
+        mat: 'copper',
+        x: lot.cx,
+        y: top + Math.min(tw, td) * 0.45,
+        z: lot.cz,
+        sx: tw * 0.9,
+        sy: Math.min(tw, td) * 0.9,
+        sz: td * 0.9,
+      },
+      0,
+    );
+    crowned = true;
+  } else if (kind === 'dark' && r() < 0.5) {
+    // Slanted top, sloping one way or the other.
+    const h = Math.min(tw, td) * (0.5 + r() * 0.4);
+    plan.parts.push(
+      {
+        shape: 'wedge',
+        mat: 'darkGlass',
+        x: lot.cx,
+        y: top + h / 2,
+        z: lot.cz,
+        sx: tw,
+        sy: h,
+        sz: td,
+        ry: Math.floor(r() * 4) * (Math.PI / 2),
+      },
+      0,
+    );
+    crowned = true;
+  } else if (kind === 'pyramid') {
+    plan.parts.push({ shape: 'cone', mat: 'steel', x: lot.cx, y: top + 3, z: lot.cz, sx: 0.35, sy: 6, sz: 0.35 }, 0);
+    crowned = true;
   }
 
   // Street-level awnings on brick and stone buildings.
@@ -225,10 +340,12 @@ function addBuilding(out: Tagged, r: () => number, lot: Lot, floors: number, far
 
   // Roof features: about half survive on 'reduced', none on 'minimal'.
   const roof: Lod = r() < 0.45 ? 2 : 1;
-  const k = r();
+  const k = crowned ? 2 : r();
   const cx = lot.cx;
   const cz = lot.cz;
-  if (floors >= 38) {
+  if (crowned) {
+    // The signature top is the roof.
+  } else if (floors >= 38) {
     // Supertall: lantern crown and spire.
     const cw = tw * 0.62;
     const cd = td * 0.62;
@@ -341,7 +458,15 @@ export function planSkyline(
   for (const b of grid.blocks) {
     if (b.core) continue;
     if (PLAZAS.some(p => p.x === b.x && p.z === b.z)) continue;
-    for (const lot of splitBlock(r, b.x, b.z, b.half)) addBuilding(out, r, lot, floorsAt(r, lot.cx, lot.cz));
+    const lots = splitBlock(r, b.x, b.z, b.half);
+    const heights = lots.map(l => floorsAt(r, l.cx, l.cz));
+    // A tower's neighbours on its block stay mid-rise, so towers stand out instead of merging into a wall.
+    const tallest = Math.max(...heights);
+    const first = heights.indexOf(tallest);
+    lots.forEach((lot, i) => {
+      const f = tallest > 22 && i !== first ? Math.min(heights[i]!, Math.round(tallest * 0.4)) : heights[i]!;
+      addBuilding(out, r, lot, f);
+    });
   }
   // Far ring: sparse towers beyond the street grid, seen through the haze (never overlapping one another).
   const FAR = 90;
