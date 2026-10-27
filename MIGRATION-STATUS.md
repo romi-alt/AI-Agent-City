@@ -8,7 +8,7 @@ failed / complete.
 |---|---|---|---|---|---|
 | M00 | **Local passed** (code complete and verified locally). Merged into `main` at the owner's request; no separate code review | `main` @ a658918 (fast-forward from f96819d). Built on branch `migration/m00-baseline` (from `city-vibes` @ 7bad3b8). Checkpoint = 7bad3b8, the head of `city-vibes` on GitHub. Tag `pre-migration-baseline` is local only: pushing it from this environment did not reach GitHub. Files below | `planning/agentcity-migration/m00/evidence/` | Real data and pilot exports missing (below) | M01 |
 | M01 | **Local passed** (code complete and verified locally, including a from-zero fresh-clone run). Merged into `main` at the owner's request; no separate code review | `main` @ b3c211c (fast-forward from d4c0159). Built on branch `migration/m01-workspace`, which can now be deleted on GitHub (deletion from this environment fails). Files: section M01.2 | `planning/agentcity-migration/m01/` (ARCHITECTURE.md, evidence/) | CI not yet run on GitHub (first run will be the next push or PR to `main`); Node 22 not 24; MinIO replaced by RustFS locally (ADR-004). See M01.5 | M02 |
-| M02 | **Local passed** (schema, RLS, catalog and importer built and tested locally on synthetic fixtures). Not merged; no code review yet | Branch `migration/m02-tenancy` (from `main` @ 7cb0642). Files: section M02.2 | `planning/agentcity-migration/m02/` (DATA-MODEL.md, IMPORT-RUNBOOK.md, evidence/) | **Production-input gate open:** no real `state.json`/`auth.json`/mapping provided, so no real import has run. CI not yet run on GitHub. See M02.5 | M03 |
+| M02 | **Local passed** (schema, RLS, catalog and importer built and tested locally on synthetic fixtures). Merged into `main` at the owner's request; no separate code review | `main` @ 002406e (fast-forward from 7cb0642). Built on branch `migration/m02-tenancy`, which can now be deleted on GitHub (deletion from this environment fails). Files: section M02.2 | `planning/agentcity-migration/m02/` (DATA-MODEL.md, IMPORT-RUNBOOK.md, evidence/) | **Production-input gate open:** no real `state.json`/`auth.json`/mapping provided, so no real import has run. CI not yet run on GitHub (first run will be the next push or PR to `main`). See M02.5 | M03 |
 | M03–M10, P01–P10 | Not started | — | — | — | In order, one at a time |
 
 
@@ -140,7 +140,8 @@ Required evidence, against the tests that prove it:
 ## M02.6 Next safe stage
 
 **M03 — OIDC access and session cutover** (`planning/agentcity-migration/prompts/M03-oidc-access-and-session-cutover.md`),
-after this branch is reviewed and merged. The production-input gate does not block M03 (it does not need real
+now that M02 is merged: start from `main` (002406e or later), run `pnpm infra:up && pnpm infra:init`, keep
+`OUTBOUND_ENABLED` unset. The production-input gate does not block M03 (it does not need real
 data), but it blocks the real import and cutover.
 
 # M01 — workspace and local infrastructure
