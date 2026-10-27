@@ -15,7 +15,7 @@ import {
 } from 'three';
 
 /** Simple shapes placed by centre and size; instanced per (shape, material) so hundreds of details cost a few draws. */
-export type Shape = 'box' | 'cyl' | 'cone' | 'pyramid' | 'sphere' | 'octa';
+export type Shape = 'box' | 'cyl' | 'cone' | 'pyramid' | 'sphere' | 'octa' | 'wedge';
 
 export interface Part {
   shape: Shape;
@@ -43,6 +43,14 @@ const UNIT: Record<Shape, () => BufferGeometry> = {
   pyramid: () => new ConeGeometry(Math.SQRT1_2, 1, 4).rotateY(Math.PI / 4),
   sphere: () => new SphereGeometry(0.5, 12, 8),
   octa: () => new CylinderGeometry(0.5, 0.5, 1, 8),
+  wedge: () => {
+    // A box whose top slopes down to nothing along -x: the slanted crown of a tower.
+    const g = new BoxGeometry(1, 1, 1).toNonIndexed();
+    const p = g.getAttribute('position');
+    for (let i = 0; i < p.count; i++) if (p.getY(i) > 0 && p.getX(i) < 0) p.setY(i, -0.5);
+    g.computeVertexNormals();
+    return g;
+  },
 };
 
 export interface PartsOptions {

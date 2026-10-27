@@ -142,7 +142,7 @@ export function Environment() {
 
     fog.color.setRGB(...s.fogColor);
     fog.density = s.fogDensity;
-    u.uFogColor.value.copy(fog.color);
+    u.uFogColor.value.setRGB(...s.fogColor);
 
     skyUniforms.uZenith.value.setRGB(...s.zenith);
     skyUniforms.uHorizon.value.setRGB(...s.horizon);
@@ -158,7 +158,7 @@ export function Environment() {
     // What glass sees below the horizon: the sunlit city and street, not a black void.
     envSkyGround
       .setRGB(...s.hemiGround)
-      .lerp(fog.color, 0.5)
+      .lerp(u.uFogColor.value, 0.5)
       .multiplyScalar(0.75 * (1 - 0.5 * s.nightFactor));
     gl.toneMappingExposure = s.exposure;
     scene.environmentIntensity = s.envIntensity;
