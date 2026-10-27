@@ -8,7 +8,7 @@ import type { AuthMethod } from './contracts.js';
  * Expected inputs (any combination):
  * - `amr`: an array of strings (or a single string), either our own values (`passkey`, `email-code`, `sso`) or the
  *   RFC 8176 / Keycloak "Authentication Method Reference" values listed in ALIASES below;
- * - `identity_provider`: the brokered IdP alias Keycloak can map into the token (`agency-sso` means SSO).
+ * - `idp` (Keycloak, IDP.md) or `identity_provider`: the brokered IdP alias (`agency-sso` means SSO).
  *
  * Unknown values are dropped, never guessed upwards: an unrecognised method can only make a session look weaker.
  * Authorization never depends on `amr` alone; step-up is decided by `acr` (recorded verbatim) and its freshness.
@@ -33,7 +33,7 @@ const ALIASES: Record<string, AuthMethod> = {
 
 const SSO_IDP_ALIASES = new Set(['agency-sso']);
 
-export function mapAuthMethods(claims: { amr?: unknown; identity_provider?: unknown }): AuthMethod[] {
+export function mapAuthMethods(claims: { amr?: unknown; identity_provider?: unknown; idp?: unknown }): AuthMethod[] {
   const raw = Array.isArray(claims.amr) ? claims.amr : typeof claims.amr === 'string' ? [claims.amr] : [];
   const out = new Set<AuthMethod>();
   for (const v of raw) {
@@ -41,7 +41,10 @@ export function mapAuthMethods(claims: { amr?: unknown; identity_provider?: unkn
     const m = ALIASES[v.trim().toLowerCase()];
     if (m) out.add(m);
   }
-  if (typeof claims.identity_provider === 'string' && SSO_IDP_ALIASES.has(claims.identity_provider)) out.add('sso');
+  // Keycloak's session-note mapper puts the broker alias in `idp` (IDP.md); `identity_provider` is accepted too.
+  for (const idp of [claims.idp, claims.identity_provider]) {
+    if (typeof idp === 'string' && SSO_IDP_ALIASES.has(idp)) out.add('sso');
+  }
   return [...out];
 }
 

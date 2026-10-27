@@ -302,6 +302,16 @@ export class SessionService {
     const subject = `kc:${c.sub}`;
     const amr: AuthMethod[] = mapAuthMethods(c);
     const acr = typeof c.acr === 'string' ? c.acr : null;
+    // Only the two levels this realm defines (IDP.md); "0" is a silent sign-in that proved nothing new.
+    if (acr !== '1' && acr !== '2') {
+      await this.event(this.pool, {
+        subject: `kc:${c.sub}`,
+        sessionId: null,
+        kind: 'sign_in_failed',
+        detail: { reason: 'acr_invalid', acr },
+      });
+      throw new LoginRefused(403, AUTH_ERRORS.forbidden, 'unsupported authentication level');
+    }
     const token = randomToken();
     const sessionId = randomUUID();
     return this.tx(async db => {
@@ -383,6 +393,8 @@ export class SessionService {
       throw await refuse('not_fresh', row.subject);
 
     const amr = mapAuthMethods(c);
+    // acr 2 in this realm means a passkey; require the method too, so a misconfigured level can't pass alone.
+    if (!amr.includes('passkey')) throw await refuse('no_passkey', row.subject);
     await this.tx(async db => {
       await db.query(
         `UPDATE identity.session

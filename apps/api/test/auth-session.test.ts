@@ -197,7 +197,7 @@ describe('auth: session lifecycle', () => {
       const up = await t.stepUp(
         s.device,
         s.jar,
-        { sub: s.sub, acr: '2' },
+        { sub: s.sub, acr: '2', amr: ['passkey'] },
         { authTime: Math.floor(Date.now() / 1000) - 3600 },
       );
       assert.equal(up.status, 400);
@@ -206,7 +206,7 @@ describe('auth: session lifecycle', () => {
       const reused = await t.stepUp(
         s.device,
         s.jar,
-        { sub: s.sub, acr: '2' },
+        { sub: s.sub, acr: '2', amr: ['passkey'] },
         { authTime: Math.floor(Date.now() / 1000) - 60 },
       );
       assert.equal(reused.status, 403);
@@ -215,7 +215,7 @@ describe('auth: session lifecycle', () => {
 
     it('expires: a step-up older than STEP_UP_MAX_AGE_SECONDS no longer counts', async () => {
       const s = await signedIn();
-      assert.equal((await t.stepUp(s.device, s.jar, { sub: s.sub, acr: '2' })).status, 303);
+      assert.equal((await t.stepUp(s.device, s.jar, { sub: s.sub, acr: '2', amr: ['passkey'] })).status, 303);
       await t.admin.query(`UPDATE identity.session SET step_up_at = now() - make_interval(secs => $2) WHERE id = $1`, [
         s.sessionId,
         t.env.STEP_UP_MAX_AGE_SECONDS + 5,
@@ -224,9 +224,18 @@ describe('auth: session lifecycle', () => {
       assert.deepEqual(r.body, { error: 'step_up_required', reason: 'billing' });
     });
 
+    it('refuses a level-2 step-up that did not use a passkey', async () => {
+      const s = await signedIn();
+      const up = await t.stepUp(s.device, s.jar, { sub: s.sub, acr: '2', amr: ['email-code'] });
+      assert.equal(up.status, 403);
+      const me = await t.request('GET', '/api/auth/me', { jar: s.jar, device: s.device });
+      assert.equal(me.body.stepUpAt, null);
+      assert.ok((await events(s.subject)).some(e => e.kind === 'step_up_refused' && e.detail.reason === 'no_passkey'));
+    });
+
     it('refuses a step-up callback for a different person', async () => {
       const s = await signedIn();
-      const up = await t.stepUp(s.device, s.jar, { sub: 'someone-else', acr: '2' });
+      const up = await t.stepUp(s.device, s.jar, { sub: 'someone-else', acr: '2', amr: ['passkey'] });
       assert.equal(up.status, 403);
       const me = await t.request('GET', '/api/auth/me', { jar: s.jar, device: s.device });
       assert.equal(me.body.subject, s.subject);
@@ -239,7 +248,7 @@ describe('auth: session lifecycle', () => {
     it('refuses a step-up callback arriving in a browser without that session', async () => {
       const s = await signedIn();
       const st = await t.start(s.device, { jar: s.jar, purpose: 'step-up', stepUpReason: 'credential' });
-      const { query } = t.idp.authorize(st.authorizeUrl, { sub: s.sub, acr: '2' });
+      const { query } = t.idp.authorize(st.authorizeUrl, { sub: s.sub, acr: '2', amr: ['passkey'] });
       const r = await t.callback(query, { ac_login: st.jar.ac_login! });
       assert.equal(r.status, 403);
     });

@@ -95,7 +95,9 @@ export class OidcClient {
       code_challenge: await oidc.calculatePKCECodeChallenge(input.codeVerifier),
       code_challenge_method: 'S256',
     };
+    // Always ask for a level (IDP.md): without acr_values=1 Keycloak can answer a silent sign-in with acr "0".
     if (input.stepUp) Object.assign(params, { acr_values: '2', prompt: 'login', max_age: '0' });
+    else params.acr_values = '1';
     if (input.idpHint) params.kc_idp_hint = input.idpHint;
     return oidc.buildAuthorizationUrl(config, params).href;
   }

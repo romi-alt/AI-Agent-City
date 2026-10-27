@@ -18,6 +18,7 @@
     "infra:ps": "docker compose -f infra/compose.yaml --env-file infra/local-dev.env ps",
     "keycloak:providers": "node scripts/build-keycloak-providers.mjs",
     "keycloak:seed": "node --env-file=infra/local-dev.env infra/keycloak/seed/seed-dev-users.mjs",
+    "keycloak:verify": "node --env-file=infra/local-dev.env infra/keycloak/verify/verify-idp.mjs",
     "infra:init": "pnpm db:migrate && pnpm --filter @agentcity/api run storage:init",
     "db:migrate": "pnpm --filter @agentcity/db run migrate",
     "db:verify-search": "pnpm --filter @agentcity/db run verify-search",

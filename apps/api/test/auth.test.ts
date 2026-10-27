@@ -28,7 +28,7 @@ describe('auth: sign-in (login/start → IdP → callback → session)', () => {
     assert.equal(url.searchParams.get('client_id'), 'agentcity-bff');
     assert.equal(url.searchParams.get('redirect_uri'), 'http://localhost:3000/api/auth/callback');
     assert.ok(url.searchParams.get('nonce') && url.searchParams.get('state'));
-    assert.equal(url.searchParams.get('acr_values'), null);
+    assert.equal(url.searchParams.get('acr_values'), '1', 'a normal sign-in always asks for level 1 (IDP.md)');
     const loginCookie = s.res.setCookies.find(c => c.startsWith('ac_login='))!;
     assert.match(loginCookie, /HttpOnly/i);
     assert.match(loginCookie, /SameSite=Lax/i);
@@ -213,6 +213,20 @@ describe('auth: sign-in (login/start → IdP → callback → session)', () => {
     const again = await t.login(await createDevice(), { sub: 'user-d' });
     assert.equal(again.res.status, 403);
     assert.equal(again.jar.ac_session, undefined);
+  });
+
+  it('refuses a sign-in at an authentication level the realm does not define (e.g. a silent acr "0")', async () => {
+    for (const acr of ['0', '3']) {
+      const before = await sessionCount();
+      const again = await t.login(await createDevice(), { sub: `user-acr-${acr}`, acr });
+      assert.equal(again.res.status, 403, `acr ${acr}`);
+      assert.equal(again.jar.ac_session, undefined);
+      assert.equal(await sessionCount(), before);
+    }
+    const ev = await t.admin.query(
+      `SELECT detail FROM identity.security_event WHERE kind = 'sign_in_failed' AND subject = 'kc:user-acr-0'`,
+    );
+    assert.equal(ev.rows[0]?.detail.reason, 'acr_invalid');
   });
 
   it('maps known methods and drops unknown ones', async () => {
