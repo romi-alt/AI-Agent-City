@@ -62,7 +62,8 @@ main { flex: 1; display: flex; min-height: 0; }
 /* 3D labels */
 .bsign { position: relative; background: var(--glass); border: 1px solid var(--line); border-radius: 8px; padding: 3px 9px; text-align: center; box-shadow: var(--shadow); font-size: 12px; white-space: nowrap; cursor: pointer; }
 .bsign .sub { display: block; font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-.bsign.kind-training { border-color: var(--accent); }
+.bsign.kind-training { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); padding: 5px 14px; font-size: 14px; box-shadow: 0 6px 20px rgba(245, 179, 53, .45); }
+.bsign.kind-training .sub { color: var(--accent-ink); opacity: .75; }
 .bsign .badge { position: absolute; top: -8px; right: -8px; background: var(--red); color: #fff; border-radius: 999px; font-size: 10px; padding: 1px 6px; font-weight: 700; }
 .agent-tag { background: #fff; color: #1f2328; border-radius: 6px; padding: 2px 8px; font: 700 11px 'JetBrains Mono', monospace; text-transform: uppercase; box-shadow: 0 2px 6px rgba(0,0,0,.2); cursor: pointer; white-space: nowrap; display: flex; gap: 6px; align-items: center; border: 2px solid transparent; }
 .agent-tag .role { font-weight: 500; color: #c07a10; }

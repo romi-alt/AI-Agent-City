@@ -18,6 +18,11 @@ export class CityView implements View {
   private cars: { obj: THREE.Object3D; axis: 'x' | 'z'; speed: number }[] = [];
   private signs = new Map<string, HTMLElement>();
   private streetLamps: THREE.Mesh[] = [];
+  /** The Training Center's crown, beacon and searchlight: the city's centrepiece. */
+  private crownMat = new THREE.MeshStandardMaterial({ color: '#cfe8f7', roughness: 0.25, metalness: 0.35, emissive: new THREE.Color('#f5b335'), emissiveIntensity: 0 });
+  private beacon?: THREE.Mesh;
+  private beam?: THREE.Mesh;
+  private time = 0;
 
   private sim: Sim;
   private onSelect: (buildingId: string) => void;
@@ -40,8 +45,9 @@ export class CityView implements View {
   }
 
   home(cam: THREE.PerspectiveCamera, controls: OrbitControls) {
-    controls.target.set(0, 4, 0);
-    cam.position.set(55, 62, 78);
+    // Look down on the Training Center from high enough that no neighbour hides it.
+    controls.target.set(0, 8, 0);
+    cam.position.set(46, 84, 72);
     controls.minDistance = 15;
     controls.maxDistance = 190;
   }
@@ -86,9 +92,18 @@ export class CityView implements View {
 
   setNight(night: boolean) {
     for (const l of this.streetLamps) (l.material as THREE.MeshStandardMaterial).emissiveIntensity = night ? 2 : 0;
+    this.crownMat.emissiveIntensity = night ? 0.55 : 0;
+    if (this.beam) this.beam.visible = night;
   }
 
   update(dt: number) {
+    this.time += dt;
+    if (this.beacon) {
+      const pulse = 0.5 + 0.5 * Math.sin(this.time * 2.4);
+      (this.beacon.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.8 + pulse * 1.6;
+      this.beacon.scale.setScalar(1 + pulse * 0.15);
+    }
+    if (this.beam) this.beam.rotation.y += dt * 0.4;
     for (const c of this.cars) {
       const p = c.obj.position;
       p[c.axis] += c.speed * dt;
@@ -134,7 +149,8 @@ export class CityView implements View {
     g.position.set(b.x, 0, b.z);
 
     // Lot: sidewalk slab, lawn, trees and a few cars on display.
-    const lot = new THREE.Mesh(new THREE.BoxGeometry(16, 0.15, 16), flat('#e9e4da'));
+    const centre = b.kind === 'training';
+    const lot = new THREE.Mesh(new THREE.BoxGeometry(16, 0.15, 16), flat(centre ? '#f1ead8' : '#e9e4da'));
     lot.position.y = 0.07;
     lot.receiveShadow = true;
     g.add(lot);
@@ -174,13 +190,8 @@ export class CityView implements View {
     canopy.position.set(0, FLOOR_H + 0.3, b.d / 2 + 0.8);
     g.add(canopy);
 
-    if (b.kind === 'training') {
-      // Rooftop terrace with planters, like the reference office.
-      for (let i = 0; i < 5; i++) {
-        const t = tree(0.7);
-        t.position.set(-5 + i * 2.5, h + 0.5, -4);
-        g.add(t);
-      }
+    if (centre) {
+      this.landmark(g, b, h);
     } else {
       const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 1.6, 14), flat('#8a6a4a'));
       tank.position.set(b.w / 4, h + 1.3, -b.d / 4);
@@ -191,10 +202,80 @@ export class CityView implements View {
     const sign = label(
       `<span class="badge" style="display:none"></span><b>${icon} ${b.short}</b><span class="sub"></span>`,
       `bsign kind-${b.kind}`, () => this.onSelect(b.id));
-    sign.position.set(0, h + 3, 0);
+    sign.position.set(0, centre ? h + 18 : h + 3, 0);
     this.signs.set(b.id, sign.element);
     g.add(sign);
     this.root.add(g);
+  }
+
+  /**
+   * Makes the Training Center the centrepiece: gold-edged plaza, gold corner columns, a rooftop terrace,
+   * a stepped glass crown and a spire with a pulsing beacon that tops every other building, and a
+   * searchlight at night.
+   */
+  private landmark(g: THREE.Group, b: Building, h: number) {
+    const gold = flat('#d9a028', { metalness: 0.45, roughness: 0.35 });
+
+    // Plaza: gold inlay along the edge of the lot and lamp posts at the corners.
+    for (const [w, d, x, z] of [[16, 0.5, 0, 7.75], [16, 0.5, 0, -7.75], [0.5, 16, 7.75, 0], [0.5, 16, -7.75, 0]]) {
+      const strip = new THREE.Mesh(new THREE.BoxGeometry(w, 0.05, d), gold);
+      strip.position.set(x, 0.17, z);
+      g.add(strip);
+    }
+    for (const [x, z] of [[-7.4, 7.4], [7.4, 7.4], [-7.4, -7.4], [7.4, -7.4]]) {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 2.6, 8), flat('#3a3f45'));
+      post.position.set(x, 1.45, z);
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 10), new THREE.MeshStandardMaterial({ color: '#fff3c4', emissive: '#ffd27a', emissiveIntensity: 0 }));
+      lamp.position.set(x, 2.85, z);
+      this.streetLamps.push(lamp);
+      g.add(post, lamp);
+    }
+
+    // Gold columns up every corner of the tower.
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(0.45, h + 0.3, 0.45), gold);
+      col.position.set(x * (b.w / 2 + 0.05), (h + 0.3) / 2, z * (b.d / 2 + 0.05));
+      col.castShadow = true;
+      g.add(col);
+    }
+
+    // Rooftop terrace with planters along the front edge.
+    for (let i = 0; i < 5; i++) {
+      const t = tree(0.7);
+      t.position.set(-5 + i * 2.5, h + 0.5, b.d / 2 - 1.2);
+      g.add(t);
+    }
+
+    // Stepped glass crown.
+    let top = h + 0.5;
+    for (const [sx, sz, th] of [[0.62, 0.55, 2.4], [0.4, 0.36, 2.2]]) {
+      const tier = new THREE.Mesh(new THREE.BoxGeometry(b.w * sx, th, b.d * sz), this.crownMat);
+      tier.position.set(0, top + th / 2, -0.8);
+      tier.castShadow = true;
+      g.add(tier);
+      const rim = new THREE.Mesh(new THREE.BoxGeometry(b.w * sx + 0.3, 0.25, b.d * sz + 0.3), gold);
+      rim.position.set(0, top + th + 0.12, -0.8);
+      g.add(rim);
+      top += th + 0.25;
+    }
+
+    // Spire and beacon: the highest point in the city.
+    const spire = new THREE.Mesh(new THREE.ConeGeometry(0.45, 9, 12), gold);
+    spire.position.set(0, top + 4.5, -0.8);
+    spire.castShadow = true;
+    this.beacon = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 16), new THREE.MeshStandardMaterial({ color: '#ffe08a', emissive: '#f5b335', emissiveIntensity: 1 }));
+    this.beacon.position.set(0, top + 9.2, -0.8);
+    g.add(spire, this.beacon);
+
+    // Night searchlight sweeping up from the crown.
+    const beamGeo = new THREE.ConeGeometry(4, 40, 24, 1, true);
+    beamGeo.rotateX(Math.PI); // narrow end at the roof, wide end in the sky
+    beamGeo.translate(0, 20, 0);
+    this.beam = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: '#ffd27a', transparent: true, opacity: 0.08, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+    this.beam.position.set(0, top, -0.8);
+    this.beam.rotation.z = 0.18;
+    this.beam.visible = false;
+    g.add(this.beam);
   }
 
   private decor() {
