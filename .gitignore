@@ -4,3 +4,8 @@ node_modules
 *.local
 .env
 .DS_Store
+**/dist/
+**/.next/
+apps/*/data/
+next-env.d.ts
+*.tsbuildinfo

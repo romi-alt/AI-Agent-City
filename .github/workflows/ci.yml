@@ -1,0 +1,74 @@
+# Build and verification for the AgentCity workspace (M01). Nothing here deploys or contacts a provider:
+# the infrastructure job runs the local Docker Compose stack on the runner with the committed local-dev credentials.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: install, format, typecheck, build, unit tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4 # version comes from "packageManager" in package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+      - run: pnpm test
+
+  infrastructure:
+    name: local stack, migrations, BM25, integration and smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: static
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+      - name: Start services and wait for health checks
+        run: pnpm infra:up
+      - name: Apply migrations and create the dev bucket
+        run: pnpm infra:init
+      - run: pnpm db:verify-search
+      - run: pnpm --filter @agentcity/db test:integration
+      - name: End-to-end smoke (web -> API, workflow survives worker crash, readiness fails without storage)
+        run: pnpm smoke
+      - name: Service state and logs on failure
+        if: failure()
+        run: |
+          pnpm infra:ps
+          docker compose -f infra/compose.yaml --env-file infra/local-dev.env logs --no-color --tail 200
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-evidence
+          path: planning/agentcity-migration/m01/evidence/
+          if-no-files-found: ignore
+      - name: Stop services
+        if: always()
+        run: pnpm infra:reset

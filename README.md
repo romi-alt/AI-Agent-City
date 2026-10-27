@@ -1,127 +1,71 @@
-# Sales City — Fast Sales virtual office
+# AgentCity
 
-A 3D city of car dealerships, the Fast Sales Training Center, Rick Case Honda's associate buildings and rental
-buildings. Every floor is staffed by people and AI agents who work the task lists from the Fast Sales documents
-(email / phone / text follow-up, social media) and report back through a daily email.
+The existing Sales City app, mid-migration to the stack in the original proposal. Progress, evidence and blockers
+are in [MIGRATION-STATUS.md](MIGRATION-STATUS.md). Decisions are in
+[planning/agentcity-migration/m01/ARCHITECTURE.md](planning/agentcity-migration/m01/ARCHITECTURE.md).
 
-## Run it
-
-```bash
-npm install
-npm run dev            # server on :3001 + web app on :5173
-```
-
-The first time, the server prints a **one-time setup link**. Open it to create the first agency owner: choose a password,
-scan the QR code with an authenticator app (Google / Microsoft Authenticator, 1Password, Authy), and save the
-recovery codes. Add everyone else from **⚙ Settings → People**; each person gets their own setup link.
-
-Production:
-
-```bash
-npm run build
-npm start              # serves the built app and the API on $PORT (default 3001)
-npm test               # isolation and account rules
-```
-
-Put it behind HTTPS (nginx, Caddy, a load balancer…) and set `COOKIE_SECURE=true`. Configuration lives in
-environment variables – see `.env.example`.
-
-## What's in it
-
-**City** – 15 buildings, 12–15 floors each, exactly as listed in the documents (see `SPEC.md`). Day / night,
-tap a building for its floors, tap again or pick a floor to walk in.
-
-**Office** – one floor: desks with labelled agents (warm = people, blue = AI), status rings
-(working / needs you), the task board, a live TV screen and the content wall. "Your office" is the floor of the desk
-you pick in Settings.
-
-**Agents** – about 300, each with its department's slice of the task lists:
-- Dealership and rental agents: new customers, unsold prospects, orphans, mastermind, sold customers, birthdays,
-  ownership anniversaries, referrals, CSI follow, lease end, service visits, conquest, lost / out of the market.
-- Fast Sales agents: new customers, unsold, sold customers, contract to expire, referrals, follow-up, new affiliates,
-  affiliates follow-up, new leads, current customers.
-- Social media agents: strategy, the 30-day content calendar, captions / hooks / CTAs / hashtags, creative briefs,
-  scheduling, community replies with escalation, lead-gen campaigns, trends, competitors, analytics, optimization,
-  weekly reports.
-- Managers (Max, and each dealership's store manager): flag leads waiting over an hour, send the morning report,
-  propose ad tests.
-
-**Right panel** – LIVE (KPIs, pipeline, activity), CRM, CONTENT, TEAM, OK (everything waiting for you), FLOORS
-(rent rental floors at $199/mo).
-
-**Full-screen views** – My CRM (pipeline board + lead drawer with timeline, notes and messaging), Content wall
-(calendar, posts, inbox, analytics, insights, weekly reports), Outbox & reports, Big screen (TV mode), Settings.
-
-**Reports** – morning report (08:00), the daily email report (18:00, every task item by email / phone / text,
-per building) and the weekly social media report (Mondays 09:00), emailed to the recipients in Settings.
-
-## Clients and roles
-
-The city can hold many client businesses. Each **client** owns one or more buildings (Rick Case Honda, for
-example, owns both of its buildings), and a building belongs to at most one client. The owner sets clients up
-under **⚙ Settings → Clients**.
-
-| Role | Sees | Can |
+| Path | What it is | State |
 |---|---|---|
-| Agency owner | The whole city | Everything, including people, clients and settings |
-| Agency staff | The whole city | Work every building and rent floors; no people, clients or settings |
-| Client admin | Only their client's buildings | Work those buildings: leads, approvals, posts, replies |
-| Client viewer | Only their client's buildings | Look, but change nothing |
+| `apps/legacy` | The working Sales City app (Express + Vite + Three.js). Its own README: [apps/legacy/README.md](apps/legacy/README.md) | In use; features move out of it stage by stage |
+| `apps/web` | Next.js App Router web app | Platform status page only |
+| `apps/api` | NestJS API: REST, GraphQL, OpenAPI | Health and readiness only |
+| `apps/worker` | Temporal worker | Platform heartbeat workflow only |
+| `packages/contracts` | Shared zod schemas | Health and heartbeat |
+| `packages/db` | Migrations, pool, test-database fixture, BM25 check | Platform schema only |
+| `infra/` | Docker Compose for local services | PostgreSQL + pg_search + pgvector, Redis, S3-compatible storage, Temporal, Keycloak |
 
-How it is enforced (`server/scope.ts`):
+## Requirements
 
-- The server filters everything a browser receives: the opening data, every live update and the people list.
-  Other clients' buildings arrive only as unnamed grey shapes for the skyline.
-- Every action is checked. Anything aimed at another client's lead, approval, post, inbox item or desk answers
-  "Not found", so a client can't even confirm it exists.
-- City-wide morning, daily and weekly reports stay with the agency for now.
-- Changing someone's role or client, or a client's buildings, signs those people out, so their browser can't keep
-  data they may no longer see.
-- Accounts created before clients existed are upgraded: admins become agency owners, members agency staff.
+- **Node 22.22** (`.nvmrc`). Node 22.12 or later 22.x is accepted.
+- **pnpm 10.28.0.** `corepack enable` picks it up from `package.json`.
+- **Docker with Compose v2**, for the local services.
 
-## Safety
+## Local development
 
-- Sign-in is password **plus** a 6-digit authenticator code (or a one-time recovery code). Optional "remember this
-  device for 30 days". Five wrong attempts lock the account for five minutes. Every attempt is in the sign-in log.
-- Forgot your password? "Forgot password?" on the sign-in page resets it with your authenticator code **and** one
-  recovery code (both are needed), then ends your sessions. (Known gap: a "remembered device" stays remembered;
-  see planning/agentcity-migration/AUDIT.md F12.) No recovery codes left? The agency owner resets you from
-  Settings → People, which sends a fresh setup link.
-  🔒 locks the screen until the code is entered again.
-- **Outbound kill switch.** No email, text or Claude request leaves the server unless it was started with
-  `OUTBOUND_ENABLED=true` **and** Settings → Delivery is **Live**. It is off by default and stays off during the
-  migration. The demo ("simulate") mode never calls a provider. Code: `server/outbound.ts`.
-- The city starts with **simulated** leads (example.com addresses, 555 numbers). They are never contacted.
-- **Real** leads are the ones you add. Agents' messages to them wait for someone to approve them. A person pressing
-  **Send** on a lead, and the automatic morning/daily/weekly reports, do **not** go through the approval queue; they
-  are held back only by the kill switch and Delivery mode. Phone "calls" are never placed; people make and log them.
-- If `data/state.json` or `data/auth.json` can't be read or is from an unsupported version, the server refuses to
-  start and leaves the file untouched (see planning/agentcity-migration/m00/BACKUP-AND-RECOVERY.md).
-- The public `/proposal` page shows no live office data.
-- Posts are only scheduled after approval. Sensitive comments are escalated to a person.
-- With `ANTHROPIC_API_KEY` set and **AI drafts** on, Claude writes posts and messages to real leads (capped per
-  hour); the same approvals apply.
+```bash
+pnpm install --frozen-lockfile
+pnpm infra:up       # start PostgreSQL, Redis, object storage, Temporal and Keycloak; returns once all are healthy
+pnpm infra:init     # apply migrations and create the dev bucket (safe to repeat)
+pnpm build
 
-## Code map
+pnpm dev:api        # http://127.0.0.1:4000  (/health/live, /health/ready, /graphql, /docs)
+pnpm dev:worker     # Temporal worker
+pnpm dev:web        # http://127.0.0.1:3000  (shows the API's readiness)
+pnpm dev:legacy     # the existing app: http://localhost:5173 (server on :3001)
+```
 
-| Path | What it holds |
-| --- | --- |
-| `src/core/data/` | Buildings and floors, task lists, message / post templates (from the documents) |
-| `src/core/sim.ts` | The city: agents, tasks, leads, social workflow, approvals, routines, reports, KPIs |
-| `server/index.ts` | HTTP API, live update stream (SSE), clock, persistence |
-| `server/auth.ts`, `server/totp.ts` | Users, clients, passwords, authenticator codes, recovery codes, sessions, sign-in log |
-| `server/scope.ts` | Multi-client isolation: roles, what each person may see, and which actions they may run |
-| `test/` | Automated tests (`npm test`) |
-| `server/delivery.ts` | Email (SMTP) and text (Twilio) delivery |
-| `server/brain.ts` | Optional Claude drafting |
-| `src/scene/` | three.js city and office |
-| `src/ui/` | Sign-in screens, app shell, panels and full-screen views |
+Shutting down:
 
-The simulation speed (pause / real time / 1× / 5×) is in the top bar for admins. At 1× a city day takes 12 minutes.
+```bash
+pnpm infra:down     # stop services, keep data
+pnpm infra:reset    # stop services and delete their data volumes
+```
 
-## Proposal page
+Service consoles, all on 127.0.0.1 only:
+- **Temporal UI:** http://127.0.0.1:58233
+- **Object storage console:** http://127.0.0.1:59001
+- **Keycloak:** http://localhost:58080. Its admin login is in `infra/local-dev.env`.
 
-A public, bilingual (EN/ES) sales proposal lives at **`/proposal`** (`?lang=es` forces Spanish). All wording, names and
-prices are in `src/proposal/content.ts`; building and agent counts come from the city data. Its live dashboard reads
-`/api/public/pulse`, which returns counts only (no names, contact details or revenue). It never shows a password.
+## Checks
 
+```bash
+pnpm format:check
+pnpm typecheck
+pnpm test                                       # unit tests, including the legacy app's 33
+pnpm db:verify-search                           # BM25 + vector search really work in this PostgreSQL
+pnpm --filter @agentcity/db test:integration    # migrations, app-role permissions, reversibility
+pnpm smoke                                      # end-to-end; needs infra:up, infra:init and build first
+```
+
+`pnpm smoke` starts its own API, worker and web app, so stop the dev servers first. It also briefly stops
+PostgreSQL and object storage to prove readiness fails without them. It writes evidence to
+`planning/agentcity-migration/m01/evidence/`.
+
+## Credentials and safety
+
+- `infra/local-dev.env` holds **local-development-only** credentials and is committed on purpose.
+  - Every secret in it contains `local-dev-only`.
+  - The API and worker refuse to start with such values when `NODE_ENV=production`.
+- Never put real credentials in it. Use an untracked `.env` or the deployment's secret store instead.
+- The legacy app's outbound kill switch (`OUTBOUND_ENABLED`) stays off. The new apps send nothing outside the
+  machine.

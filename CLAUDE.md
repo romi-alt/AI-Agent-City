@@ -6,8 +6,16 @@ already follows (from README.md, package.json and the code); the second is the m
 
 ## Project conventions (existing)
 
-- Commands: `npm install` (or `npm ci` from the lockfile), `npm run dev` (server :3001 + Vite :5173),
-  `npm run typecheck`, `npm run build`, `npm test`, `npm start` (production build). Node 22+.
+- Workspace (since M01): pnpm 10.28.0 workspaces, Node 22.22 (`.nvmrc`). From the root: `pnpm install
+  --frozen-lockfile`, `pnpm format:check`, `pnpm typecheck`, `pnpm build`, `pnpm test`; local services with
+  `pnpm infra:up` / `infra:init` / `infra:down`; end-to-end with `pnpm smoke`. See README.md. Don't add npm or yarn
+  lockfiles.
+- The existing app now lives in `apps/legacy` (moved unchanged in M01). Its commands run from the root as
+  `pnpm --filter @agentcity/legacy <dev|typecheck|build|test|start>` (`pnpm dev:legacy` = server :3001 + Vite
+  :5173). Paths below are relative to `apps/legacy`.
+- New code (apps/web, apps/api, apps/worker, packages/*) is ESM TypeScript formatted by Prettier
+  (`.prettierrc.json`). Browser-reachable web code must not import server modules; server-only web modules import
+  `server-only`. Local credentials live only in `infra/local-dev.env` and contain `local-dev-only`.
 - TypeScript everywhere, strict, `erasableSyntaxOnly` (no parameter properties or enums), no unused locals.
   Match the surrounding code's style: short functions, plain-English comments that explain why, UI copy written
   from the user's side of the screen.
@@ -18,7 +26,7 @@ already follows (from README.md, package.json and the code); the second is the m
   explicitly asks; corrupt saved state stops the server instead of being replaced.
 - Multi-client isolation: everything a browser receives and every action goes through `server/scope.ts`; keep
   its no-leak tests (`test/scope.test.ts`) passing.
-- Private data lives in `DATA_DIR` (default `./data`, git-ignored) and the server environment. Never commit it.
+- Private data lives in `DATA_DIR` (default `./data` relative to where the server starts, git-ignored) and the server environment. Never commit it.
 - Work on a branch; open pull requests as drafts; don't push to `main` directly.
 
 ## AgentCity migration instructions

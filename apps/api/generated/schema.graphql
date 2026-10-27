@@ -1,0 +1,27 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type DependencyCheck {
+  detail: String!
+  latencyMs: Int!
+  name: String!
+  ok: Boolean!
+}
+
+type Liveness {
+  service: String!
+  status: String!
+  version: String!
+}
+
+type Query {
+  liveness: Liveness!
+  readiness: ReadinessReport!
+}
+
+type ReadinessReport {
+  checkedAt: String!
+  checks: [DependencyCheck!]!
+  status: String!
+}

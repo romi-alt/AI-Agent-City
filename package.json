@@ -1,36 +1,32 @@
 {
-  "name": "sales-city",
+  "name": "agentcity",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "description": "AgentCity workspace: the legacy Sales City app plus the proposal-stack apps being migrated to (see MIGRATION-STATUS.md).",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.12.0 <23"
+  },
   "scripts": {
-    "dev": "concurrently -k -n server,web -c yellow,cyan \"npm:dev:server\" \"npm:dev:web\"",
-    "dev:server": "tsx watch server/index.ts",
-    "dev:web": "vite",
-    "build": "tsc -p tsconfig.json && tsc -p tsconfig.server.json && vite build",
-    "start": "NODE_ENV=production tsx server/index.ts",
-    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.server.json",
-    "test": "node --import tsx --test --test-concurrency=1 test/*.test.ts"
+    "build": "pnpm -r run build",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "infra:up": "docker compose -f infra/compose.yaml --env-file infra/local-dev.env up -d --wait",
+    "infra:down": "docker compose -f infra/compose.yaml --env-file infra/local-dev.env down",
+    "infra:reset": "docker compose -f infra/compose.yaml --env-file infra/local-dev.env down -v",
+    "infra:ps": "docker compose -f infra/compose.yaml --env-file infra/local-dev.env ps",
+    "infra:init": "pnpm db:migrate && pnpm --filter @agentcity/api run storage:init",
+    "db:migrate": "pnpm --filter @agentcity/db run migrate",
+    "db:verify-search": "pnpm --filter @agentcity/db run verify-search",
+    "dev:api": "pnpm --filter @agentcity/api run dev",
+    "dev:worker": "pnpm --filter @agentcity/worker run dev",
+    "dev:web": "pnpm --filter @agentcity/web run dev",
+    "dev:legacy": "pnpm --filter @agentcity/legacy run dev",
+    "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
-    "@types/cookie-parser": "^1.4.10",
-    "@types/express": "^5.0.6",
-    "@types/node": "^26.6.5",
-    "@types/nodemailer": "^8.0.2",
-    "@types/qrcode": "^1.5.6",
-    "@types/three": "^0.180.0",
-    "concurrently": "^10.0.6",
-    "tsx": "^4.23.15",
-    "typescript": "~7.0.2",
-    "vite": "^8.3.5"
-  },
-  "dependencies": {
-    "@anthropic-ai/sdk": "^1.3.0",
-    "cookie-parser": "^1.4.7",
-    "express": "^5.3.0",
-    "nodemailer": "^10.2.1",
-    "qrcode": "^1.5.4",
-    "three": "^0.180.0",
-    "zod": "^4.6.7"
+    "prettier": "3.9.10",
+    "typescript": "6.0.3"
   }
 }

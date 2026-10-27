@@ -1,0 +1,30 @@
+{
+  "name": "@agentcity/worker",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Temporal worker. M01: the platform heartbeat workflow only; business workflows arrive in M08.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node --env-file-if-exists=../../infra/local-dev.env dist/main.js",
+    "dev": "pnpm run build && pnpm run start",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@agentcity/contracts": "workspace:*",
+    "@agentcity/db": "workspace:*",
+    "@temporalio/activity": "1.24.0",
+    "@temporalio/worker": "1.24.0",
+    "@temporalio/workflow": "1.24.0",
+    "pg": "8.23.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@temporalio/testing": "1.24.0",
+    "@types/node": "22.20.5",
+    "@types/pg": "8.23.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
+  }
+}

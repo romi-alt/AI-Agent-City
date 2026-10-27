@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Install scripts are off unless listed. Allowed: native compiler binaries used by tsx/Vite (esbuild) and by the
+# Temporal workflow bundler (@swc/core). Ignored on purpose: @scarf/scarf is install-time telemetry; the protobufjs
+# scripts only print version notices.
+onlyBuiltDependencies:
+  - esbuild
+  - '@swc/core'
+ignoredBuiltDependencies:
+  - '@scarf/scarf'
+  - protobufjs
+  - '@apollo/protobufjs'

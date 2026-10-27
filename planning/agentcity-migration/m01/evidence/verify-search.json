@@ -1,0 +1,33 @@
+{
+  "extensions": {
+    "pg_search": "0.26.3",
+    "vector": "0.8.6"
+  },
+  "bm25": [
+    {
+      "id": 2,
+      "score": 0.6342719
+    },
+    {
+      "id": 1,
+      "score": 0.3884579
+    },
+    {
+      "id": 4,
+      "score": 0.2489934
+    }
+  ],
+  "bm25Plan": "Custom Scan (ParadeDB Base Scan) on docs  (cost=10.00..10.03 rows=3 width=4)\n  Table: docs\n  Index: docs_bm25\n  Segment Count: 1\n  Exec Method: ColumnarExecState\n  Columnar: id\n  Scores: false\n  Tantivy Query: {\"with_index\":{\"query\":{\"parse_with_field\":{\"field\":\"body\",\"query_string\":\"payment\",\"lenient\":null,\"conjunction_mode\":null}}}}",
+  "vectorNearest": [
+    {
+      "id": 1,
+      "distance": 0
+    },
+    {
+      "id": 2,
+      "distance": 0.14142137441313676
+    }
+  ],
+  "result": "PASSED",
+  "failures": []
+}

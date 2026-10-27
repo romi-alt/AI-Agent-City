@@ -1,0 +1,44 @@
+{
+  "name": "@agentcity/api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "NestJS API (REST + GraphQL + OpenAPI). M01: health/readiness and the platform heartbeat only.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node --env-file-if-exists=../../infra/local-dev.env dist/main.js",
+    "dev": "pnpm run build && pnpm run start",
+    "contracts": "node --env-file-if-exists=../../infra/local-dev.env dist/main.js --write-contracts",
+    "test": "node --import tsx --test test/*.test.ts",
+    "storage:init": "node --env-file-if-exists=../../infra/local-dev.env --import tsx src/cli-init-storage.ts"
+  },
+  "dependencies": {
+    "@agentcity/contracts": "workspace:*",
+    "@agentcity/db": "workspace:*",
+    "@apollo/server": "5.5.1",
+    "@as-integrations/express5": "1.1.2",
+    "@aws-sdk/client-s3": "3.1157.0",
+    "@nestjs/apollo": "14.1.1",
+    "@nestjs/common": "12.3.2",
+    "@nestjs/core": "12.3.2",
+    "@nestjs/graphql": "14.1.0",
+    "@nestjs/platform-express": "12.3.2",
+    "@nestjs/swagger": "12.0.5",
+    "@temporalio/client": "1.24.0",
+    "express": "5.3.0",
+    "graphql": "16.14.2",
+    "ioredis": "6.0.0",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.6",
+    "@types/node": "22.20.5",
+    "@types/pg": "8.23.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
+  }
+}

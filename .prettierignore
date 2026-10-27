@@ -1,0 +1,9 @@
+# The legacy app keeps its existing formatting until it is ported; the migration pack is reference material.
+apps/legacy/
+planning/
+pnpm-lock.yaml
+**/dist/
+**/.next/
+**/generated/
+# Hand-written prose and tables (status, ADRs, READMEs): formatting them would rewrite history in diffs.
+**/*.md
