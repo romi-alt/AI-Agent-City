@@ -1,0 +1,155 @@
+// Browser smoke test for the marketing landing page (X01 workstream B). No API needed: the page is static.
+//
+//   node --test test/b-landing.smoke.ts            (builds into .next/b-landing-test first)
+//   SKIP_BUILD=1 node --test test/b-landing.smoke.ts
+//
+// Starts `next start` on port 3204 and checks, in Chromium: the calls to action (scroll to #get-demo, link to
+// /city), no console errors, the reduced-motion and no-WebGL fallbacks, the skip link, and the page metadata.
+import assert from 'node:assert/strict';
+import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
+import { after, before, test } from 'node:test';
+
+const PORT = 3204;
+const WEB = `http://127.0.0.1:${PORT}`;
+const APP_DIR = join(import.meta.dirname, '..');
+const env = { ...process.env, NEXT_TELEMETRY_DISABLED: '1', NEXT_DIST_DIR: '.next/b-landing-test' };
+const nextBin = join(APP_DIR, 'node_modules/next/dist/bin/next');
+
+// Playwright is pre-installed outside the workspace (not a dependency), so it is required and typed loosely.
+type Browser = any;
+type Page = any;
+const { chromium } = createRequire(import.meta.url)('playwright') as {
+  chromium: { launch(o?: { args?: string[] }): Promise<Browser> };
+};
+
+let web: ChildProcess;
+let browser: Browser;
+
+before(async () => {
+  if (!process.env.SKIP_BUILD) {
+    const build = spawnSync(process.execPath, [nextBin, 'build'], { cwd: APP_DIR, env, stdio: 'inherit' });
+    assert.equal(build.status, 0, 'next build failed');
+  }
+  web = spawn(process.execPath, [nextBin, 'start', '-p', String(PORT), '-H', '127.0.0.1'], {
+    cwd: APP_DIR,
+    env,
+    stdio: ['ignore', 'inherit', 'inherit'],
+  });
+  const until = Date.now() + 60_000;
+  for (;;) {
+    try {
+      if ((await fetch(WEB)).ok) break;
+    } catch {
+      /* not up yet */
+    }
+    if (Date.now() > until) throw new Error('web app did not start');
+    await new Promise(r => setTimeout(r, 300));
+  }
+  browser = await chromium.launch();
+});
+
+after(async () => {
+  await browser?.close();
+  web?.kill();
+});
+
+/** A page that records console errors and uncaught exceptions. */
+async function open(
+  options: { reducedMotion?: 'reduce' | 'no-preference'; viewport?: { width: number; height: number } } = {},
+): Promise<{ page: Page; errors: string[] }> {
+  const context = await browser.newContext({
+    viewport: options.viewport ?? { width: 1440, height: 900 },
+    reducedMotion: options.reducedMotion ?? 'no-preference',
+  });
+  const page = await context.newPage();
+  const errors: string[] = [];
+  page.on('console', (m: any) => m.type() === 'error' && errors.push(m.text()));
+  page.on('pageerror', (e: Error) => errors.push(String(e)));
+  await page.goto(WEB, { waitUntil: 'networkidle' });
+  return { page, errors };
+}
+
+test('the landing page renders its headline and calls to action without console errors', async () => {
+  const { page, errors } = await open();
+  assert.match(await page.textContent('h1'), /Your Business\.\s*Your AI Team\.\s*Your City\./);
+  assert.equal(await page.locator('h1').count(), 1, 'exactly one h1');
+  assert.match(await page.textContent('[data-testid=hero-cta-demo]'), /Get My Free Demo Office/);
+  assert.match(await page.textContent('[data-testid=hero-cta-city]'), /Explore AgentCity/);
+  // Give the deferred 3D preview time to load (or fall back) before judging the console.
+  await page.waitForTimeout(3000);
+  assert.deepEqual(errors, []);
+  await page.context().close();
+});
+
+test('"Get My Free Demo Office" scrolls to the demo form section', async () => {
+  const { page } = await open();
+  await page.click('[data-testid=hero-cta-demo]');
+  await page.waitForFunction(() => location.hash === '#get-demo');
+  await page.waitForFunction(() => {
+    const top = document.getElementById('get-demo')?.getBoundingClientRect().top ?? 9999;
+    return Math.abs(top) < 120;
+  });
+  assert.equal(
+    await page.locator('#get-demo [data-testid=demo-form-slot]').count(),
+    1,
+    'the form slot is in #get-demo',
+  );
+  await page.context().close();
+});
+
+test('"Explore AgentCity" goes to /city', async () => {
+  const { page } = await open();
+  assert.equal(await page.getAttribute('[data-testid=hero-cta-city]', 'href'), '/city');
+  await page.click('[data-testid=hero-cta-city]');
+  await page.waitForURL(`${WEB}/city`);
+  await page.context().close();
+});
+
+test('reduced motion keeps the static skyline and never loads the 3D scene', async () => {
+  const { page, errors } = await open({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(3000);
+  assert.equal(await page.getAttribute('[data-testid=hero-city]', 'data-mode'), 'static');
+  assert.equal(await page.locator('[data-testid=hero-city] canvas').count(), 0);
+  assert.equal(await page.locator('.mk-hero-skyline').count(), 1);
+  assert.deepEqual(errors, []);
+  await page.context().close();
+});
+
+test('without WebGL the illustration stays and nothing errors', async () => {
+  const noGl = await chromium.launch({ args: ['--disable-webgl', '--disable-webgl2', '--disable-3d-apis'] });
+  const page = await noGl.newPage();
+  const errors: string[] = [];
+  page.on('console', (m: any) => m.type() === 'error' && errors.push(m.text()));
+  page.on('pageerror', (e: Error) => errors.push(String(e)));
+  await page.goto(WEB, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(3000);
+  assert.equal(await page.getAttribute('[data-testid=hero-city]', 'data-mode'), 'static');
+  assert.match(await page.textContent('.mk-hero-caption'), /Illustration/);
+  assert.deepEqual(errors, []);
+  await noGl.close();
+});
+
+test('the first Tab reaches the skip link, which moves focus to the content', async () => {
+  const { page } = await open({ reducedMotion: 'reduce' });
+  await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Skip to content');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => location.hash === '#main');
+  await page.context().close();
+});
+
+test('the page is not indexable by default and has Open Graph metadata', async () => {
+  const html = await (await fetch(WEB)).text();
+  assert.match(html, /<meta name="robots" content="noindex, nofollow"/);
+  assert.match(html, /<meta property="og:title" content="AgentCity: Your Business\. Your AI Team\. Your City\."/);
+  assert.match(html, /<meta property="og:image"/);
+});
+
+test('no horizontal scrolling on a phone', async () => {
+  const { page } = await open({ viewport: { width: 360, height: 780 }, reducedMotion: 'reduce' });
+  const width = await page.evaluate(() => document.documentElement.scrollWidth);
+  assert.ok(width <= 360, `page is ${width}px wide`);
+  await page.context().close();
+});
