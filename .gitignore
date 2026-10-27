@@ -9,3 +9,6 @@ node_modules
 apps/*/data/
 next-env.d.ts
 *.tsbuildinfo
+
+# Written by `next dev` on each run (agent hints); not project documentation
+apps/web/AGENTS.md

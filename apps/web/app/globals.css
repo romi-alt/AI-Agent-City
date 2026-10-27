@@ -187,26 +187,61 @@ select {
   font-weight: 600;
 }
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 20px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--line);
+  gap: 12px 24px;
+  min-height: 64px;
+  padding: 10px max(16px, calc((100% - 1200px) / 2));
+  background: color-mix(in srgb, var(--c-paper, #fafaf9) 82%, transparent);
+  backdrop-filter: saturate(1.4) blur(14px);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: 1px solid var(--c-hairline, var(--line));
+  font-size: 0.9375rem;
 }
 .app-header .brand {
-  font-weight: 700;
-  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   margin-right: auto;
+  font-weight: 600;
+  font-size: 1.0625rem;
+  letter-spacing: -0.02em;
+  color: var(--c-ink, inherit);
+  text-decoration: none;
+}
+.app-header .brand-mark {
+  width: 20px;
+  height: 20px;
+}
+.app-header .header-account {
+  color: var(--c-muted, var(--muted));
+  text-decoration: none;
+}
+.app-header .header-account:hover {
+  color: var(--c-ink, inherit);
 }
 .tenant-switcher {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+.tenant-switcher select {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid var(--c-hairline-2, var(--line));
+  border-radius: 10px;
+  background-color: var(--c-white, #fff);
+  color: var(--c-ink, inherit);
+  font: inherit;
+  font-size: 0.875rem;
+}
 .tenant-switcher label {
-  color: var(--muted);
-  font-size: 14px;
+  color: var(--c-muted, var(--muted));
+  font-size: 0.875rem;
 }
 .header-message {
   flex-basis: 100%;

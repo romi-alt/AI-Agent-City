@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, describeError, getMe, NavigatingAwayError } from '../lib/api-client';
 import { describeRole, normaliseMemberships, type AuthMeResponse, type MembershipRow } from '../lib/auth-types';
+import { Mark } from './marketing/Primitives';
 import { RealtimeStatus } from './RealtimeStatus';
 
 /** Fired by pages that change what the header shows (e.g. after accepting an invitation). */
@@ -66,8 +67,9 @@ export function AppHeader() {
 
   return (
     <header className="app-header" data-testid="app-header">
-      <a className="brand" href="/account">
-        AgentCity
+      <a className="brand" href="/account" aria-label="AgentCity, your account">
+        <Mark className="brand-mark" />
+        <span>AgentCity</span>
       </a>
       <div className="tenant-switcher">
         <label htmlFor="tenant-select">Working in</label>
@@ -93,7 +95,7 @@ export function AppHeader() {
         )}
       </div>
       <RealtimeStatus />
-      <a href="/account" data-testid="header-account">
+      <a className="header-account" href="/account" data-testid="header-account">
         {me?.email ?? 'Your account'}
       </a>
       {message && (
