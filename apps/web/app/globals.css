@@ -73,3 +73,194 @@ code {
   font-family: ui-monospace, Menlo, monospace;
   font-size: 0.9em;
 }
+
+/* M03: sign-in, account and the shared header. */
+h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+a {
+  color: inherit;
+}
+.muted,
+.small {
+  color: var(--muted);
+}
+.small {
+  font-size: 14px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+button,
+.button {
+  font: inherit;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  text-decoration: none;
+}
+button.primary,
+.button.primary {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+button.danger {
+  color: var(--bad);
+  border-color: currentColor;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+button:focus-visible,
+.button:focus-visible,
+a:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--ok);
+  outline-offset: 2px;
+}
+select {
+  font: inherit;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
+  max-width: 100%;
+}
+.notice {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  color: var(--fg);
+}
+.notice.ok {
+  border-color: var(--ok);
+  font-weight: normal;
+}
+.notice.bad {
+  border-color: var(--bad);
+  font-weight: normal;
+}
+.notice p {
+  color: var(--fg);
+}
+.panel {
+  padding: 16px;
+  border: 2px solid var(--fg);
+  border-radius: 12px;
+}
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 0;
+}
+.facts dt {
+  color: var(--muted);
+}
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.tag {
+  font-weight: 600;
+}
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.app-header .brand {
+  font-weight: 700;
+  text-decoration: none;
+  margin-right: auto;
+}
+.tenant-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tenant-switcher label {
+  color: var(--muted);
+  font-size: 14px;
+}
+.header-message {
+  flex-basis: 100%;
+  font-size: 14px;
+}
+.header-message.ok {
+  color: var(--ok);
+}
+.header-message.bad {
+  color: var(--bad);
+}
+.realtime {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+.realtime .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.realtime-live .dot {
+  background: var(--ok);
+}
+.realtime-revoked .dot {
+  background: var(--bad);
+}
+.realtime-revoked {
+  color: var(--bad);
+  font-weight: 600;
+}
+table td button {
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td {
+    display: block;
+  }
+  thead {
+    display: none;
+  }
+  tr {
+    border-bottom: 1px solid var(--line);
+    padding: 8px 0;
+  }
+  td {
+    border: 0;
+    padding: 2px 0;
+  }
+}

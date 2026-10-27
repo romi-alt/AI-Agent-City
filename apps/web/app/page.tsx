@@ -12,6 +12,12 @@ export default async function StatusPage() {
         The new web app asked the new API whether it is ready to serve traffic. Business screens are still in the legacy
         app (<code>apps/legacy</code>) and move here from M05 onwards.
       </p>
+      <p>
+        <a href="/account" data-testid="home-account">
+          Your account
+        </a>{' '}
+        (you'll be asked to sign in first if you aren't already).
+      </p>
       {status.reachable ? (
         <>
           <p data-testid="overall">
