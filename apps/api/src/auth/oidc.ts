@@ -84,6 +84,7 @@ export class OidcClient {
     codeVerifier: string;
     stepUp: boolean;
     idpHint?: string;
+    loginHint?: string;
   }): Promise<string> {
     const config = await this.config();
     const params: Record<string, string> = {
@@ -99,6 +100,7 @@ export class OidcClient {
     if (input.stepUp) Object.assign(params, { acr_values: '2', prompt: 'login', max_age: '0' });
     else params.acr_values = '1';
     if (input.idpHint) params.kc_idp_hint = input.idpHint;
+    if (input.loginHint) params.login_hint = input.loginHint;
     return oidc.buildAuthorizationUrl(config, params).href;
   }
 

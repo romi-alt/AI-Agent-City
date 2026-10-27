@@ -283,8 +283,50 @@
           }
         }
       ]
+    },
+    {
+      "clientId": "agentcity-provisioner",
+      "name": "AgentCity demo provisioner (local development)",
+      "description": "Demo module service account: finds or creates demo people (no password or credential) and sends the verify-email link back to /demo/verified. Only admin role: realm-management manage-users.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "local-dev-only-provisioner-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "consentRequired": false,
+      "fullScopeAllowed": false,
+      "frontchannelLogout": false,
+      "redirectUris": ["http://localhost:3000/demo/verified*"],
+      "webOrigins": [],
+      "attributes": {
+        "use.refresh.tokens": "false",
+        "client_credentials.use_refresh_token": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "standard.token.exchange.enabled": "false",
+        "access.token.signed.response.alg": "RS256"
+      },
+      "defaultClientScopes": ["basic"],
+      "optionalClientScopes": []
     }
   ],
+  "users": [
+    {
+      "username": "service-account-agentcity-provisioner",
+      "enabled": true,
+      "serviceAccountClientId": "agentcity-provisioner",
+      "realmRoles": [],
+      "clientRoles": { "realm-management": ["manage-users"] }
+    }
+  ],
+  "clientScopeMappings": {
+    "realm-management": [{ "client": "agentcity-provisioner", "roles": ["manage-users"] }]
+  },
   "identityProviders": [
     {
       "alias": "agency-sso",

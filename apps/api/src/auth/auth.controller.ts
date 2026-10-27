@@ -47,6 +47,8 @@ const LoginStartBody = z.object({
   purpose: z.enum(['login', 'step-up']),
   stepUpReason: z.enum(['credential', 'billing', 'permission']).optional(),
   idpHint: z.literal('agency-sso').optional(),
+  /** X01: pre-fills the sign-in page with this address (Keycloak `login_hint`); it proves nothing about the person. */
+  loginHint: z.string().trim().max(320).pipe(z.email()).optional(),
 });
 
 const badRequest = (error: string) => new HttpException({ error }, HttpStatus.BAD_REQUEST);
@@ -123,6 +125,7 @@ export class AuthController {
         codeVerifier,
         stepUp: input.purpose === 'step-up',
         idpHint: input.idpHint,
+        loginHint: input.loginHint,
       });
     } catch (err) {
       this.log.error(`Identity provider unavailable (${errorName(err)})`);
