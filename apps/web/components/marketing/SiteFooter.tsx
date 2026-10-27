@@ -2,38 +2,25 @@ import { CtaLink, Mark } from './Primitives';
 
 export function SiteFooter({ contactEmail }: { contactEmail?: string }) {
   return (
-    <footer className="mk-footer on-dark">
+    <footer className="mk-footer">
       <div className="mk-container">
         <section className="mk-contact" id="contact" aria-labelledby="contact-title">
-          <p className="mk-label">
-            <span className="mk-label-index">08</span>Contact
-          </p>
-          <h2 id="contact-title" className="mk-h2">
-            Rather talk <em>to a person first?</em>
+          <h2 id="contact-title" className="mk-contact-title">
+            Questions first?
           </h2>
-          <div className="mk-contact-copy">
+          <p className="mk-body">
             {contactEmail ? (
-              <p className="mk-lead">
-                Write to us at{' '}
-                <a className="mk-contact-email" href={`mailto:${contactEmail}`}>
-                  {contactEmail}
-                </a>
-                , or request a demo and mention what you&rsquo;d like to talk about.
-              </p>
+              <>
+                Write to <a href={`mailto:${contactEmail}`}>{contactEmail}</a>, or request a demo and tell us what
+                you&rsquo;d like to know.
+              </>
             ) : (
-              <p className="mk-lead">
-                Request a demo and tell us a little about your business. Every request reaches our team.
-              </p>
+              <>Request a demo and tell us what you&rsquo;d like to know. Every request reaches our team.</>
             )}
-            <div className="mk-contact-actions">
-              <CtaLink href="#get-demo" testId="footer-cta-demo">
-                Get My Free Demo Office
-              </CtaLink>
-              <CtaLink href="/city" variant="ghost">
-                Explore AgentCity
-              </CtaLink>
-            </div>
-          </div>
+          </p>
+          <CtaLink href="#get-demo" variant="secondary" size="sm" testId="footer-cta-demo">
+            Get My Free Demo Office
+          </CtaLink>
         </section>
         <div className="mk-footer-base">
           <a className="mk-wordmark" href="/" aria-label="AgentCity home">
@@ -49,11 +36,11 @@ export function SiteFooter({ contactEmail }: { contactEmail?: string }) {
                 <a href="/signin">Sign in</a>
               </li>
               <li>
-                <a href="/status">Platform status</a>
+                <a href="/status">Status</a>
               </li>
             </ul>
           </nav>
-          <p className="mk-footer-small">Activity in the public city is simulated. Agent names are AI personas.</p>
+          <p className="mk-footer-note">Public city activity is simulated. Agent names are AI personas.</p>
         </div>
       </div>
     </footer>

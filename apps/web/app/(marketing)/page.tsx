@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
-import { Buildings } from '../../components/marketing/Buildings';
-import { CityLevels } from '../../components/marketing/CityLevels';
-import { Capabilities } from '../../components/marketing/Capabilities';
+import { Audience } from '../../components/marketing/Audience';
 import { Faq } from '../../components/marketing/Faq';
 import { GetDemo } from '../../components/marketing/GetDemo';
 import { Hero } from '../../components/marketing/Hero';
-import { Industries } from '../../components/marketing/Industries';
+import { HowItWorks } from '../../components/marketing/HowItWorks';
+import { Product } from '../../components/marketing/Product';
 import { Security } from '../../components/marketing/Security';
 import { SiteFooter } from '../../components/marketing/SiteFooter';
 
@@ -13,7 +12,7 @@ import { SiteFooter } from '../../components/marketing/SiteFooter';
 
 const TITLE = 'AgentCity: Your Business. Your AI Team. Your City.';
 const DESCRIPTION =
-  'Give your business an office in a living 3D city, staffed by AI agents for follow-up, social content, scheduling and reporting. Get a free demo office with sample data.';
+  'An office in a living 3D city, staffed by AI agents for follow-up, content, scheduling and reporting. Get a free demo office with sample data.';
 
 // Not launched yet: the landing page may be indexed only when the deployment opts in.
 const allowIndex = process.env.NEXT_PUBLIC_ALLOW_INDEX === 'true';
@@ -30,7 +29,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: '/',
     locale: 'en_US',
-    images: [{ url: '/og-agentcity.png', width: 1200, height: 630, alt: 'The AgentCity skyline at golden hour' }],
+    images: [{ url: '/og-agentcity.png', width: 1200, height: 630, alt: 'The AgentCity 3D city at golden hour' }],
   },
   twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION, images: ['/og-agentcity.png'] },
 };
@@ -48,10 +47,9 @@ export default function LandingPage() {
     <>
       <main id="main" className="mk-main" tabIndex={-1}>
         <Hero />
-        <CityLevels />
-        <Buildings />
-        <Capabilities />
-        <Industries />
+        <HowItWorks />
+        <Product />
+        <Audience />
         <Security />
         <GetDemo ttlDays={ttlDays} />
         <Faq ttlDays={ttlDays} />
