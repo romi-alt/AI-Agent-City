@@ -1,0 +1,4 @@
+body { margin: 0; display: flex; gap: 16px; padding: 16px; background: #1e1f22; color: #eee; font-family: system-ui, sans-serif; }
+#city { max-width: calc(100vw - 320px); height: auto; border-radius: 8px; cursor: pointer; }
+#panel { width: 260px; }
+#panel ul { padding-left: 18px; line-height: 1.6; }
