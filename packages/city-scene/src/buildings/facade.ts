@@ -161,7 +161,7 @@ export function createFacadeMaterial(shared: SharedUniforms, rim?: RimUniforms):
           if (vFac.w > 0.5) {
             float n = a1noise(vWorldA1.xz * 1.3 + seed);
             float edge = 1.0 - a1box(fract(vWorldA1.xz * 0.5), vec2(0.03), vec2(0.97), vec2(0.02));
-            o.albedo = mix(vec3(0.055, 0.055, 0.052), vec3(0.1, 0.095, 0.09), n) * (1.0 - edge * 0.2) * wetK;
+            o.albedo = mix(vec3(0.24, 0.235, 0.225), vec3(0.32, 0.31, 0.295), n) * (1.0 - edge * 0.2) * wetK;
             o.rough = mix(0.92, 0.3, uWet);
             o.metal = 0.0;
             o.emissive = vec3(0.0);
@@ -175,7 +175,7 @@ export function createFacadeMaterial(shared: SharedUniforms, rim?: RimUniforms):
           float detail = 1.0 - smoothstep(0.16, 0.42, max(dd.x, dd.y));
           float r1 = a1hash13(vec3(bay, floorIdx, seed));
           float r2 = a1hash13(vec3(bay * 1.7 + 3.1, floorIdx * 0.7 + 1.3, seed + 5.0));
-          float grime = 0.9 + 0.1 * a1noise(vec2(vFac.x * 2.5 + seed, vFac.y * 0.25));
+          float grime = 0.96 + 0.04 * a1noise(vec2(vFac.x * 2.5 + seed, vFac.y * 0.25));
           vec3 wall = vWall * grime;
           float wallRough = 0.82;
           float wallMetal = 0.0;
@@ -208,9 +208,9 @@ export function createFacadeMaterial(shared: SharedUniforms, rim?: RimUniforms):
             bp.x += mod(row, 2.0) * 0.5;
             float mortar = 1.0 - a1box(fract(bp), vec2(0.04, 0.08), vec2(0.96, 0.92), bpw * 0.8);
             float brickDetail = 1.0 - smoothstep(0.2, 0.5, max(bpw.x, bpw.y));
-            wall *= (0.9 + 0.2 * a1hash12(floor(bp) + seed)) * mix(1.0, 0.8, mortar * brickDetail);
+            wall *= (0.9 + 0.2 * a1hash12(floor(bp) + seed)) * mix(1.0, 1.25, mortar * brickDetail);
             float trim = a1box(vec2(fx, fy), vec2(0.23, 0.15), vec2(0.77, 0.23), aa) + a1box(vec2(fx, fy), vec2(0.25, 0.8), vec2(0.75, 0.87), aa);
-            wall = mix(wall, vec3(0.62, 0.58, 0.5), clamp(trim, 0.0, 1.0) * detail);
+            wall = mix(wall, vec3(0.78, 0.74, 0.66), clamp(trim, 0.0, 1.0) * detail);
             cov = 0.3;
           } else if (style < 3.5) {
             win = a1box(vec2(fx, fy), vec2(-1.0, 0.34), vec2(2.0, 0.88), aa);
@@ -239,12 +239,15 @@ export function createFacadeMaterial(shared: SharedUniforms, rim?: RimUniforms):
           win = mix(cov, win, detail);
 
           // Glass: tinted reflective panes, some with blinds drawn; offices lit at night.
-          float blind = step(0.74, r2) * (1.0 - store) * step(1.0 - (0.25 + 0.45 * r1), wy) * detail;
-          vec3 glassCol = (vGlass * 1.3 + vec3(0.12, 0.14, 0.16)) * (0.8 + 0.4 * r1);
-          vec3 albedo = mix(glassCol, vec3(0.3, 0.27, 0.22), blind);
-          float rough = mix(0.03 + 0.07 * r2, 0.85, blind);
-          float metal = mix(0.9, 0.0, blind);
-          float lit = mix(step(r1, litRatio), litRatio, 1.0 - detail);
+          // Reflective low-e glass: a bright tinted mirror of the sky, nearly uniform pane to pane.
+          float blind = step(0.9, r2) * (1.0 - store) * step(1.0 - (0.2 + 0.3 * r1), wy) * detail;
+          vec3 glassCol = mix(vGlass, vec3(0.7, 0.76, 0.8), 0.3) * (0.94 + 0.12 * r1);
+          vec3 albedo = mix(glassCol, vec3(0.42, 0.44, 0.47), blind);
+          float rough = mix(0.035 + 0.05 * r2, 0.8, blind);
+          float metal = mix(0.93, 0.0, blind);
+          // Fewer offices burn late into the night than at dusk.
+          float litK = litRatio * mix(1.0, 0.7, smoothstep(0.6, 1.0, uNight));
+          float lit = mix(step(r1, litK), litK, 1.0 - detail);
           lit = max(lit, store);
           // Office light: mostly warm, some neutral, a few cool fluorescent; dimmer and brighter rooms.
           vec3 warm = r2 < 0.55 ? vec3(1.0, 0.64, 0.34) : r2 < 0.85 ? vec3(1.0, 0.82, 0.6) : vec3(0.78, 0.86, 1.0);
@@ -274,6 +277,11 @@ export function createFacadeMaterial(shared: SharedUniforms, rim?: RimUniforms):
         diffuseColor.rgb = a1.albedo;`,
       )
       .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = a1.rough;')
+      // Glass gets a stronger sky reflection; masonry less sky fill, so the sun models the forms.
+      .replace(
+        '#include <lights_fragment_maps>',
+        '#include <lights_fragment_maps>\nradiance *= 1.0 + 0.6 * a1.metal;\niblIrradiance *= 0.75;',
+      )
       .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = a1.metal;')
       .replace(
         '#include <emissivemap_fragment>',
@@ -287,7 +295,7 @@ export function createFacadeMaterial(shared: SharedUniforms, rim?: RimUniforms):
         }`,
       );
   };
-  m.customProgramCacheKey = () => 'a1-facade-v2';
+  m.customProgramCacheKey = () => 'a1-facade-v3';
   return m;
 }
 

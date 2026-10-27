@@ -47,28 +47,33 @@ export function createSkyMaterial(uniforms: SkyUniforms, reflection = false) {
         vec3 d = normalize(vDir);
         float h = d.y;
         float up = clamp(h, 0.0, 1.0);
-        vec3 col = mix(uHorizon, uZenith, pow(up, 0.55));
+        ${reflection ? '// Glass mirrors the sky downward too (softened), so curtain walls read as sky, not as street.\n        up = max(up, 0.22 + abs(h) * 0.6);' : ''}
+        // Three stops (horizon, pale sky blue, zenith) so warm horizons never mix into grey-lavender.
+        float zl = dot(uZenith, vec3(0.2126, 0.7152, 0.0722));
+        vec3 mid = mix(uZenith, vec3(1.0), 0.45 * smoothstep(0.02, 0.15, zl));
+        vec3 col = mix(uHorizon, mid, smoothstep(0.0, 0.14, up));
+        col = mix(col, uZenith, pow(smoothstep(0.06, 0.8, up), 0.8));
         col = mix(col, uHorizon * 1.04, exp(-up * 22.0) * 0.6);
         float mu = max(dot(d, uSunDir), 0.0);
         vec3 sunFlat = normalize(vec3(uSunDir.x, 0.0, uSunDir.z) + 1e-5);
         float muFlat = max(dot(normalize(vec3(d.x, 0.0, d.z) + 1e-5), sunFlat), 0.0);
         float clearSky = 1.0 - 0.65 * uCover;
         col += uSunGlow * (pow(mu, 6.0) * 0.3 + pow(mu, 60.0) * 0.55) * clearSky;
-        col += uSunGlow * pow(muFlat, 4.0) * exp(-up * 7.0) * 0.4 * clearSky;
+        col += uSunGlow * pow(muFlat, 3.0) * exp(-up * 6.0) * 0.75 * clearSky;
         col += uSunColor * smoothstep(0.99955, 0.99985, mu) * uSunDisk * 14.0;
         float mm = dot(d, uMoonDir);
         col += vec3(0.82, 0.86, 0.95) * smoothstep(0.99935, 0.99965, mm) * uMoon * 2.2;
         col += vec3(0.16, 0.2, 0.32) * pow(max(mm, 0.0), 120.0) * uMoon * 0.5;
         if (${reflection ? 'false' : 'uStars > 0.001'}) {
-          vec2 g = vec2(atan(d.z, d.x), asin(clamp(d.y, -1.0, 1.0))) * 160.0;
+          vec2 g = vec2(atan(d.z, d.x), asin(clamp(d.y, -1.0, 1.0))) * 300.0;
           vec2 cell = floor(g);
           float r = a1hash12(cell);
-          float star = step(0.9965, r) * smoothstep(0.5, 0.05, length(fract(g) - 0.5));
+          float star = step(0.993, r) * smoothstep(0.32, 0.0, length(fract(g) - 0.5));
           star *= 0.55 + 0.45 * sin(uTime * (1.0 + r * 3.0) + r * 40.0);
           col += vec3(0.9, 0.92, 1.0) * star * uStars * smoothstep(0.08, 0.35, h) * (1.0 - uCover);
         }
         float below = smoothstep(0.0, ${reflection ? '-0.04' : '-0.1'}, h);
-        col = mix(col, uGround, below);
+        col = mix(col, uGround, below * ${reflection ? '0.35' : '1.0'});
         gl_FragColor = vec4(col, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>

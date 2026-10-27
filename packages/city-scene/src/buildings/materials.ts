@@ -10,14 +10,14 @@ export function usePartMaterials(): Record<string, Material> {
   const table = useMemo(() => {
     const std = (p: ConstructorParameters<typeof MeshStandardMaterial>[0]) => new MeshStandardMaterial(p);
     return {
-      stone: std({ color: '#d6cdbb', roughness: 0.85 }),
+      stone: std({ color: '#ece4d4', roughness: 0.8 }),
       steel: std({ color: '#5a6066', roughness: 0.55, metalness: 0.6 }),
       darkMetal: std({ color: '#25292e', roughness: 0.45, metalness: 0.6 }),
       gold: std({ color: '#d9a531', roughness: 0.3, metalness: 1 }),
       copper: std({ color: '#5f8f7e', roughness: 0.6, metalness: 0.4 }),
       tank: std({ color: '#7a5a3e', roughness: 0.9 }),
       tankRoof: std({ color: '#3f3a36', roughness: 0.8 }),
-      garden: std({ color: '#4f7f45', roughness: 0.95 }),
+      garden: std({ color: '#5f9a4c', roughness: 0.95 }),
       hvac: std({ color: '#b9bec2', roughness: 0.7, metalness: 0.2 }),
       awning: std({ color: '#ffffff', roughness: 0.8 }),
       accent: std({ color: '#ffffff', roughness: 0.4, metalness: 0.3 }),

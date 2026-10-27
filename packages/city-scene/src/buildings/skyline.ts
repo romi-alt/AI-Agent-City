@@ -20,10 +20,10 @@ export interface SkylinePlan {
 /** Inset of buildings from the curb: keeps lamps, trees and the walking line (2.7 from the road) clear. */
 export const BLOCK_INSET = 2.6;
 
-const BRICKS = ['#8e4b3a', '#9a5a43', '#7d4636', '#a8705a', '#6f3f33', '#b07f62'];
-const STONES = ['#d8cfbf', '#cdbfa6', '#e2dccf', '#bfb6a6', '#c9b79a', '#a9a59c'];
-const GLASS_FRAMES = ['#2f3a45', '#5d6a75', '#8c96a0', '#3c4650', '#b8bec4', '#4a4f55'];
-const GLASS_TINTS = ['#1d3447', '#28465a', '#3a5263', '#24343f', '#40566a', '#2f4b52', '#4a5560'];
+const BRICKS = ['#b4583d', '#a64f36', '#c06a4c', '#9c4a34', '#b86b4f', '#a85d45'];
+const STONES = ['#efe7d8', '#e6dcc8', '#f3efe6', '#ddd3c1', '#e9dfcb', '#d8d2c6'];
+const GLASS_FRAMES = ['#b9c1c8', '#8b98a3', '#d5d9dc', '#6f7c87', '#a6b0b8', '#55616b'];
+const GLASS_TINTS = ['#3f6d93', '#4a7f99', '#3a6382', '#5683a5', '#3f7a82', '#46708f', '#5f8098'];
 const AWNINGS = ['#0f1b2d', '#1f8a8a', '#7a2e2e', '#2f5d3a', '#3b3f45', '#b5462f', '#5b4a3a'];
 
 const pick = <T>(r: () => number, xs: readonly T[]): T => xs[Math.floor(r() * xs.length)]!;
@@ -94,10 +94,10 @@ function floorsAt(r: () => number, x: number, z: number): number {
   let [lo, hi] = [3, 7];
   if (ring > 20) [lo, hi] = [5, 12];
   if (ring > 40) [lo, hi] = [8, 20];
-  if (ring > 70) [lo, hi] = [10, 30];
+  if (ring > 70) [lo, hi] = [10, 24];
   let f = lo + Math.floor(r() * (hi - lo + 1));
-  f = Math.round(f * (1 + back * (ring > 20 ? 0.9 : 0.3)) * (z > 30 && ring < 60 ? 0.85 : 1));
-  if (ring > 50 && r() < 0.08) f = 36 + Math.floor(r() * 24);
+  f = Math.round(f * (1 + back * (ring > 20 ? 0.6 : 0.25)) * (z > 30 && ring < 60 ? 0.85 : 1));
+  if (ring > 50 && r() < 0.06) f = 36 + Math.floor(r() * 20);
   return Math.max(3, f);
 }
 
@@ -123,7 +123,7 @@ function addBuilding(out: Tagged, r: () => number, lot: Lot, floors: number, far
   const style = styleFor(r, floors);
   const { wall, glass } = colours(r, style);
   const seed = Math.floor(r() * 997);
-  const lit = 0.15 + r() * 0.3;
+  const lit = 0.1 + r() * 0.22;
   const base: Omit<Mass, 'x' | 'z' | 'w' | 'd' | 'y0' | 'y1'> = {
     style,
     wall,

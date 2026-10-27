@@ -85,7 +85,7 @@ export function createRoadMaterial(shared: SharedUniforms, grid: ExtendedGrid, l
     float aa = max(fw.x, fw.y);
     float grain = a1noise(w * 7.0) * 0.5 + a1noise(w * 23.0) * 0.5;
     float patchN = a1fbm(w * 0.08);
-    vec3 asphalt = mix(vec3(0.034, 0.035, 0.037), vec3(0.06, 0.06, 0.062), grain * 0.7 + patchN * 0.4);
+    vec3 asphalt = mix(vec3(0.048, 0.049, 0.052), vec3(0.062, 0.063, 0.066), grain * 0.6 + patchN * 0.25);
     // Tyre wear: lighter polish along the middle of each lane.
     float onX = 1.0 - smoothstep(${ROAD_HALF.toFixed(1)} - aa, ${ROAD_HALF.toFixed(1)} + aa, abs(ax));
     float onZ = 1.0 - smoothstep(${ROAD_HALF.toFixed(1)} - aa, ${ROAD_HALF.toFixed(1)} + aa, abs(az));
@@ -94,8 +94,8 @@ export function createRoadMaterial(shared: SharedUniforms, grid: ExtendedGrid, l
     float laneZ = abs(abs(az) - 1.0);
     asphalt *= 1.0 - 0.12 * (onX * (1.0 - onZ) * smoothstep(0.45, 0.15, laneX) + onZ * (1.0 - onX) * smoothstep(0.45, 0.15, laneZ));
     vec3 col = asphalt;
-    vec3 white = vec3(0.72, 0.72, 0.7);
-    vec3 yellow = vec3(0.78, 0.52, 0.09);
+    vec3 white = vec3(0.86, 0.86, 0.84);
+    vec3 yellow = vec3(0.9, 0.6, 0.1);
     float paint = 0.0;
     vec3 paintCol = white;
     // Road along z (at x = road): a = ax, distance to the junction along it = az.
@@ -116,7 +116,7 @@ export function createRoadMaterial(shared: SharedUniforms, grid: ExtendedGrid, l
       paintCol = yl > 0.5 ? yellow : white;
     }
     // Worn paint.
-    paint *= 0.75 + 0.25 * a1noise(w * 3.0);
+    paint *= 0.92 + 0.08 * a1noise(w * 3.0);
     col = mix(col, paintCol, paint * inside);
     // Manhole covers in some lanes.
     vec2 cell = floor(w / 10.0);
@@ -124,7 +124,7 @@ export function createRoadMaterial(shared: SharedUniforms, grid: ExtendedGrid, l
     float mhd = length(w - mh);
     col = mix(col, vec3(0.03, 0.028, 0.026), (1.0 - smoothstep(0.32, 0.36, mhd)) * step(0.6, a1hash12(cell + 3.0)) * max(onX, onZ));
     // Outside the grid: pale paving that dissolves into the haze.
-    vec3 paving = mix(vec3(0.13, 0.125, 0.115), vec3(0.16, 0.155, 0.145), grain);
+    vec3 paving = mix(vec3(0.3, 0.29, 0.27), vec3(0.34, 0.33, 0.31), grain);
     col = mix(paving, col, inside);
     float wet = uWet * mix(0.55, 1.0, puddles(w));
     vec3 gAlbedo = col * mix(1.0, 0.45, wet);
@@ -153,13 +153,13 @@ export function createSidewalkMaterial(shared: SharedUniforms, grid: ExtendedGri
     vec2 tile = w / 1.25;
     vec2 tf = abs(fract(tile) - 0.5);
     float joint = smoothstep(0.47 - aa, 0.5, max(tf.x, tf.y)) * (1.0 - smoothstep(0.08, 0.3, aa));
-    vec3 conc = mix(vec3(0.21, 0.2, 0.185), vec3(0.26, 0.25, 0.235), grain) * (0.94 + 0.06 * a1hash12(floor(tile)));
-    conc *= 1.0 - 0.25 * joint;
+    vec3 conc = mix(vec3(0.4, 0.38, 0.35), vec3(0.45, 0.43, 0.4), grain) * (0.94 + 0.06 * a1hash12(floor(tile)));
+    conc *= 1.0 - 0.18 * joint;
     float curb = 1.0 - smoothstep(${(ROAD_HALF + 0.28).toFixed(2)} - aa, ${(ROAD_HALF + 0.28).toFixed(2)} + aa, edge);
-    vec3 col = mix(conc, vec3(0.16, 0.16, 0.165) * (0.9 + 0.2 * grain), curb);
+    vec3 col = mix(conc, vec3(0.3, 0.3, 0.3) * (0.92 + 0.16 * grain), curb);
     // Side faces of the slab (the curb face) are granite.
     float side = step(vUpA1, 0.5);
-    col = mix(col, vec3(0.14, 0.14, 0.145), side);
+    col = mix(col, vec3(0.26, 0.26, 0.26), side);
     float walk = 1.0 - smoothstep(0.0, 0.6, abs(edge - ${SIDEWALK.toFixed(2)}));
     col *= 1.0 - 0.05 * walk;
     float wet = uWet * mix(0.6, 1.0, puddles(w + 13.0));

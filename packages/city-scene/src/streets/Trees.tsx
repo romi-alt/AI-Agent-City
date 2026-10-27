@@ -16,7 +16,7 @@ import type { SharedUniforms } from '../environment/palette.ts';
 import { hex } from '../environment/presets.ts';
 import { rng } from './grid.ts';
 
-const GREENS = ['#4f7f45', '#5b9a5b', '#3f6d3c', '#6a9a4f', '#557a3a', '#47704a'];
+const GREENS = ['#5fa04e', '#6cae55', '#4f8f44', '#78b35c', '#5a9a4a', '#64a852'];
 
 /** A lumpy crown of three blobs, so a tree reads as foliage rather than a ball. */
 function crownGeometry(): BufferGeometry {

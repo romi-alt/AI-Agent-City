@@ -155,7 +155,12 @@ export function Environment() {
     skyUniforms.uStars.value = s.stars;
     skyUniforms.uCover.value = s.cloudCover;
     skyUniforms.uTime.value = u.uTime.value;
-    envSkyGround.setRGB(...s.hemiGround).multiplyScalar(0.35 + 0.2 * s.hemiIntensity);
+    // What glass sees below the horizon: the sunlit city and street, not a black void.
+    envSkyGround
+      .setRGB(...s.hemiGround)
+      .lerp(fog.color, 0.5)
+      .multiplyScalar(0.75 * (1 - 0.5 * s.nightFactor));
+    gl.toneMappingExposure = s.exposure;
     scene.environmentIntensity = s.envIntensity;
 
     // The sky dome travels with the camera so it is never clipped.

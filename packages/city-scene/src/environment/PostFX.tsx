@@ -16,7 +16,7 @@ export function PostFX({ rt }: { rt: EnvRuntime }) {
   });
   return (
     <EffectComposer multisampling={0}>
-      <Bloom ref={bloom} mipmapBlur luminanceThreshold={0.95} luminanceSmoothing={0.2} intensity={0.3} radius={0.6} />
+      <Bloom ref={bloom} mipmapBlur luminanceThreshold={1.6} luminanceSmoothing={0.15} intensity={0.3} radius={0.6} />
       <SMAA />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
     </EffectComposer>

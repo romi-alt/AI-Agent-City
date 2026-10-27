@@ -81,8 +81,8 @@ export function Clouds({ layers, rt }: { layers: number; rt: EnvRuntime }) {
           float n = a1fbm(vUv * vec2(4.0, 2.2) + vSeed.x + vec2(uTime * 0.004, 0.0));
           float shape = 1.0 - length(p * vec2(1.0, 1.15 - 0.3 * vUv.y));
           float cover = clamp(uCover, 0.0, 1.0);
-          float dens = smoothstep(0.0, 0.55, shape + (n - 0.55) * 1.4 + cover * 0.45 - 0.1);
-          float keep = step(vSeed.z, 0.25 + cover * 0.95);
+          float dens = smoothstep(0.22, 0.62, shape + (n - 0.5) * 1.6 + cover * 0.32 - 0.12);
+          float keep = step(vSeed.z, 0.12 + cover * 0.9);
           float a = dens * keep * vFade * mix(0.7, 0.95, cover);
           if (a < 0.01) discard;
           float lit = clamp(vUv.y * 0.8 + n * 0.5 - 0.15, 0.0, 1.0);
