@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "node --env-file-if-exists=../../infra/local-dev.env dist/main.js",
     "dev": "pnpm run build && pnpm run start",
+    "demo:expire": "node --env-file-if-exists=../../infra/local-dev.env --import tsx src/demo-expire.ts",
     "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {

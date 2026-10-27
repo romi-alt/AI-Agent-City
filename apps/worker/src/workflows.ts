@@ -19,3 +19,5 @@ export async function heartbeat(input: HeartbeatInput): Promise<HeartbeatResult>
   await recordStep(input.runId, 'finished');
   return readRun(input.runId);
 }
+
+export * from './demo-workflow.js';

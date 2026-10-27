@@ -4,6 +4,7 @@ import { PLATFORM_TASK_QUEUE } from '@agentcity/contracts';
 import { createPool } from '@agentcity/db';
 import { NativeConnection, Worker } from '@temporalio/worker';
 import { createActivities } from './activities.js';
+import { createDemoActivities } from './demo-expire.js';
 import { loadEnv } from './env.js';
 
 const env = loadEnv();
@@ -16,7 +17,7 @@ const worker = await Worker.create({
   namespace: env.TEMPORAL_NAMESPACE,
   taskQueue: PLATFORM_TASK_QUEUE,
   workflowsPath: fileURLToPath(new URL('./workflows.js', import.meta.url)),
-  activities: createActivities(pool, workerId),
+  activities: { ...createActivities(pool, workerId), ...createDemoActivities(pool) },
 });
 
 console.log(

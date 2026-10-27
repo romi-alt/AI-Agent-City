@@ -18,6 +18,8 @@ export const API_ERRORS = {
   rateLimited: 'rate_limited', // 429: details.retryAfterSeconds, plus Retry-After header
   outboundDisabled: 'outbound_disabled', // 409: kill switch or demo mode; nothing was sent
   policyBlocked: 'policy_blocked', // 409: suppression, consent, quiet hours or a cap refused the send
+  demoUnavailable: 'demo_unavailable', // 503: demo provisioning is not configured here
+  emailNotVerified: 'email_not_verified', // 403: the signed-in address has not been verified yet
   internal: 'internal_error', // 500: our fault; quote the request id
   unavailable: 'service_unavailable', // 503: a dependency is down or timed out; safe to retry later
 } as const;
@@ -46,6 +48,8 @@ export const ERROR_STATUS: Record<ApiErrorCode, number> = {
   rate_limited: 429,
   outbound_disabled: 409,
   policy_blocked: 409,
+  demo_unavailable: 503,
+  email_not_verified: 403,
   internal_error: 500,
   service_unavailable: 503,
 };
