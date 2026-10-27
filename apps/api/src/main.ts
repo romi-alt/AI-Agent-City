@@ -2,13 +2,20 @@ import 'reflect-metadata';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule, GENERATED_DIR } from './app.module.js';
 import { loadEnv } from './env.js';
 
 const env = loadEnv();
-const app = await NestFactory.create(AppModule.forEnv(env), { logger: ['error', 'warn', 'log'] });
+const app = await NestFactory.create<NestExpressApplication>(AppModule.forEnv(env), {
+  logger: ['error', 'warn', 'log'],
+});
 app.enableShutdownHooks();
+app.use(cookieParser());
+// Behind the web app's /api proxy in development; set per deployment in production.
+app.set('trust proxy', 'loopback');
 
 const openapi = SwaggerModule.createDocument(
   app,

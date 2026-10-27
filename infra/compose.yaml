@@ -64,8 +64,22 @@ services:
       timeout: 5s
       retries: 40
 
+  mail:
+    # Local mail sink (M03): Keycloak's email sign-in codes land here and never leave the machine.
+    # Its web UI/API is for tests and developers: http://127.0.0.1:${MAIL_UI_PORT}
+    image: mirror.gcr.io/axllent/mailpit:v1.27@sha256:e22dce5b36f93c77082e204a3942fb6b283b7896e057458400a4c88344c3df68
+    ports: ['127.0.0.1:${MAIL_UI_PORT}:8025']
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 'true'
+      MP_SMTP_AUTH_ALLOW_INSECURE: 'true'
+    healthcheck:
+      test: ['CMD', '/mailpit', 'readyz']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
   keycloak:
-    # OIDC provider. M01 only proves the realm is served; sign-in flows are M03.
+    # OIDC provider (M03 sign-in flows; realm in ./keycloak, first-party providers built into ./keycloak/providers).
     image: quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b
     command: ['start-dev', '--import-realm', '--health-enabled=true']
     environment:
@@ -74,6 +88,10 @@ services:
     ports: ['127.0.0.1:${KEYCLOAK_PORT}:8080', '127.0.0.1:${KEYCLOAK_MGMT_PORT}:9000']
     volumes:
       - ./keycloak/agentcity-realm.json:/opt/keycloak/data/import/agentcity-realm.json:ro
+      - ./keycloak/providers:/opt/keycloak/providers:ro
+    depends_on:
+      mail:
+        condition: service_healthy
     healthcheck:
       test:
         - CMD-SHELL

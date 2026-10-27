@@ -474,7 +474,7 @@ describe('tenant isolation (row-level security, app role)', () => {
   it('classifies every table, and protects every tenant table with forced RLS', async () => {
     const unclassified = await admin.query(`
       SELECT n.nspname || '.' || c.relname AS t FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-      WHERE c.relkind IN ('r', 'p') AND n.nspname IN ('platform', 'catalog', 'app', 'app_private', 'migration')
+      WHERE c.relkind IN ('r', 'p') AND n.nspname IN ('platform', 'catalog', 'app', 'app_private', 'migration', 'identity')
         AND NOT EXISTS (SELECT 1 FROM platform.table_classification k WHERE k.table_schema = n.nspname AND k.table_name = c.relname)`);
     assert.deepEqual(unclassified.rows, []);
     const weak = await admin.query(`

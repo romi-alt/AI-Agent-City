@@ -20,6 +20,42 @@ const Env = z.object({
     .transform(v => v === 'true'),
   /** Per-dependency time limit for readiness checks. */
   READINESS_TIMEOUT_MS: z.coerce.number().int().min(100).max(10_000).default(2000),
+
+  // Identity (M03). The API is the OIDC client (backend for frontend): tokens never reach the browser.
+  /** The browser-facing origin (the web app, which proxies /api/* here). Also the only accepted Origin for writes. */
+  PUBLIC_ORIGIN: z.string().url(),
+  OIDC_ISSUER: z.string().url(),
+  OIDC_CLIENT_ID: z.string().min(1),
+  OIDC_CLIENT_SECRET: z.string().min(16),
+  OIDC_REDIRECT_URI: z.string().url(),
+  OIDC_POST_LOGOUT_REDIRECT_URI: z.string().url(),
+  /** Encrypts refresh tokens at rest in identity.session. Production: 32+ random bytes from the secret store. */
+  SESSION_ENCRYPTION_KEY: z.string().min(32),
+  SESSION_IDLE_MINUTES: z.coerce
+    .number()
+    .int()
+    .min(5)
+    .max(24 * 60)
+    .default(12 * 60),
+  SESSION_ABSOLUTE_HOURS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(30 * 24)
+    .default(7 * 24),
+  /** How recent a strong sign-in must be for credential, billing and permission changes. */
+  STEP_UP_MAX_AGE_SECONDS: z.coerce.number().int().min(30).max(3600).default(300),
+  DEVICE_PROOF_MAX_SKEW_SECONDS: z.coerce.number().int().min(5).max(300).default(60),
+  INVITATION_TTL_HOURS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(14 * 24)
+    .default(48),
+  COOKIE_SECURE: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform(v => v === 'true'),
 });
 export type ApiEnv = z.infer<typeof Env>;
 
@@ -38,6 +74,10 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): ApiEnv {
       );
     }
     if (env.ENABLE_DEV_ROUTES) throw new Error('ENABLE_DEV_ROUTES must not be true in production.');
+    if (!env.COOKIE_SECURE) throw new Error('COOKIE_SECURE must be true in production.');
+    for (const k of ['PUBLIC_ORIGIN', 'OIDC_ISSUER', 'OIDC_REDIRECT_URI'] as const) {
+      if (!env[k].startsWith('https://')) throw new Error(`${k} must use https in production.`);
+    }
   }
   return env;
 }
