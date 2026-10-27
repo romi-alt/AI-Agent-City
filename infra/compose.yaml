@@ -86,9 +86,16 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     ports: ['127.0.0.1:${KEYCLOAK_PORT}:8080', '127.0.0.1:${KEYCLOAK_MGMT_PORT}:9000']
+    # Two realms: `agentcity` (the product) and `agency-idp` (a stand-in for an agency's corporate IdP, brokered
+    # as `agency-sso`). The broker reaches agency-idp's back-channel at localhost:8080 inside this container, while
+    # browsers use localhost:${KEYCLOAK_PORT}; both realms pin frontendUrl so issuers match (m03/IDP.md). Realms
+    # are imported only when missing; data is not persisted, so recreating the container re-imports them.
     volumes:
       - ./keycloak/agentcity-realm.json:/opt/keycloak/data/import/agentcity-realm.json:ro
+      - ./keycloak/agency-idp-realm.json:/opt/keycloak/data/import/agency-idp-realm.json:ro
       - ./keycloak/providers:/opt/keycloak/providers:ro
+    # Back-channel logout to the API on the host (agentcity-bff's backchannel.logout.url).
+    extra_hosts: ['host.docker.internal:host-gateway']
     depends_on:
       mail:
         condition: service_healthy

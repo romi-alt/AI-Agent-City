@@ -1,0 +1,601 @@
+{
+  "generatedAt": "2026-10-27T19:19:29.749Z",
+  "keycloak": "http://localhost:58080",
+  "command": "node --env-file=infra/local-dev.env infra/keycloak/verify/verify-idp.mjs",
+  "summary": {
+    "total": 34,
+    "passed": 32,
+    "failed": [
+      "email-code-provider",
+      "email-code-sign-in"
+    ]
+  },
+  "checks": [
+    {
+      "id": "seed-present",
+      "title": "Seeded development users exist (pnpm keycloak:seed)",
+      "passed": true,
+      "details": {
+        "users": [
+          "owner@agentcity.test",
+          "staff@agentcity.test",
+          "sso.user@agency.example"
+        ]
+      },
+      "ms": 7
+    },
+    {
+      "id": "seed-guards",
+      "title": "Seed script refuses NODE_ENV=production and non-local Keycloak hosts",
+      "passed": true,
+      "details": {
+        "production": "Refusing to run: NODE_ENV=production. Development users and realm tweaks are never applied to production.",
+        "remoteHost": "Refusing to run: Keycloak host must be localhost or 127.0.0.1, got \"keycloak.example.com\"."
+      },
+      "ms": 54
+    },
+    {
+      "id": "discovery",
+      "title": "Discovery document: issuer, PKCE S256, endpoints",
+      "passed": true,
+      "details": {
+        "issuer": "http://localhost:58080/realms/agentcity",
+        "authorization_endpoint": "http://localhost:58080/realms/agentcity/protocol/openid-connect/auth",
+        "token_endpoint": "http://localhost:58080/realms/agentcity/protocol/openid-connect/token",
+        "end_session_endpoint": "http://localhost:58080/realms/agentcity/protocol/openid-connect/logout",
+        "jwks_uri": "http://localhost:58080/realms/agentcity/protocol/openid-connect/certs",
+        "backchannel_logout_supported": true,
+        "acr_values_supported": [
+          "1",
+          "2",
+          "0",
+          "1",
+          "2"
+        ],
+        "claims_supported_includes_amr": false,
+        "keycloakVersion": "26.8.1"
+      },
+      "ms": 5
+    },
+    {
+      "id": "client-config",
+      "title": "agentcity-bff is confidential, code flow only, PKCE S256; agentcity-web removed",
+      "passed": true,
+      "details": {
+        "redirectUris": [
+          "http://localhost:3000/api/auth/callback"
+        ],
+        "postLogoutRedirectUris": "http://localhost:3000/signed-out",
+        "webOrigins": [],
+        "defaultClientScopes": [
+          "acr",
+          "profile",
+          "basic",
+          "email"
+        ],
+        "clients": [
+          "account",
+          "account-console",
+          "admin-cli",
+          "agentcity-bff",
+          "broker",
+          "realm-management",
+          "security-admin-console"
+        ]
+      },
+      "ms": 8
+    },
+    {
+      "id": "client-rejects-misuse",
+      "title": "Direct grant, implicit, missing PKCE and foreign redirect URIs are refused",
+      "passed": true,
+      "details": {
+        "directGrant": "unauthorized_client",
+        "missingPkce": "Missing parameter: code_challenge_method",
+        "plainPkce": "Invalid parameter: code challenge method is not matching the configured one",
+        "implicit": "unauthorized_client",
+        "foreignRedirect": 400
+      },
+      "ms": 31
+    },
+    {
+      "id": "passkeyless-no-enrolment",
+      "title": "Identification alone never lets a person register a passkey",
+      "passed": true,
+      "details": {
+        "page": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... Invalid username or password. « Back to Application"
+      },
+      "ms": 2370
+    },
+    {
+      "id": "passkey-enrolment",
+      "title": "Passkey enrolment by admin-issued email link (Mailpit) with a virtual authenticator",
+      "passed": true,
+      "details": {
+        "mailSubject": "Update Your Account",
+        "keycloakCredentialTypes": [
+          "webauthn-passwordless"
+        ],
+        "virtualCredentials": 1,
+        "residentKey": true
+      },
+      "ms": 466
+    },
+    {
+      "id": "passkey-sign-in",
+      "title": "Passwordless sign-in with the passkey; ID token verified and claims present",
+      "passed": true,
+      "details": {
+        "idTokenHeader": {
+          "alg": "RS256",
+          "typ": "JWT",
+          "kid": "eyqAZwyCxL1cSZAXy8lEIVwOGxC0MugwJH2p-2MlhqY"
+        },
+        "idToken": {
+          "iss": "http://localhost:58080/realms/agentcity",
+          "aud": "agentcity-bff",
+          "azp": "agentcity-bff",
+          "sub": "62adbbce-6289-43b8-8702-2de19b0a1a33",
+          "email": "verify.passkey.1793128706434@agentcity.test",
+          "email_verified": true,
+          "sid": "7CEtqwYhNvAikmMW0QcvgY3o",
+          "auth_time": 1793128710,
+          "acr": "1",
+          "amr": [
+            "passkey"
+          ]
+        },
+        "allClaimNames": [
+          "acr",
+          "amr",
+          "at_hash",
+          "aud",
+          "auth_time",
+          "azp",
+          "email",
+          "email_verified",
+          "exp",
+          "family_name",
+          "given_name",
+          "iat",
+          "iss",
+          "jti",
+          "name",
+          "nonce",
+          "preferred_username",
+          "sid",
+          "sub",
+          "typ"
+        ]
+      },
+      "ms": 565
+    },
+    {
+      "id": "step-up-forces-passkey",
+      "title": "acr 1 session asked for acr_values=2 (prompt=login, max_age=0) must use the passkey",
+      "passed": true,
+      "details": {
+        "promptPage": "AGENTCITY (LOCAL DEVELOPMENT) Passkey login Email Please re-authenticate to continue Sign in with Passkey",
+        "before": {
+          "acr": "1",
+          "amr": [
+            "passkey"
+          ],
+          "auth_time": 1793128710,
+          "sid": "7CEtqwYhNvAikmMW0QcvgY3o"
+        },
+        "after": {
+          "acr": "2",
+          "amr": [
+            "passkey"
+          ],
+          "auth_time": 1793128711,
+          "sid": "7CEtqwYhNvAikmMW0QcvgY3o"
+        },
+        "sameKeycloakSession": true
+      },
+      "ms": 1840
+    },
+    {
+      "id": "step-up-acr-values-only",
+      "title": "acr_values=2 alone (no prompt/max_age) still prompts for the passkey",
+      "passed": true,
+      "details": {
+        "after": {
+          "acr": "2",
+          "amr": [
+            "passkey",
+            "passkey"
+          ],
+          "auth_time": 1793128713
+        }
+      },
+      "ms": 1778
+    },
+    {
+      "id": "silent-sso-is-acr1",
+      "title": "A later sign-in without acr_values reuses the session at acr 1 (level 2 has max age 0)",
+      "passed": true,
+      "details": {
+        "silent": {
+          "acr": "1",
+          "amr": [
+            "passkey",
+            "passkey"
+          ],
+          "auth_time": 1793128713,
+          "sid": "7CEtqwYhNvAikmMW0QcvgY3o"
+        }
+      },
+      "ms": 50
+    },
+    {
+      "id": "fresh-acr2-single-passkey",
+      "title": "A fresh sign-in asking for acr 2 needs exactly one passkey ceremony",
+      "passed": true,
+      "details": {
+        "claims": {
+          "acr": "2",
+          "amr": [
+            "passkey"
+          ],
+          "auth_time": 1793128714
+        }
+      },
+      "ms": 404
+    },
+    {
+      "id": "code-exchange-guards",
+      "title": "Codes are single-use, bound to the PKCE verifier and the client secret",
+      "passed": true,
+      "details": {
+        "wrongSecret": "unauthorized_client",
+        "wrongVerifier": "PKCE verification failed: Code mismatch",
+        "replay": "Code not valid",
+        "refreshOfFirstTokensAfterReplay": "Session doesn't have required client"
+      },
+      "ms": 90
+    },
+    {
+      "id": "refresh-rotation",
+      "title": "Refresh tokens rotate; reusing an old refresh token fails",
+      "passed": true,
+      "details": {
+        "reuse": "Maximum allowed refresh token reuse exceeded",
+        "accessTokenLifetime": 300,
+        "refreshLifetime": 43200
+      },
+      "ms": 48
+    },
+    {
+      "id": "rp-logout",
+      "title": "RP-initiated logout ends the Keycloak session and its refresh token",
+      "passed": true,
+      "details": {
+        "postLogoutRedirect": "http://localhost:3000/signed-out?state=bye",
+        "loggedOutSid": "toOMHB_b_jIrCmYMXpC_s2zZ",
+        "otherSessionsOfUser": [
+          {
+            "id": "7CEtqwYhNvAikmMW0QcvgY3o",
+            "clients": [
+              "agentcity-bff"
+            ]
+          }
+        ],
+        "refreshAfter": "Session not active",
+        "nextAuthorizeShowsSignIn": true
+      },
+      "ms": 245
+    },
+    {
+      "id": "sso-sign-in",
+      "title": "Agency SSO through the broker (button on the sign-in page), pre-linked seeded user",
+      "passed": true,
+      "details": {
+        "agencyAuthorizationHost": "localhost:58080",
+        "idToken": {
+          "iss": "http://localhost:58080/realms/agentcity",
+          "aud": "agentcity-bff",
+          "azp": "agentcity-bff",
+          "sub": "7ea351f9-19ef-4d78-af45-1ae1f7019e00",
+          "email": "sso.user@agency.example",
+          "email_verified": true,
+          "sid": "6YXEU4QWp8dGV_n-b3B5fsX7",
+          "auth_time": 1793128715,
+          "acr": "1",
+          "amr": [
+            "sso"
+          ],
+          "idp": "agency-sso"
+        }
+      },
+      "ms": 446
+    },
+    {
+      "id": "sso-hint",
+      "title": "kc_idp_hint=agency-sso goes straight to the agency IdP",
+      "passed": true,
+      "details": {
+        "claims": {
+          "acr": "1",
+          "amr": [
+            "sso"
+          ],
+          "idp": "agency-sso"
+        }
+      },
+      "ms": 338
+    },
+    {
+      "id": "sso-cannot-step-up",
+      "title": "Agency SSO never yields acr 2; a person without a passkey is denied step-up",
+      "passed": true,
+      "details": {
+        "viaAgencySso": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... Agency SSO cannot confirm this action. Sign in with your passkey instead. « Back to Application",
+        "viaSignInForm": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... A passkey is required for this action. Add a passkey to your account first. « Back to Application"
+      },
+      "ms": 6242
+    },
+    {
+      "id": "sso-user-adds-passkey",
+      "title": "An SSO user adds a passkey (kc_action, right after sign-in) and can then step up to acr 2",
+      "passed": true,
+      "details": {
+        "kcActionStatus": "success",
+        "stepUp": {
+          "acr": "2",
+          "amr": [
+            "passkey"
+          ],
+          "idp": "agency-sso",
+          "sid": "LalP03Y_fVBw45AllKc15bPA"
+        }
+      },
+      "ms": 1097
+    },
+    {
+      "id": "second-passkey-needs-passkey",
+      "title": "A person who has a passkey cannot add another from an acr 1 session; additions are notified by email",
+      "passed": true,
+      "details": {
+        "firstPasskey": "success",
+        "notification": "Update credential",
+        "secondAttemptPage": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Email Strong authentication required to continue Sign In or Sign in with Agency SSO"
+      },
+      "ms": 6214
+    },
+    {
+      "id": "sso-first-login-new-account",
+      "title": "First SSO sign-in creates the account only after the email is verified",
+      "passed": true,
+      "details": {
+        "verifyPage": "AGENTCITY (LOCAL DEVELOPMENT) Email verification You need to verify your email address to activate your account. An email with instructions to verify your email address has been sent to your address verify.sso-new.1793128706434@agency.example. Haven't received a verification code in your email? Click here to re-send the email.",
+        "mailSubject": "Verify email",
+        "claims": {
+          "email": "verify.sso-new.1793128706434@agency.example",
+          "email_verified": true,
+          "acr": "1",
+          "amr": [
+            "sso"
+          ],
+          "idp": "agency-sso"
+        },
+        "links": [
+          "agency-sso"
+        ]
+      },
+      "ms": 1605
+    },
+    {
+      "id": "sso-no-silent-link",
+      "title": "An SSO identity with the email of an existing account is not linked without confirmation + mailbox proof",
+      "passed": true,
+      "details": {
+        "existsPage": "AGENTCITY (LOCAL DEVELOPMENT) Account already exists User with email verify.collide.1793128706434@agentcity.test already exists. How do you want to continue? Review profile Add to existing account",
+        "emailPage": "AGENTCITY (LOCAL DEVELOPMENT) Link Agency SSO You need to verify your email address to link your account with Agency SSO. An email with instructions to link Agency SSO account verify.collide.1793128706434@agentcity.test with your AgentCity (local development) account has been sent to you. Haven't received the email? Click here to re-send the email. If you already confirmed linking the account in a",
+        "linksBeforeProof": 0,
+        "mailSubject": "Link Agency SSO",
+        "linksAfterProof": [
+          "agency-sso"
+        ],
+        "claims": {
+          "sub": "672a979d-3a32-4c1f-9a11-c6877d7315d2",
+          "amr": [
+            "sso"
+          ],
+          "idp": "agency-sso"
+        }
+      },
+      "ms": 2706
+    },
+    {
+      "id": "sso-issuer-validation",
+      "title": "The broker rejects agency tokens whose issuer does not match the configured issuer",
+      "passed": true,
+      "details": {
+        "configuredIssuer": "http://localhost:58080/realms/agency-idp",
+        "wrongIssuerPage": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... Unexpected error when authenticating with identity provider « Back to Application",
+        "restored": {
+          "amr": [
+            "sso"
+          ],
+          "idp": "agency-sso"
+        }
+      },
+      "ms": 5712
+    },
+    {
+      "id": "agency-backchannel-logout",
+      "title": "Ending the agency session (admin logout in agency-idp) ends the brokered agentcity session",
+      "passed": true,
+      "details": {
+        "sessionsBefore": 7,
+        "sessionsAfter": 0,
+        "refreshAfter": "invalid_grant"
+      },
+      "ms": 698
+    },
+    {
+      "id": "loa1-expiry",
+      "title": "After the level-1 max age, silent SSO gives acr 0; acr_values=1 forces a new sign-in instead",
+      "passed": true,
+      "details": {
+        "signIn": {
+          "acr": "1",
+          "amr": [
+            "sso"
+          ],
+          "auth_time": 1793128740
+        },
+        "silentAfterExpiry": {
+          "acr": "0",
+          "amr": [
+            "sso"
+          ],
+          "auth_time": 1793128740
+        },
+        "acrValues1AfterExpiry": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Email Sign In or Sign in with Agency SSO"
+      },
+      "ms": 11629
+    },
+    {
+      "id": "backchannel-logout-token",
+      "title": "Keycloak POSTs a signed logout token (sid, sub) to the client back-channel URL",
+      "passed": true,
+      "details": {
+        "configuredUrl": "http://host.docker.internal:4000/api/auth/backchannel-logout",
+        "request": {
+          "path": "/api/auth/backchannel-logout",
+          "contentType": "application/x-www-form-urlencoded"
+        },
+        "header": {
+          "alg": "RS256",
+          "typ": "logout+jwt",
+          "kid": "eyqAZwyCxL1cSZAXy8lEIVwOGxC0MugwJH2p-2MlhqY"
+        },
+        "claims": {
+          "exp": 1793128871,
+          "iat": 1793128751,
+          "jti": "54f95345-7af1-e4d7-2bf1-143e201131d1",
+          "iss": "http://localhost:58080/realms/agentcity",
+          "aud": "agentcity-bff",
+          "sub": "7ea351f9-19ef-4d78-af45-1ae1f7019e00",
+          "typ": "Logout",
+          "sid": "kuTjS1ucAgYUjL0FkaYYqvW2",
+          "events": {
+            "http://schemas.openid.net/event/backchannel-logout": {},
+            "revoke_offline_access": true
+          }
+        }
+      },
+      "ms": 413
+    },
+    {
+      "id": "brute-force",
+      "title": "Repeated failed authentications lock the account temporarily (brute-force detection)",
+      "passed": true,
+      "details": {
+        "status": {
+          "failedLoginNotBefore": 1793128812,
+          "numFailures": 2,
+          "numTemporaryLockouts": 0,
+          "disabled": true,
+          "numSecondaryAuthFailures": 0,
+          "lastIPFailure": "172.18.0.1",
+          "lastFailure": 1793128752462
+        },
+        "lastDeniedPage": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Email Email Invalid username or password. Sign In or Sign in with Agency SSO",
+        "lockedSignInPage": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... Account is disabled, contact your administrator. « Back to Application",
+        "realm": {
+          "bruteForceProtected": true,
+          "failureFactor": 5,
+          "waitIncrementSeconds": 60,
+          "maxFailureWaitSeconds": 900,
+          "permanentLockout": false
+        }
+      },
+      "ms": 5721
+    },
+    {
+      "id": "break-glass-rotate-client-secret",
+      "title": "Rotating the agentcity-bff secret invalidates the old one (then restored for local dev)",
+      "passed": true,
+      "details": {
+        "oldSecretAfterRotation": "unauthorized_client",
+        "newSecretWorked": true,
+        "restoredLocalSecret": true
+      },
+      "ms": 647
+    },
+    {
+      "id": "break-glass-lost-passkey-recovery",
+      "title": "Lost device: an operator removes the passkey (old one stops working) and sends a fresh enrolment link",
+      "passed": true,
+      "details": {
+        "oldPasskeyPage": "AGENTCITY (LOCAL DEVELOPMENT) We are sorry... Invalid username or password. « Back to Application",
+        "enrolmentMail": "Update Your Account",
+        "newSignIn": {
+          "acr": "1",
+          "amr": [
+            "passkey"
+          ]
+        }
+      },
+      "ms": 3133
+    },
+    {
+      "id": "break-glass-disable-agency-sso",
+      "title": "Disabling the agency-sso identity provider stops SSO sign-in (then re-enabled)",
+      "passed": true,
+      "details": {
+        "pageWhileDisabled": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Email Sign In",
+        "restored": true
+      },
+      "ms": 2342
+    },
+    {
+      "id": "break-glass-disable-user",
+      "title": "Disabling a user blocks refresh and new sign-in; admin logout ends every session",
+      "passed": true,
+      "details": {
+        "sessionsBefore": 2,
+        "sessionsAfterDisableOnly": 2,
+        "refreshAfterDisable": "User disabled",
+        "sessionsAfterAdminLogout": 0,
+        "signInPage": "AGENTCITY (LOCAL DEVELOPMENT) Sign in to your account Account is disabled, contact your administrator. Email Sign In or Sign in with Agency SSO"
+      },
+      "ms": 5915
+    },
+    {
+      "id": "email-code-provider",
+      "title": "Email sign-in code step (agentcity-email-code)",
+      "passed": false,
+      "error": "provider not installed: email codes NOT verified (see m03/IDP.md, release blocker until it is)",
+      "ms": 14
+    },
+    {
+      "id": "email-code-sign-in",
+      "title": "Email sign-in code: passkeyless person signs in with a code from Mailpit (acr 1, amr email-code)",
+      "passed": false,
+      "error": "provider not installed: not run",
+      "ms": 5
+    },
+    {
+      "id": "break-glass-logout-all",
+      "title": "Ending every session in the realm (admin \"logout all\")",
+      "passed": true,
+      "details": {
+        "before": [
+          {
+            "offline": "0",
+            "clientId": "agentcity-bff",
+            "active": "5",
+            "id": "5a3f6ef7-7de3-49bf-ba78-64aa79ceb0ac"
+          }
+        ],
+        "after": []
+      },
+      "ms": 32
+    }
+  ]
+}

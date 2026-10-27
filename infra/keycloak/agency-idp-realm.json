@@ -1,0 +1,63 @@
+{
+  "realm": "agency-idp",
+  "displayName": "Agency corporate IdP (local stand-in)",
+  "enabled": true,
+  "sslRequired": "external",
+  "attributes": {
+    "frontendUrl": "http://localhost:58080"
+  },
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "editUsernameAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "verifyEmail": false,
+  "passwordPolicy": "length(12) and notUsername",
+  "accessTokenLifespan": 300,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanLogin": 900,
+  "ssoSessionIdleTimeout": 43200,
+  "ssoSessionMaxLifespan": 604800,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "eventsEnabled": true,
+  "eventsExpiration": 604800,
+  "clients": [
+    {
+      "clientId": "agentcity-broker",
+      "name": "AgentCity (identity brokering from realm agentcity)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "local-dev-only-agency-broker-secret",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "consentRequired": false,
+      "fullScopeAllowed": false,
+      "frontchannelLogout": false,
+      "redirectUris": ["http://localhost:58080/realms/agentcity/broker/agency-sso/endpoint"],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:58080/realms/agentcity/broker/agency-sso/endpoint/logout_response",
+        "backchannel.logout.url": "http://localhost:8080/realms/agentcity/protocol/openid-connect/logout/backchannel-logout",
+        "backchannel.logout.session.required": "true",
+        "use.refresh.tokens": "true",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "oidc.ciba.grant.enabled": "false"
+      },
+      "defaultClientScopes": ["basic", "acr", "email", "profile"],
+      "optionalClientScopes": []
+    }
+  ]
+}
