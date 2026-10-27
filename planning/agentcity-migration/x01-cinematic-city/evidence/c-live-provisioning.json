@@ -1,0 +1,109 @@
+{
+  "stage": "X01 workstream C — live demo provisioning",
+  "ranAt": "2026-10-27T20:32:25.396Z",
+  "keycloak": "http://localhost:58080 (realm agentcity, recreated from this worktree, then pnpm keycloak:seed)",
+  "mailpit": "http://127.0.0.1:58025",
+  "api": "AppModule on 127.0.0.1:4205, fresh test database (dropped afterwards)",
+  "personalData": "a random fixture address at example.test; replaced by placeholders here",
+  "cleanup": "the Keycloak user, the probe client and the Mailpit message created by this run were deleted",
+  "allPassed": true,
+  "checks": [
+    {
+      "check": "API listening on port 4205 with a fresh database",
+      "ok": true,
+      "detail": {
+        "database": "agentcity_test_<random>"
+      }
+    },
+    {
+      "check": "POST /api/demo/requests → 202 verification-sent",
+      "ok": true,
+      "detail": {
+        "status": 202,
+        "body": {
+          "requestId": "<uuid>",
+          "status": "verification-sent"
+        }
+      }
+    },
+    {
+      "check": "Keycloak user exists (username = email), not yet verified",
+      "ok": true,
+      "detail": {
+        "username": "<email>",
+        "emailVerified": false,
+        "enabled": true,
+        "firstName": "Fixture",
+        "lastName": "Live Visitor"
+      }
+    },
+    {
+      "check": "Keycloak user has no credentials and no required actions",
+      "ok": true,
+      "detail": {
+        "credentials": [],
+        "requiredActions": []
+      }
+    },
+    {
+      "check": "Mailpit received the verify-email message for the address",
+      "ok": true,
+      "detail": {
+        "subject": "Update Your Account",
+        "hasActionTokenLink": true
+      }
+    },
+    {
+      "check": "following the link verifies the address in Keycloak",
+      "ok": true,
+      "detail": {
+        "emailVerified": true
+      }
+    },
+    {
+      "check": "the link returns to /demo/verified?request=<requestId>",
+      "ok": true,
+      "detail": {
+        "landed": "http://localhost:3000/demo/verified?request=<requestId>"
+      }
+    },
+    {
+      "check": "GET /api/demo/requests/:id answers a status without personal data",
+      "ok": true,
+      "detail": {
+        "status": "verification-sent"
+      }
+    },
+    {
+      "check": "provisioner service account holds only realm-management:manage-users",
+      "ok": true,
+      "detail": {
+        "clientRoles": [
+          "realm-management:manage-users"
+        ],
+        "realmRoles": []
+      }
+    },
+    {
+      "check": "view-users + query-users alone can search users",
+      "ok": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "check": "without manage-users, creating a user is refused",
+      "ok": true,
+      "detail": {
+        "status": 403
+      }
+    },
+    {
+      "check": "without manage-users, sending execute-actions email is refused",
+      "ok": true,
+      "detail": {
+        "status": 403
+      }
+    }
+  ]
+}
