@@ -10,7 +10,8 @@ import {
   type DemoAgent,
   type DemoClaim,
 } from '../../../components/demo/demo-api';
-import { AgentAvatar, ConversionCards, Simulated, Skyline } from '../../../components/demo/DemoBits';
+import { AgentAvatar, AgentStatus, ConversionCards, Simulated } from '../../../components/demo/DemoBits';
+import { Icon } from '../../../components/marketing/Primitives';
 
 type Problem = { kind: 'not-verified' | 'no-demo' | 'expired' | 'other'; text: string };
 
@@ -84,72 +85,74 @@ export function DemoWelcome() {
   }, []);
 
   if (problem) {
+    const title =
+      problem.kind === 'expired'
+        ? 'This demo office has expired'
+        : problem.kind === 'not-verified'
+          ? 'Confirm your email address first'
+          : problem.kind === 'no-demo'
+            ? 'We couldn’t find your demo office'
+            : 'Your demo office didn’t open';
     return (
-      <section
-        className="dm-card"
-        aria-labelledby="welcome-problem"
-        data-testid="welcome-error"
-        data-kind={problem.kind}
-      >
-        <span className="dm-eyebrow">Almost there</span>
-        <h1 id="welcome-problem" className="dm-title" style={{ fontSize: 30 }}>
-          {problem.kind === 'expired'
-            ? 'This demo office has expired'
-            : problem.kind === 'not-verified'
-              ? 'Please confirm your email address first'
-              : problem.kind === 'no-demo'
-                ? 'We couldn’t find your demo office'
-                : 'Your demo office didn’t open'}
-        </h1>
-        <div className="dm-notice dm-notice-error" role="alert">
-          <p data-testid="welcome-error-text">{problem.text}</p>
-        </div>
-        <div className="dm-actions">
-          {problem.kind === 'not-verified' && (
-            <button type="button" className="dm-btn dm-btn-primary" onClick={() => void load()} disabled={busy}>
-              I’ve confirmed it, try again
-            </button>
-          )}
-          {problem.kind === 'no-demo' && (
-            <a className="dm-btn dm-btn-primary" href="/signin?returnTo=%2Fdemo%2Fwelcome">
-              Sign in with a different address
-            </a>
-          )}
-          {problem.kind === 'other' && (
-            <button
-              type="button"
-              className="dm-btn dm-btn-primary"
-              onClick={() => void load()}
-              disabled={busy}
-              data-testid="welcome-retry"
+      <div className="dm-narrow-col dm-stack-lg">
+        <section
+          className="dm-card"
+          aria-labelledby="welcome-problem"
+          data-testid="welcome-error"
+          data-kind={problem.kind}
+        >
+          <div className="dm-stack">
+            <p className="mk-eyebrow">Your demo</p>
+            <h1 id="welcome-problem" className="dm-title">
+              {title}
+            </h1>
+          </div>
+          <div className="dm-notice dm-notice-error" role="alert">
+            <p data-testid="welcome-error-text">{problem.text}</p>
+          </div>
+          <div className="dm-actions">
+            {problem.kind === 'not-verified' && (
+              <button type="button" className="mk-btn mk-btn-primary" onClick={() => void load()} disabled={busy}>
+                I’ve confirmed it, try again
+              </button>
+            )}
+            {problem.kind === 'no-demo' && (
+              <a className="mk-btn mk-btn-primary" href="/signin?returnTo=%2Fdemo%2Fwelcome">
+                Sign in with another address
+              </a>
+            )}
+            {problem.kind === 'other' && (
+              <button
+                type="button"
+                className="mk-btn mk-btn-primary"
+                onClick={() => void load()}
+                disabled={busy}
+                data-testid="welcome-retry"
+              >
+                Try again
+              </button>
+            )}
+            <a
+              className={`mk-btn ${problem.kind === 'expired' ? 'mk-btn-primary' : 'mk-btn-secondary'}`}
+              href="/#get-demo"
             >
-              Try again
-            </button>
-          )}
-          <a className={`dm-btn${problem.kind === 'expired' ? ' dm-btn-primary' : ''}`} href="/#get-demo">
-            Request a new demo office
-          </a>
-          <a className="dm-btn" href="/city">
-            Explore the city
-          </a>
-        </div>
-        {problem.kind === 'expired' && (
-          <>
-            <p>Liked what you saw? We can set up an office around your own business.</p>
-            <ConversionCards only={['consultation', 'contactSales']} />
-          </>
-        )}
-      </section>
+              Request a new demo office
+            </a>
+            <a className="dm-link dm-muted" href="/city">
+              Explore the city
+            </a>
+          </div>
+        </section>
+        {problem.kind === 'expired' && <ConversionCards only={['consultation', 'contactSales']} />}
+      </div>
     );
   }
 
   if (!claim) {
     return (
-      <section className="dm-card" aria-busy="true" data-testid="welcome-loading">
-        <p className="dm-status-line" role="status">
-          <span className="dm-pulse" aria-hidden="true" /> Opening your demo office…
-        </p>
-      </section>
+      <p className="dm-status-line" role="status" aria-busy="true" data-testid="welcome-loading">
+        <span className="dm-pulse" aria-hidden="true" /> Opening your demo office…
+      </p>
     );
   }
 
@@ -157,23 +160,22 @@ export function DemoWelcome() {
   const expiry = formatExpiry(claim.expiresAt);
   return (
     <>
-      <section className="dm-hero" aria-labelledby="welcome-title" data-testid="welcome">
-        <Skyline />
-        <span className="dm-eyebrow" style={{ position: 'relative' }}>
-          Your demo is ready
+      <section className="dm-welcome-head" aria-labelledby="welcome-title" data-testid="welcome">
+        <span className="mk-pill">
+          <span className="mk-pill-dot" aria-hidden="true" />
+          Your demo is ready · sample data
         </span>
-        <h1 id="welcome-title" className="dm-title" style={{ position: 'relative' }} data-testid="welcome-title">
+        <h1 id="welcome-title" className="mk-h2" data-testid="welcome-title">
           {claim.firstName ? `Welcome to AgentCity, ${claim.firstName}.` : 'Welcome to AgentCity.'}
         </h1>
-        <p className="dm-lede" style={{ position: 'relative' }}>
-          Your virtual AI office is ready to explore.
-        </p>
-        <div className="dm-actions" style={{ position: 'relative' }}>
-          <a className="dm-btn dm-btn-primary" href="/office?tour=start" data-testid="welcome-start-tour">
+        <p className="mk-lead">Your virtual AI office is ready to explore.</p>
+        <div className="dm-actions">
+          <a className="mk-btn mk-btn-primary" href="/office?tour=start" data-testid="welcome-start-tour">
             Start tour
+            <Icon name="arrow" className="mk-btn-arrow" />
           </a>
           <a
-            className="dm-btn dm-btn-ghost-light"
+            className="mk-btn mk-btn-secondary"
             href={`/city?building=${encodeURIComponent(claim.building.key)}`}
             data-testid="welcome-explore-city"
           >
@@ -188,11 +190,11 @@ export function DemoWelcome() {
           <dd data-testid="welcome-company">{claim.company || '—'}</dd>
         </div>
         <div className="dm-fact">
-          <dt>Your building</dt>
+          <dt>Building</dt>
           <dd data-testid="welcome-building">{claim.building.name}</dd>
         </div>
         <div className="dm-fact">
-          <dt>Your office</dt>
+          <dt>Office</dt>
           <dd data-testid="welcome-office">
             {level !== null ? `Level ${level} · ` : ''}
             {claim.office.name}
@@ -206,40 +208,40 @@ export function DemoWelcome() {
         )}
       </dl>
 
-      <section className="dm-card" aria-labelledby="team-title">
-        <h2 id="team-title" style={{ margin: 0, fontSize: 20, display: 'flex', gap: 10, alignItems: 'center' }}>
-          Your sample team <Simulated label="Sample" />
-        </h2>
-        <p>
-          These agents work in your demo office with made-up leads and conversations. They never contact anyone or
-          change real records.
-        </p>
+      <section className="dm-mock" aria-labelledby="team-title">
+        <div className="dm-mock-bar">
+          <h2 id="team-title" className="dm-mock-title">
+            Your sample team <Simulated label="Sample" />
+          </h2>
+          <a className="mk-btn mk-btn-dark mk-btn-sm" href="/office" data-testid="welcome-open-office">
+            Go to my office
+          </a>
+        </div>
         {agents === null ? (
-          <p className="small">Loading your team…</p>
+          <p className="dm-empty">Loading your team…</p>
         ) : agents.length === 0 ? (
-          <p className="small">Your team will be waiting for you in the office.</p>
+          <p className="dm-empty">Your team is waiting in the office.</p>
         ) : (
-          <ul className="dm-agent-chips" data-testid="welcome-agents">
+          <ul className="dm-rows" data-testid="welcome-agents">
             {agents.map(a => (
-              <li key={a.id} className="dm-agent-chip">
-                <AgentAvatar name={a.name} id={a.id} />
-                <span>
-                  {a.name}
-                  <small>{a.role}</small>
+              <li key={a.id}>
+                <AgentAvatar name={a.name} />
+                <span className="dm-row-main">
+                  <b>{a.name}</b>
+                  <span className="dm-row-sub">{a.role}</span>
                 </span>
+                <AgentStatus status={a.status} />
               </li>
             ))}
           </ul>
         )}
-        <div className="dm-actions">
-          <a className="dm-btn dm-btn-dark" href="/office" data-testid="welcome-open-office">
-            Go to my office
-          </a>
-        </div>
+        <p className="dm-mock-foot">
+          Made-up leads and conversations. These agents never contact anyone or change real records.
+        </p>
       </section>
 
-      <section aria-labelledby="next-steps-title" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <h2 id="next-steps-title" style={{ margin: 0, fontSize: 20 }}>
+      <section className="dm-section" aria-labelledby="next-steps-title">
+        <h2 id="next-steps-title" className="dm-h3">
           When you’re ready
         </h2>
         <ConversionCards />

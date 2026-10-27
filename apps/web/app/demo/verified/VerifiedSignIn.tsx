@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { describeError, NavigatingAwayError, startLogin } from '../../../lib/api-client';
 import { recallDemoEmail } from '../../../components/demo/demo-api';
+import { CheckIcon } from '../../../components/demo/DemoBits';
 
 const AUTO_START_MS = 1200;
 
@@ -45,20 +46,23 @@ export function VerifiedSignIn() {
 
   return (
     <section className="dm-card" aria-labelledby="verified-title" data-testid="verified" data-state={state}>
-      <span className="dm-eyebrow">Email confirmed</span>
-      <h1 id="verified-title" className="dm-title">
-        Thanks, your email address is confirmed
-      </h1>
-      <p className="dm-lede">
-        Now sign in so we can open your demo office. There’s no password: we’ll email you a short code
-        {hint ? (
-          <>
-            {' '}
-            at <strong data-testid="verified-hint">{hint}</strong>
-          </>
-        ) : null}
-        .
-      </p>
+      <CheckIcon />
+      <div className="dm-stack">
+        <p className="mk-eyebrow">Email confirmed</p>
+        <h1 id="verified-title" className="dm-title">
+          Thanks. Now sign in.
+        </h1>
+        <p className="mk-lead">
+          No password: we’ll email you a short code
+          {hint ? (
+            <>
+              {' '}
+              at <strong data-testid="verified-hint">{hint}</strong>
+            </>
+          ) : null}
+          .
+        </p>
+      </div>
       <p role="status" aria-live="polite" className="dm-status-line" data-testid="verified-status">
         <span className={`dm-pulse${state === 'failed' ? ' dm-stopped' : ''}`} aria-hidden="true" />
         {state === 'failed' ? 'Sign-in didn’t open.' : 'Taking you to sign in…'}
@@ -71,7 +75,7 @@ export function VerifiedSignIn() {
       <div className="dm-actions">
         <button
           type="button"
-          className="dm-btn dm-btn-primary"
+          className="mk-btn mk-btn-primary"
           disabled={state === 'opening'}
           onClick={() => void go(hint)}
           data-testid="verified-signin"
@@ -79,9 +83,7 @@ export function VerifiedSignIn() {
           {state === 'opening' ? 'Opening sign-in…' : 'Sign in to my demo office'}
         </button>
       </div>
-      <p className="small">
-        Use the same email address you requested the demo with. Your office is waiting on the next screen.
-      </p>
+      <p className="dm-muted">Use the address you requested the demo with.</p>
     </section>
   );
 }

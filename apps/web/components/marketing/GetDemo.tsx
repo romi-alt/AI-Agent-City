@@ -1,5 +1,5 @@
 import { DEMO_BUILDING } from './cityFacts';
-import { DemoFormSlot } from './DemoFormSlot';
+import { DemoRequestForm } from '../demo/DemoRequestForm';
 
 // The demo invitation, with the demo walkthrough beside the form.
 export function GetDemo({ ttlDays }: { ttlDays: number }) {
@@ -33,7 +33,7 @@ export function GetDemo({ ttlDays }: { ttlDays: number }) {
             </p>
           </div>
           <div className="mk-demo-form">
-            <DemoFormSlot />
+            <DemoRequestForm headingId="get-demo-title" />
           </div>
         </div>
       </div>

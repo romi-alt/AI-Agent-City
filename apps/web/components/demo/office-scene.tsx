@@ -12,7 +12,7 @@ import dynamic from 'next/dynamic';
 export const DemoOfficeScene = dynamic(() => import('./DemoOfficeStandIn').then(m => m.DemoOfficeStandIn), {
   ssr: false,
   loading: () => (
-    <p className="dm-status-line" style={{ padding: 24, color: '#e9eef6' }}>
+    <p className="dm-status-line" style={{ padding: 24 }}>
       Opening your office…
     </p>
   ),

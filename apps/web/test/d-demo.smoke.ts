@@ -231,8 +231,6 @@ test('form: can be completed with the keyboard alone; the honeypot is never focu
   await page.keyboard.press('Tab');
   await track();
   await page.keyboard.type('compiler.example');
-  await page.keyboard.press('Tab'); // privacy link
-  await track();
   await page.keyboard.press('Tab'); // consent
   await track();
   await page.keyboard.press('Space');
@@ -245,7 +243,6 @@ test('form: can be completed with the keyboard alone; the honeypot is never focu
     'industry',
     'phone',
     'website',
-    'A',
     'marketingConsent',
     'BUTTON',
   ]);
@@ -258,6 +255,29 @@ test('form: can be completed with the keyboard alone; the honeypot is never focu
   assert.equal(sent.body!.website2, '');
   assert.ok(sent.body!.industry);
   await page.context().close();
+});
+
+test('landing: the form sits natively in the #get-demo card and submits to check-email', async () => {
+  for (const mobile of [false, true]) {
+    const page = await newPage({ mobile });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`${WEB}/#get-demo`);
+    const form = page.locator('#get-demo [data-testid="demo-request-form"]');
+    await form.waitFor();
+    await page.waitForTimeout(400);
+    const card = page.locator('#get-demo .mk-demo-card');
+    await card.scrollIntoViewIfNeeded();
+    await card.screenshot({ path: join(EVIDENCE, mobile ? 'd-landing-form-390.png' : 'd-landing-form.png') });
+    assert.ok(await noHorizontalScroll(page), 'landing: no sideways scroll');
+    if (!mobile) {
+      const n = mock.requests.length;
+      await fillGood(page, { email: 'landing@analytical.example' });
+      await page.getByTestId('demo-submit').click();
+      await page.waitForURL(`${WEB}/demo/check-email?request=req-*`);
+      assert.equal(count(n, 'POST', '/api/demo/requests'), 1);
+    }
+    await page.context().close();
+  }
 });
 
 test('check-email: polls gently with growing gaps and stops when ready; dev mailbox note is shown', async () => {
