@@ -1,0 +1,182 @@
+{
+  "generatedAt": "2026-10-27T18:38:56.181Z",
+  "durationSeconds": 103,
+  "command": "node infra/keycloak/email-code-authenticator/verify/verify-email-code.mjs",
+  "keycloakImage": "quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b",
+  "container": {
+    "name": "m03-email-kc",
+    "port": 58180,
+    "network": "agentcity_default",
+    "removed": true
+  },
+  "jar": {
+    "path": "infra/keycloak/providers/agentcity-email-code-authenticator.jar",
+    "sha256": "48eff4945f02397441d42da330e2b3b302ebff7cb3823f9beb3d96e755e918ad"
+  },
+  "realm": {
+    "name": "email-code-verify",
+    "flow": "email-code-browser",
+    "executions": [
+      "auth-username-form",
+      "agentcity-email-code"
+    ],
+    "ttlSeconds": 60,
+    "cooldownSeconds": 10,
+    "maxAttempts": 5
+  },
+  "mailpit": {
+    "api": "http://127.0.0.1:58025",
+    "ownMessagesDeleted": 8
+  },
+  "browser": "Playwright Chromium",
+  "checks": [
+    {
+      "name": "Keycloak loaded the agentcity-email-code provider",
+      "passed": true,
+      "provider": {
+        "displayName": "Email sign-in code",
+        "description": "Sends a one-time code to the user's verified email address and asks for it. Needs a user identified earlier in the flow (for example by the Username Form).",
+        "id": "agentcity-email-code"
+      }
+    },
+    {
+      "name": "code page says where the code went (masked) and how long it lasts",
+      "passed": true,
+      "text": "We sent a 6-digit code to e***@example.test. It works for 1 minute."
+    },
+    {
+      "name": "code page has a labelled one-time-code input",
+      "passed": true
+    },
+    {
+      "name": "email arrives in Mailpit with a 6-digit code, text and HTML parts",
+      "passed": true,
+      "subject": "Your sign-in code for AgentCity verify",
+      "from": "noreply@agentcity.local",
+      "textPreview": [
+        "Use this code to sign in to AgentCity verify:\r",
+        "\r",
+        "804155\r"
+      ]
+    },
+    {
+      "name": "email and page do not leak the code into the subject",
+      "passed": true
+    },
+    {
+      "name": "correct code completes sign-in (redirect with authorization code)",
+      "passed": true
+    },
+    {
+      "name": "ID token amr contains email-code",
+      "passed": true,
+      "amr": [
+        "email-code"
+      ]
+    },
+    {
+      "name": "ID token acr is 1 (basic level)",
+      "passed": true,
+      "acr": "1"
+    },
+    {
+      "name": "ID token is for the signed-in user with a verified email",
+      "passed": true,
+      "email": "ecv-6e413afc-happy@example.test",
+      "email_verified": true
+    },
+    {
+      "name": "access token amr contains email-code",
+      "passed": true,
+      "amr": [
+        "email-code"
+      ]
+    },
+    {
+      "name": "wrong code is refused with tries left",
+      "passed": true,
+      "error": "That code is not right. Tries left for this code: 4."
+    },
+    {
+      "name": "after 5 wrong codes the code stops working",
+      "passed": true,
+      "error": "Too many wrong codes. Send a new code to try again."
+    },
+    {
+      "name": "the right code is refused once the attempt limit is reached",
+      "passed": true,
+      "error": "Too many wrong codes. Send a new code to try again."
+    },
+    {
+      "name": "each wrong code is recorded as a login failure on the user",
+      "passed": true,
+      "numFailures": 6
+    },
+    {
+      "name": "resend during the cooldown is refused and sends nothing",
+      "passed": true,
+      "error": "Please wait 10 seconds before asking for another code.",
+      "messages": 1
+    },
+    {
+      "name": "reloading the code page does not send another code",
+      "passed": true
+    },
+    {
+      "name": "resend after the cooldown sends a new code",
+      "passed": true,
+      "messages": 2
+    },
+    {
+      "name": "the earlier code no longer works after a resend",
+      "passed": true,
+      "error": "That code is not right. Tries left for this code: 4."
+    },
+    {
+      "name": "the new code completes sign-in",
+      "passed": true
+    },
+    {
+      "name": "unverified account sees the same page as a verified one (no enumeration)",
+      "passed": true,
+      "text": "We sent a 6-digit code to e***@example.test. It works for 1 minute."
+    },
+    {
+      "name": "no email is sent to an unverified address",
+      "passed": true,
+      "messages": 0
+    },
+    {
+      "name": "unverified account cannot sign in with a code",
+      "passed": true,
+      "error": "That code is not right. Tries left for this code: 4."
+    },
+    {
+      "name": "page also works with the classic \"keycloak\" login theme",
+      "passed": true
+    },
+    {
+      "name": "wrong codes count towards Keycloak brute-force protection (user temporarily locked)",
+      "passed": true,
+      "numFailures": 3,
+      "disabled": true
+    },
+    {
+      "name": "while locked, even the right code is refused with a generic message",
+      "passed": true,
+      "error": "Sign-in with a code is not possible right now. Wait a few minutes, then start again."
+    },
+    {
+      "name": "expired code is refused",
+      "passed": true,
+      "error": "That code has expired. Send a new code to try again."
+    },
+    {
+      "name": "after expiry a new code can be requested and works",
+      "passed": true
+    }
+  ],
+  "keycloakErrorLogLines": [],
+  "fatal": null,
+  "allPassed": true
+}
