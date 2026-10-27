@@ -7,7 +7,7 @@ failed / complete.
 | Stage | Status | Commit/files | Evidence | Blockers | Next action |
 |---|---|---|---|---|---|
 | M00 | **Local passed** (code complete and verified locally). Merged into `main` at the owner's request; no separate code review | `main` @ a658918 (fast-forward from f96819d). Built on branch `migration/m00-baseline` (from `city-vibes` @ 7bad3b8). Checkpoint = 7bad3b8, the head of `city-vibes` on GitHub. Tag `pre-migration-baseline` is local only: pushing it from this environment did not reach GitHub. Files below | `planning/agentcity-migration/m00/evidence/` | Real data and pilot exports missing (below) | M01 |
-| M01 | **Local passed** (code complete and verified locally, including a from-zero fresh-clone run). Not merged; no code review yet | Branch `migration/m01-workspace` (from `main` @ d4c0159). Files: section M01.2 | `planning/agentcity-migration/m01/` (ARCHITECTURE.md, evidence/) | CI not yet run on GitHub; Node 22 not 24; MinIO replaced by RustFS locally (ADR-004). See M01.5 | M02 |
+| M01 | **Local passed** (code complete and verified locally, including a from-zero fresh-clone run). Merged into `main` at the owner's request; no separate code review | `main` @ b3c211c (fast-forward from d4c0159). Built on branch `migration/m01-workspace`, which can now be deleted on GitHub (deletion from this environment fails). Files: section M01.2 | `planning/agentcity-migration/m01/` (ARCHITECTURE.md, evidence/) | CI not yet run on GitHub (first run will be the next push or PR to `main`); Node 22 not 24; MinIO replaced by RustFS locally (ADR-004). See M01.5 | M02 |
 | M02–M10, P01–P10 | Not started | — | — | — | In order, one at a time |
 
 
@@ -117,8 +117,8 @@ Defects found and fixed during M01 (not left in): the API hung on shutdown when 
 
 ## M01.6 Next safe stage
 
-**M02 — PostgreSQL tenancy and import** (`planning/agentcity-migration/prompts/M02-postgres-tenancy-and-import.md`), after this branch is reviewed and merged. Start from `main`
-with M01 merged, run `pnpm infra:up && pnpm infra:init`, keep `OUTBOUND_ENABLED` unset.
+**M02 — PostgreSQL tenancy and import** (`planning/agentcity-migration/prompts/M02-postgres-tenancy-and-import.md`), now that M01 is merged. Start from `main`
+(b3c211c or later), run `pnpm infra:up && pnpm infra:init`, keep `OUTBOUND_ENABLED` unset.
 
 # M00 record
 
