@@ -29,3 +29,19 @@ L1–L12: Floor for Rent – $199/mo.
 - **Fast Sales agents:** new customers, unsold, sold customers, contract to expire, referrals, follow-up, new affiliates,
   affiliates follow-up, new leads, current customers.
 - All task results roll up into the **daily email report**.
+
+## Rick Case Honda associate buildings
+- **New Cars Sales Associates** (15 floors, one associate per floor): L1 Javier, L2 Andre, L3 Josiah, L4 Luiz, L5 Abdul,
+  L6 Bilal, L7 Claudia, L8 Frank, L9 Seyling, L10 Shaher, L11 Jolson, L12 Rafael, L13 Soco, L14 Will, L15 Anarkis
+- **Used Cars Sales Associates** (12 floors): L1 Federico, L2 Jeffrey, L3 John, L4 Reymer, L5 Wayne, L6 Clarissa, L7–L12 open
+
+## Social media agents (Fast Sales and dealerships)
+Content strategy · Content calendar · Content creation · Graphic & video production · Multi-platform publishing ·
+Community engagement · Lead generation · Trend monitoring · Competitor analysis · Performance analytics ·
+Content optimization · Weekly reporting
+
+## Assumptions made (confirm or change)
+- Training Center L12 hosts the reference office team (Elvis owner, Max CEO, Vera, Nico, Luna, Teo, Iris, Dante).
+- Department floors get 2–3 AI agents each; associate floors get the human associate + a follow-up AI + a social AI.
+- Renting a rental floor moves in a follow-up AI and a social AI for the tenant.
+- Publishing posts and sending special offers require your OK.
