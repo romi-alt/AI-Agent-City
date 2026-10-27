@@ -44,7 +44,7 @@ export function Faq({ ttlDays }: { ttlDays: number }) {
     <section className="mk-section mk-faq on-light" aria-labelledby="faq-title" id="faq">
       <div className="mk-container mk-faq-grid">
         <SectionHead
-          index="10"
+          index="07"
           label="Questions"
           id="faq-title"
           title={

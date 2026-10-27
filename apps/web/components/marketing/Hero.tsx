@@ -4,7 +4,7 @@ import { Skyline } from './Skyline';
 
 export function Hero() {
   return (
-    <section className="mk-hero on-dark" aria-labelledby="hero-title">
+    <section className="mk-hero on-light" aria-labelledby="hero-title">
       <div className="mk-hero-sky" aria-hidden="true" />
       <Skyline className="mk-hero-skyline" />
       <HeroCity />
@@ -15,9 +15,8 @@ export function Hero() {
           <span>Your Business.</span> <span>Your AI Team.</span> <em>Your City.</em>
         </h1>
         <p className="mk-hero-lead">
-          AgentCity gives your business its own office in a 3D city, staffed by AI agents built for one clear job each:
-          following up with leads, planning your social content, keeping the calendar moving and reporting back every
-          day. You see who is working on what, and nothing goes out until you say so.
+          Give your business an office in a sunlit 3D city, staffed by AI agents for follow-up, social content,
+          scheduling and reporting. You see who is working on what, and nothing goes out until you say so.
         </p>
         <div className="mk-hero-actions">
           <CtaLink href="#get-demo" testId="hero-cta-demo">

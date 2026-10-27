@@ -1,14 +1,11 @@
 import type { Metadata } from 'next';
 import { Buildings } from '../../components/marketing/Buildings';
+import { CityLevels } from '../../components/marketing/CityLevels';
 import { Capabilities } from '../../components/marketing/Capabilities';
-import { DemoJourney } from '../../components/marketing/DemoJourney';
 import { Faq } from '../../components/marketing/Faq';
 import { GetDemo } from '../../components/marketing/GetDemo';
 import { Hero } from '../../components/marketing/Hero';
-import { HowItWorks } from '../../components/marketing/HowItWorks';
 import { Industries } from '../../components/marketing/Industries';
-import { Intro } from '../../components/marketing/Intro';
-import { OfficePreview } from '../../components/marketing/OfficePreview';
 import { Security } from '../../components/marketing/Security';
 import { SiteFooter } from '../../components/marketing/SiteFooter';
 
@@ -33,7 +30,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: '/',
     locale: 'en_US',
-    images: [{ url: '/og-agentcity.png', width: 1200, height: 630, alt: 'The AgentCity skyline at dusk' }],
+    images: [{ url: '/og-agentcity.png', width: 1200, height: 630, alt: 'The AgentCity skyline at golden hour' }],
   },
   twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION, images: ['/og-agentcity.png'] },
 };
@@ -51,14 +48,11 @@ export default function LandingPage() {
     <>
       <main id="main" className="mk-main" tabIndex={-1}>
         <Hero />
-        <Intro />
-        <HowItWorks />
+        <CityLevels />
         <Buildings />
-        <OfficePreview />
         <Capabilities />
         <Industries />
         <Security />
-        <DemoJourney ttlDays={ttlDays} />
         <GetDemo ttlDays={ttlDays} />
         <Faq ttlDays={ttlDays} />
       </main>

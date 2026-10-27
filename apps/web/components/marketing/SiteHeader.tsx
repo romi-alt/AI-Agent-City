@@ -1,7 +1,8 @@
+import { HeaderScroll } from './HeaderScroll';
 import { CtaLink, Mark } from './Primitives';
 
 const NAV = [
-  { href: '#how-it-works', label: 'How it works' },
+  { href: '#city', label: 'How it works' },
   { href: '#buildings', label: 'Buildings' },
   { href: '#capabilities', label: 'AI teams' },
   { href: '#security', label: 'Security' },
@@ -10,7 +11,8 @@ const NAV = [
 
 export function SiteHeader() {
   return (
-    <header className="mk-site-header on-dark">
+    <header className="mk-site-header on-light">
+      <HeaderScroll />
       <a className="mk-skip" href="#main">
         Skip to content
       </a>

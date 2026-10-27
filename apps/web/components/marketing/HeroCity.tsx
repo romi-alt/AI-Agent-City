@@ -101,7 +101,7 @@ export function HeroCity() {
       )}
       <div className="mk-hero-caption">
         <span className="mk-hero-caption-dot" data-live={live && !userPaused} aria-hidden="true" />
-        <span>{live ? 'Public city preview · simulated activity' : 'Illustration of the city at dusk'}</span>
+        <span>{live ? 'Public city preview · simulated activity' : 'Illustration of the city at golden hour'}</span>
         {live && (
           <button
             type="button"

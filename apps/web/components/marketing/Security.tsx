@@ -5,48 +5,42 @@ import { SectionHead } from './Primitives';
 const POINTS = [
   {
     title: 'A person decides what goes out',
-    text: 'AgentCity is designed so agents draft and people approve: anything risky or outside your rules waits for a person. In a demo, sending is impossible. The database itself refuses messages, receipts and payments for demo accounts.',
+    text: 'Designed so agents draft and people approve. In a demo, the database refuses every send.',
   },
   {
     title: 'Your data is sealed off',
-    text: 'Every record carries the organisation it belongs to, and PostgreSQL row-level security enforces that boundary inside the database, not only in the app. Each demo gets an account of its own.',
+    text: 'PostgreSQL row-level security keeps each organisation’s records apart inside the database.',
   },
   {
     title: 'No passwords to steal',
-    text: 'Sign in with a one-time email code or a passkey; agencies can use single sign-on. Sessions are tied to the device you signed in on, and sensitive changes ask for your passkey again.',
+    text: 'Email codes, passkeys or agency single sign-on; sessions tied to your device.',
   },
   {
     title: 'Roles, not shared logins',
-    text: 'Agency owners, agency staff, client admins and client viewers each get their own access. Viewers can look but not change anything.',
+    text: 'Agency owner, staff, client admin and viewer; viewers can’t change anything.',
   },
   {
-    title: 'A record that can’t be rewritten',
-    text: 'Important actions go into an append-only audit log: the application can add entries, never change or delete them.',
+    title: 'An audit log that can’t be rewritten',
+    text: 'Entries can be added, never changed or deleted.',
   },
 ];
 
 export function Security() {
   return (
     <section className="mk-section mk-security on-teal" aria-labelledby="security-title" id="security">
-      <div className="mk-container mk-security-grid">
-        <div>
-          <SectionHead
-            index="07"
-            label="Security and control"
-            id="security-title"
-            title={
-              <>
-                You stay in charge <em>of your city.</em>
-              </>
-            }
-          />
-          <p className="mk-lead">
-            AI that works for your customers has to be trusted with them. These protections are built in, not bolted on.
-          </p>
-          <p className="mk-note">
-            AgentCity does not hold a security certification today, and we won&rsquo;t imply one.
-          </p>
-        </div>
+      <div className="mk-container">
+        <SectionHead
+          index="05"
+          label="Security and control"
+          id="security-title"
+          align="split"
+          title={
+            <>
+              You stay in charge <em>of your city.</em>
+            </>
+          }
+          lead="Built in, not bolted on. AgentCity does not hold a security certification today, and we won’t imply one."
+        />
         <ol className="mk-security-list">
           {POINTS.map((p, i) => (
             <li key={p.title}>

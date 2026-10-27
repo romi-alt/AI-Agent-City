@@ -1,27 +1,42 @@
 import { DEMO_BUILDING } from './cityFacts';
 import { DemoFormSlot } from './DemoFormSlot';
 
+// The demo invitation and the demo walkthrough, side by side: what happens after you press the button sits right
+// next to the form.
 export function GetDemo({ ttlDays }: { ttlDays: number }) {
+  const steps = [
+    ['Tell us about your business', 'Name, business email and company. The rest is optional.'],
+    ['Confirm your email', 'Click the one-time link we send you.'],
+    ['Sign in with a code', 'No password to create; add a passkey later if you like.'],
+    ['Meet your office', `A sample office for your company opens in ${DEMO_BUILDING.name}.`],
+    ['Look around', 'Fly in from the skyline, open each desk, explore the city.'],
+  ];
   return (
-    <section className="mk-section mk-get-demo on-dark" aria-labelledby="get-demo-title" id="get-demo" tabIndex={-1}>
+    <section className="mk-section mk-get-demo on-light" aria-labelledby="get-demo-title" id="get-demo" tabIndex={-1}>
       <div className="mk-container mk-get-demo-grid">
         <div className="mk-get-demo-copy">
           <p className="mk-label">
-            <span className="mk-label-index">09</span>Your invitation
+            <span className="mk-label-index">06</span>Your invitation
           </p>
           <h2 id="get-demo-title" className="mk-h2 mk-get-demo-title">
             Get your free <em>demo office.</em>
           </h2>
-          <p className="mk-lead">
-            Tell us who you are and we&rsquo;ll open a sample office for your company in {DEMO_BUILDING.name}, with an
-            AI team already at work on sample data.
+          <ol className="mk-steps" aria-label="What happens next" id="demo-walkthrough">
+            {steps.map(([title, text], i) => (
+              <li key={title}>
+                <span className="mk-step-dot" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <p>
+                  <strong>{title}.</strong> {text}
+                </p>
+              </li>
+            ))}
+          </ol>
+          <p className="mk-get-demo-note">
+            {ttlDays} days, then access ends and the sample office is removed. Everything inside is labelled Sample or
+            Simulated, and demo agents can&rsquo;t contact anyone.
           </p>
-          <ul className="mk-ticks mk-ticks-gold">
-            <li>A private office on its own floor</li>
-            <li>An AI team with sample tasks, conversations and activity</li>
-            <li>A guided arrival through the city</li>
-            <li>{ttlDays} days to look around. No card, no password</li>
-          </ul>
         </div>
         <div className="mk-get-demo-form">
           <DemoFormSlot />

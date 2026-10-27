@@ -6,7 +6,7 @@ export function SiteFooter({ contactEmail }: { contactEmail?: string }) {
       <div className="mk-container">
         <section className="mk-contact" id="contact" aria-labelledby="contact-title">
           <p className="mk-label">
-            <span className="mk-label-index">11</span>Contact
+            <span className="mk-label-index">08</span>Contact
           </p>
           <h2 id="contact-title" className="mk-h2">
             Rather talk <em>to a person first?</em>

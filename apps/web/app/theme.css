@@ -67,7 +67,7 @@
   --space-8: 64px;
   --space-9: 96px;
   --space-10: 128px;
-  --section-pad: clamp(64px, 9vw, 136px);
+  --section-pad: clamp(56px, 6.5vw, 104px);
   --gutter: clamp(16px, 4vw, 48px);
   --measure: 62ch;
   --container: 1240px;
