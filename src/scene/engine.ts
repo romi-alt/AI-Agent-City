@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { setNightGlow } from './meshes';
+import { skyTexture } from './textures';
 
 export interface View {
   root: THREE.Group;
@@ -85,9 +86,10 @@ export class Engine {
 
   setNight(night: boolean) {
     this.night = night;
-    const sky = new THREE.Color(night ? '#0b1430' : '#cfe6f5');
-    this.scene.background = sky;
-    this.scene.fog = new THREE.Fog(sky, 120, 260);
+    // Gradient sky: deep blue overhead fading to a hazy horizon that the fog blends into.
+    const [top, horizon] = night ? ['#050a1f', '#1b2a55'] : ['#5aa9e6', '#d6ecfa'];
+    this.scene.background = skyTexture(top, horizon);
+    this.scene.fog = new THREE.Fog(horizon, 130, 280);
     this.hemi.intensity = night ? 0.35 : 1.6;
     this.sun.intensity = night ? 0.25 : 2.2;
     this.sun.color.set(night ? '#8fa6ff' : '#fff4e0');

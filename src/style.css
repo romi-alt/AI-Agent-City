@@ -495,3 +495,14 @@ label.check input { width: auto; }
 .view-only { color: #b45309; background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.35); border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
 .empty-scope { position: fixed; inset: 0; display: grid; place-items: center; padding: 16px; background: var(--bg); color: var(--text); }
 .empty-scope div { max-width: 420px; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+
+/* city polish: brand-coloured building signs and livelier floating panels */
+.bsign { border-top: 3px solid var(--b, var(--accent)); border-radius: 10px; padding: 4px 11px; transition: transform .15s ease, box-shadow .15s ease; }
+.bsign:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 10px 24px rgba(0,0,0,.18); }
+.bsign b { letter-spacing: .01em; }
+.menu, .floors, .legend, .pad, .chip-title { border-radius: 14px; backdrop-filter: blur(12px) saturate(1.3); -webkit-backdrop-filter: blur(12px) saturate(1.3); }
+.menu button { transition: background .15s, color .15s, padding-left .15s; }
+.menu button:hover { background: var(--accent); color: var(--accent-ink); padding-left: 14px; }
+.pad button { transition: background .15s, color .15s, transform .1s; }
+.pad button:active { transform: scale(.94); }
+@media (prefers-reduced-motion: reduce) { .bsign, .menu button, .pad button { transition: none; } }

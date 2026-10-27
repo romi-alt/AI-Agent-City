@@ -3,19 +3,23 @@ import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js
 import type { Sim } from '../core/sim';
 import type { Building } from '../core/types';
 import { label, type View } from './engine';
-import { car, decorBuilding, facadeMaterial, flat, FLOOR_H, tree } from './meshes';
-import { roadTexture } from './textures';
+import { Batcher, car, decorBuilding, facadeMaterial, flat, FLOOR_H, tree } from './meshes';
+import { Street } from './street';
+import { FACADE_STYLES, roadTexture, type FacadeStyle } from './textures';
 
 const ROADS_X = [-50, -30, -10, 10, 30, 50];
 const ROADS_Z = [-30, -10, 10, 30];
-const DECOR_COLORS = ['#f4a6a6', '#f7c873', '#a6d3f4', '#b8e0a6', '#d9b8f0', '#f6e3a1', '#9fd8cf', '#f2b8d0', '#c9d2dc', '#ef8f6b'];
+/** Bright, varied walls for the blocks around the city. */
+const DECOR_COLORS = ['#ff8a80', '#ffb74d', '#4fc3f7', '#81c784', '#ba68c8', '#ffd54f', '#4db6ac', '#f06292', '#7986cb', '#ff7043', '#aed581', '#90caf9', '#ce93d8', '#ffcc80'];
+const TREE_GREENS = ['#6fbf5f', '#58a85a', '#8acb6a', '#4f9d63'];
 
 export class CityView implements View {
   root = new THREE.Group();
   pickables: THREE.Object3D[] = [];
   private hoverBox: THREE.Mesh;
   private marker: THREE.Mesh;
-  private cars: { obj: THREE.Object3D; axis: 'x' | 'z'; speed: number }[] = [];
+  private street: Street;
+  private clouds = new THREE.Group();
   private signs = new Map<string, HTMLElement>();
   private streetLamps: THREE.Mesh[] = [];
   /** The Training Center's crown, beacon and searchlight: the city's centrepiece. */
@@ -34,7 +38,9 @@ export class CityView implements View {
     sim.buildings.forEach((b, i) => this.building(b, i));
     this.neighbours();
     this.decor();
-    this.traffic();
+    this.street = new Street({ roadsX: ROADS_X, roadsZ: ROADS_Z, reach: 78, walkX: 56, walkZ: 36 });
+    this.root.add(this.street.root);
+    this.sky();
 
     this.hoverBox = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: '#ffd166', transparent: true, opacity: 0.45, depthWrite: false }));
     this.hoverBox.visible = false;
@@ -97,6 +103,7 @@ export class CityView implements View {
     for (const l of this.streetLamps) (l.material as THREE.MeshStandardMaterial).emissiveIntensity = night ? 2 : 0;
     this.crownMat.emissiveIntensity = night ? 0.55 : 0;
     if (this.beam) this.beam.visible = night;
+    this.clouds.visible = !night;
   }
 
   update(dt: number) {
@@ -107,17 +114,15 @@ export class CityView implements View {
       this.beacon.scale.setScalar(1 + pulse * 0.15);
     }
     if (this.beam) this.beam.rotation.y += dt * 0.4;
-    for (const c of this.cars) {
-      const p = c.obj.position;
-      p[c.axis] += c.speed * dt;
-      const lim = c.axis === 'x' ? 75 : 55;
-      if (p[c.axis] > lim) p[c.axis] = -lim;
-      if (p[c.axis] < -lim) p[c.axis] = lim;
+    this.street.update(dt, this.time);
+    for (const c of this.clouds.children) {
+      c.position.x += dt * (1.2 + (c.userData.speed as number));
+      if (c.position.x > 140) c.position.x = -140;
     }
   }
 
   private ground() {
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), flat('#cfd3d6'));
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), flat('#a9cf8e'));
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     this.root.add(ground);
@@ -136,15 +141,22 @@ export class CityView implements View {
     for (const x of ROADS_X) road(160, false, x);
     for (const z of ROADS_Z) road(160, true, z);
 
-    const lampGeo = new THREE.SphereGeometry(0.25, 8, 8);
-    for (const x of ROADS_X) for (const z of ROADS_Z) {
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3), flat('#3a3f45'));
-      pole.position.set(x + 2.6, 1.5, z + 2.6);
-      const lamp = new THREE.Mesh(lampGeo, new THREE.MeshStandardMaterial({ color: '#fff3c4', emissive: '#ffd27a', emissiveIntensity: 0 }));
-      lamp.position.set(x + 2.6, 3.1, z + 2.6);
-      this.streetLamps.push(lamp);
-      this.root.add(pole, lamp);
-    }
+    // Street lamps halfway along each block, on both sides of the road.
+    const lampGeo = new THREE.SphereGeometry(0.22, 8, 8);
+    const lampMat = new THREE.MeshStandardMaterial({ color: '#fff3c4', emissive: '#ffd27a', emissiveIntensity: 0 });
+    const poleGeo = new THREE.CylinderGeometry(0.06, 0.07, 3);
+    const posts = new Batcher();
+    const heads = new Batcher();
+    const addLamp = (x: number, z: number) => {
+      posts.add(poleGeo, flat('#3a3f45'), [x, 1.5, z]);
+      heads.add(lampGeo, lampMat, [x, 3.1, z]);
+    };
+    const mids = (roads: number[]) => roads.slice(1).map((r, i) => (r + roads[i]!) / 2);
+    for (const z of ROADS_Z) for (const x of mids(ROADS_X)) for (const side of [-1, 1]) addLamp(x, z + side * 3.5);
+    for (const x of ROADS_X) for (const z of mids(ROADS_Z)) for (const side of [-1, 1]) addLamp(x + side * 3.5, z);
+    const lit = heads.build(false);
+    this.streetLamps.push(...(lit.children as THREE.Mesh[]));
+    this.root.add(posts.build(false), lit);
   }
 
   private building(b: Building, index: number) {
@@ -158,25 +170,29 @@ export class CityView implements View {
     lot.receiveShadow = true;
     g.add(lot);
     for (const [tx, tz] of [[-6.5, 6.5], [6.5, 6.5], [-6.5, -6.5], [6.5, -6.5]]) {
-      const t = tree(0.9 + ((index + tx) % 3) * 0.1);
+      const t = tree(0.9 + ((index + tx) % 3) * 0.1, TREE_GREENS[(index + Math.abs(tx + tz)) % TREE_GREENS.length]);
       t.position.set(tx, 0.15, tz);
       g.add(t);
     }
     if (b.kind === 'dealership') {
       [-3, 0, 3].forEach((cx, i) => {
         const c = car([b.accent, '#ffffff', '#2d3436'][i]);
-        c.position.set(cx, 0.15, 6.8);
+        c.position.set(cx, 0.15, 5.9);
         c.rotation.y = Math.PI / 2;
         g.add(c);
       });
     }
 
-    const variant = 1 + (index % 3);
+    const variant = 1 + (index % 6);
+    // Each kind of building gets its own look: dealerships a glass showroom at street level.
+    const style: FacadeStyle = b.kind === 'associates' ? 'ribbon' : b.kind === 'rental' ? (index % 2 ? 'brick' : 'glass') : b.kind === 'training' ? 'classic' : (['classic', 'glass', 'brick'] as const)[index % 3]!;
     b.floors.forEach(f => {
       const isTop = f.level === b.floors.length;
       const wall = b.kind === 'training' && isTop ? '#cfe8f7' : b.color;
-      const mat = facadeMaterial(wall, b.w, f.vacant ? 0 : variant);
-      const m = new THREE.Mesh(new THREE.BoxGeometry(b.w, FLOOR_H, b.d), [mat, mat, flat(b.accent), flat(b.accent), mat, mat]);
+      const floorStyle: FacadeStyle = b.kind === 'dealership' && f.level === 1 ? 'showroom' : style;
+      const mat = facadeMaterial(wall, b.w, f.vacant ? 0 : variant, floorStyle);
+      // One material on all faces: floors stack and the parapet caps the top, so this draws once, not six times.
+      const m = new THREE.Mesh(new THREE.BoxGeometry(b.w, FLOOR_H, b.d), mat);
       m.position.y = (f.level - 0.5) * FLOOR_H + 0.15;
       m.castShadow = m.receiveShadow = true;
       m.userData = { pick: true, buildingId: b.id, level: f.level };
@@ -206,6 +222,7 @@ export class CityView implements View {
       `<span class="badge" style="display:none"></span><b>${icon} ${b.short}</b><span class="sub"></span>`,
       `bsign kind-${b.kind}`, () => this.onSelect(b.id));
     sign.position.set(0, centre ? h + 18 : h + 3, 0);
+    sign.element.style.setProperty('--b', b.accent === '#ffffff' ? b.color : b.accent);
     this.signs.set(b.id, sign.element);
     g.add(sign);
     this.root.add(g);
@@ -295,31 +312,75 @@ export class CityView implements View {
   private decor() {
     let seed = 7;
     const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    const ROOFS = ['#7d6b5d', '#5d6d7e', '#8d6e63', '#607d8b'];
+    const scenery = new Batcher();
+    const padGeo = new THREE.BoxGeometry(9, 0.12, 9);
     for (let x = -70; x <= 70; x += 10) for (let z = -50; z <= 50; z += 10) {
       if (Math.abs(x) <= 50 && Math.abs(z) <= 30) continue;
       if (ROADS_X.includes(x) || ROADS_Z.includes(z)) continue;
-      const c = DECOR_COLORS[Math.floor(rnd() * DECOR_COLORS.length)];
-      const d = decorBuilding(7, 7, 3 + Math.floor(rnd() * 7), c, '#7d6b5d', Math.floor(rnd() * 10));
-      d.position.set(x, 0, z);
+      const r = rnd();
+      // Concrete pad under every plot.
+      scenery.add(padGeo, flat('#e4e0d8'), [x, 0.06, z]);
+      if (r < 0.16) { scenery.addObject(this.park(x, z, Math.floor(rnd() * 100))); continue; }
+      const c = DECOR_COLORS[Math.floor(rnd() * DECOR_COLORS.length)]!;
+      const style: FacadeStyle = FACADE_STYLES[Math.floor(rnd() * FACADE_STYLES.length)]!;
+      const tall = style === 'glass' ? 6 + Math.floor(rnd() * 8) : 3 + Math.floor(rnd() * 7);
+      const d = decorBuilding(7, 7, tall, c, ROOFS[Math.floor(rnd() * ROOFS.length)]!, Math.floor(rnd() * 100), style);
+      d.position.set(x, 0.12, z);
+      d.rotation.y = Math.floor(rnd() * 4) * (Math.PI / 2);
       this.root.add(d);
     }
+    this.root.add(scenery.build());
   }
 
-  private traffic() {
-    const colors = ['#e74c3c', '#3498db', '#f1c40f', '#ecf0f1', '#2c3e50', '#27ae60'];
-    for (let i = 0; i < 18; i++) {
-      const horizontal = i % 2 === 0;
-      const c = car(colors[i % colors.length]);
-      const dir = i % 4 < 2 ? 1 : -1;
-      if (horizontal) {
-        c.position.set(-75 + i * 9, 0, ROADS_Z[i % ROADS_Z.length] + dir * 1);
-        c.rotation.y = dir > 0 ? 0 : Math.PI;
-      } else {
-        c.position.set(ROADS_X[i % ROADS_X.length] - dir * 1, 0, -55 + i * 6);
-        c.rotation.y = dir > 0 ? -Math.PI / 2 : Math.PI / 2;
-      }
-      this.cars.push({ obj: c, axis: horizontal ? 'x' : 'z', speed: dir * (5 + (i % 5)) });
-      this.root.add(c);
+  /** A small park: lawn, trees, a fountain and benches (returned for batching, not added). */
+  private park(x: number, z: number, seed: number) {
+    const g = new THREE.Group();
+    g.position.set(x, 0.12, z);
+    const lawn = new THREE.Mesh(new THREE.BoxGeometry(8.4, 0.1, 8.4), flat('#7cc36b'));
+    lawn.position.y = 0.05;
+    lawn.receiveShadow = true;
+    g.add(lawn);
+    const path = new THREE.Mesh(new THREE.BoxGeometry(8.4, 0.11, 1.2), flat('#e8dcc4'));
+    path.position.y = 0.06;
+    const path2 = path.clone();
+    path2.rotation.y = Math.PI / 2;
+    g.add(path, path2);
+    const basin = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.4, 0.4, 20), flat('#cfd8dc'));
+    basin.position.y = 0.3;
+    const water = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.15, 0.1, 20), flat('#4fc3f7', { roughness: 0.15, metalness: 0.1 }));
+    water.position.y = 0.48;
+    const spout = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 0.9, 8), flat('#cfd8dc'));
+    spout.position.y = 0.8;
+    g.add(basin, water, spout);
+    for (const [tx, tz] of [[-3, -3], [3, -3], [-3, 3], [3, 3], [-3.3, 0.2], [3.3, -0.2]]) {
+      const t = tree(0.85 + ((seed + tx) % 3) * 0.15, TREE_GREENS[(seed + Math.abs(tx * 3 + tz)) % TREE_GREENS.length]);
+      t.position.set(tx, 0.1, tz);
+      g.add(t);
     }
+    for (const [bx, bz, ry] of [[0, 2.2, 0], [0, -2.2, Math.PI]]) {
+      const bench = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.15, 0.4), flat('#8d6e63'));
+      bench.position.set(bx + 1.6, 0.4, bz);
+      bench.rotation.y = ry;
+      g.add(bench);
+    }
+    return g;
+  }
+
+  /** Soft low-poly clouds drifting across the sky (hidden at night). */
+  private sky() {
+    const puff = flat('#ffffff', { roughness: 1, flatShading: true, transparent: true, opacity: 0.92 });
+    for (let i = 0; i < 9; i++) {
+      const c = new THREE.Group();
+      for (let k = 0; k < 4; k++) {
+        const ball = new THREE.Mesh(new THREE.IcosahedronGeometry(2.4 + ((i + k) % 3) * 0.8, 0), puff);
+        ball.position.set(k * 2.6 - 4, ((i + k) % 2) * 0.9, ((k * 7) % 3) - 1);
+        c.add(ball);
+      }
+      c.position.set(-140 + i * 32, 58 + (i % 3) * 8, -60 + ((i * 37) % 120));
+      c.userData.speed = (i % 4) * 0.4;
+      this.clouds.add(c);
+    }
+    this.root.add(this.clouds);
   }
 }
