@@ -1,16 +1,28 @@
 'use client';
 import dynamic from 'next/dynamic';
 
-// WebGL needs the browser: the scene is never rendered on the server.
-const CityScene = dynamic(() => import('@agentcity/city-scene').then(m => m.CityScene), {
+// WebGL needs the browser: the explorer (scene, HUD and 2D fallback) never renders on the server.
+const CityClient = dynamic(() => import('./CityClient').then(m => m.CityClient), {
   ssr: false,
-  loading: () => <p className="city-loading">Loading the city…</p>,
+  loading: () => (
+    <main
+      className="city-loading"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'grid',
+        placeItems: 'center',
+        background: '#0f1b2d',
+        color: '#f6f3ec',
+        maxWidth: 'none',
+        padding: 0,
+      }}
+    >
+      <p style={{ color: '#f6f3ec' }}>Loading the city…</p>
+    </main>
+  ),
 });
 
 export function CityExplorer() {
-  return (
-    <main className="city-page" style={{ height: '100dvh' }}>
-      <CityScene />
-    </main>
-  );
+  return <CityClient />;
 }
