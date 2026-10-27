@@ -113,8 +113,8 @@ function StreetParts({
       housing: new MeshStandardMaterial({ color: '#2f3326', roughness: 0.6, metalness: 0.3 }),
       wood: new MeshStandardMaterial({ color: '#8a6446', roughness: 0.8 }),
       iron: new MeshStandardMaterial({ color: '#23272b', roughness: 0.5, metalness: 0.5 }),
-      granite: new MeshStandardMaterial({ color: '#8b8a86', roughness: 0.6 }),
-      lawn: new MeshStandardMaterial({ color: '#4d7a3f', roughness: 0.95 }),
+      granite: new MeshStandardMaterial({ color: '#b9b6ae', roughness: 0.6 }),
+      lawn: new MeshStandardMaterial({ color: '#5d9a48', roughness: 0.95 }),
     }),
     [],
   );

@@ -67,7 +67,7 @@ const DEALER_STYLES: FacadeStyle[] = [
 export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: number): BuildingDesign {
   const n = b.floors.length;
   const d: BuildingDesign = { key: b.key, masses: [], parts: [], signs: [], trees: [], top: at(n), roof: at(n) };
-  const base = { seed, lit: 0.4, baseY: BUILDING_BASE_Y, ground: 1 };
+  const base = { seed, lit: 0.32, baseY: BUILDING_BASE_Y, ground: 1 };
   const mass = (m: Omit<Mass, 'seed' | 'lit' | 'baseY' | 'ground'> & Partial<Mass>) =>
     d.masses.push({ ...base, ...m, x: b.x + m.x, z: b.z + m.z });
   const part = (p: Part) => d.parts.push({ ...p, x: b.x + p.x, z: b.z + p.z });
@@ -86,10 +86,10 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
       y0: at(0),
       y1: at(podium),
       style: 'stone',
-      wall: '#e6dece',
-      glass: '#2a4258',
+      wall: '#efe8da',
+      glass: '#3f6a88',
       ground: 2,
-      lit: 0.6,
+      lit: 0.4,
     });
     const tw = b.w * 0.74;
     const td = b.d * 0.72;
@@ -102,9 +102,9 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
       y0: at(podium),
       y1: at(n),
       style: 'glass',
-      wall: '#a8823f',
-      glass: '#22405a',
-      lit: 0.6,
+      wall: '#b8924a',
+      glass: '#3d6a8e',
+      lit: 0.4,
     });
     // Gold fins up the tower corners, and gold coping.
     for (const sx of [-1, 1])
@@ -183,7 +183,7 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
     const style = DEALER_STYLES[kindIndex % DEALER_STYLES.length]!;
     const glassy = style !== 'stone';
     const wall = glassy ? mix('#9aa2a8', b.color, 0.18) : mute(b.color, 0.72);
-    const glass = mix('#203546', b.color, 0.18);
+    const glass = mix('#3f6a88', b.color, 0.15);
     // Double-height glass showroom with a brand-coloured fascia.
     mass({
       x: 0,
@@ -194,7 +194,7 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
       y1: at(2),
       style: 'glass',
       wall: '#2b2f33',
-      glass: '#2a4a60',
+      glass: '#4a7a98',
       ground: 2,
       lit: 1,
     });
@@ -210,7 +210,7 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
       color: b.accent,
     });
     const tw = b.w - 1;
-    mass({ x: 0, z: -0.3, w: tw, d: b.d - 1.2, y0: at(2), y1: at(n), style, wall, glass, lit: 0.45 });
+    mass({ x: 0, z: -0.3, w: tw, d: b.d - 1.2, y0: at(2), y1: at(n), style, wall, glass, lit: 0.35 });
     // A brand-coloured fin up one front corner.
     part({
       shape: 'box',
@@ -249,9 +249,9 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
   }
 
   if (b.kind === 'associates') {
-    const brick = mix(kindIndex % 2 ? '#8a4a39' : '#9b6a52', b.color, 0.12);
-    const stone = '#d2c6b0';
-    mass({ x: 0, z: 0, w: b.w, d: b.d, y0: at(0), y1: at(2), style: 'stone', wall: stone, glass: '#2c3e4c' });
+    const brick = mix(kindIndex % 2 ? '#b0573c' : '#b86d50', b.color, 0.1);
+    const stone = '#e6dbc6';
+    mass({ x: 0, z: 0, w: b.w, d: b.d, y0: at(0), y1: at(2), style: 'stone', wall: stone, glass: '#3c5a70' });
     mass({
       x: 0,
       z: 0,
@@ -261,8 +261,8 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
       y1: at(n - 2),
       style: 'brick',
       wall: brick,
-      glass: '#2a3a46',
-      lit: 0.5,
+      glass: '#3c5a70',
+      lit: 0.35,
     });
     mass({
       x: 0,
@@ -273,8 +273,8 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
       y1: at(n),
       style: 'brick',
       wall: brick,
-      glass: '#2a3a46',
-      lit: 0.5,
+      glass: '#3c5a70',
+      lit: 0.35,
     });
     for (const [y, w, dd, z] of [
       [at(2), b.w, b.d, 0],
@@ -330,9 +330,9 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
 
   // Rentals: contemporary curtain-wall towers with a setback terrace.
   const variants: { style: FacadeStyle; wall: string; glass: string; canopy: string }[] = [
-    { style: 'fins', wall: '#8b7a62', glass: '#3a3a34', canopy: '#ff7a5c' },
-    { style: 'glass', wall: '#c9d1d6', glass: '#1d4a52', canopy: '#1f8a8a' },
-    { style: 'ribbon', wall: '#e4e0d7', glass: '#2b4646', canopy: '#5b9a5b' },
+    { style: 'fins', wall: '#a89276', glass: '#7a6a52', canopy: '#ff7a5c' },
+    { style: 'glass', wall: '#d5dbdf', glass: '#3d7f86', canopy: '#1f8a8a' },
+    { style: 'ribbon', wall: '#eeeae2', glass: '#4c7676', canopy: '#5b9a5b' },
   ];
   const v = variants[kindIndex % variants.length]!;
   const setback = n - 2;
@@ -346,7 +346,7 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
     style: v.style,
     wall: v.wall,
     glass: v.glass,
-    lit: 0.55,
+    lit: 0.35,
   });
   mass({
     x: 0,
@@ -358,7 +358,7 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
     style: v.style,
     wall: v.wall,
     glass: v.glass,
-    lit: 0.55,
+    lit: 0.35,
   });
   // Terrace planting on the setback, and a mechanical penthouse on top.
   part({ shape: 'box', mat: 'garden', x: 0, y: at(setback) + 0.2, z: hd - 0.55, sx: b.w - 0.6, sy: 0.3, sz: 0.8 });
