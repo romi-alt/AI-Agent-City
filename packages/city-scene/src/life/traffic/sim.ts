@@ -64,6 +64,20 @@ export interface Vehicle {
   blocked: number;
   /** Distance driven (world units); the wheels roll by it. */
   odo: number;
+  /** Personal driving style: peak acceleration (units/s²), reaction time to a car pulling away (s). */
+  accel: number;
+  reaction: number;
+  /** Seconds this car has been held back by a leader that is already moving (start-up delay down a queue). */
+  react: number;
+  /** Where in its lane the driver sits, as a sideways offset from the lane centre (units, positive towards the kerb). */
+  lat: number;
+  /** Yaw rate (rad/s, positive turning left), smoothed: the body rolls with it. */
+  yawRate: number;
+  /** Stop planned on the current link (distance along it, −1: none) and the dwell left once there (−1: not there yet). */
+  stopAt: number;
+  dwell: number;
+  /** 0..1: eased towards the kerb while a bus or taxi pulls in. */
+  pull: number;
 }
 
 /** Gaps (units) between bumpers: kept while driving, never closed (hard), reserved when entering a junction. */
@@ -72,7 +86,14 @@ const GAP_DESIRED = 0.8;
 const HEADWAY = 0.22;
 const GAP_HARD = 0.3;
 const GAP_RESERVE = GAP_DESIRED + 0.3;
-const ACCEL = 2.6;
+/** How quickly the commanded acceleration may build up (units/s³): no instant throttle, a progressive brake. */
+const JERK_UP = 5;
+const JERK_DOWN = 14;
+/** Odds that a bus (a taxi) plans a stop on a link long enough for it, and how long it waits there (seconds). */
+const STOP_CHANCE: Partial<Record<VehicleKind, number>> = { bus: 0.5, taxi: 0.1 };
+const DWELL: Partial<Record<VehicleKind, [number, number]>> = { bus: [5, 10], taxi: [2.5, 4.5] };
+/** Sideways shift towards the kerb while stopped at a stop (units). */
+const PULL_OVER: Partial<Record<VehicleKind, number>> = { bus: 0.3, taxi: 0.36 };
 const DECEL_COMFORT = 4;
 const DECEL_MAX = 10;
 const TURN_SPEED = { straight: Infinity, right: 3.2, left: 4 };
@@ -125,6 +146,8 @@ export class TrafficSim {
   /** Pieces whose occupant order may have changed this step (sorting all of a large grid's pieces is wasteful). */
   private dirty = new Set<number>();
   time = 0;
+  /** Length of the step in progress. */
+  private dt = 1 / 30;
 
   constructor(streets: CityLayout['streets'], opts: TrafficOptions) {
     this.net = buildNetwork(streets);
@@ -165,6 +188,14 @@ export class TrafficSim {
         brake: 0,
         blocked: 0,
         odo: 0,
+        accel: range(this.rng, 2.1, 3.0),
+        reaction: range(this.rng, 0.35, 1.1),
+        react: 0,
+        lat: range(this.rng, -0.06, 0.1),
+        yawRate: 0,
+        stopAt: -1,
+        dwell: -1,
+        pull: 0,
       });
     });
     this.scatter();
@@ -229,7 +260,18 @@ export class TrafficSim {
     poseAt(link, s, v.pose);
   }
 
+  /** Buses and now and then a taxi plan to stop somewhere along a link that is long enough to hold them. */
+  private planStop(v: Vehicle, link: Link) {
+    v.stopAt = -1;
+    v.dwell = -1;
+    const odds = STOP_CHANCE[v.kind];
+    if (!odds || link.length < 12 || this.rng() > odds) return;
+    const at = link.length * range(this.rng, 0.4, 0.7);
+    if (at > v.s + 3 + v.len) v.stopAt = at;
+  }
+
   private chooseNext(v: Vehicle, link: Link) {
+    this.planStop(v, link);
     if (link.toJ < 0) {
       v.next = -1;
       return;
@@ -354,6 +396,7 @@ export class TrafficSim {
 
   step(dt: number, t: number) {
     this.time = t;
+    this.dt = dt;
     const vs = this.vehicles;
     // 1. Decide speeds from the current positions (everyone ahead only moves forward, so this is safe).
     const advance = new Float64Array(vs.length);
@@ -396,8 +439,15 @@ export class TrafficSim {
           vMax = Math.min(vMax, lead.o.v * Math.max(0, (gap - GAP_HARD) / (GAP_DESIRED - GAP_HARD)));
         hard = Math.min(hard, Math.max(0, gap - GAP_HARD));
       }
-      const want = Math.max(-DECEL_MAX, Math.min(ACCEL, (vMax - v.v) * 2.2));
-      v.a += (want - v.a) * Math.min(1, dt * 6);
+      if (piece.kind === 'link' && v.stopAt >= 0) vMax = Math.min(vMax, this.stopLimit(v, dt));
+      // A driver sets off a moment after the car ahead does, so a queue releases as a wave, not all at once.
+      if (v.v < 0.15 && lead && lead.o.v > 0.4 && vMax > 0.2) {
+        v.react += dt;
+        if (v.react < v.reaction) vMax = Math.min(vMax, 0.05);
+      } else if (v.v >= 0.15 || !lead) v.react = 0;
+      const want = Math.max(-DECEL_MAX, Math.min(v.accel, (vMax - v.v) * 2.2));
+      const jerk = want > v.a ? JERK_UP : JERK_DOWN;
+      v.a += Math.max(-jerk * dt, Math.min(jerk * dt, want - v.a));
       if (vMax < v.v && want < v.a) v.a = want;
       let nv = Math.max(0, Math.min(v.v + v.a * dt, vMax + 0.01));
       let ds = nv * dt;
@@ -410,6 +460,7 @@ export class TrafficSim {
       advance[v.id] = ds;
       const braking = v.a < -0.8 || v.v < 0.25 ? 1 : 0;
       v.brake += (braking - v.brake) * Math.min(1, dt * 8);
+      this.updatePull(v, piece, dt);
     }
     // 2. Move.
     for (const v of vs) {
@@ -426,6 +477,39 @@ export class TrafficSim {
     this.dirty.clear();
     // 3. Bring back vehicles that left the city.
     for (const v of vs) if (!v.active) this.respawn(v);
+  }
+
+  /** Speed cap that brings a bus or taxi to rest exactly at its planned stop, then holds it for the dwell time. */
+  private stopLimit(v: Vehicle, dt: number): number {
+    const toStop = v.stopAt - v.s;
+    if (v.dwell >= 0) {
+      v.dwell -= dt;
+      if (v.dwell > 0) return 0;
+      v.stopAt = -1;
+      v.dwell = -1;
+      return Infinity;
+    }
+    if (toStop < -0.5) {
+      v.stopAt = -1;
+      return Infinity;
+    }
+    if (toStop < 0.25 && v.v < 0.15) {
+      const [lo, hi] = DWELL[v.kind] ?? [3, 5];
+      v.dwell = range(this.rng, lo, hi);
+      return 0;
+    }
+    return Math.sqrt(2 * DECEL_COMFORT * 0.8 * Math.max(0, toStop - 0.05)) + 0.08;
+  }
+
+  /** Buses and taxis ease towards the kerb as they near their stop and back into the lane when they leave. */
+  private updatePull(v: Vehicle, piece: Piece, dt: number) {
+    const near = piece.kind === 'link' && v.stopAt >= 0 && v.stopAt - v.s < 5;
+    v.pull += ((near ? 1 : 0) - v.pull) * Math.min(1, dt * 1.6);
+  }
+
+  /** Sideways offset of a driver from the lane centre right now (towards the kerb is positive). */
+  laneOffset(v: Vehicle): number {
+    return v.lat + v.pull * (PULL_OVER[v.kind] ?? 0);
   }
 
   private transition(v: Vehicle) {
@@ -453,7 +537,15 @@ export class TrafficSim {
         this.chooseNext(v, link);
       }
     }
+    const yaw = v.pose.yaw;
     poseAt(this.net.pieces[v.piece]!, v.s, v.pose);
+    this.turnRate(v, yaw);
+  }
+
+  /** Smoothed yaw rate from the change of heading over the last step. */
+  private turnRate(v: Vehicle, before: number) {
+    const d = Math.atan2(Math.sin(v.pose.yaw - before), Math.cos(v.pose.yaw - before));
+    v.yawRate += (d / Math.max(this.dt, 1e-3) - v.yawRate) * Math.min(1, this.dt * 6);
   }
 
   private moveTo(v: Vehicle, piece: number, s: number) {

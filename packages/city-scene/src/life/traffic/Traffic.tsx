@@ -4,10 +4,11 @@ import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import type { LifeEnv } from '../env-adapter.ts';
 import { ROAD_Y } from '../geometry.ts';
+import { LightPoints } from '../light-points.ts';
 import { instanceAttr, Placer } from '../mesh-utils.ts';
 import { createRng } from '../rng.ts';
 import type { StreetSim } from '../street-sim.ts';
-import { VEHICLE_KINDS, type VehicleKind } from './sim.ts';
+import { VEHICLE_KINDS, VEHICLE_SPEC, type Vehicle, type VehicleKind } from './sim.ts';
 import {
   PAINTS,
   type VehicleDetail,
@@ -82,6 +83,37 @@ const NEAR = 70;
 /** Vehicles farther than this are lost in the fog (and a few pixels long), so they are not drawn at all. */
 const FAR = 420;
 
+/** Body lean: radians per unit of acceleration (pitch) and of lateral acceleration (roll), and their limits. */
+const PITCH_PER_ACCEL = 0.0065;
+const PITCH_MAX = 0.04;
+const ROLL_PER_LATERAL = 0.01;
+const ROLL_MAX = 0.05;
+/** Light points replace the lamp glow beyond LIGHT_MIN (the model's own lamps carry the near view). */
+const LIGHT_MIN = 14;
+const LIGHT_MAX = 330;
+
+/** Two headlights and two tail lights of a vehicle at (x, z) facing its yaw, brighter and bigger when braking. */
+function pushLights(lights: LightPoints, v: Vehicle, x: number, z: number, level: number, brake: number) {
+  const { len, width } = VEHICLE_SPEC[v.kind];
+  const fx = Math.cos(v.pose.yaw);
+  const fz = -Math.sin(v.pose.yaw);
+  const sx = Math.sin(v.pose.yaw);
+  const sz = Math.cos(v.pose.yaw);
+  const y = ROAD_Y + (v.kind === 'bus' ? 0.36 : 0.3);
+  for (const side of [-1, 1]) {
+    const s = side * width * 0.36;
+    lights.push(x + fx * len * 0.5 + sx * s, y, z + fz * len * 0.5 + sz * s, '#fff1cf', level * 0.8, 5);
+    lights.push(
+      x - fx * len * 0.5 + sx * s,
+      y,
+      z - fz * len * 0.5 + sz * s,
+      '#ff2a1c',
+      level * (0.45 + brake * 0.5),
+      4 + brake * 3,
+    );
+  }
+}
+
 interface Lod {
   mesh: THREE.InstancedMesh;
   state: THREE.InstancedBufferAttribute;
@@ -144,7 +176,10 @@ export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
     poolMesh.name = 'life-headlight-pools';
     poolMesh.frustumCulled = false;
     poolMesh.renderOrder = 2;
-    return { near, far, paint, beacon, uniforms, material, poolMesh, poolMat };
+    // Distant headlights and tail lights: fixed-size glowing points, so a car 200 units away is still a light.
+    const lights = new LightPoints(vehicles.length * 4, Math.min(2, window.devicePixelRatio || 1));
+    lights.points.name = 'life-vehicle-lights';
+    return { near, far, paint, beacon, uniforms, material, poolMesh, poolMat, lights };
   }, [vehicles, shadows, detail]);
 
   useEffect(
@@ -154,6 +189,7 @@ export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
       built.poolMesh.geometry.dispose();
       built.poolMat.map?.dispose();
       built.poolMat.dispose();
+      built.lights.dispose();
     },
     [built],
   );
@@ -176,6 +212,9 @@ export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
     for (const l of near.values()) l.n = 0;
     for (const l of far.values()) l.n = 0;
     let poolCount = 0;
+    const night = env.nightFactor;
+    const lit = pools && night > 0.2;
+    built.lights.begin();
     for (const v of vehicles) {
       const fade = v.active ? sim.traffic.edgeFade(v) : 0;
       if (fade <= 0) continue;
@@ -187,13 +226,22 @@ export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
       if (!tmp.frustum.intersectsSphere(tmp.sphere)) continue;
       const lod = (d < NEAR ? near : far).get(v.kind) ?? near.get(v.kind)!;
       const i = lod.n++;
-      lod.mesh.setMatrixAt(i, tmp.placer.set(v.pose.x, ROAD_Y, v.pose.z, v.pose.yaw));
+      const off = sim.traffic.laneOffset(v);
+      // The body leans with the car: nose down under braking, up under power, outward in a turn.
+      const pitch = animate ? Math.max(-PITCH_MAX, Math.min(PITCH_MAX, v.a * PITCH_PER_ACCEL)) : 0;
+      const roll = animate ? Math.max(-ROLL_MAX, Math.min(ROLL_MAX, v.v * v.yawRate * ROLL_PER_LATERAL)) : 0;
+      const px = v.pose.x + Math.sin(v.pose.yaw) * off;
+      const pz = v.pose.z + Math.cos(v.pose.yaw) * off;
+      lod.mesh.setMatrixAt(i, tmp.placer.set(px, ROAD_Y, pz, v.pose.yaw, 1, roll, pitch));
+      if (lit && d > LIGHT_MIN && d < LIGHT_MAX)
+        pushLights(built.lights, v, px, pz, night * fade, animate ? v.brake : 0);
       lod.mesh.setColorAt(i, built.paint[v.id]!);
       const turn = 2 * Math.PI * WHEEL_RADIUS[v.kind];
       lod.state.setXYZW(i, v.brake, built.beacon[v.id]!, v.odo % turn, fade);
       if (d < NEAR && poolMesh.visible)
-        poolMesh.setMatrixAt(poolCount++, tmp.placer.set(v.pose.x, ROAD_Y + 0.02, v.pose.z, v.pose.yaw, fade));
+        poolMesh.setMatrixAt(poolCount++, tmp.placer.set(px, ROAD_Y + 0.02, pz, v.pose.yaw, fade));
     }
+    built.lights.end();
     for (const l of [...near.values(), ...far.values()]) {
       l.mesh.count = l.n;
       l.mesh.instanceMatrix.needsUpdate = true;
@@ -210,6 +258,7 @@ export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
         <primitive key={l.mesh.name} object={l.mesh} />
       ))}
       {pools && <primitive object={built.poolMesh} />}
+      {pools && <primitive object={built.lights.points} />}
     </group>
   );
 }

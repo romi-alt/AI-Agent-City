@@ -76,6 +76,14 @@ interface Bird extends BirdState {
   turn: number;
   yaw: number;
   pyaw: number;
+  /** Personal wing-beat rhythm: seconds into the flap-and-glide cycle, its length, and the eased glide (0 flapping … 1 wings held). */
+  cyc: number;
+  period: number;
+  glide: number;
+  /** 0 … 1 while riding a thermal: wings held out, no beating. */
+  soar: number;
+  /** Phase of the slow altitude drift. */
+  wob: number;
 }
 
 interface Leg {
@@ -87,6 +95,8 @@ interface Leg {
   path: [number, number, number][];
   /** Cumulative length along the path. */
   lengths: number[];
+  /** The flock circles on a thermal over the rooftops, wings held out. */
+  thermal: boolean;
 }
 
 interface Flock {
@@ -97,6 +107,20 @@ interface Flock {
   t: number;
   speed: number;
 }
+
+function cumulative(path: [number, number, number][]): number[] {
+  const lengths = [0];
+  for (let i = 1; i < path.length; i++) {
+    const p = path[i - 1]!;
+    const q = path[i]!;
+    lengths.push(lengths[i - 1]! + Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2]));
+  }
+  return lengths;
+}
+
+/** Share of flights that are a thermal circle, and the share of a wing-beat cycle spent flapping before gliding. */
+const THERMAL_ODDS = 0.28;
+const FLAP_SHARE = 0.62;
 
 export const BOIDS = {
   step: 1 / 30,
@@ -112,7 +136,8 @@ export class Boids {
   readonly flocks: Flock[] = [];
   readonly obstacles: Obstacle[];
   readonly roofs: Roof[];
-  private skyline: number;
+  /** Top of everything the birds must clear: the main roofs, crowns, spires and signs included. */
+  readonly top: number;
   readonly bounds: { minX: number; maxX: number; minZ: number; maxZ: number; maxY: number };
   readonly count: number;
   private simT = 0;
@@ -122,7 +147,7 @@ export class Boids {
     const rng = createRng(opts.seed ?? 77);
     this.obstacles = world.obstacles;
     this.roofs = world.roofs;
-    this.skyline = world.skyline;
+    this.top = world.obstacles.reduce((m, o) => Math.max(m, o.maxY), world.skyline);
     this.roads = { x: layout.streets.roadsX, z: layout.streets.roadsZ };
     const e = layout.streets.extent;
     this.bounds = {
@@ -153,7 +178,7 @@ export class Boids {
     for (let i = 0; i < 16; i++) {
       let to = Math.floor(rng() * n);
       if (to === at) to = (to + 1 + Math.floor(rng() * (n - 1))) % n;
-      legs.push(this.route(rng, at, to));
+      legs.push(rng() < THERMAL_ODDS ? this.thermal(rng, at, to) : this.route(rng, at, to));
       at = to;
     }
     legs[legs.length - 1] = this.route(rng, legs[legs.length - 1]!.from, legs[0]!.from);
@@ -175,6 +200,11 @@ export class Boids {
       turn: 0,
       yaw: 0,
       pyaw: 0,
+      cyc: rng() * 4,
+      period: range(rng, 2.4, 4.4),
+      glide: 0,
+      soar: 0,
+      wob: rng() * 6.28,
     }));
     return { birds, legs, leg: 0, t: 0, speed: range(rng, 6.5, 8.5) };
   }
@@ -191,7 +221,7 @@ export class Boids {
     const path: [number, number, number][] = [];
     path.push([ca[0], A.y + 3, ca[1]]);
     if (rng() < 0.5) {
-      const high = this.skyline + range(rng, 4, 10);
+      const high = this.top + range(rng, 3, 8);
       path.push([ca[0] + (cb[0] - ca[0]) * 0.3, high, ca[1] + (cb[1] - ca[1]) * 0.3]);
       path.push([ca[0] + (cb[0] - ca[0]) * 0.7, high, ca[1] + (cb[1] - ca[1]) * 0.7]);
     } else {
@@ -208,13 +238,35 @@ export class Boids {
       }
     }
     path.push([cb[0], B.y + 3, cb[1]]);
-    const lengths = [0];
-    for (let i = 1; i < path.length; i++) {
-      const p = path[i - 1]!;
-      const q = path[i]!;
-      lengths.push(lengths[i - 1]! + Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2]));
+    const lengths = cumulative(path);
+    return { from: a, to: b, rest: range(rng, 8, 22), path, lengths, thermal: false };
+  }
+
+  /**
+   * A lazy thermal: climb steeply off roof a, circle one to two turns well above the skyline (so never near a tower)
+   * with the wings held out, then glide down to roof b.
+   */
+  private thermal(rng: Rng, a: number, b: number): Leg {
+    const A = this.roofs[a]!;
+    const B = this.roofs[b]!;
+    const radius = range(rng, 13, 22);
+    const base = this.top + range(rng, 5, 10);
+    const turns = range(rng, 1.2, 2);
+    const dir = rng() < 0.5 ? 1 : -1;
+    const lift = range(rng, 4, 8);
+    // The circle is centred so that its first point is straight above the roof the flock left.
+    const phi = range(rng, 0, Math.PI * 2);
+    const cx = A.x - Math.cos(phi) * radius;
+    const cz = A.z - Math.sin(phi) * radius;
+    const path: [number, number, number][] = [[A.x, A.y + 3, A.z]];
+    const points = Math.ceil(turns * 14);
+    for (let i = 0; i <= points; i++) {
+      const k = i / points;
+      const ang = phi + dir * turns * Math.PI * 2 * k;
+      path.push([cx + Math.cos(ang) * radius, base + lift * k, cz + Math.sin(ang) * radius]);
     }
-    return { from: a, to: b, rest: range(rng, 8, 22), path, lengths };
+    path.push([B.x, B.y + 3, B.z]);
+    return { from: a, to: b, rest: range(rng, 8, 22), path, lengths: cumulative(path), thermal: true };
   }
 
   private placePerched(f: Flock, roof: number) {
@@ -327,7 +379,9 @@ export class Boids {
         az *= 3;
       } else {
         allLanded = false;
-        const [tx, ty, tz] = this.target(f, leg, flight + 0.6);
+        const [tx, ty0, tz] = this.target(f, leg, flight + 0.6);
+        // Birds drift a little up and down on their own rhythm, only where there is sky to spare.
+        const ty = ty0 + Math.sin(f.t * 0.45 + b.wob) * (ty0 > this.top ? 1.6 : 0.3);
         // Seek the route, keep together, match heading, keep apart.
         ax += (tx - b.x) * 0.9 + (cx - b.x) * 0.35 + (vx - b.vx) * 0.6;
         ay += (ty - b.y) * 0.9 + (cy - b.y) * 0.35 + (vy - b.vy) * 0.6;
@@ -395,11 +449,21 @@ export class Boids {
         b.turn += (dyaw / h - b.turn) * Math.min(1, h * 3);
       }
       b.climb += (b.vy - b.climb) * Math.min(1, h * 4);
+      this.rhythm(b, h, leg.thermal && !arrive && b.y > this.top + 1);
     });
     if (arrive && allLanded) {
       f.leg = (f.leg + 1) % f.legs.length;
       f.t = 0;
     }
+  }
+
+  /** Flap for most of a cycle, then hold the wings out and glide; on a thermal, soar. */
+  private rhythm(b: Bird, h: number, thermal: boolean) {
+    b.cyc += h;
+    const phase = (b.cyc % b.period) / b.period;
+    const glideNow = phase > FLAP_SHARE && b.climb < 0.9 ? 1 : 0;
+    b.glide += (glideNow - b.glide) * Math.min(1, h * 5);
+    b.soar += ((thermal ? 1 : 0) - b.soar) * Math.min(1, h * 1.5);
   }
 
   /** Never inside a building, never below the street or above the sky limit, never out of the district. */
@@ -456,13 +520,16 @@ export class Boids {
     out.y = b.py + (b.y - b.py) * alpha;
     out.z = b.pz + (b.z - b.pz) * alpha;
     out.yaw = b.pyaw + Math.atan2(Math.sin(b.yaw - b.pyaw), Math.cos(b.yaw - b.pyaw)) * alpha;
-    out.bank = Math.max(-0.6, Math.min(0.6, -b.turn * 0.25));
+    out.bank = Math.max(-0.7, Math.min(0.7, -b.turn * 0.8));
     const sp = Math.hypot(b.vx, b.vz) || 1;
     out.pitch = Math.max(-0.5, Math.min(0.5, Math.atan2(b.vy, sp) * 0.6));
     // Strong beats when climbing or slow, a glide when descending fast.
     const climbing = Math.max(0, Math.min(1, b.climb / 2));
     const gliding = Math.max(0, Math.min(1, -b.climb / 2.5));
-    out.flap = b.perched >= 1 ? 0 : Math.max(0.15, Math.min(1, 0.55 + climbing * 0.5 - gliding * 0.45));
+    const beat = Math.max(0.3, Math.min(1, 0.65 + climbing * 0.45 - gliding * 0.3));
+    // Gliding and soaring hold the wings out, with a faint shiver so they are not frozen.
+    const held = Math.max(b.glide, b.soar);
+    out.flap = b.perched >= 1 ? 0 : beat * (1 - held) + 0.04 * held;
     out.rate = 5.5 + climbing * 2.5;
     out.perched = b.perched;
     out.scale = b.scale;

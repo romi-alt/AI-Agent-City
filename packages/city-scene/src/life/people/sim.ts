@@ -73,8 +73,36 @@ interface RoofWorker {
 
 type WalkerState = 'side' | 'toWait' | 'wait' | 'cross' | 'toDoor' | 'inside' | 'fromDoor';
 
+/** A walking companion: keeps beside (and, for a third, slightly behind) the walker it came with. */
+interface Companion {
+  pose: PersonPose;
+  leader: Walker;
+  /** Distance to the side of the leader (always on the side away from the road) and behind it. */
+  side: number;
+  back: number;
+  /** Stride offset so a pair is not in lockstep. */
+  stride: number;
+  /** Where it is beside the leader now (signed, eased): it moves across when the pavement side changes at a corner. */
+  off: number | null;
+  /** Body size (the pose's scale drops to 0 while the group is indoors). */
+  size: number;
+}
+
 interface Walker {
   id: number;
+  /** The walking line position, before smoothing (the pose holds the smoothed one). */
+  ix: number;
+  iz: number;
+  /** Speed cap from people just ahead on the same pavement. */
+  cap: number;
+  /** Sideways step to the right to pass someone coming the other way, eased. */
+  nudge: number;
+  nudgeTo: number;
+  /** Seconds left stopped to look around (phone, shop window), 0 when walking. */
+  pause: number;
+  /** The position shown (smoothed). */
+  sx: number;
+  sz: number;
   v0: number;
   v: number;
   lat: number;
@@ -103,6 +131,15 @@ interface Walker {
 const WALK_SPEED: [number, number] = [0.85, 1.45];
 const CROSS_SPEED = 1.4;
 const TURN_RATE = 5;
+/** Rate (1/s) at which the shown position follows the walking line: it rounds corners instead of snapping to them. */
+const SMOOTH = 9;
+/** Share of walkers that walk as a pair or trio, and the chance per second a walker stops to look around. */
+const COMPANION_SHARE = 0.28;
+const LOOK_RATE = 0.02;
+/** People closer than this on a pavement notice each other. */
+const PERSONAL = 0.9;
+const GRID = 1.2;
+const NUDGE = 0.25;
 
 export interface PeopleOptions {
   seed?: number;
@@ -118,6 +155,7 @@ export class PeopleSim {
   readonly poses: PersonPose[] = [];
   readonly benches: Bench[] = [];
   readonly walkers: Walker[] = [];
+  private companions: Companion[] = [];
   private corners: { x: number; z: number; edges: number[] }[] = [];
   private edges: Edge[] = [];
   private rng: Rng;
@@ -142,7 +180,9 @@ export class PeopleSim {
     const rest = opts.count - roofWorkers;
     const statics = Math.round(rest * 0.3);
     const walkers = rest - statics;
-    for (let i = 0; i < walkers; i++) this.addWalker();
+    const followers = Math.round(walkers * COMPANION_SHARE);
+    for (let i = 0; i < walkers - followers; i++) this.addWalker();
+    this.addCompanions(followers);
     this.addStatics(layout, statics);
     this.addRoofWorkers(layout, roofWorkers);
   }
@@ -215,7 +255,7 @@ export class PeopleSim {
       y: SIDEWALK_Y,
       z: 0,
       yaw: 0,
-      scale: range(this.rng, 0.92, 1.1),
+      scale: range(this.rng, 0.88, 1.12),
       phase: this.rng() * 6.28,
       dist: this.rng() * 10,
       gait: 0,
@@ -230,9 +270,17 @@ export class PeopleSim {
     const e = sides[Math.floor(this.rng() * sides.length)]!;
     const w: Walker = {
       id: this.walkers.length,
+      ix: 0,
+      iz: 0,
+      cap: Infinity,
+      nudge: 0,
+      nudgeTo: 0,
+      pause: 0,
+      sx: 0,
+      sz: 0,
       v0: range(this.rng, WALK_SPEED[0], WALK_SPEED[1]),
       v: 0,
-      lat: range(this.rng, 0.12, 0.5),
+      lat: range(this.rng, 0.12, 0.4),
       height: 1,
       state: 'side',
       edge: e.id,
@@ -259,6 +307,26 @@ export class PeopleSim {
     this.setSegment(w, x0 + (x1 - x0) * f, z0 + (z1 - z0) * f, x1, z1);
     w.corner = w.fwd ? e.b : e.a;
     w.pose.yaw = Math.atan2(-(z1 - z0), x1 - x0);
+    w.ix = w.sx = w.pose.x = w.x0;
+    w.iz = w.sz = w.pose.z = w.z0;
+  }
+
+  /** Make `n` more people walk beside walkers already on the pavement: mostly pairs, now and then a trio. */
+  private addCompanions(n: number) {
+    for (let i = 0; i < n; i++) {
+      const leader = this.walkers[Math.floor(i / 1.4) % this.walkers.length]!;
+      const nth = this.companions.filter(c => c.leader === leader).length;
+      const pose = this.newPose();
+      this.companions.push({
+        pose,
+        size: pose.scale,
+        off: null,
+        leader,
+        side: nth === 0 ? 0.5 : 0.28,
+        back: nth === 0 ? 0 : 0.6,
+        stride: range(this.rng, 0.3, 1.2),
+      });
+    }
   }
 
   /** The walking line of an edge, offset to the walker's right. */
@@ -413,13 +481,13 @@ export class PeopleSim {
       const dz = (bz - az) / e.length;
       const back = 0.05 + this.rng() * 0.45;
       const side = (this.rng() - 0.5) * 0.5;
-      this.setSegment(w, w.pose.x, w.pose.z, ax - dx * back - dz * side, az - dz * back + dx * side);
+      this.setSegment(w, w.ix, w.iz, ax - dx * back - dz * side, az - dz * back + dx * side);
       w.state = 'toWait';
       this.tryCross(w, t, true);
       return;
     }
     const [x0, z0, x1, z1] = this.edgeLine(e, w.fwd, w.lat);
-    this.setSegment(w, w.pose.x, w.pose.z, x1, z1);
+    this.setSegment(w, w.ix, w.iz, x1, z1);
     w.state = 'side';
     w.corner = w.fwd ? e.b : e.a;
     w.stopAt = -1;
@@ -429,7 +497,7 @@ export class PeopleSim {
       const along = w.fwd ? d.s : e.length - d.s;
       if (along > 1) {
         const f = along / e.length;
-        this.setSegment(w, w.pose.x, w.pose.z, x0 + (x1 - x0) * f, z0 + (z1 - z0) * f);
+        this.setSegment(w, w.ix, w.iz, x0 + (x1 - x0) * f, z0 + (z1 - z0) * f);
         w.door = d.door;
       }
     }
@@ -445,20 +513,139 @@ export class PeopleSim {
     if (!ok) return false;
     this.pedsOnCrosswalk[e.cw]!++;
     const [, , bx, bz] = this.edgeLine(e, w.fwd, Math.min(w.lat, CROSSWALK_HALF_WIDTH) * 0.7);
-    this.setSegment(w, w.pose.x, w.pose.z, bx, bz);
+    this.setSegment(w, w.ix, w.iz, bx, bz);
     w.state = 'cross';
     w.corner = w.fwd ? e.b : e.a;
     return true;
   }
 
   step(dt: number, t: number) {
+    this.sense();
     for (const w of this.walkers) this.stepWalker(w, dt, t);
+    for (const c of this.companions) this.stepCompanion(c, dt);
     for (const r of this.roof) this.stepRoof(r, dt);
+  }
+
+  /**
+   * Who is near whom on the pavement, from a coarse grid: someone ahead going the same way caps our speed to theirs,
+   * someone coming towards us makes us step a little to our right (as people do), so nobody walks through anyone.
+   */
+  private sense() {
+    const cells = new Map<number, Walker[]>();
+    const key = (x: number, z: number) => Math.floor(x / GRID) * 100003 + Math.floor(z / GRID);
+    const on = (w: Walker) => w.state === 'side' || w.state === 'fromDoor';
+    for (const w of this.walkers) {
+      w.cap = Infinity;
+      w.nudgeTo = 0;
+      if (!on(w)) continue;
+      const k = key(w.pose.x, w.pose.z);
+      const list = cells.get(k);
+      if (list) list.push(w);
+      else cells.set(k, [w]);
+    }
+    for (const w of this.walkers) if (on(w)) this.notice(w, cells, key);
+  }
+
+  private notice(w: Walker, cells: Map<number, Walker[]>, key: (x: number, z: number) => number) {
+    const p = w.pose;
+    const hx = Math.cos(p.yaw);
+    const hz = -Math.sin(p.yaw);
+    for (let dx = -1; dx <= 1; dx++)
+      for (let dz = -1; dz <= 1; dz++)
+        for (const o of cells.get(key(p.x + dx * GRID, p.z + dz * GRID)) ?? []) {
+          if (o === w) continue;
+          const rx = o.pose.x - p.x;
+          const rz = o.pose.z - p.z;
+          const ahead = rx * hx + rz * hz;
+          const side = Math.abs(rx * -hz + rz * hx);
+          if (ahead < 0.05 || ahead > PERSONAL || side > 0.45) continue;
+          const together = Math.cos(o.pose.yaw - p.yaw) > 0;
+          if (together) w.cap = Math.min(w.cap, Math.max(0.2, o.v - 0.05));
+          else w.nudgeTo = NUDGE;
+        }
+  }
+
+  /** Companions stay beside their leader, copy its pace and wait where it waits. */
+  private stepCompanion(c: Companion, dt: number) {
+    const p = c.pose;
+    const l = c.leader.pose;
+    // Away from the road: the pavement side of the leader's heading.
+    const want = this.awaySide(c.leader) * c.side;
+    c.off = c.off === null ? want : c.off + (want - c.off) * Math.min(1, dt * 3);
+    p.x = l.x + Math.sin(l.yaw) * c.off - Math.cos(l.yaw) * c.back;
+    p.z = l.z + Math.cos(l.yaw) * c.off + Math.sin(l.yaw) * c.back;
+    p.yaw = l.yaw;
+    p.phase = l.phase + c.stride;
+    p.dist = l.dist + c.stride;
+    p.gait = l.gait;
+    p.mode = l.mode;
+    p.y = l.y;
+    // Shown only while the leader is (people go through a door together).
+    p.scale = l.scale === 0 ? 0 : c.size;
+  }
+
+  /** +1 when the pavement's outer side is to the leader's right, −1 when to the left. */
+  private awaySide(w: Walker): number {
+    const e = this.edges[w.edge]!;
+    if (e.kind !== 'side') return 1;
+    const A = this.corners[e.a]!;
+    const B = this.corners[e.b]!;
+    const q = e.a % 4;
+    const sx = [1, -1, -1, 1][q]!;
+    const sz = [1, 1, -1, -1][q]!;
+    const alongX = Math.abs(A.z - B.z) < 0.01;
+    const outX = alongX ? 0 : sx;
+    const outZ = alongX ? sz : 0;
+    return outX * Math.sin(w.pose.yaw) + outZ * Math.cos(w.pose.yaw) >= 0 ? 1 : -1;
   }
 
   private stepWalker(w: Walker, dt: number, t: number) {
     const p = w.pose;
-    let target = w.v0;
+    p.x = w.ix;
+    p.z = w.iz;
+    this.advanceWalker(w, dt, t);
+    w.ix = p.x;
+    w.iz = p.z;
+    this.shown(w, dt);
+  }
+
+  /** The pose shows the walking line smoothed (corners are rounded) and shifted aside when passing someone. */
+  private shown(w: Walker, dt: number) {
+    const p = w.pose;
+    const k = 1 - Math.exp(-SMOOTH * dt);
+    w.nudge += (w.nudgeTo - w.nudge) * Math.min(1, dt * 3);
+    const tx = w.ix + Math.sin(p.yaw) * w.nudge;
+    const tz = w.iz + Math.cos(p.yaw) * w.nudge;
+    // Doors and teleports show at once.
+    const jump = p.scale === 0 || Math.hypot(tx - w.sx, tz - w.sz) > 1.5;
+    w.sx = jump ? tx : w.sx + (tx - w.sx) * k;
+    w.sz = jump ? tz : w.sz + (tz - w.sz) * k;
+    p.x = w.sx;
+    p.z = w.sz;
+  }
+
+  /** Ease a walker's heading towards its path, turning no faster than a person can. */
+  private turnToward(p: PersonPose, want: number, dt: number) {
+    const d = Math.atan2(Math.sin(want - p.yaw), Math.cos(want - p.yaw));
+    const step = d * Math.min(1, dt * 8);
+    p.yaw += Math.max(-TURN_RATE * dt, Math.min(TURN_RATE * dt, step));
+  }
+
+  /** Now and then a walker on a pavement stops to look at a phone or a shop window. */
+  private lookAround(w: Walker, dt: number, target: number): number {
+    if (w.pause > 0) {
+      w.pause -= dt;
+      return 0;
+    }
+    const midway = w.s > 1 && w.len - w.s > 1.5 && !w.door;
+    if (midway && w.v > 0.5 && this.rng() < LOOK_RATE * dt) w.pause = range(this.rng, 2, 5);
+    return target;
+  }
+
+  private advanceWalker(w: Walker, dt: number, t: number) {
+    const p = w.pose;
+    let target = Math.min(w.v0, w.cap);
+    if (w.state === 'side') target = this.lookAround(w, dt, target);
     if (w.state === 'wait') {
       if (!this.tryCross(w, t)) target = 0;
     }
@@ -500,10 +687,7 @@ export class PeopleSim {
     p.gait += (Math.min(1, w.v / 0.9) - p.gait) * Math.min(1, dt * 6);
     p.mode = w.state === 'wait' ? MODE.wait : MODE.walk;
     if (w.len > 0.02 && w.state !== 'wait') {
-      const want = Math.atan2(-(w.z1 - w.z0), w.x1 - w.x0);
-      let d = want - p.yaw;
-      d = Math.atan2(Math.sin(d), Math.cos(d));
-      p.yaw += Math.max(-TURN_RATE * dt, Math.min(TURN_RATE * dt, d));
+      this.turnToward(p, Math.atan2(-(w.z1 - w.z0), w.x1 - w.x0), dt);
     }
     if (w.s < w.len - 1e-4) return;
     // Arrived at the end of the segment.
@@ -570,6 +754,11 @@ export class PeopleSim {
     let d = want - p.yaw;
     d = Math.atan2(Math.sin(d), Math.cos(d));
     p.yaw += Math.max(-TURN_RATE * dt, Math.min(TURN_RATE * dt, d));
+  }
+
+  /** Walking groups: each companion with the walker it came with (for tests). */
+  groups(): { leader: PersonPose; member: PersonPose }[] {
+    return this.companions.map(c => ({ leader: c.leader.pose, member: c.pose }));
   }
 
   /** Pedestrians currently on a crosswalk (between the kerbs), for tests. */
