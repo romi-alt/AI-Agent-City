@@ -343,7 +343,13 @@ export class Boids {
       b.py = b.y;
       b.pz = b.z;
       b.pyaw = b.yaw;
-      if (resting) return;
+      if (resting) {
+        // Settled on the roof: fully perched, wings folded, no turn left over from the landing.
+        b.perched = Math.min(1, b.perched + h * 3);
+        b.turn *= 0.9;
+        b.climb *= 0.9;
+        return;
+      }
       // Staggered take-off: each bird leaves a fraction of a second after its neighbour.
       if (b.perched > 0 && flight < i * 0.12) return;
       if (b.perched > 0 && !arrive) {
@@ -520,7 +526,7 @@ export class Boids {
     out.y = b.py + (b.y - b.py) * alpha;
     out.z = b.pz + (b.z - b.pz) * alpha;
     out.yaw = b.pyaw + Math.atan2(Math.sin(b.yaw - b.pyaw), Math.cos(b.yaw - b.pyaw)) * alpha;
-    out.bank = Math.max(-0.7, Math.min(0.7, -b.turn * 0.8));
+    out.bank = Math.max(-0.7, Math.min(0.7, -b.turn * 0.8)) * (1 - b.perched);
     const sp = Math.hypot(b.vx, b.vz) || 1;
     out.pitch = Math.max(-0.5, Math.min(0.5, Math.atan2(b.vy, sp) * 0.6));
     // Strong beats when climbing or slow, a glide when descending fast.

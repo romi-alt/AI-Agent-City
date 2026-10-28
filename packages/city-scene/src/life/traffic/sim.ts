@@ -71,6 +71,8 @@ export interface Vehicle {
   react: number;
   /** Where in its lane the driver sits, as a sideways offset from the lane centre (units, positive towards the kerb). */
   lat: number;
+  /** The speed cap of the previous step: its fall is fed forward when stopping. */
+  cap: number;
   /** Yaw rate (rad/s, positive turning left), smoothed: the body rolls with it. */
   yawRate: number;
   /** Stop planned on the current link (distance along it, −1: none) and the dwell left once there (−1: not there yet). */
@@ -88,13 +90,17 @@ const GAP_HARD = 0.3;
 const GAP_RESERVE = GAP_DESIRED + 0.3;
 /** How quickly the commanded acceleration may build up (units/s³): no instant throttle, a progressive brake. */
 const JERK_UP = 5;
-const JERK_DOWN = 14;
+const JERK_DOWN = 9;
+/** Seconds of braking lost while the brake comes on: stops are planned this much earlier. */
+const BRAKE_LAG = 0.22;
+/** A car may carry a little more speed than its cap while the throttle comes off (units/s). */
+const CRUISE_SLACK = 0.9;
 /** Odds that a bus (a taxi) plans a stop on a link long enough for it, and how long it waits there (seconds). */
 const STOP_CHANCE: Partial<Record<VehicleKind, number>> = { bus: 0.5, taxi: 0.1 };
 const DWELL: Partial<Record<VehicleKind, [number, number]>> = { bus: [5, 10], taxi: [2.5, 4.5] };
 /** Sideways shift towards the kerb while stopped at a stop (units). */
 const PULL_OVER: Partial<Record<VehicleKind, number>> = { bus: 0.3, taxi: 0.36 };
-const DECEL_COMFORT = 4;
+const DECEL_COMFORT = 3.6;
 const DECEL_MAX = 10;
 const TURN_SPEED = { straight: Infinity, right: 3.2, left: 4 };
 const LOOKAHEAD = 30;
@@ -192,6 +198,7 @@ export class TrafficSim {
         reaction: range(this.rng, 0.35, 1.1),
         react: 0,
         lat: range(this.rng, -0.06, 0.1),
+        cap: spec.v0[1],
         yawRate: 0,
         stopAt: -1,
         dwell: -1,
@@ -423,7 +430,7 @@ export class TrafficSim {
             if (v.blocked > 2.5) this.reroute(v, piece);
           }
           if (v.holding !== conn.id) {
-            vMax = Math.min(vMax, Math.sqrt(2 * DECEL_COMFORT * Math.max(0, toEnd - 0.1)));
+            vMax = Math.min(vMax, Math.sqrt(2 * DECEL_COMFORT * Math.max(0, toEnd - 0.1 - v.v * BRAKE_LAG)));
             hard = Math.min(hard, Math.max(0, toEnd - 0.02));
           }
         }
@@ -445,11 +452,13 @@ export class TrafficSim {
         v.react += dt;
         if (v.react < v.reaction) vMax = Math.min(vMax, 0.05);
       } else if (v.v >= 0.15 || !lead) v.react = 0;
-      const want = Math.max(-DECEL_MAX, Math.min(v.accel, (vMax - v.v) * 2.2));
-      const jerk = want > v.a ? JERK_UP : JERK_DOWN;
-      v.a += Math.max(-jerk * dt, Math.min(jerk * dt, want - v.a));
-      if (vMax < v.v && want < v.a) v.a = want;
-      let nv = Math.max(0, Math.min(v.v + v.a * dt, vMax + 0.01));
+      // Follow the speed cap like a driver: feed forward the cap's own fall (a stop curve) and correct what is left.
+      const fall = Math.min(0, (vMax - v.cap) / dt);
+      v.cap = vMax;
+      const gain = vMax < v.v ? 4 : 2.2;
+      const wanted = Math.max(-DECEL_MAX, Math.min(v.accel, fall + (vMax - v.v) * gain));
+      v.a = this.easeAcceleration(v.a, wanted, dt);
+      let nv = Math.max(0, Math.min(v.v + v.a * dt, vMax + CRUISE_SLACK));
       let ds = nv * dt;
       if (ds > hard) {
         ds = hard;
@@ -479,6 +488,16 @@ export class TrafficSim {
     for (const v of vs) if (!v.active) this.respawn(v);
   }
 
+  /**
+   * Acceleration changes at a bounded rate (throttle builds, the brake comes on progressively) so speed curves have no
+   * corners; only braking harder than a driver ever would by choice (a car ahead stopping short) is applied at once.
+   */
+  private easeAcceleration(a: number, wanted: number, dt: number): number {
+    if (wanted < -DECEL_COMFORT * 2.2) return Math.max(-DECEL_MAX, wanted);
+    const jerk = wanted > a ? JERK_UP : JERK_DOWN;
+    return a + Math.max(-jerk * dt, Math.min(jerk * dt, wanted - a));
+  }
+
   /** Speed cap that brings a bus or taxi to rest exactly at its planned stop, then holds it for the dwell time. */
   private stopLimit(v: Vehicle, dt: number): number {
     const toStop = v.stopAt - v.s;
@@ -498,7 +517,7 @@ export class TrafficSim {
       v.dwell = range(this.rng, lo, hi);
       return 0;
     }
-    return Math.sqrt(2 * DECEL_COMFORT * 0.8 * Math.max(0, toStop - 0.05)) + 0.08;
+    return Math.sqrt(2 * DECEL_COMFORT * 0.8 * Math.max(0, toStop - 0.05 - v.v * BRAKE_LAG)) + 0.08;
   }
 
   /** Buses and taxis ease towards the kerb as they near their stop and back into the lane when they leave. */
