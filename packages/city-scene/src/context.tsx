@@ -9,6 +9,8 @@ export interface CityContextValue {
   layout: CityLayout;
   /** Called by the scene when the user asks to go somewhere the host app must handle (e.g. open the demo office). */
   onNavigate?: (target: { kind: 'office'; building: string; level: number }) => void;
+  /** Overrides the overview camera (e.g. the landing page's framed hero). Defaults to the whole-city overview. */
+  homePose?: { pos: [number, number, number]; target: [number, number, number] };
 }
 
 export const CityContext = createContext<CityContextValue | null>(null);

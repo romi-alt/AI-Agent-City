@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { useCityContext } from '../context.tsx';
 import { OfficeOccupantsContext } from '../interior/occupants.ts';
 import { deskWorld } from '../interior/placement.ts';
-import type { CityMode } from '../types.ts';
+import type { CityLayout, CityMode } from '../types.ts';
 import { ARRIVAL_FADE_SECONDS, ARRIVAL_SECONDS, markArrivalPlayed } from './arrival.ts';
 import {
   type Box,
@@ -91,7 +91,8 @@ function limitsFor(mode: CityMode): OrbitLimits {
  * position is clamped against the city's bounds and the buildings' boxes, during flights too.
  */
 export function CameraRig() {
-  const { store, layout } = useCityContext();
+  const { store, layout, homePose } = useCityContext();
+  const homeOf = (l: CityLayout, a: number): Pose => homePose ?? homeShot(l, a);
   const occupants = useContext(OfficeOccupantsContext);
   const { camera: cameraR3f, gl, scene: sceneR3f, size } = useThree();
   const camera = cameraR3f as unknown as THREE.PerspectiveCamera;
@@ -117,7 +118,7 @@ export function CameraRig() {
 
   const rig = useRef<Rig>(null as unknown as Rig);
   if (!rig.current) {
-    const start = homeShot(layout, aspect);
+    const start = homeOf(layout, aspect);
     const o = orbitFromPose(start.pos, start.target);
     rig.current = {
       cur: { ...o },
@@ -158,7 +159,7 @@ export function CameraRig() {
       const a = aspectRef.current;
       switch (mode.kind) {
         case 'arrival':
-          return homeShot(layout, a);
+          return homeOf(layout, a);
         case 'explore': {
           // Coming back out of a building: step back to see its block rather than jumping to the far overview.
           if (prev && 'building' in prev) {
@@ -168,19 +169,19 @@ export function CameraRig() {
               return poseFromOrbit(o);
             }
           }
-          return homeShot(layout, a);
+          return homeOf(layout, a);
         }
         case 'building': {
           const b = findBuilding(layout, mode.building);
-          return b ? buildingShot(b, a, othersThan(b.key), r.measured?.get(b.key)?.top) : homeShot(layout, a);
+          return b ? buildingShot(b, a, othersThan(b.key), r.measured?.get(b.key)?.top) : homeOf(layout, a);
         }
         case 'floor': {
           const b = findBuilding(layout, mode.building);
-          return b ? floorShot(b, mode.level, a) : homeShot(layout, a);
+          return b ? floorShot(b, mode.level, a) : homeOf(layout, a);
         }
         case 'office': {
           const b = findBuilding(layout, mode.building);
-          if (!b) return homeShot(layout, a);
+          if (!b) return homeOf(layout, a);
           if (mode.desk !== null) {
             const d = deskWorld(b, mode.level, mode.desk, deskCount(mode));
             if (d) return deskShot(d.pos, d.facing);

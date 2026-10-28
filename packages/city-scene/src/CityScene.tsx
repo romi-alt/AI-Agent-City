@@ -33,6 +33,8 @@ export interface CitySceneProps {
   /** Extra DOM overlay (HUD, panels) rendered over the canvas, inside the city context. */
   overlay?: ReactNode;
   onNavigate?: CityContextValue['onNavigate'];
+  /** Camera for the overview instead of the whole-city default. */
+  homePose?: CityContextValue['homePose'];
   className?: string;
   /** Accessible description of the scene for screen readers. */
   label?: string;
@@ -42,11 +44,14 @@ export interface CitySceneProps {
  * The whole city. Composition only: each part is owned by one workstream (see x01-cinematic-city/PLAN.md).
  * Render it inside a sized container; it fills it.
  */
-export function CityScene({ store: given, initial, overlay, onNavigate, className, label }: CitySceneProps) {
+export function CityScene({ store: given, initial, overlay, onNavigate, homePose, className, label }: CitySceneProps) {
   const store = useMemo(() => given ?? createCityStore(initial), [given, initial]);
   const quality = useCityState(store, s => s.quality);
   const budget = QUALITY[quality];
-  const ctx = useMemo<CityContextValue>(() => ({ store, layout: CITY_LAYOUT, onNavigate }), [store, onNavigate]);
+  const ctx = useMemo<CityContextValue>(
+    () => ({ store, layout: CITY_LAYOUT, onNavigate, homePose }),
+    [store, onNavigate, homePose],
+  );
   return (
     <CityContext.Provider value={ctx}>
       <div className={className} style={{ position: 'relative', width: '100%', height: '100%' }}>
