@@ -39,7 +39,8 @@ export function Air({ layout, clock, env, aircraft, helicopters }: Props) {
   const dpr = useThree(s => s.viewport.dpr);
   const built = useMemo(() => {
     const traffic = new AirTraffic(layout, { aircraft, helicopters });
-    const planeMat = fadingMaterial('plane', { roughness: 0.35, metalness: 0.25 });
+    const haze = { uHazeColor: { value: new THREE.Color('#bfd3e2') }, uHazeDensity: { value: 0.00075 } };
+    const planeMat = fadingMaterial('plane', { roughness: 0.35, metalness: 0.25 }, haze);
     const planes = new THREE.InstancedMesh(airlinerGeometry(), planeMat, Math.max(1, aircraft));
     planes.name = 'life-airliners';
     const heliMat = fadingMaterial('heli', { roughness: 0.4, metalness: 0.35 });
@@ -54,7 +55,7 @@ export function Air({ layout, clock, env, aircraft, helicopters }: Props) {
       for (let i = 0; i < m.count; i++) hideInstance(m, i);
     }
     const lights = new LightPoints(aircraft * PLANE_LIGHTS.length + helicopters * HELI_LIGHTS.length + 4, 1);
-    return { traffic, planes, helis, rotors, planeMat, heliMat, lights };
+    return { traffic, planes, helis, rotors, planeMat, heliMat, lights, haze };
   }, [layout, aircraft, helicopters]);
 
   useEffect(() => {
@@ -81,7 +82,10 @@ export function Air({ layout, clock, env, aircraft, helicopters }: Props) {
     [],
   );
 
+  const scene = useThree(s => s.scene);
   useFrame(() => {
+    const fog = scene.fog as THREE.Fog | THREE.FogExp2 | null;
+    if (fog) built.haze.uHazeColor.value.copy(fog.color);
     const t = clock.t;
     const { s, placer, v } = tmp;
     const night = env.nightFactor;

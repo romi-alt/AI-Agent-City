@@ -10,6 +10,7 @@ import {
 } from '../geometry.ts';
 import { createRng, range, type Rng } from '../rng.ts';
 import { walkSignal } from '../signals.ts';
+import { plazaSpots } from './plaza.ts';
 import { STRIDE } from './proportions.ts';
 import type { Network } from '../traffic/network.ts';
 
@@ -33,6 +34,8 @@ export interface PersonPose {
   scale: number;
   /** Walk-cycle phase in radians, advanced by distance walked so the feet never slide. */
   phase: number;
+  /** Distance walked so far (world units): skeletal walk clips are timed from it. */
+  dist: number;
   /** 0 standing … 1 full stride. */
   gait: number;
   mode: PersonMode;
@@ -143,9 +146,12 @@ export class PeopleSim {
   }
 
   private buildGraph(layout: CityLayout) {
-    const { roadsX, roadsZ } = layout.streets;
-    const xs = [...roadsX].sort((a, b) => a - b);
-    const zs = [...roadsZ].sort((a, b) => a - b);
+    // The same junctions as the traffic network (which may include A1's ring road).
+    const xs = [...new Set(this.net.junctions.map(j => j.x))].sort((a, b) => a - b);
+    const zs = [...new Set(this.net.junctions.map(j => j.z))].sort((a, b) => a - b);
+    const ring = this.net.extent;
+    // Pedestrians stay inside the district: no corners beyond the outermost road.
+    const inside = (c: { x: number; z: number }) => Math.abs(c.x) < ring && Math.abs(c.z) < ring;
     const sx = [1, -1, -1, 1];
     const sz = [1, 1, -1, -1];
     for (const J of this.net.junctions)
@@ -154,6 +160,7 @@ export class PeopleSim {
     const add = (a: number, b: number, kind: Edge['kind'], cw = -1) => {
       const A = this.corners[a]!;
       const B = this.corners[b]!;
+      if (!inside(A) || !inside(B)) return null;
       const e: Edge = { id: this.edges.length, a, b, kind, cw, length: Math.hypot(B.x - A.x, B.z - A.z), doors: [] };
       this.edges.push(e);
       A.edges.push(e.id);
@@ -179,14 +186,21 @@ export class PeopleSim {
       }
     // Doors hang off the sidewalk that runs past them.
     for (const door of buildingDoors(layout)) {
-      const lineZ = door.nz > 0 ? zs.find(z => z > door.z)! - SIDEWALK : zs.filter(z => z < door.z).at(-1)! + SIDEWALK;
+      // The sidewalk line in front of the door: along x for doors facing ±z, along z for doors facing ±x.
+      const alongX = door.nz !== 0;
+      const roads = alongX ? zs : xs;
+      const at = alongX ? door.z : door.x;
+      const n = alongX ? door.nz : door.nx;
+      const road = n > 0 ? roads.find(r => r > at) : roads.filter(r => r < at).at(-1);
+      if (road === undefined) continue;
+      const line = road - n * SIDEWALK;
       for (const e of this.edges) {
         if (e.kind !== 'side') continue;
         const A = this.corners[e.a]!;
         const B = this.corners[e.b]!;
-        if (Math.abs(A.z - lineZ) > 0.01 || Math.abs(B.z - lineZ) > 0.01) continue;
-        if (door.x > Math.min(A.x, B.x) + 0.5 && door.x < Math.max(A.x, B.x) - 0.5)
-          e.doors.push({ s: Math.abs(door.x - A.x), door });
+        const [la, lb, pa, pb, d] = alongX ? [A.z, B.z, A.x, B.x, door.x] : [A.x, B.x, A.z, B.z, door.z];
+        if (Math.abs(la - line) > 0.01 || Math.abs(lb - line) > 0.01) continue;
+        if (d > Math.min(pa, pb) + 0.5 && d < Math.max(pa, pb) - 0.5) e.doors.push({ s: Math.abs(d - pa), door });
       }
     }
   }
@@ -199,6 +213,7 @@ export class PeopleSim {
       yaw: 0,
       scale: range(this.rng, 0.92, 1.1),
       phase: this.rng() * 6.28,
+      dist: this.rng() * 10,
       gait: 0,
       mode: 0,
     };
@@ -268,12 +283,38 @@ export class PeopleSim {
     const { roadsZ } = layout.streets;
     let left = n;
     let k = 0;
+    // About half the people out and about are in the plaza, talking in small groups.
+    const plaza = plazaSpots(layout);
+    let plazaLeft = Math.round(n * 0.5);
+    for (let round = 0; plazaLeft > 0 && plaza.groups.length > 0 && round < 2; round++) {
+      for (const g of plaza.groups) {
+        if (plazaLeft <= 0) break;
+        const size = Math.min(plazaLeft, 2 + Math.floor(this.rng() * 3));
+        const gx = g.x + round * 0.55;
+        const gz = g.z - round * 0.45;
+        for (let i = 0; i < size; i++) {
+          const a = (i / size) * Math.PI * 2 + this.rng() * 0.5;
+          const r = size === 2 ? 0.22 : 0.3;
+          const p = this.newPose();
+          p.x = gx + Math.cos(a) * r;
+          p.z = gz + Math.sin(a) * r * 0.8;
+          p.yaw = Math.atan2(-(gz - p.z), gx - p.x);
+          p.mode = this.rng() < 0.75 ? MODE.talk : MODE.wait;
+          plazaLeft--;
+          left--;
+        }
+      }
+    }
     // Rotate through doors: a group on one side of the entrance, a bench on the other.
     const spots: { door: Door; kind: 'group' | 'bench' }[] = [];
     for (const door of doors) {
-      const road = door.nz > 0 ? roadsZ.find(z => z > door.z) : roadsZ.filter(z => z < door.z).at(-1);
+      const alongX = door.nz !== 0;
+      const roads = alongX ? roadsZ : layout.streets.roadsX;
+      const at = alongX ? door.z : door.x;
+      const n = alongX ? door.nz : door.nx;
+      const road = n > 0 ? roads.find(r => r > at) : roads.filter(r => r < at).at(-1);
       if (road === undefined) continue;
-      const space = Math.abs(road - door.z) - SIDEWALK - 0.6;
+      const space = Math.abs(road - at) - SIDEWALK - 0.6;
       if (space < 2) continue;
       spots.push({ door, kind: k++ % 2 === 0 ? 'group' : 'bench' });
     }
@@ -281,12 +322,14 @@ export class PeopleSim {
       for (const spot of spots) {
         if (left <= 0) break;
         const { door } = spot;
+        // Along the facade (t) and out from it (n).
         const tx = -door.nz;
+        const tz = door.nx;
         const side = (round % 2 === 0) === (spot.kind === 'group') ? 1 : -1;
         if (spot.kind === 'group' || round === 2) {
           const size = Math.min(left, 2 + Math.floor(this.rng() * 3));
-          const cx = door.x + tx * side * (2.2 + round * 0.4);
-          const cz = door.z + door.nz * 1.35;
+          const cx = door.x + tx * side * (2.2 + round * 0.4) + door.nx * 1.35;
+          const cz = door.z + tz * side * (2.2 + round * 0.4) + door.nz * 1.35;
           for (let i = 0; i < size; i++) {
             const a = (i / size) * Math.PI * 2 + this.rng() * 0.5;
             const r = size === 2 ? 0.22 : 0.3;
@@ -298,16 +341,16 @@ export class PeopleSim {
             left--;
           }
         } else {
-          const bx = door.x + tx * side * (2.6 + round * 0.3);
-          const bz = door.z + door.nz * 0.85;
-          const yaw = Math.atan2(-door.nz, 0);
+          const bx = door.x + tx * side * (2.6 + round * 0.3) + door.nx * 0.85;
+          const bz = door.z + tz * side * (2.6 + round * 0.3) + door.nz * 0.85;
+          const yaw = Math.atan2(-door.nz, door.nx);
           this.benches.push({ x: bx, z: bz, yaw });
           const seats = Math.min(left, this.rng() < 0.6 ? 2 : 1);
           for (let i = 0; i < seats; i++) {
             const p = this.newPose();
             const off = seats === 1 ? (this.rng() - 0.5) * 0.4 : i === 0 ? -0.27 : 0.27;
             p.x = bx + tx * off;
-            p.z = bz;
+            p.z = bz + tz * off;
             p.yaw = yaw;
             p.mode = MODE.seated;
             p.scale = 1;
@@ -319,9 +362,10 @@ export class PeopleSim {
     while (left-- > 0) {
       const d = doors[Math.floor(this.rng() * doors.length)]!;
       const p = this.newPose();
-      p.x = d.x + (this.rng() - 0.5) * 3;
-      p.z = d.z + d.nz * 0.9;
-      p.yaw = Math.atan2(-d.nz, 0) + (this.rng() - 0.5);
+      const along = (this.rng() - 0.5) * 3;
+      p.x = d.x - d.nz * along + d.nx * 0.9;
+      p.z = d.z + d.nx * along + d.nz * 0.9;
+      p.yaw = Math.atan2(-d.nz, d.nx) + (this.rng() - 0.5);
       p.mode = MODE.wait;
     }
   }
@@ -423,7 +467,9 @@ export class PeopleSim {
         w.fwd = this.rng() < 0.5;
         const [x0, z0, x1, z1] = this.edgeLine(e, w.fwd, w.lat);
         // Back to the walking line, level with the door.
-        const f = Math.max(0, Math.min(1, Math.abs(d.x - x0) / Math.max(1e-6, Math.abs(x1 - x0))));
+        const lx = x1 - x0;
+        const lz = z1 - z0;
+        const f = Math.max(0, Math.min(1, ((d.x - x0) * lx + (d.z - z0) * lz) / Math.max(1e-9, lx * lx + lz * lz)));
         p.x = d.x;
         p.z = d.z;
         p.scale = w.height;
@@ -446,6 +492,7 @@ export class PeopleSim {
     p.x = w.x0 + (w.x1 - w.x0) * f;
     p.z = w.z0 + (w.z1 - w.z0) * f;
     p.phase += (ds / (STRIDE * p.scale)) * Math.PI * 2;
+    p.dist += ds;
     p.gait += (Math.min(1, w.v / 0.9) - p.gait) * Math.min(1, dt * 6);
     p.mode = w.state === 'wait' ? MODE.wait : MODE.walk;
     if (w.len > 0.02 && w.state !== 'wait') {
@@ -505,6 +552,7 @@ export class PeopleSim {
     const v = 0.7;
     r.s += (r.dir * v * dt) / len;
     p.phase += ((v * dt) / (STRIDE * p.scale)) * Math.PI * 2;
+    p.dist += v * dt;
     if (r.s >= 1 || r.s <= 0) {
       r.s = Math.max(0, Math.min(1, r.s));
       r.dir = r.dir === 1 ? -1 : 1;

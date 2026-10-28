@@ -1,3 +1,5 @@
+import { designsForLayout } from '../buildings/info.ts';
+import { CURB_H } from '../streets/grid.ts';
 import { FLOOR_HEIGHT, type CityLayout, type LayoutBuilding } from '../types.ts';
 
 /**
@@ -15,8 +17,8 @@ export const CROSSWALK_HALF_WIDTH = 0.55;
 export const STOP_FRONT = SIDEWALK + 0.7;
 /** Road surface height (cars sit on it). */
 export const ROAD_Y = 0.03;
-/** Sidewalk surface height (people stand on it). A1's kerb height; adjust here only. */
-export const SIDEWALK_Y = 0.12;
+/** Sidewalk surface height (people stand on it): A1's kerb height. */
+export const SIDEWALK_Y = CURB_H;
 
 export interface Box {
   key: string;
@@ -62,22 +64,15 @@ export interface Door {
 }
 
 /**
- * Lobby doors: the middle of the facade facing the nearest east-west road (the larger buildings get a second door
- * on the opposite side). Pedestrians walk in and out here; A1's lobbies should line up with these.
+ * Lobby doors from A1's building designs (`designsForLayout()`): the middle of the facade on the entrance side.
+ * Pedestrians walk in and out here.
  */
 export function buildingDoors(layout: CityLayout): Door[] {
-  const doors: Door[] = [];
-  const { roadsZ } = layout.streets;
-  for (const b of layout.buildings) {
-    const south = roadsZ.filter(z => z > b.z).sort((a, c) => a - c)[0];
-    const north = roadsZ.filter(z => z < b.z).sort((a, c) => c - a)[0];
-    const faces: number[] = [];
-    if (south !== undefined && (north === undefined || south - b.z <= b.z - north)) faces.push(1);
-    else faces.push(-1);
-    if (b.w * b.d >= 120 && faces[0] === 1 && north !== undefined) faces.push(-1);
-    for (const nz of faces) doors.push({ building: b.key, x: b.x, z: b.z + (nz * b.d) / 2, nx: 0, nz });
-  }
-  return doors;
+  return designsForLayout(layout).map(b => {
+    const [nx, nz] =
+      b.entrance === '+x' ? [1, 0] : b.entrance === '-x' ? [-1, 0] : b.entrance === '+z' ? [0, 1] : [0, -1];
+    return { building: b.key, x: b.x + (nx * b.w) / 2, z: b.z + (nz * b.d) / 2, nx, nz };
+  });
 }
 
 /** Height of the walkable roof surface above `roofHeight` (A1's roof cap). Rooftop life stands on it. */

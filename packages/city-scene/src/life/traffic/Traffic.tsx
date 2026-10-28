@@ -15,6 +15,7 @@ import {
   VEHICLE_FRAGMENT_HEAD,
   VEHICLE_VERTEX_HEAD,
   vehicleGeometry,
+  WHEEL_RADIUS,
 } from './vehicles.ts';
 
 interface Props {
@@ -36,16 +37,19 @@ function vehicleMaterial(uniforms: { uNight: THREE.IUniform<number>; uTime: THRE
     shader.uniforms.uTime = uniforms.uTime;
     shader.vertexShader =
       VEHICLE_VERTEX_HEAD +
-      shader.vertexShader.replace(
-        '#include <color_vertex>',
-        `vColor = vec4(color, 1.0);
+      shader.vertexShader
+        .replace(
+          '#include <color_vertex>',
+          `vColor = vec4(color, 1.0);
 #ifdef USE_INSTANCING_COLOR
       if (aSlot < 0.5) vColor.rgb *= instanceColor.rgb;
       else if (aSlot > 7.5) vColor.rgb = min(vec3(1.0), instanceColor.rgb * 1.35 + 0.08);
 #endif
       vSlot = aSlot;
       vState = iState;`,
-      );
+        )
+        .replace('#include <beginnormal_vertex>', 'vec3 objectNormal = acRoll(vec3(normal), false);')
+        .replace('#include <begin_vertex>', 'vec3 transformed = acRoll(vec3(position), true);');
     shader.fragmentShader =
       VEHICLE_FRAGMENT_HEAD +
       shader.fragmentShader.replace(
@@ -92,7 +96,7 @@ export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
       mesh.castShadow = shadows;
       mesh.receiveShadow = shadows;
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      instanceAttr(mesh, 'iState', 2);
+      instanceAttr(mesh, 'iState', 4);
       ofKind.forEach((v, i) => {
         slot[v.id] = i;
         const paints = PAINTS[kind];
@@ -143,10 +147,14 @@ export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
         hideInstance(built.poolMesh, v.id);
         continue;
       }
-      const m = placer.set(v.pose.x, ROAD_Y, v.pose.z, v.pose.yaw, fade);
+      const m = placer.set(v.pose.x, ROAD_Y, v.pose.z, v.pose.yaw);
       mesh.setMatrixAt(i, m);
       built.poolMesh.setMatrixAt(v.id, placer.set(v.pose.x, ROAD_Y + 0.02, v.pose.z, v.pose.yaw, fade));
-      (mesh.geometry.getAttribute('iState') as THREE.InstancedBufferAttribute).setX(i, v.brake);
+      const state = mesh.geometry.getAttribute('iState') as THREE.InstancedBufferAttribute;
+      const turn = 2 * Math.PI * WHEEL_RADIUS[v.kind];
+      state.setX(i, v.brake);
+      state.setZ(i, v.odo % turn);
+      state.setW(i, fade);
     }
     for (const mesh of built.meshes.values()) {
       mesh.instanceMatrix.needsUpdate = true;

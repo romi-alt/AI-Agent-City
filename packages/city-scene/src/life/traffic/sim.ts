@@ -53,6 +53,8 @@ export interface Vehicle {
   brake: number;
   /** Seconds spent waiting at the line for room on the chosen exit. */
   blocked: number;
+  /** Distance driven (world units); the wheels roll by it. */
+  odo: number;
 }
 
 /** Gaps (units) between bumpers: kept while driving, never closed (hard), reserved when entering a junction. */
@@ -130,6 +132,7 @@ export class TrafficSim {
         pose: { x: 0, z: 0, yaw: 0 },
         brake: 0,
         blocked: 0,
+        odo: 0,
       });
     });
     this.scatter();
@@ -174,22 +177,29 @@ export class TrafficSim {
     const [straight, right, left] = link.out as [number, number, number];
     // Drivers avoid streets that are already backed up.
     const w = (c: number) =>
-      this.room(this.net.links[(this.net.pieces[c] as Connector).to]!) >= v.len + GAP_RESERVE + 2 ? 1 : 0.1;
+      c < 0 ? 0 : this.room(this.net.links[(this.net.pieces[c] as Connector).to]!) >= v.len + GAP_RESERVE + 2 ? 1 : 0.1;
     v.blocked = 0;
+    const options = (
+      [
+        [straight, 0.62 * w(straight)],
+        [right, 0.22 * w(right)],
+        [left, 0.16 * w(left)],
+      ] as [number, number][]
+    ).filter(([c]) => c >= 0);
+    // Buses keep straight on where they can (at a ring corner they must turn).
     v.next =
-      v.kind === 'bus'
+      v.kind === 'bus' && straight >= 0
         ? straight
-        : weighted(this.rng, [
-            [straight, 0.62 * w(straight)],
-            [right, 0.22 * w(right)],
-            [left, 0.16 * w(left)],
-          ]);
+        : weighted(this.rng, options.length ? options : [[link.out.find(c => c >= 0)!, 1]]);
   }
 
   /** A driver held at the line by a full exit for a while takes another way, which also dissolves gridlock. */
   private reroute(v: Vehicle, link: Link) {
     const free = link.out.filter(
-      c => c !== v.next && this.room(this.net.links[(this.net.pieces[c] as Connector).to]!) >= v.len + GAP_RESERVE,
+      c =>
+        c >= 0 &&
+        c !== v.next &&
+        this.room(this.net.links[(this.net.pieces[c] as Connector).to]!) >= v.len + GAP_RESERVE,
     );
     v.blocked = 0;
     if (free.length) v.next = free[Math.floor(this.rng() * free.length)]!;
@@ -268,6 +278,7 @@ export class TrafficSim {
       // Cars that just turned off this link still stick out of it with their rear.
       if (p.kind === 'link')
         for (const cid of p.out) {
+          if (cid < 0) continue;
           if (cid === plan[k + 1]?.id) continue;
           for (const o of this.occ[cid]!) {
             const d = base + p.length + o.s;
@@ -344,6 +355,7 @@ export class TrafficSim {
     for (const v of vs) {
       if (!v.active) continue;
       v.s += advance[v.id]!;
+      v.odo += advance[v.id]!;
       this.transition(v);
     }
     for (const list of this.occ) list.sort((a, b) => a.s - b.s);
@@ -408,8 +420,9 @@ export class TrafficSim {
 
   /** Visibility of a vehicle near the city edge (0 at the edge), so arrivals and exits fade into the haze. */
   edgeFade(v: Vehicle): number {
+    if (this.net.closed) return 1;
     const e = this.net.extent;
     const d = e - Math.max(Math.abs(v.pose.x), Math.abs(v.pose.z));
-    return Math.max(0, Math.min(1, d / 3));
+    return Math.max(0, Math.min(1, d / 6));
   }
 }

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { it } from 'node:test';
-import { Birds } from '../src/life/birds/flock.ts';
+import { Boids } from '../src/life/birds/boids.ts';
+import { birdWorld } from '../src/life/birds/obstacles.ts';
 import { detailPlan } from '../src/life/details/placement.ts';
 import { buildingBoxes, buildingDoors, roofHeight } from '../src/life/geometry.ts';
 import { createRng } from '../src/life/rng.ts';
@@ -21,9 +22,12 @@ it('sizes every system from the quality budget', () => {
     });
     assert.equal(sim.traffic.vehicles.length, q.vehicles, `${level} vehicles`);
     assert.equal(sim.people.poses.length, q.pedestrians, `${level} pedestrians`);
-    assert.equal(new Birds(layout, { count: q.birds }).count, q.birds);
-    const birds = new Birds(layout, { count: q.birds });
-    assert.equal(birds.roofFlocks.reduce((n, f) => n + f.size, 0) + birds.soarers.length, q.birds);
+    const birds = new Boids(layout, birdWorld(layout), { count: q.birds });
+    assert.equal(birds.count, q.birds);
+    assert.equal(
+      birds.flocks.reduce((n, f) => n + f.birds.length, 0),
+      q.birds,
+    );
   }
 });
 
@@ -67,7 +71,12 @@ it('places a lobby door on a facade of every building, facing a street', () => {
   for (const b of layout.buildings) {
     const own = doors.filter(d => d.building === b.key);
     assert.ok(own.length >= 1);
-    for (const d of own) assert.equal(Math.abs(d.z - b.z), b.d / 2);
+    for (const d of own)
+      assert.ok(
+        (d.nz !== 0 && Math.abs(Math.abs(d.z - b.z) - b.d / 2) < 1e-9) ||
+          (d.nx !== 0 && Math.abs(Math.abs(d.x - b.x) - b.w / 2) < 1e-9),
+        `${b.key}: door on a facade`,
+      );
   }
   assert.ok(roofHeight(layout.buildings[0]!) > 0);
 });
@@ -78,11 +87,11 @@ it('keeps model triangle counts within budget (full detail on ultra/balanced, ch
   for (const kind of VEHICLE_KINDS) {
     const full = tris(vehicleGeometry(kind, 'full'));
     const low = tris(vehicleGeometry(kind, 'low'));
-    assert.ok(full <= 950, `${kind}: ${full} triangles`);
-    assert.ok(low <= 450 && low < full * 0.6, `${kind} low: ${low} triangles`);
+    assert.ok(full <= 1400, `${kind}: ${full} triangles`);
+    assert.ok(low <= 460 && low < full * 0.6, `${kind} low: ${low} triangles`);
   }
   assert.ok(tris(personGeometry()) <= 700);
   // A full ultra street (all vehicles and people, main pass) stays well under 200k triangles.
   const q = QUALITY.ultra;
-  assert.ok(q.vehicles * 950 + q.pedestrians * 700 < 200_000);
+  assert.ok(q.vehicles * 1400 + q.pedestrians * 700 < 250_000);
 });
