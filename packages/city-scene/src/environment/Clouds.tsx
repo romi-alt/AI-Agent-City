@@ -31,7 +31,7 @@ export function Clouds({ layers, rt }: { layers: number; rt: EnvRuntime }) {
     for (let i = 0; i < count; i++) {
       const layer = Math.floor(i / PER_LAYER);
       data.set(
-        [(rnd() - 0.5) * SPAN, 170 + layer * 70 + rnd() * 30, (rnd() - 0.5) * SPAN * 0.9, 260 + rnd() * 320],
+        [(rnd() - 0.5) * SPAN, 230 + layer * 80 + rnd() * 40, (rnd() - 0.5) * SPAN * 0.9, 260 + rnd() * 320],
         i * 4,
       );
       seed.set([rnd() * 100, 2 + rnd() * 3 + layer * 1.5, rnd(), layer], i * 4);
@@ -90,6 +90,11 @@ export function Clouds({ layers, rt }: { layers: number; rt: EnvRuntime }) {
           float toward = max(dot(normalize(vWorld - cameraPosition), uSunDir), 0.0);
           col += uLit * pow(toward, 6.0) * 0.25 * (1.0 - cover);
           float far = smoothstep(500.0, 1100.0, length(vWorld.xz - cameraPosition.xz));
+          // Never a veil in front of the camera: fade billboards that come close.
+          a *= smoothstep(180.0, 380.0, length(vWorld - cameraPosition));
+          // Clouds seen edge-on near the horizon (or from above) fade out instead of showing a hard edge.
+          a *= smoothstep(0.03, 0.14, (vWorld.y - cameraPosition.y) / length(vWorld - cameraPosition));
+          if (a < 0.01) discard;
           col = mix(col, uFog, far * 0.7);
           gl_FragColor = vec4(col, a);
           #include <tonemapping_fragment>

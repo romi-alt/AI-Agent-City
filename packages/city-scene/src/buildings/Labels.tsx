@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import { type Camera, Vector3 } from 'three';
 import { useCityContext } from '../context.tsx';
+import { explodeRuntime, floorOffset } from './explode.ts';
 
 export interface LabelItem {
   key: string;
@@ -10,6 +11,8 @@ export interface LabelItem {
   x: number;
   y: number;
   z: number;
+  /** Floor count: the label rises with the top floor when the building is exploded. */
+  floors: number;
 }
 
 const PILL =
@@ -63,7 +66,8 @@ export function BuildingLabels({ items }: { items: LabelItem[] }) {
       const { el, open } = nodes.els[i]!;
       const show = labelsOn && (st.hovered === it.key || focus === it.key || st.highlight === it.key);
       if (show) {
-        v.set(it.x, it.y, it.z).project(camera as unknown as Camera);
+        const lift = floorOffset(it.key, it.floors, explodeRuntime(store).progress.get(it.key) ?? 0);
+        v.set(it.x, it.y + lift, it.z).project(camera as unknown as Camera);
         if (v.z > 1 || Math.abs(v.x) > 1.2 || v.y < -1.2) {
           el.style.display = 'none';
           return;

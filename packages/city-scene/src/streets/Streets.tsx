@@ -17,104 +17,141 @@ import {
   SphereGeometry,
   Vector3,
 } from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { buildParts, disposeParts, type Part } from '../buildings/parts.ts';
 import { useCity, useCityContext } from '../context.tsx';
 import { type SharedUniforms, useEnvRuntime } from '../environment/palette.ts';
 import { QUALITY } from '../quality/quality.ts';
 import { planFurniture } from './furniture.ts';
-import { createRoadMaterial, createSidewalkMaterial } from './ground.ts';
-import { CURB_H, extendedGrid } from './grid.ts';
-import { planPlazas } from './plazas.ts';
+import { createBlockMaterial, createGrassMaterial, createRoadMaterial, createWaterMaterial } from './ground.ts';
+import { CURB_H, type CellKind, districtPlan, ROAD_HALF } from './grid.ts';
+import { planLandscape } from './plazas.ts';
 import { type SignalLight, SignalSourceContext } from './signal-source.ts';
 import { Trees } from './Trees.tsx';
 
+const KIND: Record<CellKind, number> = { lot: 0, plaza: 1, park: 2, strip: 3 };
+
 /**
- * Roads, sidewalks and curbs, crossings, street lamps, traffic signals, street trees, plazas with a fountain,
- * benches and flags. Matches the legacy street geometry (road half-width 2, lanes at ±1, walking line at 2.7) so
- * A2's traffic and pedestrians line up. Owner: A1.
+ * The district's ground (X02): merged road strips with crisp markings, curbed sidewalk blocks with planting
+ * strips and lawns, the central plaza with fountain, benches, beds and flags, street lamps, traffic signals and
+ * street trees, parkland beyond the parkway and a waterfront promenade on the bay. Street geometry matches the
+ * legacy street.ts so A2's traffic and pedestrians line up. Owner: A1.
  */
 export function Streets() {
   const { layout } = useCityContext();
   const rt = useEnvRuntime();
   const quality = useCity(s => s.quality);
   const budget = QUALITY[quality];
-  const lampReach = budget.decorBuildingDetail === 'minimal' ? 70 : 110;
-  const grid = useMemo(() => extendedGrid(layout.streets), [layout]);
+  const district = useMemo(() => districtPlan(layout.streets), [layout]);
 
-  const { road, slabs } = useMemo(() => {
-    const roadMat = createRoadMaterial(rt.uniforms, grid, lampReach);
-    const road = new Mesh(new PlaneGeometry(3000, 3000).rotateX(-Math.PI / 2), roadMat);
+  const { road, blocks, grass, water } = useMemo(() => {
+    const R = district.ring + ROAD_HALF;
+    const strips = [
+      ...district.xs.map(x => new PlaneGeometry(ROAD_HALF * 2, R * 2).rotateX(-Math.PI / 2).translate(x, 0.012, 0)),
+      ...district.zs.map(z => new PlaneGeometry(R * 2, ROAD_HALF * 2).rotateX(-Math.PI / 2).translate(0, 0.012, z)),
+    ];
+    const road = new Mesh(mergeGeometries(strips), createRoadMaterial(rt.uniforms, district));
     road.receiveShadow = true;
-    road.name = 'a1-road';
-    const slabMat = createSidewalkMaterial(rt.uniforms, grid, lampReach);
-    const slabs = new InstancedMesh(new BoxGeometry(1, 1, 1), slabMat, grid.blocks.length);
-    const m = new Matrix4();
-    grid.blocks.forEach((b, i) =>
-      slabs.setMatrixAt(
-        i,
-        m.compose(new Vector3(b.x, CURB_H / 2, b.z), new Quaternion(), new Vector3(b.half * 2, CURB_H, b.half * 2)),
-      ),
+    road.name = 'a1-roads';
+    const cells = district.cells;
+    const blocks = new InstancedMesh(
+      new BoxGeometry(1, 1, 1),
+      createBlockMaterial(rt.uniforms, district),
+      cells.length,
     );
-    slabs.instanceMatrix.needsUpdate = true;
-    slabs.receiveShadow = true;
-    slabs.computeBoundingSphere();
-    slabs.name = 'a1-sidewalks';
-    return { road, slabs };
-  }, [rt, grid, lampReach]);
+    const kinds = new Float32Array(cells.length);
+    const m = new Matrix4();
+    cells.forEach((c, i) => {
+      blocks.setMatrixAt(
+        i,
+        m.compose(new Vector3(c.cx, CURB_H / 2, c.cz), new Quaternion(), new Vector3(c.x1 - c.x0, CURB_H, c.z1 - c.z0)),
+      );
+      kinds[i] = KIND[c.kind];
+    });
+    blocks.geometry.setAttribute('aKind', new InstancedBufferAttribute(kinds, 1));
+    blocks.instanceMatrix.needsUpdate = true;
+    blocks.receiveShadow = true;
+    blocks.computeBoundingSphere();
+    blocks.name = 'a1-blocks';
+    const grass = new Mesh(
+      new PlaneGeometry(3000, 3000).rotateX(-Math.PI / 2),
+      createGrassMaterial(rt.uniforms, district),
+    );
+    grass.receiveShadow = true;
+    grass.name = 'a1-parkland';
+    const water = new Mesh(
+      new PlaneGeometry(4000, 4000).rotateX(-Math.PI / 2).translate(0, -0.45, 0),
+      createWaterMaterial(rt.uniforms),
+    );
+    water.receiveShadow = true;
+    water.name = 'a1-bay';
+    for (const o of [road, blocks, grass, water]) o.raycast = () => {};
+    return { road, blocks, grass, water };
+  }, [rt, district]);
   useEffect(
     () => () => {
-      for (const o of [road, slabs]) {
+      for (const o of [road, blocks, grass, water]) {
         o.geometry.dispose();
         (o.material as Material).dispose();
       }
     },
-    [road, slabs],
+    [road, blocks, grass, water],
   );
 
-  const furniture = useMemo(() => planFurniture(layout, lampReach), [layout, lampReach]);
-  const plazas = useMemo(() => planPlazas(), []);
-  const trees = useMemo(() => [...furniture.trees, ...plazas.trees], [furniture, plazas]);
+  const furniture = useMemo(() => planFurniture(layout, district), [layout, district]);
+  const land = useMemo(() => planLandscape(district), [district]);
+  const trees = useMemo(() => {
+    const all = [...furniture.trees, ...land.trees];
+    // Low quality: fewer far parkland trees.
+    return budget.decorBuildingDetail === 'minimal'
+      ? all.filter(t => Math.max(Math.abs(t[0]), Math.abs(t[2])) < 110)
+      : all;
+  }, [furniture, land, budget.decorBuildingDetail]);
 
   return (
     <group name="a1-streets">
+      <primitive object={water} />
+      <primitive object={grass} />
       <primitive object={road} />
-      <primitive object={slabs} />
-      <StreetParts lamps={furniture.lamps} signals={furniture.signals} plazaParts={plazas.parts} />
+      <primitive object={blocks} />
+      <StreetParts lamps={furniture.lamps} signals={furniture.signals} extra={land.parts} />
       <SignalHeads signals={furniture.signals} shared={rt.uniforms} />
       <Trees items={trees} shared={rt.uniforms} castShadow={budget.shadows} />
-      {plazas.fountains.map(f => (
+      {land.fountains.map(f => (
         <Fountain key={`${f.x},${f.z}`} x={f.x} z={f.z} r={f.r} shared={rt.uniforms} />
       ))}
-      <Flags flags={plazas.flags} shared={rt.uniforms} />
+      <Flags flags={land.flags} shared={rt.uniforms} />
     </group>
   );
 }
 
-/** Lamp posts, signal poles and housings, benches and plaza beds, instanced per shape and material. */
+/** Lamp posts, signal poles and housings, benches, beds, embankment and railing: instanced per shape and material. */
 function StreetParts({
   lamps,
   signals,
-  plazaParts,
+  extra,
 }: {
   lamps: { x: number; z: number; ry: number }[];
   signals: { x: number; z: number; sx: 1 | -1; sz: 1 | -1 }[];
-  plazaParts: Part[];
+  extra: Part[];
 }) {
   const rt = useEnvRuntime();
   const mats = useMemo(
     () => ({
-      pole: new MeshStandardMaterial({ color: '#2c3136', roughness: 0.5, metalness: 0.6 }),
+      pole: new MeshStandardMaterial({ color: '#30363c', roughness: 0.45, metalness: 0.7 }),
       lampHead: new MeshStandardMaterial({
-        color: '#d8d2c4',
-        emissive: '#ffd59a',
+        color: '#e6e1d6',
+        emissive: '#ffd9a6',
         emissiveIntensity: 0,
         roughness: 0.4,
       }),
-      housing: new MeshStandardMaterial({ color: '#2f3326', roughness: 0.6, metalness: 0.3 }),
-      wood: new MeshStandardMaterial({ color: '#8a6446', roughness: 0.8 }),
-      iron: new MeshStandardMaterial({ color: '#23272b', roughness: 0.5, metalness: 0.5 }),
-      granite: new MeshStandardMaterial({ color: '#b9b6ae', roughness: 0.6 }),
-      lawn: new MeshStandardMaterial({ color: '#5d9a48', roughness: 0.95 }),
+      housing: new MeshStandardMaterial({ color: '#2a2f33', roughness: 0.6, metalness: 0.3 }),
+      wood: new MeshStandardMaterial({ color: '#a27650', roughness: 0.7 }),
+      iron: new MeshStandardMaterial({ color: '#2a2e33', roughness: 0.45, metalness: 0.6 }),
+      granite: new MeshStandardMaterial({ color: '#c9c5bc', roughness: 0.6 }),
+      lawn: new MeshStandardMaterial({ color: '#4f8a3c', roughness: 0.95 }),
+      stone: new MeshStandardMaterial({ color: '#b8b0a2', roughness: 0.8 }),
+      paving: new MeshStandardMaterial({ color: '#cfc6b6', roughness: 0.85 }),
     }),
     [],
   );
@@ -125,21 +162,21 @@ function StreetParts({
     [mats],
   );
   const group = useMemo(() => {
-    const parts: Part[] = [...plazaParts];
+    const parts: Part[] = [...extra];
     for (const l of lamps) {
       const c = Math.cos(l.ry);
       const s = Math.sin(l.ry);
       // Local +x (the arm) rotated by ry about y: (cos, -sin).
       const ax = (d: number): [number, number] => [l.x + d * c, l.z - d * s];
-      parts.push({ shape: 'cyl', mat: 'pole', x: l.x, y: CURB_H + 2.15, z: l.z, sx: 0.12, sy: 4.3, sz: 0.12 });
+      parts.push({ shape: 'cyl', mat: 'pole', x: l.x, y: CURB_H + 1.55, z: l.z, sx: 0.08, sy: 3.1, sz: 0.08 });
       const [mx, mz] = ax(0.6);
-      parts.push({ shape: 'box', mat: 'pole', x: mx, y: CURB_H + 4.28, z: mz, sx: 1.2, sy: 0.06, sz: 0.06, ry: l.ry });
+      parts.push({ shape: 'box', mat: 'pole', x: mx, y: CURB_H + 3.08, z: mz, sx: 1.2, sy: 0.04, sz: 0.04, ry: l.ry });
       const [hx, hz] = ax(1.25);
       parts.push({
         shape: 'box',
         mat: 'lampHead',
         x: hx,
-        y: CURB_H + 4.22,
+        y: CURB_H + 3.02,
         z: hz,
         sx: 0.55,
         sy: 0.09,
@@ -170,15 +207,15 @@ function StreetParts({
         sz: 0.22,
       });
     }
-    const g = buildParts(parts, mats, { noShadow: new Set(['lampHead']) });
+    const g = buildParts(parts, mats, { noShadow: new Set(['lampHead', 'iron', 'paving', 'stone']) });
     g.traverse(o => {
       o.raycast = () => {};
     });
     return g;
-  }, [lamps, signals, plazaParts, mats]);
+  }, [lamps, signals, extra, mats]);
   useEffect(() => () => disposeParts(group), [group]);
   useFrame(() => {
-    mats.lampHead.emissiveIntensity = rt.state.nightFactor * 3.2;
+    mats.lampHead.emissiveIntensity = 0.05 + rt.state.nightFactor * 3.2;
   });
   return <primitive object={group} />;
 }
