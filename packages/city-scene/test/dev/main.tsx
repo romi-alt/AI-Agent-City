@@ -11,6 +11,8 @@ import layoutJson from '../../src/data/city-layout.json';
 import { Life } from '../../src/life/Life.tsx';
 import { signalPhase } from '../../src/life/signals.ts';
 import { vehicleGeometry } from '../../src/life/traffic/vehicles.ts';
+import { Character } from '../../src/life/characters/Character.tsx';
+import type { CharacterClip } from '../../src/life/characters/zones.ts';
 import { createCityStore } from '../../src/store.ts';
 import { FLOOR_HEIGHT, type CityLayout, type QualityLevel, type TimeOfDay } from '../../src/types.ts';
 
@@ -29,6 +31,7 @@ const VIEWS: Record<string, { pos: [number, number, number]; look: [number, numb
   avenue: { pos: [30.5, 2.4, 22], look: [30.5, 0.8, 0], fov: 50 },
   people: { pos: [-17.2, 1.3, 6.6], look: [-20, 0.45, 5.2], fov: 40 },
   group: { pos: [-37.2, 1.0, -8.0], look: [-40, 0.4, -6.3], fov: 40 },
+  chars: { pos: [0, 0.6, 83.2], look: [0, 0.35, 80], fov: 45 },
   models: { pos: [-1.5, 1.7, 85.5], look: [-2.8, 0.2, 78.5], fov: 45 },
   walk: { pos: [-24, 1.3, 10.6], look: [-30, 0.6, 12.4], fov: 40 },
   skyline: { pos: [70, 55, 90], look: [0, 10, 0], fov: 42 },
@@ -216,6 +219,30 @@ function Models() {
   );
 }
 
+/** ?view=chars: every character clip side by side (shared Character component). */
+function Characters() {
+  const clips: CharacterClip[] = ['idle', 'walk', 'walkFormal', 'talk', 'phone', 'sit', 'type', 'foldArms'];
+  return (
+    <group position={[0, 0.12, 80]}>
+      {clips.map((c, i) => (
+        <Character
+          key={c}
+          clip={c}
+          body={i % 2 ? 'female' : 'male'}
+          hair={i % 2 ? (i % 4 === 1 ? 'long' : 'buns') : i % 4 === 0 ? 'parted' : 'beard'}
+          look={{
+            top: ['#1e2635', '#e7e4dc', '#8a7458', '#3f5068'][i % 4]!,
+            bottom: ['#1c212b', '#3b4f6b', '#24272d'][i % 3]!,
+            ...(i % 2 === 0 ? { shirt: '#f1efe9' } : {}),
+          }}
+          position={[-3.5 + i * 1.0, 0, 0]}
+          offset={i * 0.37}
+        />
+      ))}
+    </group>
+  );
+}
+
 function Stats() {
   const gl = useThree(s => s.gl);
   const scene = useThree(s => s.scene);
@@ -272,6 +299,7 @@ function App() {
           {withLife && <Life />}
           <Stats />
           {view === 'models' && <Models />}
+          {view === 'chars' && <Characters />}
           {(view === 'plane' || view === 'heli') && <Follow what={view} />}
         </CityContext.Provider>
       </Canvas>

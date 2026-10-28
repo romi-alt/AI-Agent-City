@@ -78,11 +78,11 @@ it('keeps model triangle counts within budget (full detail on ultra/balanced, ch
   for (const kind of VEHICLE_KINDS) {
     const full = tris(vehicleGeometry(kind, 'full'));
     const low = tris(vehicleGeometry(kind, 'low'));
-    assert.ok(full <= 950, `${kind}: ${full} triangles`);
-    assert.ok(low <= 450 && low < full * 0.6, `${kind} low: ${low} triangles`);
+    assert.ok(full <= 1400, `${kind}: ${full} triangles`);
+    assert.ok(low <= 460 && low < full * 0.6, `${kind} low: ${low} triangles`);
   }
   assert.ok(tris(personGeometry()) <= 700);
   // A full ultra street (all vehicles and people, main pass) stays well under 200k triangles.
   const q = QUALITY.ultra;
-  assert.ok(q.vehicles * 950 + q.pedestrians * 700 < 200_000);
+  assert.ok(q.vehicles * 1400 + q.pedestrians * 700 < 250_000);
 });

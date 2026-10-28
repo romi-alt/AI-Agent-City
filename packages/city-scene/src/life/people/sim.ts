@@ -33,6 +33,8 @@ export interface PersonPose {
   scale: number;
   /** Walk-cycle phase in radians, advanced by distance walked so the feet never slide. */
   phase: number;
+  /** Distance walked so far (world units): skeletal walk clips are timed from it. */
+  dist: number;
   /** 0 standing … 1 full stride. */
   gait: number;
   mode: PersonMode;
@@ -199,6 +201,7 @@ export class PeopleSim {
       yaw: 0,
       scale: range(this.rng, 0.92, 1.1),
       phase: this.rng() * 6.28,
+      dist: this.rng() * 10,
       gait: 0,
       mode: 0,
     };
@@ -446,6 +449,7 @@ export class PeopleSim {
     p.x = w.x0 + (w.x1 - w.x0) * f;
     p.z = w.z0 + (w.z1 - w.z0) * f;
     p.phase += (ds / (STRIDE * p.scale)) * Math.PI * 2;
+    p.dist += ds;
     p.gait += (Math.min(1, w.v / 0.9) - p.gait) * Math.min(1, dt * 6);
     p.mode = w.state === 'wait' ? MODE.wait : MODE.walk;
     if (w.len > 0.02 && w.state !== 'wait') {
@@ -505,6 +509,7 @@ export class PeopleSim {
     const v = 0.7;
     r.s += (r.dir * v * dt) / len;
     p.phase += ((v * dt) / (STRIDE * p.scale)) * Math.PI * 2;
+    p.dist += v * dt;
     if (r.s >= 1 || r.s <= 0) {
       r.s = Math.max(0, Math.min(1, r.s));
       r.dir = r.dir === 1 ? -1 : 1;

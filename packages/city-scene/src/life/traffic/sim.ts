@@ -53,6 +53,8 @@ export interface Vehicle {
   brake: number;
   /** Seconds spent waiting at the line for room on the chosen exit. */
   blocked: number;
+  /** Distance driven (world units); the wheels roll by it. */
+  odo: number;
 }
 
 /** Gaps (units) between bumpers: kept while driving, never closed (hard), reserved when entering a junction. */
@@ -130,6 +132,7 @@ export class TrafficSim {
         pose: { x: 0, z: 0, yaw: 0 },
         brake: 0,
         blocked: 0,
+        odo: 0,
       });
     });
     this.scatter();
@@ -344,6 +347,7 @@ export class TrafficSim {
     for (const v of vs) {
       if (!v.active) continue;
       v.s += advance[v.id]!;
+      v.odo += advance[v.id]!;
       this.transition(v);
     }
     for (const list of this.occ) list.sort((a, b) => a.s - b.s);
@@ -410,6 +414,6 @@ export class TrafficSim {
   edgeFade(v: Vehicle): number {
     const e = this.net.extent;
     const d = e - Math.max(Math.abs(v.pose.x), Math.abs(v.pose.z));
-    return Math.max(0, Math.min(1, d / 3));
+    return Math.max(0, Math.min(1, d / 6));
   }
 }

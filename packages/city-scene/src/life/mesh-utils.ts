@@ -11,6 +11,12 @@ export class PartBuilder {
   private q = new THREE.Quaternion();
   private e = new THREE.Euler();
   private c = new THREE.Color();
+  private readonly wheels: boolean;
+
+  /** `wheels`: add the `aWheel` attribute (hub and radius; zero for non-wheel parts). */
+  constructor(opts: { wheels?: boolean } = {}) {
+    this.wheels = opts.wheels ?? false;
+  }
 
   add(
     geo: THREE.BufferGeometry,
@@ -21,6 +27,8 @@ export class PartBuilder {
       color?: string;
       slot?: number;
       part?: number;
+      /** Wheel hub centre and radius: the vertex shader spins these vertices about the hub's z axis. */
+      wheel?: [number, number, number, number];
     },
   ) {
     const g = (geo.index ? geo.toNonIndexed() : geo.clone()) as THREE.BufferGeometry;
@@ -39,6 +47,11 @@ export class PartBuilder {
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
     g.setAttribute('aSlot', new THREE.BufferAttribute(new Float32Array(n).fill(opts.slot ?? 0), 1));
     g.setAttribute('aPart', new THREE.BufferAttribute(new Float32Array(n).fill(opts.part ?? 0), 1));
+    if (this.wheels) {
+      const w = new Float32Array(n * 4);
+      if (opts.wheel) for (let i = 0; i < n; i++) w.set(opts.wheel, i * 4);
+      g.setAttribute('aWheel', new THREE.BufferAttribute(w, 4));
+    }
     this.parts.push(g);
     geo.dispose();
     return this;
