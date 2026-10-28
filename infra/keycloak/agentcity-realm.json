@@ -1,6 +1,8 @@
 {
   "realm": "agentcity",
   "displayName": "AgentCity (local development)",
+  "loginTheme": "agentcity",
+  "emailTheme": "agentcity",
   "enabled": true,
   "sslRequired": "external",
   "attributes": {

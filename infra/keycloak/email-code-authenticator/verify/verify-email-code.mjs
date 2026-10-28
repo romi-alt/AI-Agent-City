@@ -23,6 +23,7 @@ const { chromium } = require('playwright');
 
 const ROOT = join(import.meta.dirname, '../../../..');
 const JAR = join(ROOT, 'infra/keycloak/providers/agentcity-email-code-authenticator.jar');
+const AGENTCITY_THEME = join(ROOT, 'infra/keycloak/themes/agentcity');
 const EVIDENCE_DIR = join(ROOT, 'planning/agentcity-migration/m03/evidence');
 const EVIDENCE = join(EVIDENCE_DIR, 'email-code-verification.json');
 const SCREENSHOT = join(EVIDENCE_DIR, 'email-code-verification-page.png');
@@ -91,6 +92,8 @@ async function startKeycloak() {
     `KC_BOOTSTRAP_ADMIN_PASSWORD=${ADMIN_PASSWORD}`,
     '-v',
     `${JAR}:/opt/keycloak/providers/agentcity-email-code-authenticator.jar:ro`,
+    '-v',
+    `${AGENTCITY_THEME}:/opt/keycloak/themes/agentcity:ro`,
     IMAGE,
     'start-dev',
   );
@@ -521,6 +524,31 @@ async function classicTheme(browser) {
   await admin('PUT', `/${REALM}`, { ...realm, loginTheme: null });
 }
 
+// X01: the AgentCity login and email theme (the agentcity realm's loginTheme/emailTheme) keeps the page's ids and
+// the code flow working, and sends the code with the AgentCity subject.
+async function agentcityTheme(browser) {
+  const realm = (await admin('GET', `/${REALM}`)).body;
+  await admin('PUT', `/${REALM}`, { ...realm, loginTheme: 'agentcity', emailTheme: 'agentcity' });
+  try {
+    const user = await createUser('agentcity-theme', true);
+    const s = await beginSignIn(browser, user.email);
+    const themed = await s.page.$('#kc-header .ac-wordmark');
+    const intro = await s.page.$('#agentcity-email-code-sent');
+    const { code, message } = await latestCode(user.email, 1);
+    await submitCode(s.page, code);
+    check(
+      'page also works with the AgentCity login theme, and the code email uses the AgentCity email theme',
+      Boolean(s.callback()) && Boolean(themed) && Boolean(intro) && message.Subject === 'Your AgentCity sign-in code',
+      {
+        subject: message.Subject,
+      },
+    );
+    await s.context.close();
+  } finally {
+    await admin('PUT', `/${REALM}`, { ...realm, loginTheme: null, emailTheme: null });
+  }
+}
+
 // --- Main -------------------------------------------------------------------------------------------------------
 
 const started = new Date();
@@ -544,6 +572,7 @@ try {
   await resendCooldown(browser);
   await unverifiedEmail(browser, happyIntro);
   await classicTheme(browser);
+  await agentcityTheme(browser);
   await bruteForceLockout(browser);
   await expiry(browser);
 } catch (error) {

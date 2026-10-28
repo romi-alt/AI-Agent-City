@@ -1,6 +1,6 @@
 {
   "stage": "X01 workstream C — live demo provisioning",
-  "ranAt": "2026-10-27T20:32:25.396Z",
+  "ranAt": "2026-10-28T03:59:35.463Z",
   "keycloak": "http://localhost:58080 (realm agentcity, recreated from this worktree, then pnpm keycloak:seed)",
   "mailpit": "http://127.0.0.1:58025",
   "api": "AppModule on 127.0.0.1:4205, fresh test database (dropped afterwards)",
@@ -46,10 +46,10 @@
       }
     },
     {
-      "check": "Mailpit received the verify-email message for the address",
+      "check": "Mailpit received the verify-email message for the address, with the AgentCity subject",
       "ok": true,
       "detail": {
-        "subject": "Update Your Account",
+        "subject": "Confirm your email for AgentCity",
         "hasActionTokenLink": true
       }
     },
@@ -99,7 +99,7 @@
       }
     },
     {
-      "check": "without manage-users, sending execute-actions email is refused",
+      "check": "without manage-users, sending the verify email is refused",
       "ok": true,
       "detail": {
         "status": 403

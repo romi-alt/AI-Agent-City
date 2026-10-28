@@ -1,7 +1,7 @@
 /**
  * The few Keycloak admin REST calls the demo funnel needs, made with the `agentcity-provisioner` service account
  * (client credentials). Its only realm-management role is `manage-users` (see the realm file): enough to find and
- * create a user and to send them an execute-actions email, nothing else.
+ * create a user and to send them the verify-email message, nothing else.
  *
  * Demo people get no password and no credential of any kind. Keycloak sends the verify-email message through the
  * realm's SMTP server (Mailpit locally). Error messages name the call and the status, never the email address.
@@ -122,19 +122,18 @@ export class KeycloakAdmin {
     return found;
   }
 
-  /** Keycloak emails the person a one-time verify-email link that returns to `redirectUri` through `clientId`. */
+  /**
+   * Keycloak emails the person a one-time verify-email link that returns to `redirectUri` through `clientId`. This
+   * is Keycloak's dedicated email-check endpoint (template email-verification.ftl, subject emailVerificationSubject),
+   * not the generic execute-actions email, so the AgentCity email theme can word it as an email check.
+   */
   async sendVerifyEmail(userId: string, o: { clientId: string; redirectUri: string; lifespanSeconds: number }) {
     const q = new URLSearchParams({
       client_id: o.clientId,
       redirect_uri: o.redirectUri,
       lifespan: String(o.lifespanSeconds),
     });
-    const res = await this.call(
-      'PUT',
-      `/users/${encodeURIComponent(userId)}/execute-actions-email?${q}`,
-      'verify email',
-      ['VERIFY_EMAIL'],
-    );
+    const res = await this.call('PUT', `/users/${encodeURIComponent(userId)}/send-verify-email?${q}`, 'verify email');
     if (res.status === 409) throw new KeycloakAdminError('verify email failed (409)', 409);
   }
 

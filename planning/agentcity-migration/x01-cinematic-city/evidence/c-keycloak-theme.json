@@ -1,0 +1,27 @@
+{
+  "stage": "X01 workstream C — AgentCity Keycloak theme and post-verify redirect",
+  "ranAt": "2026-10-28",
+  "keycloak": "quay.io/keycloak/keycloak:26.8.1, recreated from this worktree with infra/keycloak/themes/agentcity mounted, then pnpm keycloak:seed; discovery 200",
+  "journey": {
+    "script": "coordinator's journey.cjs (scratchpad/int), 'Back to Application' step removed, OUT=this worktree's evidence/e2e",
+    "result": "steps 01–10 passed twice: landing → form → verify email → Keycloak confirm (one deliberate click) → /demo/verified with no further click → sign-in page prefilled by login_hint → email code → 'Welcome to AgentCity, Ada.' → office tour → 3D office → city. Both runs then timed out on the next step (mobile /demo/welcome, page.goto 'load' after the city page) — outside Keycloak; 11/12 screenshots are the coordinator's earlier ones.",
+    "screenshots": [
+      "e2e/04a-keycloak-confirm-email.png",
+      "e2e/04-verified.png",
+      "e2e/05-keycloak-email.png",
+      "e2e/06-keycloak-code.png",
+      "e2e/04m-mail-verify.png",
+      "e2e/06m-mail-code.png"
+    ],
+    "note": "The running API on :4000 is the coordinator's build, which still sends the email check with execute-actions-email, so the journey's verify mail is the themed executeActions email ('Finish setting up your AgentCity sign-in'). This branch's API uses send-verify-email ('Confirm your email for AgentCity'), checked live on port 4205 (c-live-provisioning.json)."
+  },
+  "checks": [
+    { "check": "pnpm keycloak:verify (M03, shared Keycloak with the agentcity theme)", "result": "34/34 passed, no selector changes" },
+    { "check": "email-code verifier (M03, own container) with a new AgentCity-theme pass", "result": "28/28 passed; code email subject 'Your AgentCity sign-in code'" },
+    { "check": "live provisioning on port 4205 (send-verify-email, theme, auto-continue)", "result": "12/12 passed (c-live-provisioning.json)" },
+    { "check": "API demo tests (mock Keycloak, send-verify-email)", "result": "15/15 passed" },
+    { "check": "demo email link reused", "result": "Keycloak answers 'Your email address has been verified already' (the link works once)" }
+  ],
+  "pages": "keycloak-theme/*.png: email code (and wrong code), error, logout confirm, passkey enrolment (confirm and register), demo email confirm, reused link, both emails",
+  "cleanup": "test users (theme-*, demo-live-*, e2e-*) and their Mailpit messages deleted; M03 evidence files restored after the verifier runs"
+}
