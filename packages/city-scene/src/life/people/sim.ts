@@ -110,6 +110,8 @@ export interface PeopleOptions {
   count: number;
   /** Rooftop workers (micro-animations). */
   roofWorkers: number;
+  /** Where sidewalks are walked (default: inside the outermost roads of the network). */
+  area?: { minX: number; maxX: number; minZ: number; maxZ: number };
 }
 
 export class PeopleSim {
@@ -135,7 +137,7 @@ export class PeopleSim {
     this.pedsOnCrosswalk = pedsOnCrosswalk;
     this.carsOnCrosswalk = carsOnCrosswalk;
     this.rng = createRng(opts.seed ?? 21);
-    this.buildGraph(layout);
+    this.buildGraph(layout, opts.area);
     const roofWorkers = Math.min(opts.roofWorkers, opts.count);
     const rest = opts.count - roofWorkers;
     const statics = Math.round(rest * 0.3);
@@ -145,13 +147,15 @@ export class PeopleSim {
     this.addRoofWorkers(layout, roofWorkers);
   }
 
-  private buildGraph(layout: CityLayout) {
+  private buildGraph(layout: CityLayout, area?: PeopleOptions['area']) {
     // The same junctions as the traffic network (which may include A1's ring road).
     const xs = [...new Set(this.net.junctions.map(j => j.x))].sort((a, b) => a - b);
     const zs = [...new Set(this.net.junctions.map(j => j.z))].sort((a, b) => a - b);
     const ring = this.net.extent;
-    // Pedestrians stay inside the district: no corners beyond the outermost road.
-    const inside = (c: { x: number; z: number }) => Math.abs(c.x) < ring && Math.abs(c.z) < ring;
+    // Pedestrians stay on the sidewalks of their area (the district and the first ring of blocks round it).
+    const inside = area
+      ? (c: { x: number; z: number }) => c.x > area.minX && c.x < area.maxX && c.z > area.minZ && c.z < area.maxZ
+      : (c: { x: number; z: number }) => Math.abs(c.x) < ring && Math.abs(c.z) < ring;
     const sx = [1, -1, -1, 1];
     const sz = [1, 1, -1, -1];
     for (const J of this.net.junctions)
