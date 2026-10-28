@@ -24,6 +24,9 @@ export function DebugParams() {
     const quality = q.get('q');
     if (quality) Object.assign(patch, { quality: quality as QualityLevel, qualityAuto: false });
     if (q.get('hover')) patch.hovered = q.get('hover');
+    if (q.get('view')) patch.view = q.get('view') as CityState['view'];
+    // Screenshots start in the explore view (no arrival flight) unless they ask for something else.
+    if (q.get('explore')) patch.mode = { kind: 'explore' };
     if (q.get('highlight')) patch.highlight = q.get('highlight');
     // Apply time/weather instantly (as with reduced motion), then restore the requested motion setting.
     const wantRm = q.get('rm') === '1' || store.get().reducedMotion;

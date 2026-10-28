@@ -10,20 +10,20 @@ export const LAMP_STEP = 10;
 
 type Shader = Parameters<MeshStandardMaterial['onBeforeCompile']>[0];
 
-/** Road lines as GLSL constants and helpers: nearest road on each axis, lamp pools, puddles. */
+/** Road lines as GLSL helpers: the city's roads are evenly spaced, so the nearest one is modular arithmetic. */
 function roadsGlsl(d: District) {
-  const arr = (v: number[]) => `float[${v.length}](${v.map(x => x.toFixed(2)).join(', ')})`;
+  const sp = d.xs.length > 1 ? d.xs[1]! - d.xs[0]! : 20;
   return /* glsl */ `
   ${GLSL_NOISE}
   uniform float uNight, uWet, uTime;
   varying float vUpA1;
   varying float vKindA1;
-  const float RING = ${d.ring.toFixed(2)};
-  const float RX[${d.xs.length}] = ${arr(d.xs)};
-  const float RZ[${d.zs.length}] = ${arr(d.zs)};
-  // Signed offset from the nearest road centre line on one axis.
-  float nearX(float v) { float best = 1e5; for (int i = 0; i < ${d.xs.length}; i++) { float o = v - RX[i]; if (abs(o) < abs(best)) best = o; } return best; }
-  float nearZ(float v) { float best = 1e5; for (int i = 0; i < ${d.zs.length}; i++) { float o = v - RZ[i]; if (abs(o) < abs(best)) best = o; } return best; }
+  const float SP = ${sp.toFixed(2)};
+  const vec2 ORIGIN = vec2(${d.xs[0]!.toFixed(2)}, ${d.zs[0]!.toFixed(2)});
+  const float EXTENT = ${d.extent.toFixed(1)};
+  // Signed offset from the nearest road centre line on each axis.
+  float nearX(float v) { return v - (ORIGIN.x + floor((v - ORIGIN.x) / SP + 0.5) * SP); }
+  float nearZ(float v) { return v - (ORIGIN.y + floor((v - ORIGIN.y) / SP + 0.5) * SP); }
   float lampPools(vec2 w) {
     float acc = 0.0;
     float ax = nearX(w.x);
@@ -34,7 +34,7 @@ function roadsGlsl(d: District) {
     acc += exp(-(alongZ * alongZ) / 4.0 - (dc * dc) / 3.0);
     dc = abs(abs(az) - ${(LAMP_OFFSET - 0.9).toFixed(2)});
     acc += exp(-(alongX * alongX) / 4.0 - (dc * dc) / 3.0);
-    return acc * step(max(abs(w.x), abs(w.y)), RING + 4.0);
+    return acc * step(abs(w.x), ${(d.bounds.maxX + 22).toFixed(1)}) * step(abs(w.y), ${(d.bounds.maxZ + 22).toFixed(1)});
   }
   float puddles(vec2 w) {
     float n = a1fbm(w * 0.18) * 0.7 + a1noise(w * 0.9) * 0.3;
@@ -133,7 +133,7 @@ export function createRoadMaterial(shared: SharedUniforms, d: District) {
 }
 
 /**
- * Sidewalk slabs (one instanced box per block, aKind = 0 lot, 1 plaza, 2 park, 3 strip): light warm concrete
+ * Sidewalk slabs (one instanced box per block, aKind = 0 lot, 1 plaza, 2 park, 3 decor, 4 city): light concrete
  * flags with joints and a granite curb; a planted strip with street trees just behind the walking line; lawns
  * inside the park blocks; a patterned granite field on the plaza.
  */
@@ -161,7 +161,7 @@ export function createBlockMaterial(shared: SharedUniforms, d: District) {
     vec3 green = mix(vec3(0.12, 0.24, 0.07), vec3(0.17, 0.32, 0.09), a1noise(w * 3.0));
     vec3 soil = vec3(0.16, 0.11, 0.07);
     // Inner lawns of park blocks and strips.
-    float lawn = (kind > 1.5 ? 1.0 : 0.0) * step(4.6, edge);
+    float lawn = step(1.5, kind) * step(kind, 2.5) * step(4.6, edge);
     // Plaza: granite field in a large grid with lighter bands.
     if (kind > 0.5 && kind < 1.5 && edge > 4.6) {
       // Plaza: concentric granite rings around the fountain, radial joints, a darker border band and
@@ -184,7 +184,7 @@ export function createBlockMaterial(shared: SharedUniforms, d: District) {
       float border = step(edge, 5.6);
       col = mix(col, vec3(0.36, 0.35, 0.34), border);
     }
-    col = mix(col, mix(soil, green, 0.85), max(strip * (1.0 - step(1.5, kind)) * step(edge, 4.15), lawn));
+    col = mix(col, mix(soil, green, 0.85), max(strip * (1.0 - step(0.5, kind)) * step(edge, 4.15), lawn));
     // Park walks: a diagonal cross and a loop of warm gravel through the lawns.
     if (lawn > 0.5) {
       float diag = min(abs(abs(fract(w.x / 20.0 + 0.5) - 0.5) - abs(fract(w.y / 20.0 + 0.5) - 0.5)), 1.0) * 20.0;
@@ -205,37 +205,29 @@ export function createBlockMaterial(shared: SharedUniforms, d: District) {
     float gRough = mix(lawn > 0.5 ? 0.95 : 0.85, 0.15, wet * (1.0 - lawn));
     vec3 gEmit = gAlbedo * vec3(1.0, 0.72, 0.45) * lampPools(w) * uNight * 1.1;
   `;
-  inject(m, shared, head, body, 'a1-blocks-v3');
+  inject(m, shared, head, body, 'a1-blocks-v4');
   return m;
 }
 
-/** The land beyond the parkway: mown parkland with soft variation, darker toward the far horizon. */
-export function createGrassMaterial(shared: SharedUniforms, d: District) {
-  const m = new MeshStandardMaterial({ roughness: 0.95 });
+/**
+ * The ground under and beyond the city blocks: worn concrete paving that continues past the last road and dissolves
+ * into the horizon fog, so there is never an edge or void.
+ */
+export function createFarGroundMaterial(shared: SharedUniforms, d: District) {
+  const m = new MeshStandardMaterial({ roughness: 0.92 });
   const body = /* glsl */ `
     vec2 w = vA1World.xz;
-    // The bay: no land beyond the embankment.
-    if (w.y < ${d.waterZ.toFixed(2)} || w.x < ${d.waterX.toFixed(2)}) discard;
-    float n = a1fbm(w * 0.04) * 0.6 + a1noise(w * 0.7) * 0.4;
-    vec3 col = mix(vec3(0.15, 0.27, 0.08), vec3(0.22, 0.36, 0.11), n);
-    float mow = 0.95 + 0.05 * step(0.5, fract((w.x - w.y) * 0.18));
-    col *= mow;
-    // Meadow patches and darker ground under the groves.
-    col = mix(col, vec3(0.12, 0.2, 0.07), smoothstep(0.5, 0.7, a1fbm(w * 0.02 + 4.0)) * 0.6);
-    // Winding gravel paths through the parkland.
-    float wave = w.y - (RING + 22.0) - 6.0 * sin(w.x * 0.05);
-    float wave2 = w.x - (RING + 22.0) - 6.0 * sin(w.y * 0.05);
-    float pth = min(abs(wave), abs(wave2));
-    col = mix(col, vec3(0.5, 0.46, 0.38), (1.0 - smoothstep(1.0, 1.3, pth)) * 0.9);
-    vec3 gAlbedo = col;
-    float gRough = 0.95;
+    float n = a1fbm(w * 0.05) * 0.6 + a1noise(w * 0.8) * 0.4;
+    vec3 col = mix(vec3(0.33, 0.32, 0.3), vec3(0.4, 0.39, 0.36), n);
+    vec3 gAlbedo = col * mix(1.0, 0.6, uWet);
+    float gRough = mix(0.92, 0.2, uWet);
     vec3 gEmit = vec3(0.0);
   `;
-  inject(m, shared, roadsGlsl(d), body, 'a1-grass-v1');
+  inject(m, shared, roadsGlsl(d), body, 'a1-farground-v1');
   return m;
 }
 
-/** Bay water: deep teal, small moving ripples, reflective; quieter toward the horizon. */
+/** Pond water: deep teal, small moving ripples, reflective. */
 export function createWaterMaterial(shared: SharedUniforms) {
   const m = new MeshStandardMaterial({
     color: new Color('#1c4a5c'),

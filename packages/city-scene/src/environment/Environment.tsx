@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import {
   Color,
   DirectionalLight,
-  FogExp2,
+  Fog,
   HemisphereLight,
   Mesh,
   PMREMGenerator,
@@ -24,7 +24,7 @@ import { Rain } from './Rain.tsx';
 import { createSkyMaterial, createSkyUniforms } from './sky.ts';
 
 /** Half-size of the sun's shadow map: the district and its parkway, so shadows stay crisp. */
-const SHADOW_HALF = 74;
+const SHADOW_HALF = 82;
 /** Below this elevation the key light stops dropping, so dusk still has a direction. */
 const MIN_LIGHT_ELEVATION = 7;
 
@@ -70,7 +70,7 @@ export function Environment() {
     sun.shadow.camera.far = 800;
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = 0.12;
-    return { hemi, sun, fog: new FogExp2('#bfd3e2', 0.0026) };
+    return { hemi, sun, fog: new Fog('#d6ecfa', 110, 330) };
   }, []);
 
   useEffect(() => {
@@ -142,7 +142,8 @@ export function Environment() {
     hemi.intensity = s.hemiIntensity;
 
     fog.color.setRGB(...s.fogColor);
-    fog.density = s.fogDensity;
+    fog.near = s.fogNear;
+    fog.far = s.fogFar;
     u.uFogColor.value.setRGB(...s.fogColor);
 
     skyUniforms.uZenith.value.setRGB(...s.zenith);
