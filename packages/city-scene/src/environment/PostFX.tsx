@@ -1,22 +1,27 @@
 'use client';
-import { useFrame } from '@react-three/fiber';
-import { Bloom, EffectComposer, SMAA, ToneMapping } from '@react-three/postprocessing';
-import { type BloomEffect, ToneMappingMode } from 'postprocessing';
-import { useRef } from 'react';
-import type { EnvRuntime } from './palette.ts';
+import { EffectComposer, N8AO, SMAA, ToneMapping } from '@react-three/postprocessing';
+import { ToneMappingMode } from 'postprocessing';
 
 /**
- * Ultra only: a light bloom that picks up lit windows, lamps and the beacon (strongest at night), SMAA in place of
- * MSAA, and the same ACES tone mapping the renderer uses without postprocessing. Deliberately subtle.
+ * Balanced and ultra: ambient occlusion (N8AO) for contact shadows where facades meet slabs, sidewalks and
+ * roofs, SMAA for edges, and ACES tone mapping at the end. No bloom or blur over the geometry.
+ *
+ * Fog note: three applies fog after tone mapping in its own shaders; here tone mapping runs last, so fog blends
+ * in linear light. The district keeps fog to the far horizon only, so the two paths (low without a composer,
+ * balanced/ultra with one) read the same.
  */
-export function PostFX({ rt }: { rt: EnvRuntime }) {
-  const bloom = useRef<BloomEffect>(null);
-  useFrame(() => {
-    if (bloom.current) bloom.current.intensity = rt.state.bloom;
-  });
+export function PostFX({ ultra }: { ultra: boolean }) {
   return (
     <EffectComposer multisampling={0}>
-      <Bloom ref={bloom} mipmapBlur luminanceThreshold={1.6} luminanceSmoothing={0.15} intensity={0.3} radius={0.6} />
+      <N8AO
+        aoRadius={2.2}
+        distanceFalloff={0.8}
+        intensity={ultra ? 2.4 : 2}
+        quality={ultra ? 'high' : 'medium'}
+        halfRes={!ultra}
+        aoSamples={ultra ? 16 : 8}
+        denoiseSamples={ultra ? 8 : 4}
+      />
       <SMAA />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
     </EffectComposer>

@@ -1,17 +1,12 @@
 import type { CityLayout } from '../types.ts';
-import { CURB_H, extendedGrid, PLAZAS, ROAD_HALF, SIDEWALK, type StreetGrid } from './grid.ts';
+import { CURB_H, type District, districtPlan, ROAD_HALF, rng } from './grid.ts';
+import { LAMP_OFFSET, LAMP_STEP } from './ground.ts';
 
 /**
- * Where street furniture goes. Pure, so tests can check that nothing stands in a road, on the pedestrians' walking
- * line (SIDEWALK from the road centre) or inside a building.
+ * Where the street furniture goes. Pure, so tests can check that nothing stands in a road, on the pedestrians'
+ * walking line (2.7 from the road centre) or inside a building.
  */
-
-/** Lamp poles stand just behind the walking line; street trees a little further in. */
-export const LAMP_OFFSET = 3.15;
 export const TREE_OFFSET = 3.7;
-/** Along each block side (measured from the junction before it): lamps and trees alternate. */
-const LAMP_AT = [5.2, 14.8];
-const TREE_AT = [8, 12];
 /** Distance of a signal pole from the junction centre, on both axes. */
 export const SIGNAL_CORNER = 3.3;
 
@@ -24,68 +19,77 @@ export interface Lamp {
 export interface Signal {
   x: number;
   z: number;
-  /** The heads face away from the junction along +x/-x and +z/-z: sign of each. */
   sx: 1 | -1;
   sz: 1 | -1;
 }
 export interface FurniturePlan {
   lamps: Lamp[];
+  /** Trees: x, y, z, scale. */
   trees: [number, number, number, number][];
   signals: Signal[];
 }
 
-function blocked(layout: CityLayout, x: number, z: number, margin: number): boolean {
-  for (const b of layout.buildings)
-    if (Math.abs(x - b.x) < b.w / 2 + margin && Math.abs(z - b.z) < b.d / 2 + margin) return true;
-  return false;
+function inBuilding(layout: CityLayout, x: number, z: number, margin: number): boolean {
+  return layout.buildings.some(b => Math.abs(x - b.x) < b.w / 2 + margin && Math.abs(z - b.z) < b.d / 2 + margin);
 }
 
-export function planFurniture(layout: CityLayout, reach: number): FurniturePlan {
-  const streets: StreetGrid = layout.streets;
-  const grid = extendedGrid(streets);
+function nearJunction(d: District, x: number, z: number, r: number): boolean {
+  return d.xs.some(jx => d.zs.some(jz => Math.abs(x - jx) < r && Math.abs(z - jz) < r));
+}
+
+export function planFurniture(layout: CityLayout, district = districtPlan(layout.streets)): FurniturePlan {
+  const d = district;
   const plan: FurniturePlan = { lamps: [], trees: [], signals: [] };
-  const sp = grid.spacing;
-  const inPlaza = (x: number, z: number) => PLAZAS.some(p => Math.abs(x - p.x) < sp / 2 && Math.abs(z - p.z) < sp / 2);
+  const R = d.ring;
   let n = 0;
-  const along = (roads: number[], cross: number[], axis: 'x' | 'z') => {
-    for (const r of roads) {
-      if (Math.abs(r) > reach) continue;
-      for (let j = 0; j < cross.length - 1; j++) {
-        const c0 = cross[j]!;
-        if (Math.abs(c0) > reach || Math.abs(cross[j + 1]!) > reach) continue;
-        for (const side of [-1, 1] as const) {
-          for (const s of LAMP_AT) {
-            const a = r + side * LAMP_OFFSET;
-            const [x, z] = axis === 'z' ? [a, c0 + s] : [c0 + s, a];
-            if (blocked(layout, x, z, 0.4)) continue;
-            // Arm points back over the road: toward -side on the cross axis.
-            const ry = axis === 'z' ? (side > 0 ? Math.PI : 0) : side > 0 ? Math.PI / 2 : -Math.PI / 2;
-            plan.lamps.push({ x, z, ry });
-          }
-          for (const s of TREE_AT) {
-            const a = r + side * TREE_OFFSET;
-            const [x, z] = axis === 'z' ? [a, c0 + s] : [c0 + s, a];
-            if (blocked(layout, x, z, 1.1) || inPlaza(x, z)) continue;
-            plan.trees.push([x, CURB_H, z, 0.95 + ((n++ * 7) % 5) * 0.06]);
-          }
+  // Lamps and street trees along both sides of every road inside the parkway (and the parkway itself).
+  const along = (lines: number[], axis: 'x' | 'z') => {
+    for (const r of lines)
+      for (const side of [-1, 1] as const) {
+        // Outside the parkway there is no sidewalk on the outer side.
+        if (Math.abs(r) >= R && Math.sign(r) === side) continue;
+        for (let s = -R + LAMP_STEP; s <= R - LAMP_STEP; s += LAMP_STEP) {
+          const a = r + side * LAMP_OFFSET;
+          const [x, z] = axis === 'z' ? [a, s] : [s, a];
+          if (nearJunction(d, x, z, 4.6) || inBuilding(layout, x, z, 0.4)) continue;
+          const ry = axis === 'z' ? (side > 0 ? Math.PI : 0) : side > 0 ? Math.PI / 2 : -Math.PI / 2;
+          plan.lamps.push({ x, z, ry });
+        }
+        for (let s = -R + 2.5; s <= R - 2.5; s += 5) {
+          const a = r + side * TREE_OFFSET;
+          const [x, z] = axis === 'z' ? [a, s] : [s, a];
+          if (nearJunction(d, x, z, 6) || inBuilding(layout, x, z, 1.0)) continue;
+          plan.trees.push([x, CURB_H, z, 0.9 + ((n++ * 7) % 5) * 0.06]);
         }
       }
-    }
   };
-  along(grid.xs, grid.zs, 'z');
-  along(grid.zs, grid.xs, 'x');
-  for (const x of streets.roadsX)
-    for (const z of streets.roadsZ) {
+  along(d.xs, 'z');
+  along(d.zs, 'x');
+  // Two signal poles on opposite corners of every junction of the traffic grid.
+  for (const x of layout.streets.roadsX)
+    for (const z of layout.streets.roadsZ) {
       plan.signals.push({ x: x + SIGNAL_CORNER, z: z + SIGNAL_CORNER, sx: 1, sz: 1 });
       plan.signals.push({ x: x - SIGNAL_CORNER, z: z - SIGNAL_CORNER, sx: -1, sz: -1 });
     }
+  // Park blocks: loose groves away from the walks.
+  const r = rng(41);
+  for (const c of d.cells) {
+    if (c.kind !== 'park' && c.kind !== 'strip') continue;
+    const inner = { x0: c.x0 + 5, x1: c.x1 - 5, z0: c.z0 + 5, z1: c.z1 - 5 };
+    if (inner.x1 <= inner.x0 || inner.z1 <= inner.z0) continue;
+    const count = Math.round(((inner.x1 - inner.x0) * (inner.z1 - inner.z0)) / 22);
+    for (let i = 0; i < count; i++) {
+      const x = inner.x0 + r() * (inner.x1 - inner.x0);
+      const z = inner.z0 + r() * (inner.z1 - inner.z0);
+      plan.trees.push([x, CURB_H, z, 1.0 + r() * 0.5]);
+    }
+  }
   return plan;
 }
 
-/** True when (x, z) lies on a road surface of the grid. */
-export function onRoad(streets: StreetGrid, x: number, z: number): boolean {
-  const g = extendedGrid(streets);
-  return g.xs.some(r => Math.abs(x - r) < ROAD_HALF) || g.zs.some(r => Math.abs(z - r) < ROAD_HALF);
+/** True when (x, z) lies on a road surface. */
+export function onRoad(d: District, x: number, z: number): boolean {
+  const inside = (v: number) => Math.abs(v) <= d.ring + ROAD_HALF;
+  if (!inside(x) || !inside(z)) return false;
+  return d.xs.some(r => Math.abs(x - r) < ROAD_HALF) || d.zs.some(r => Math.abs(z - r) < ROAD_HALF);
 }
-
-export { SIDEWALK };

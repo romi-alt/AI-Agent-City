@@ -23,8 +23,8 @@ import { presetFor, startTransition, stepTransition, sunVector, type Transition,
 import { Rain } from './Rain.tsx';
 import { createSkyMaterial, createSkyUniforms } from './sky.ts';
 
-/** Half-size of the area the sun's shadow map covers: the lots plus the first ring of the skyline. */
-const SHADOW_HALF = 105;
+/** Half-size of the sun's shadow map: the district and its parkway, so shadows stay crisp. */
+const SHADOW_HALF = 74;
 /** Below this elevation the key light stops dropping, so dusk still has a direction. */
 const MIN_LIGHT_ELEVATION = 7;
 
@@ -119,6 +119,7 @@ export function Environment() {
     u.uMotion.value = st.reducedMotion ? 0 : 1;
     u.uNight.value = s.nightFactor;
     u.uWet.value = s.wetness;
+    u.uCloud.value = s.cloudCover;
 
     const [sx, sy, sz] = sunVector(s.sunElevation, s.sunAzimuth);
     const [lx, ly, lz] = sunVector(Math.max(s.sunElevation, MIN_LIGHT_ELEVATION), s.sunAzimuth);
@@ -185,7 +186,7 @@ export function Environment() {
       <primitive object={sun.target} />
       <Clouds layers={budget.cloudLayers} rt={rt} />
       {!reducedMotion && <Rain drops={budget.rainDrops} rt={rt} />}
-      {budget.postprocessing && <PostFX rt={rt} />}
+      {budget.postprocessing && <PostFX ultra={quality === 'ultra'} />}
       {process.env.NODE_ENV !== 'production' && <DebugParams />}
     </>
   );
