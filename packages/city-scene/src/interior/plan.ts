@@ -99,8 +99,9 @@ function pods(work: Rect, occupants: number): Workstation[] {
   const podD = DESK_D * 2 + SEAT_OFFSET * 2 + 1.6;
   const cols = Math.max(1, Math.floor(work.w / podW));
   const rows = Math.max(1, Math.floor(work.d / podD));
-  // A believable team area: room for everyone plus a few free desks, at least four pods when they fit.
-  const podCount = Math.min(cols * rows, Math.max(4, Math.ceil(occupants / 4) + 1));
+  // A believable team area: at least four pods; up to eight people each get a pod of their own (so their name
+  // tags stay apart), larger teams share pods with a few free desks left over.
+  const podCount = Math.min(cols * rows, Math.max(4, Math.min(occupants, 8), Math.ceil(occupants / 4) + 1));
   // Fill a compact block from the centre out (columns nearest the middle first, front row before back row), so
   // the occupied desks sit together where the camera looks.
   const centre = (cols - 1) / 2;

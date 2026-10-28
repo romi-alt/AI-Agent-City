@@ -110,8 +110,7 @@ export function CityHud({
             <nav className="ac-brandbar ac-glass" aria-label="Where you are">
               {brand && (
                 <a className="ac-brand" href={brand.href}>
-                  {brand.label.replace(/City$/, '')}
-                  <span>{brand.label.endsWith('City') ? 'City' : ''}</span>
+                  {brand.label}
                 </a>
               )}
               <ol className="ac-crumbs">
@@ -285,7 +284,7 @@ function Arrival({
   const [progress, setProgress] = useState(0);
   useEffect(() => bus.on(e => e.type === 'arrival-progress' && setProgress(e.value)), [bus]);
   return (
-    <div className="ac-arrival">
+    <div className="ac-arrival ac-glass">
       <p className="ac-arrival-title">Welcome to AgentCity</p>
       <p className="ac-arrival-sub">
         {subtitle ?? (highlight ? `Taking you to ${highlight}.` : 'A city where AI agents work alongside your team.')}
@@ -293,7 +292,7 @@ function Arrival({
       <div className="ac-progress" aria-hidden="true">
         <i style={{ transform: `scaleX(${progress})` }} />
       </div>
-      <button type="button" className="ac-btn ac-glass" onClick={onSkip}>
+      <button type="button" className="ac-btn" onClick={onSkip}>
         Skip intro
       </button>
     </div>

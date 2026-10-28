@@ -24,6 +24,7 @@ export function SceneLabels() {
             className={`ac-label ac-desk-tag${l.selected ? ' is-selected' : ''}`}
             aria-pressed={!!l.selected}
             aria-label={l.ariaLabel}
+            data-testid={l.testId}
             onClick={l.onSelect}
             style={{ visibility: 'hidden' }}
           >

@@ -1,4 +1,5 @@
 import { type CityLayout, FLOOR_HEIGHT, type LayoutBuilding } from '../types.ts';
+import { CURB_H } from '../streets/grid.ts';
 import { type Box, buildingHeight, segmentHitsBox } from './bounds.ts';
 import { add, clamp, type V3 } from './math.ts';
 import { type Orbit, orbitPosition } from './orbit.ts';
@@ -42,7 +43,7 @@ export function entrance(b: LayoutBuilding): V3 {
 
 /** Headings tried for a building shot, entrance side first. */
 const HEADINGS = [0.42, -0.42, 0.8, -0.8, 0.1, 1.25, -1.25, 1.7, -1.7, 2.4, -2.4, Math.PI];
-const ELEVATIONS = [1.08, 0.95, 0.82, 0.7];
+const ELEVATIONS = [1.05, 0.92, 0.8, 0.68, 0.58];
 
 /** How many sight lines from the camera to the building are blocked by other buildings. */
 export function blockedSightLines(pos: V3, b: LayoutBuilding, others: Box[]): number {
@@ -51,9 +52,16 @@ export function blockedSightLines(pos: V3, b: LayoutBuilding, others: Box[]): nu
     [b.x, h * 0.5, b.z],
     [b.x, h * 0.95, b.z],
     [b.x, h * 0.2, b.z + b.d / 2],
-    [b.x - b.w / 2, h * 0.6, b.z + b.d / 2],
-    [b.x + b.w / 2, h * 0.6, b.z + b.d / 2],
   ];
+  // Every corner low and half-way up: a tower in front that hides the lower half counts as much as one hiding the top.
+  for (const [sx, sz] of [
+    [-1, -1],
+    [1, -1],
+    [-1, 1],
+    [1, 1],
+  ] as const) {
+    for (const f of [0.12, 0.55]) points.push([b.x + (sx * b.w) / 2, h * f, b.z + (sz * b.d) / 2]);
+  }
   let n = 0;
   for (const p of points) if (others.some(o => segmentHitsBox(pos, p, o, 0.2))) n++;
   return n;
@@ -63,13 +71,20 @@ export function blockedSightLines(pos: V3, b: LayoutBuilding, others: Box[]): nu
  * Frames a whole building from its entrance side, a little off-axis so its depth reads. When other buildings
  * would block the view, tries other headings, then higher angles, and keeps the clearest.
  */
-export function buildingShot(b: LayoutBuilding, aspect = 16 / 9, others: Box[] = []): Pose {
+export function buildingShot(b: LayoutBuilding, aspect = 16 / 9, others: Box[] = [], top?: number): Pose {
   const h = buildingHeight(b);
-  const r = Math.max(fitDistance(h * 1.7 + 4, Math.max(b.w, b.d) * 3, aspect), 30);
+  // `top` is the measured highest point (a spire or crown); the frame keeps it in view.
+  const r = Math.max(fitDistance(Math.max(h * 1.7 + 4, (top ?? h) * 1.25), Math.max(b.w, b.d) * 3, aspect), 30);
   const target: V3 = [b.x, h * 0.45, b.z];
   let best: { pose: Pose; blocked: number } | null = null;
-  for (const phi of ELEVATIONS) {
-    for (const theta of HEADINGS) {
+  // Entrance-side headings first (raising the camera before swinging round), then the sides and the back.
+  const front = HEADINGS.filter(t => Math.abs(t) < 1.3);
+  const order = [
+    ...front.flatMap(theta => ELEVATIONS.map(phi => ({ theta, phi }))),
+    ...HEADINGS.filter(t => Math.abs(t) >= 1.3).flatMap(theta => ELEVATIONS.map(phi => ({ theta, phi }))),
+  ];
+  for (const { theta, phi } of order) {
+    {
       const pose = poseFromOrbit({ target, theta, phi, radius: r });
       const blocked = others.length ? blockedSightLines(pose.pos, b, others) : 0;
       if (blocked === 0) return pose;
@@ -81,7 +96,8 @@ export function buildingShot(b: LayoutBuilding, aspect = 16 / 9, others: Box[] =
 
 /** Height of a floor's slab (bottom) in world units. */
 export function floorBase(level: number): number {
-  return (level - 1) * FLOOR_HEIGHT;
+  // Buildings stand on the curb (A1: BUILDING_BASE_Y = CURB_H).
+  return CURB_H + (level - 1) * FLOOR_HEIGHT;
 }
 
 /**
@@ -122,11 +138,12 @@ export function arrivalKeyframes(
   highlight: LayoutBuilding | null,
   aspect = 16 / 9,
   others: Box[] = [],
+  measuredTallest = 0,
 ): Pose[] {
   const e = layout.streets.extent;
   const end = highlight ? buildingShot(highlight, aspect, others) : homeShot(layout, aspect);
   const focus: V3 = highlight ? [highlight.x, 0, highlight.z] : [0, 0, 0];
-  const tallest = Math.max(...layout.buildings.map(buildingHeight), 10);
+  const tallest = Math.max(...layout.buildings.map(buildingHeight), measuredTallest, 10);
   return [
     { pos: [-e * 2.6, tallest * 1.4, e * 4.2], target: [0, tallest * 0.7, 0] },
     { pos: [-e * 1.1, tallest * 3.2, e * 2.1], target: [0, tallest * 0.25, 0] },

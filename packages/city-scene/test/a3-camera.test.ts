@@ -27,6 +27,7 @@ import {
   arrivalKeyframes,
   blockedSightLines,
   buildingShot,
+  floorBase,
   floorShot,
   homeShot,
   officeShot,
@@ -123,7 +124,7 @@ describe('bounds and collisions', () => {
   it('lets the camera into an opened floor but not below it', () => {
     const b = layout.buildings.find(x => x.key === 'rental-2')!;
     const cut = cityBoxes(layout, { building: b.key, level: 3 });
-    const floorY = 2 * 1.4;
+    const floorY = floorBase(3);
     const inOffice: V3 = [b.x + 1, floorY + 0.5, b.z + 1];
     assert.deepEqual(clampPosition(inOffice, cut, bounds), inOffice);
     const below = clampPosition([b.x, floorY - 0.6, b.z], cut, bounds);

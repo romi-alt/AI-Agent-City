@@ -227,6 +227,7 @@ export function DemoOffice() {
                 building={ws.building}
                 level={ws.office.level}
                 onSelectAgent={setSelected}
+                selectedAgentId={selected}
               />
             </div>
             <section className="dm-mock" aria-labelledby="office-activity-title">

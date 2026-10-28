@@ -23,6 +23,8 @@ export interface OfficeOccupants {
   level: number;
   agents: DeskOccupant[];
   onSelect?: (id: string) => void;
+  /** `data-testid` for each desk's name tag. */
+  deskTestId?: (id: string) => string;
 }
 
 export const OfficeOccupantsContext = createContext<OfficeOccupants | null>(null);

@@ -1,6 +1,6 @@
 'use client';
 import { type ThreeEvent, useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useSceneLabel } from '../camera/labels.ts';
 import { METRES_PER_UNIT, floorBase } from '../camera/shots.ts';
@@ -23,7 +23,7 @@ import {
 import { StaticBatch } from './batch.tsx';
 import { createKit, KitContext, useKit } from './kit.ts';
 import type { DeskOccupant } from './occupants.ts';
-import { statusColor, statusLabel } from './occupants.ts';
+import { OfficeOccupantsContext, statusColor, statusLabel } from './occupants.ts';
 import { Box, Cyl, Plane, Sphere } from './parts.tsx';
 import { deskLabel, DESK_HEIGHT } from './placement.ts';
 import { type OfficePlan, officeSize, planOffice, type Rect, variantFor, type Workstation } from './plan.ts';
@@ -521,6 +521,7 @@ function Desk({
 }) {
   const { m } = useKit();
   const { store } = useCityContext();
+  const testIdFor = useContext(OfficeOccupantsContext)?.deskTestId;
   const anchor = useRef<THREE.Group>(null);
   const top = DESK_HEIGHT;
   const w = classroom ? 1.3 : 1.6;
@@ -543,6 +544,7 @@ function Desk({
           status: occupant.status,
           selected,
           ariaLabel: `${deskLabel(occupant)}, ${statusLabel(occupant.status)}. Show this desk`,
+          ...(testIdFor ? { testId: testIdFor(occupant.id) } : {}),
           ...(select ? { onSelect: select } : {}),
         }
       : null,

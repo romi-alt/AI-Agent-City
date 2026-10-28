@@ -167,18 +167,7 @@ function DirectoryBody({ headingRef, onClose }: { headingRef: HeadingRef; onClos
       <p>Every building is open to look around. Choose one to see its floors and teams.</p>
       {layout.districts.map(d => (
         <div key={d.key}>
-          <h3
-            className="ac-list-title"
-            style={{
-              margin: '4px 0 6px',
-              fontSize: 13,
-              color: 'var(--ac-muted)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-            }}
-          >
-            {d.name}
-          </h3>
+          <h3 className="ac-list-title">{d.name}</h3>
           <ul className="ac-list">
             {layout.buildings
               .filter(b => b.district === d.key)
@@ -267,17 +256,7 @@ function BuildingBody({
         </button>
       </div>
       <div>
-        <h3
-          style={{
-            margin: '0 0 6px',
-            fontSize: 13,
-            color: 'var(--ac-muted)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-          }}
-        >
-          Floors
-        </h3>
+        <h3>Floors</h3>
         <ul className="ac-list" onMouseLeave={() => bus.emit({ type: 'floor-preview', level: null })}>
           {floorsTopDown(b).map(f => (
             <li key={f.level}>
@@ -404,17 +383,7 @@ function People({
   if (!people.length) return <p>No one works on this floor yet.</p>;
   return (
     <div>
-      <h3
-        style={{
-          margin: '0 0 6px',
-          fontSize: 13,
-          color: 'var(--ac-muted)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}
-      >
-        Who works here
-      </h3>
+      <h3>Who works here</h3>
       <ul className="ac-list">
         {people.map((p, i) => {
           const name = p.name ?? (p.kind === 'human' ? 'Team member' : 'AI agent');

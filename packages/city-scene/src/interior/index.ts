@@ -1,5 +1,5 @@
 export { DemoOfficeScene, type DemoAgent, type DemoOfficeSceneProps } from './DemoOfficeScene.tsx';
-export { Interior, nightFactorFor } from './Interior.tsx';
+export { Interior } from './Interior.tsx';
 export {
   type DeskOccupant,
   type OfficeOccupants,
