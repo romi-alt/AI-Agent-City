@@ -1,4 +1,4 @@
-import type { Rect } from '../plan.ts';
+import type { ReferencePlan, Rect } from '../plan.ts';
 
 /**
  * Where the room's zones sit in the reference-look office (Office mode), in office-local metres: x east, z south,
@@ -8,6 +8,7 @@ import type { Rect } from '../plan.ts';
  * Proportions follow the legacy floor view (apps/legacy/src/scene/officeView.ts, a 30 × 22 room): leadership
  * corner back-left, team rug in the middle-right, lounge front-left, round meeting table front-right, the timber
  * feature wall with the task board on the back glass and a freestanding live screen at the right.
+ * Zone rectangles come from R2's `planReferenceOffice`, so rugs and desks always line up.
  */
 export interface RoomLayout {
   width: number;
@@ -23,7 +24,7 @@ export interface RoomLayout {
   /** Lounge rug (coral outline) with the yellow sofa. */
   loungeRug: Rect;
   /** The teal ring around the round meeting table. */
-  meeting: { x: number; z: number; radius: number };
+  meeting: { x: number; z: number; radius: number; table: number };
   /** The slatted timber wall on the back glass: centre of its front face, width and height. */
   featureWall: { x: number; z: number; w: number; h: number };
   /** The freestanding live screen: floor position and yaw (it turns towards the room). */
@@ -37,37 +38,44 @@ export interface RoomLayout {
 /** Width of the border band on each rug, in metres. */
 export const RUG_BORDER = 0.3;
 
-/** A rectangle from edges given as fractions of the room (-0.5 … 0.5 on each axis). */
-function span(W: number, D: number, u0: number, u1: number, v0: number, v1: number): Rect {
-  return { x: ((u0 + u1) / 2) * W, z: ((v0 + v1) / 2) * D, w: (u1 - u0) * W, d: (v1 - v0) * D };
-}
-
-export function roomLayout(width: number, depth: number): RoomLayout {
-  const W = width;
-  const D = depth;
-  const wallW = Math.min(13, W * 0.38);
-  const radius = Math.min(W, D) * 0.105;
+/**
+ * The room around R2's reference plan: rugs, meeting ring, feature wall, live screen and corner plants come from the
+ * plan (so they line up with the desks); glass height, handrail, the bookshelf wall and extra plants are the room's.
+ * Heights follow the legacy room (5-unit glass, rail at 1.1) at the plan's scale.
+ */
+export function roomLayout(plan: ReferencePlan): RoomLayout {
+  const W = plan.width;
+  const D = plan.depth;
+  const s = plan.scale;
+  const f = plan.featureWall;
+  const lead = plan.leadRug;
+  const lounge = plan.loungeRug;
+  // The bookshelf stands on the west glass between the leadership and lounge rugs.
+  const gapFrom = lead.z + lead.d / 2;
+  const gapTo = lounge.z - lounge.d / 2;
   return {
     width: W,
     depth: D,
-    glassHeight: 3.4,
-    railHeight: 1.1,
-    leadRug: span(W, D, -0.46, -0.17, -0.31, -0.05),
-    teamRug: span(W, D, -0.12, 0.38, -0.28, 0.17),
-    loungeRug: span(W, D, -0.46, -0.2, 0.12, 0.42),
-    meeting: { x: 0.3 * W, z: 0.34 * D, radius },
-    featureWall: { x: 0.04 * W, z: -D / 2 + 0.55, w: wallW, h: 3.9 },
-    liveScreen: { x: 0.44 * W, z: -0.2 * D, yaw: -0.65 },
-    library: { x: -W / 2 + 0.45, z: 0.0 * D, w: Math.min(4.6, D * 0.16) },
+    glassHeight: 5 * s,
+    railHeight: 1.1 * s,
+    leadRug: rectOf(lead),
+    teamRug: rectOf(plan.teamRug),
+    loungeRug: rectOf(lounge),
+    meeting: { x: plan.meeting.x, z: plan.meeting.z, radius: plan.meeting.outer, table: plan.meeting.table },
+    featureWall: { x: f.x, z: f.z + 0.25 * s, w: f.w, h: f.h },
+    liveScreen: plan.liveScreen,
+    library: { x: -W / 2 + 0.45, z: (gapFrom + gapTo) / 2, w: Math.max(2.4, Math.min(4.6, gapTo - gapFrom - 0.6)) },
     plants: [
-      { x: -W / 2 + 1.0, z: -D / 2 + 1.0, size: 1.25 },
-      { x: W / 2 - 1.0, z: -D / 2 + 1.0, size: 1.2 },
-      { x: -W / 2 + 1.0, z: D / 2 - 1.0, size: 1.1 },
-      { x: W / 2 - 1.0, z: D * 0.05, size: 1.0 },
-      { x: 0.04 * W - wallW / 2 - 0.9, z: -D / 2 + 0.95, size: 0.95 },
-      { x: 0.04 * W + wallW / 2 + 0.9, z: -D / 2 + 0.95, size: 0.9 },
+      ...plan.plants.map(p => ({ ...p, size: 1.25 })),
+      { x: W / 2 - 1.0, z: D / 2 - 1.0, size: 1.1 },
+      { x: f.x - f.w / 2 - 0.9, z: -D / 2 + 0.95, size: 0.95 },
+      { x: f.x + f.w / 2 + 0.9, z: -D / 2 + 0.95, size: 0.9 },
     ],
   };
+}
+
+function rectOf(r: Rect): Rect {
+  return { x: r.x, z: r.z, w: r.w, d: r.d };
 }
 
 /** The rug a desk zone belongs to, for desk placement: 'lead' for leadership and people, 'team' for the rest. */

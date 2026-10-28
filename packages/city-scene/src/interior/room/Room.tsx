@@ -51,7 +51,12 @@ export function RoomShell({ room }: { room: RoomLayout }) {
             <Box mat={m.rail} position={[0, 0.06, 0]} scale={[s.len, 0.12, 0.14]} />
             <Box mat={m.post} position={[0, H, 0]} scale={[s.len + 0.1, 0.08, 0.1]} />
             {Array.from({ length: posts + 1 }, (_, k) => (
-              <Box key={k} mat={m.post} position={[-s.len / 2 + (s.len * k) / posts, H / 2, 0]} scale={[0.07, H, 0.08]} />
+              <Box
+                key={k}
+                mat={m.post}
+                position={[-s.len / 2 + (s.len * k) / posts, H / 2, 0]}
+                scale={[0.07, H, 0.08]}
+              />
             ))}
           </group>
         );
@@ -146,11 +151,23 @@ export function FeatureWall({ room, board }: { room: RoomLayout; board: THREE.Ma
       </mesh>
       <Box mat={m.metal} position={[0, 0.75, 0.12]} scale={[boardW * 0.6, 0.05, 0.22]} />
       {/* Clock above the board: a dark rim, white face, two hands. */}
-      <group position={[0, boardY + boardH / 2 + 0.45, 0.05]}>
-        <Shape geo={g.disc} mat={m.clockRim} position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[0.6, 0.06, 0.6]} />
-        <Shape geo={g.disc} mat={m.clockFace} position={[0, 0, 0.02]} rotation={[Math.PI / 2, 0, 0]} scale={[0.5, 0.05, 0.5]} />
-        <Box mat={m.clockRim} position={[0, 0.08, 0.06]} scale={[0.025, 0.17, 0.01]} />
-        <Box mat={m.clockRim} position={[0.06, 0, 0.06]} rotation-z={-1.1} scale={[0.025, 0.13, 0.01]} />
+      <group position={[0, boardY + boardH / 2 + 0.6, 0.05]}>
+        <Shape
+          geo={g.disc}
+          mat={m.clockRim}
+          position={[0, 0, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+          scale={[0.85, 0.08, 0.85]}
+        />
+        <Shape
+          geo={g.disc}
+          mat={m.clockFace}
+          position={[0, 0, 0.02]}
+          rotation={[Math.PI / 2, 0, 0]}
+          scale={[0.72, 0.07, 0.72]}
+        />
+        <Box mat={m.clockRim} position={[0, 0.11, 0.07]} scale={[0.035, 0.24, 0.01]} />
+        <Box mat={m.clockRim} position={[0.08, 0.02, 0.07]} rotation-z={-1.1} scale={[0.035, 0.18, 0.01]} />
       </group>
     </group>
   );
@@ -239,7 +256,7 @@ function MeetingChair({ position, yaw, mat }: { position: V3; yaw: number; mat: 
 export function MeetingCorner({ room }: { room: RoomLayout }) {
   const { m, g } = useRoomKit();
   const t = room.meeting;
-  const tableR = t.radius * 0.45;
+  const tableR = t.table;
   const seats = 5;
   return (
     <group position={[t.x, 0, t.z]}>

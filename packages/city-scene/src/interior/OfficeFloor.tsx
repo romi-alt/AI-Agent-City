@@ -26,7 +26,8 @@ import { createKit, KitContext, useKit } from './kit.ts';
 import type { DeskOccupant } from './occupants.ts';
 import { OfficeOccupantsContext, statusColor, statusLabel } from './occupants.ts';
 import { Box, Cyl, Plane, Sphere } from './parts.tsx';
-import { deskLabel, DESK_HEIGHT } from './placement.ts';
+import { deskLabel, DESK_HEIGHT, referencePlanFor } from './placement.ts';
+import { ReferenceDesks } from './desks.tsx';
 import { type OfficePlan, officeSize, planOffice, type Rect, variantFor, type Workstation } from './plan.ts';
 import { DeskScreen, drawLiveScreen, drawRoster, drawTaskBoard } from './screens.ts';
 import { signTexture } from './textures.ts';
@@ -80,7 +81,8 @@ export function OfficeFloor(props: OfficeFloorProps) {
     [width, depth, props.occupants.length, b.kind],
   );
   const reference = props.look === 'reference';
-  const room = useMemo(() => roomLayout(width, depth), [width, depth]);
+  const refPlan = useMemo(() => referencePlanFor(b, props.occupants), [b, props.occupants]);
+  const room = useMemo(() => roomLayout(refPlan), [refPlan]);
   const roomKit = useMemo(() => (reference ? createRoomKit(width, depth) : null), [reference, width, depth]);
   useEffect(() => () => roomKit?.dispose(), [roomKit]);
   const root = useRef<THREE.Group>(null);
@@ -107,7 +109,14 @@ export function OfficeFloor(props: OfficeFloorProps) {
           <RoomKitContext.Provider value={roomKit!}>
             <StaticBatch version={`ref:${batchVersion}`}>
               <ReferenceRoom room={room} building={b} floor={floor} occupants={props.occupants} />
-              <Desks plan={plan} {...props} />
+              <ReferenceDesks
+                plan={refPlan}
+                occupants={props.occupants}
+                selected={props.selected}
+                onSelectDesk={props.onSelectDesk}
+                showLabels={props.detail === 'full'}
+                animate={props.animate}
+              />
             </StaticBatch>
           </RoomKitContext.Provider>
         ) : (

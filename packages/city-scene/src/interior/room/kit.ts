@@ -61,7 +61,7 @@ function matte(color: string, extra: THREE.MeshStandardMaterialParameters = {}) 
 }
 
 export function createRoomKit(widthM: number, depthM: number): RoomKit {
-  const plank = plankFloorTexture([widthM / 7, depthM / 7]);
+  const plank = plankFloorTexture([widthM / 4, depthM / 4]);
   const grids = NEIGHBOUR_COLOURS.map(c => windowGridTexture(c));
   const prints = [1, 2].map(pictureTexture);
   const m: RoomKit['m'] = {
@@ -114,7 +114,7 @@ export function createRoomKit(widthM: number, depthM: number): RoomKit {
   const g: RoomKit['g'] = {
     ico: new THREE.IcosahedronGeometry(0.5, 0),
     pot: new THREE.CylinderGeometry(0.5, 0.38, 1, 10),
-    ring: new THREE.RingGeometry(0.88, 1, 56),
+    ring: new THREE.RingGeometry(2.6 / 3.2, 1, 56),
     disc: new THREE.CylinderGeometry(0.5, 0.5, 1, 28),
   };
   return {

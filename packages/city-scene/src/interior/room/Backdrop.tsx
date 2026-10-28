@@ -52,6 +52,24 @@ export function neighboursFor(room: RoomLayout): Neighbour[] {
   ];
 }
 
+/** Street trees on the pavement between the back glass and the neighbours. */
+function treesFor(room: RoomLayout): [number, number, number][] {
+  const z = -room.depth / 2 - GAP / 2;
+  return [-0.36, -0.12, 0.2, 0.42].map(u => [u * room.width, GROUND_Y, z]);
+}
+
+function Tree({ position, seed }: { position: [number, number, number]; seed: number }) {
+  const { m, g } = useRoomKit();
+  const s = 1 + (seed % 2) * 0.25;
+  return (
+    <group position={position} scale={s}>
+      <mesh geometry={asGeo(g.pot)} material={asMat(m.trunk)} position={[0, 1.1, 0]} scale={[0.25, 2.2, 0.25]} />
+      <mesh geometry={asGeo(g.ico)} material={asMat(m.leaf)} position={[0, 2.9, 0]} scale={2.4} />
+      <mesh geometry={asGeo(g.ico)} material={asMat(m.leafDark)} position={[0.4, 3.6, 0.2]} scale={1.5} />
+    </group>
+  );
+}
+
 /**
  * Box geometry whose UVs count facade tiles, so one shared window-grid texture per colour tiles evenly across
  * buildings of any size (the static batch merges them all into one mesh per colour).
@@ -78,13 +96,16 @@ function Building({ n }: { n: Neighbour }) {
       <mesh geometry={asGeo(geo)} material={asMat(kit.facades[n.colour]!)} position={[0, h / 2, 0]} />
       <Box mat={kit.m.cornice} position={[0, h + 0.15, 0]} scale={[w + 0.3, 0.3, BLOCK_D + 0.3]} />
       <Box mat={kit.m.roof} position={[0, h + 0.35, 0]} scale={[w + 0.1, 0.12, BLOCK_D + 0.1]} />
-      {/* Shop awning over the ground floor, tilted out towards the room. */}
-      <Box
-        mat={kit.awnings[(n.colour + 2) % kit.awnings.length]!}
-        position={[0, 2.75, BLOCK_D / 2 + 0.5]}
-        rotation-x={0.35}
-        scale={[w * 0.72, 0.1, 1.1]}
-      />
+      {/* Shop awning over the ground floor, tilted out towards the room (back row only: at the sides they would
+          stand right against the glass). */}
+      {n.yaw === 0 && (
+        <Box
+          mat={kit.awnings[(n.colour + 2) % kit.awnings.length]!}
+          position={[0, 2.75, BLOCK_D / 2 + 0.5]}
+          rotation-x={0.35}
+          scale={[w * 0.72, 0.1, 1.1]}
+        />
+      )}
     </group>
   );
 }
@@ -98,6 +119,9 @@ export function Backdrop({ room }: { room: RoomLayout }) {
       <Plane mat={m.ground} position={[0, GROUND_Y, 0]} rotation-x={-Math.PI / 2} scale={[600, 600, 1]} />
       {list.map((n, i) => (
         <Building key={i} n={n} />
+      ))}
+      {treesFor(room).map((t, i) => (
+        <Tree key={i} position={t} seed={i} />
       ))}
     </group>
   );

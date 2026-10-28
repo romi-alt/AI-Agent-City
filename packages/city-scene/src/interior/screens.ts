@@ -201,8 +201,15 @@ export function drawTaskBoard(
  * The freestanding live screen: the floor's name and how many people are working, waiting for the visitor or idle
  * right now (counted from the desks, so it never shows invented figures).
  */
-export function drawLiveScreen(g: CanvasRenderingContext2D, w: number, h: number, title: string, people: DeskOccupant[]) {
-  const count = (s: string) => people.filter(p => (s === 'idle' ? statusLabel(p.status) === 'Idle' : p.status === s)).length;
+export function drawLiveScreen(
+  g: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  title: string,
+  people: DeskOccupant[],
+) {
+  const count = (s: string) =>
+    people.filter(p => (s === 'idle' ? statusLabel(p.status) === 'Idle' : p.status === s)).length;
   const lines: [string, string, string][] = [
     ['On this floor', String(people.length), '#f5b335'],
     ['Working', String(count('working')), statusColor('working')],
