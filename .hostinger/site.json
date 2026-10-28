@@ -1,0 +1,13 @@
+{
+  "domain": "autosalescity.site",
+  "username": "u943531942",
+  "type": "nodejs",
+  "package": "scripts/package-preview.sh https://autosalescity.site <zip>",
+  "build": {
+    "app_type": "other",
+    "node_version": 22,
+    "package_manager": "npm",
+    "entry_file": "apps/web/server.js",
+    "build_script": "build"
+  }
+}
