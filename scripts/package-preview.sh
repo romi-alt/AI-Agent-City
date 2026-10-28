@@ -56,12 +56,16 @@ cat > "$STAGE/package.json" <<'JSON'
   "private": true,
   "description": "Prebuilt Next.js standalone server for the AgentCity public preview (landing page and 3D city, no backend).",
   "engines": { "node": ">=22 <23" },
+  "dependencies": { "next": "16.4.3", "react": "19.3.1", "react-dom": "19.3.1" },
   "scripts": {
     "build": "echo prebuilt",
     "start": "NODE_ENV=production node apps/web/server.js"
   }
 }
 JSON
+# The host runs `npm install` before starting. The exact versions above are already in node_modules, so npm keeps
+# them; skipping optional packages stops it fetching native extras (image resizer, compiler) the server never loads.
+printf 'omit=optional\nfund=false\naudit=false\n' > "$STAGE/.npmrc"
 if grep -rqs "local-dev-only" "$STAGE"; then
   echo "refusing to package: a local development secret is in the build" >&2
   exit 1
