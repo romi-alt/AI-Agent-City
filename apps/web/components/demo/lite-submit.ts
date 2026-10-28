@@ -3,11 +3,36 @@ import { liteFormToken, liteRequestDemo, LiteError } from '../../lib/api-client'
 import { readAttribution } from './demo-api';
 import { normaliseDemoForm, type DemoFormValues } from './demo-validation';
 
-/** Takes a fresh single-use form token each time, so a retry after any failure starts clean. */
+// The server refuses a form token younger than 3 s (a bot filter), so the token is fetched when the form opens and
+// a submit that comes sooner waits out the difference. It is dropped after 90 minutes, well inside the 2 h limit.
+const MIN_AGE_MS = 3200;
+const MAX_AGE_MS = 90 * 60_000;
+type HeldToken = { token: string; at: number } | null;
+let held: Promise<HeldToken> | null = null;
+
+/** Gets a form token ahead of time (call when the form appears and again after each use). */
+export function prefetchFormToken(): void {
+  held = liteFormToken()
+    .then(token => ({ token, at: Date.now() }))
+    .catch(() => null);
+}
+
+async function takeFormToken(): Promise<string> {
+  const ready = held ? await held : null;
+  held = null;
+  const usable = ready && Date.now() - ready.at < MAX_AGE_MS ? ready : null;
+  const got = usable ?? { token: await liteFormToken(), at: Date.now() };
+  const wait = MIN_AGE_MS - (Date.now() - got.at);
+  if (wait > 0) await new Promise(resolve => setTimeout(resolve, wait));
+  return got.token;
+}
+
+/** Sends the request with its own form token; the next one is fetched for a retry. */
 export async function submitDemoRequest(values: DemoFormValues, honeypot = ''): Promise<string> {
   const clean = normaliseDemoForm(values);
   const { referrerHost, ...utm } = readAttribution();
-  const formToken = await liteFormToken();
+  const formToken = await takeFormToken();
+  prefetchFormToken();
   const { requestId } = await liteRequestDemo({
     name: clean.fullName,
     email: clean.email,

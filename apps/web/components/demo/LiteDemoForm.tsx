@@ -15,7 +15,7 @@ import {
   type DemoFormValues,
 } from './demo-validation';
 import { loadDraft, saveDraft } from './lite-draft';
-import { explainSubmitError, submitDemoRequest } from './lite-submit';
+import { explainSubmitError, prefetchFormToken, submitDemoRequest } from './lite-submit';
 import '../marketing/marketing.css';
 import './demo.css';
 
@@ -33,6 +33,9 @@ export function LiteDemoForm({ headingId }: { headingId?: string }) {
   const inFlight = useRef(false);
   const summaryRef = useRef<HTMLDivElement>(null);
   const failureRef = useRef<HTMLDivElement>(null);
+
+  // The server wants a form token at least 3 s old, so it is fetched as soon as the form is on screen.
+  useEffect(() => prefetchFormToken(), []);
 
   // Coming back from "wrong address?" on the check-email page: the details are still here, ready to correct.
   useEffect(() => {
