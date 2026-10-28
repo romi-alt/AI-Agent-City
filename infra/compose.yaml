@@ -94,6 +94,8 @@ services:
       - ./keycloak/agentcity-realm.json:/opt/keycloak/data/import/agentcity-realm.json:ro
       - ./keycloak/agency-idp-realm.json:/opt/keycloak/data/import/agency-idp-realm.json:ro
       - ./keycloak/providers:/opt/keycloak/providers:ro
+      # AgentCity login and email theme (X01): realm loginTheme/emailTheme "agentcity".
+      - ./keycloak/themes/agentcity:/opt/keycloak/themes/agentcity:ro
     # Back-channel logout to the API on the host (agentcity-bff's backchannel.logout.url).
     extra_hosts: ['host.docker.internal:host-gateway']
     depends_on:

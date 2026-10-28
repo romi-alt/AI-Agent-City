@@ -1,0 +1,454 @@
+/*
+ * AgentCity login theme (X01). Loaded after keycloak.v2's PatternFly styles and restyles them to the landing page's
+ * tokens (apps/web/app/theme.css): paper and ink, hairlines, a white 16 px card, 48 px controls with a 10 px radius,
+ * a gold primary button with ink text, and the Geist font (self-hosted, SIL OFL 1.1: ../fonts/OFL-geist.txt).
+ */
+@font-face {
+  font-family: 'Geist';
+  src: url('../fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ac-paper: #fafaf9;
+  --ac-white: #ffffff;
+  --ac-ink: #0c0c0d;
+  --ac-ink-2: #3f3f46;
+  --ac-muted: #5f5f68;
+  --ac-hairline: #e7e5e4;
+  --ac-hairline-2: #d6d3d1;
+  --ac-tint: #f4f4f2;
+  --ac-gold: #f5b335;
+  --ac-gold-hover: #eaa51f;
+  --ac-gold-ink: #7a5000;
+  --ac-danger: #b42318;
+  --ac-danger-tint: #fef3f2;
+  --ac-success-ink: #2f6b3a;
+  --ac-success-tint: #f0f7f1;
+  --ac-focus: #2563eb;
+  --ac-radius-card: 16px;
+  --ac-radius-btn: 10px;
+  --ac-control: 48px;
+  --ac-shadow-card: 0 1px 2px rgba(12, 12, 13, 0.04), 0 8px 24px -12px rgba(12, 12, 13, 0.1);
+  --ac-font: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* PatternFly globals the stock templates draw with. */
+  --pf-v5-global--FontFamily--text: var(--ac-font);
+  --pf-v5-global--FontFamily--heading: var(--ac-font);
+  --pf-v5-global--FontFamily--redhat-updatedfont-path: var(--ac-font);
+  --pf-v5-global--Color--100: var(--ac-ink);
+  --pf-v5-global--Color--200: var(--ac-muted);
+  --pf-v5-global--BorderColor--100: var(--ac-hairline);
+  --pf-v5-global--BorderColor--200: var(--ac-hairline-2);
+  --pf-v5-global--link--Color: var(--ac-ink);
+  --pf-v5-global--link--Color--hover: var(--ac-ink);
+  --pf-v5-global--primary-color--100: var(--ac-ink);
+  --pf-v5-global--BackgroundColor--100: var(--ac-white);
+  --pf-v5-global--BorderRadius--sm: var(--ac-radius-btn);
+  --keycloak-card-top-color: transparent;
+  color-scheme: light;
+}
+
+html,
+body.ac-body,
+.login-pf body {
+  background: var(--ac-paper) !important;
+  color: var(--ac-ink);
+  font-family: var(--ac-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ac-login {
+  min-height: 100vh;
+  background: var(--ac-paper);
+  --pf-v5-c-login--PaddingTop: 0;
+  --pf-v5-c-login--PaddingBottom: 0;
+}
+.ac-login .pf-v5-c-login__container {
+  grid-template-columns: minmax(0, 440px);
+  justify-content: center;
+  padding: 56px 20px 64px;
+  row-gap: 28px;
+}
+
+/* Wordmark and the quiet environment note. */
+.ac-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+}
+#kc-header-wrapper.ac-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1875rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  line-height: 1;
+  color: var(--ac-ink) !important;
+}
+.ac-mark {
+  width: 22px;
+  height: 22px;
+  color: var(--ac-ink);
+}
+.ac-env-note {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  color: var(--ac-muted);
+}
+
+/* The card. */
+.ac-login .pf-v5-c-login__main {
+  background: var(--ac-white);
+  border: 1px solid var(--ac-hairline);
+  border-radius: var(--ac-radius-card);
+  box-shadow: var(--ac-shadow-card);
+  overflow: hidden;
+  --pf-v5-c-login__main--BackgroundColor: var(--ac-white);
+}
+.ac-login .pf-v5-c-login__main-header {
+  border-top: 0;
+  padding: 36px 36px 4px;
+  --pf-v5-c-login__main-header--PaddingTop: 36px;
+}
+.ac-login .pf-v5-c-login__main-body {
+  padding: 20px 36px 8px;
+}
+.ac-login .pf-v5-c-login__main-footer {
+  padding: 0 36px 28px;
+}
+.ac-login .pf-v5-c-login__main-footer:empty {
+  display: none;
+}
+#kc-page-title {
+  font-family: var(--ac-font);
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--ac-ink);
+}
+
+/* Text. */
+.ac-login p,
+.ac-login .instruction,
+#kc-info-message,
+#agentcity-email-code-sent {
+  color: var(--ac-ink-2);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+#agentcity-email-code-help,
+#kc-info-wrapper,
+.ac-login .pf-v5-c-login__main-footer-band {
+  color: var(--ac-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.ac-login .pf-v5-c-login__main-footer-band {
+  border-top: 1px solid var(--ac-hairline);
+  background: transparent;
+  padding: 18px 0 0;
+  margin-top: 8px;
+  text-align: left;
+}
+.ac-login a,
+.ac-link {
+  color: var(--ac-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--ac-hairline-2);
+}
+.ac-login a:hover {
+  text-decoration-color: var(--ac-ink);
+}
+
+/* Fields: 48 px, 10 px radius, hairline border. */
+.ac-login .pf-v5-c-form__label,
+.ac-login .pf-v5-c-form__label-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ac-ink);
+}
+.ac-login .pf-v5-c-form-control {
+  --pf-v5-c-form-control--BorderRadius: var(--ac-radius-btn);
+  --pf-v5-c-form-control--after--BorderColor: transparent;
+  --pf-v5-c-form-control--before--BorderColor: var(--ac-hairline-2);
+  --pf-v5-c-form-control--hover--after--BorderColor: transparent;
+  --pf-v5-c-form-control--focus--after--BorderColor: transparent;
+  --pf-v5-c-form-control--BackgroundColor: var(--ac-white);
+  min-height: var(--ac-control);
+  border-radius: var(--ac-radius-btn);
+}
+.ac-login .pf-v5-c-form-control::before,
+.ac-login .pf-v5-c-form-control::after {
+  border-radius: var(--ac-radius-btn);
+}
+.ac-login .pf-v5-c-form-control > input,
+.ac-login .pf-v5-c-form-control > select {
+  min-height: var(--ac-control);
+  padding: 0 14px;
+  font-family: var(--ac-font);
+  font-size: 1rem;
+  color: var(--ac-ink);
+}
+.ac-login .pf-v5-c-form-control:focus-within {
+  --pf-v5-c-form-control--before--BorderColor: var(--ac-ink);
+  box-shadow: 0 0 0 3px rgba(12, 12, 13, 0.08);
+}
+.ac-login .pf-v5-c-form-control.pf-m-error {
+  --pf-v5-c-form-control--before--BorderColor: var(--ac-danger);
+}
+.ac-login .pf-v5-c-form-control.pf-m-readonly {
+  --pf-v5-c-form-control--BackgroundColor: var(--ac-tint);
+}
+#code {
+  font-family: var(--ac-font);
+  font-size: 1.375rem !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.35em;
+}
+.ac-login .pf-v5-c-helper-text__item.pf-m-error,
+.ac-login .pf-m-error .pf-v5-c-helper-text__item-text,
+#input-error-code {
+  color: var(--ac-danger);
+  font-size: 0.875rem;
+}
+
+/* Buttons: 48 px, 10 px radius. Primary is gold with ink text; secondary and tertiary are hairline white. */
+.ac-login .pf-v5-c-button {
+  min-height: var(--ac-control);
+  border-radius: var(--ac-radius-btn);
+  font-family: var(--ac-font);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  --pf-v5-c-button--BorderRadius: var(--ac-radius-btn);
+  --pf-v5-c-button--PaddingTop: 12px;
+  --pf-v5-c-button--PaddingBottom: 12px;
+}
+.ac-login .pf-v5-c-button::after {
+  border-radius: var(--ac-radius-btn);
+}
+.ac-login .pf-v5-c-button.pf-m-primary {
+  --pf-v5-c-button--m-primary--BackgroundColor: var(--ac-gold);
+  --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--ac-gold-hover);
+  --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--ac-gold-hover);
+  --pf-v5-c-button--m-primary--active--BackgroundColor: var(--ac-gold-hover);
+  --pf-v5-c-button--m-primary--Color: var(--ac-ink);
+  --pf-v5-c-button--m-primary--hover--Color: var(--ac-ink);
+  --pf-v5-c-button--m-primary--focus--Color: var(--ac-ink);
+  --pf-v5-c-button--m-primary--active--Color: var(--ac-ink);
+  background-color: var(--ac-gold);
+  color: var(--ac-ink);
+}
+.ac-login .pf-v5-c-button.pf-m-secondary,
+.ac-login .pf-v5-c-button.pf-m-tertiary,
+.ac-login .pf-v5-c-button.pf-m-control {
+  --pf-v5-c-button--m-secondary--Color: var(--ac-ink);
+  --pf-v5-c-button--m-secondary--hover--Color: var(--ac-ink);
+  --pf-v5-c-button--m-secondary--focus--Color: var(--ac-ink);
+  --pf-v5-c-button--m-secondary--BackgroundColor: var(--ac-white);
+  --pf-v5-c-button--m-secondary--hover--BackgroundColor: var(--ac-tint);
+  --pf-v5-c-button--m-secondary--after--BorderColor: var(--ac-hairline-2);
+  --pf-v5-c-button--m-secondary--hover--after--BorderColor: var(--ac-ink);
+  --pf-v5-c-button--m-tertiary--Color: var(--ac-ink);
+  --pf-v5-c-button--m-tertiary--hover--Color: var(--ac-ink);
+  --pf-v5-c-button--m-tertiary--BackgroundColor: var(--ac-white);
+  --pf-v5-c-button--m-tertiary--hover--BackgroundColor: var(--ac-tint);
+  --pf-v5-c-button--m-tertiary--after--BorderColor: var(--ac-hairline-2);
+  --pf-v5-c-button--m-tertiary--hover--after--BorderColor: var(--ac-ink);
+  --pf-v5-c-button--m-control--after--BorderColor: var(--ac-hairline-2);
+  color: var(--ac-ink);
+}
+#kc-social-providers .pf-v5-c-button.pf-m-tertiary {
+  --pf-v5-c-button--m-tertiary--after--BorderColor: var(--ac-hairline-2);
+  --pf-v5-c-button--m-tertiary--hover--after--BorderColor: var(--ac-ink);
+}
+.ac-login .pf-v5-c-button:focus-visible,
+.ac-login a:focus-visible,
+.ac-login input:focus-visible {
+  outline: 2px solid var(--ac-focus);
+  outline-offset: 2px;
+}
+.ac-login .pf-v5-c-form__actions {
+  margin-top: 4px;
+}
+#kc-email-code-resend-form {
+  margin-top: 10px;
+}
+.ac-login .pf-v5-c-button.pf-m-link {
+  min-height: auto;
+  --pf-v5-c-button--m-link--Color: var(--ac-ink);
+  --pf-v5-c-button--m-link--hover--Color: var(--ac-ink);
+}
+
+/* "or continue with" divider and the SSO button. */
+.kc-login-divider {
+  color: var(--ac-muted);
+  font-size: 0.8125rem;
+}
+.kc-login-divider hr,
+.ac-login hr {
+  border: 0;
+  border-top: 1px solid var(--ac-hairline);
+  opacity: 1;
+}
+#kc-social-providers .pf-v5-c-login__main-body {
+  padding-inline: 0;
+}
+
+/* Alerts: quiet tinted boxes instead of PatternFly's coloured bars. */
+.ac-login .pf-v5-c-alert {
+  --pf-v5-c-alert--BoxShadow: none;
+  --pf-v5-c-alert--BorderTopWidth: 0;
+  border: 1px solid var(--ac-hairline);
+  border-radius: var(--ac-radius-btn);
+  background: var(--ac-tint);
+  font-size: 0.9375rem;
+}
+.ac-login .pf-v5-c-alert__title {
+  font-weight: 500;
+  color: var(--ac-ink);
+}
+.ac-login .pf-v5-c-alert.pf-m-danger {
+  background: var(--ac-danger-tint);
+  border-color: #fecdca;
+}
+.ac-login .pf-v5-c-alert.pf-m-danger .pf-v5-c-alert__title,
+.ac-login .pf-v5-c-alert.pf-m-danger .pf-v5-c-alert__icon {
+  color: var(--ac-danger);
+}
+.ac-login .pf-v5-c-alert.pf-m-success {
+  background: var(--ac-success-tint);
+  border-color: #cfe5d3;
+}
+.ac-login .pf-v5-c-alert.pf-m-success .pf-v5-c-alert__title,
+.ac-login .pf-v5-c-alert.pf-m-success .pf-v5-c-alert__icon {
+  color: var(--ac-success-ink);
+}
+
+/* The "use a different email" control next to an attempted username. */
+.kc-login-tooltip .kc-tooltip-text {
+  background-color: var(--ac-ink);
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+/* Passkey list (passkey sign-in and enrolment pages). */
+.ac-login .pf-v5-c-data-list,
+.ac-login .pf-v5-c-list {
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 480px) {
+  .ac-login .pf-v5-c-login__container {
+    padding: 32px 16px 40px;
+  }
+  .ac-login .pf-v5-c-login__main-header {
+    padding: 28px 22px 4px;
+  }
+  .ac-login .pf-v5-c-login__main-body {
+    padding: 16px 22px 8px;
+  }
+  .ac-login .pf-v5-c-login__main-footer {
+    padding: 0 22px 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* Layout refinements: the card sits at the same height on every page. */
+.ac-login.pf-v5-c-login {
+  align-items: flex-start;
+}
+.ac-login .pf-v5-c-login__container {
+  padding-top: clamp(40px, 12vh, 128px);
+}
+/* Empty groups (e.g. "remember me" when it is off) take no space. */
+.ac-login .pf-v5-c-form__group:empty {
+  display: none;
+}
+.ac-login .pf-v5-c-form {
+  --pf-v5-c-form--GridGap: 20px;
+}
+/* Inputs: one rounded hairline border that turns ink on focus, with a soft ring; no PatternFly underline. */
+.ac-login .pf-v5-c-form-control::after {
+  display: none;
+}
+.ac-login .pf-v5-c-form-control::before {
+  border: 1px solid var(--ac-hairline-2);
+}
+.ac-login .pf-v5-c-form-control:focus-within::before {
+  border-color: var(--ac-ink);
+}
+.ac-login .pf-v5-c-form-control.pf-m-error::before {
+  border-color: var(--ac-danger);
+}
+.ac-login .pf-v5-c-form-control > input:focus-visible {
+  outline: none;
+}
+.ac-login .pf-v5-c-input-group {
+  gap: 8px;
+}
+/* Buttons that are links: no underline; full width. */
+.ac-login a.pf-v5-c-button {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#kc-social-providers ul,
+#kc-social-providers .pf-v5-c-login__main-body {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+#kc-social-providers .pf-v5-c-button {
+  width: 100%;
+  justify-content: center;
+  gap: 10px;
+}
+.kc-login-divider {
+  margin: 20px 0 16px;
+}
+/* Email-code page: breathing room between the explanation and the field; the help note flush with the card. */
+#agentcity-email-code-sent {
+  margin-bottom: 16px;
+}
+#kc-info,
+#kc-info-wrapper {
+  padding-left: 0;
+  padding-right: 0;
+}
+.ac-login .pf-v5-c-login__main-footer-band-item {
+  padding: 0;
+}
+.ac-login .instruction {
+  margin-bottom: 16px;
+  overflow-wrap: anywhere;
+}
+.ac-actions {
+  margin-top: 8px;
+}
+/* keycloak.v2 nests the social/info footer inside the card body: no second inset. */
+.ac-login .pf-v5-c-login__main-body .pf-v5-c-login__main-footer {
+  padding: 0;
+}
+/* Wrapper groups that render nothing (only whitespace, e.g. "remember me" when it is off) add no grid gap. Text-only
+   paragraphs such as #agentcity-email-code-sent are <p> elements and stay visible. */
+.ac-login div.pf-v5-c-form__group:not(:has(*)):not([id]) {
+  display: none;
+}

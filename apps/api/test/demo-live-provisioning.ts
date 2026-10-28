@@ -1,7 +1,8 @@
 // LIVE CHECK against the local Keycloak and Mailpit (not part of the test suites). Starts the real API (AppModule,
 // port 4205) on a fresh throwaway database, submits a demo request, and checks that:
 //   - Keycloak now has the person, unverified, with no credentials and no required actions;
-//   - Mailpit received the verify-email message for that address, with a link back to /demo/verified?request=<id>;
+//   - Mailpit received the verify-email message (AgentCity email theme) for that address, with a link back to
+//     /demo/verified?request=<id>;
 //   - following the link verifies the address in Keycloak and returns to the demo page;
 //   - the agentcity-provisioner service account needs exactly realm-management `manage-users` (probed with a
 //     temporary service-account client holding only view-users + query-users, which must be refused).
@@ -124,16 +125,15 @@ async function probeRoles(email: string) {
       await kcAdmin('DELETE', `/users/${create.location!.slice(create.location!.lastIndexOf('/') + 1)}`);
     const userId = (await kcAdmin('GET', `/users?email=${encodeURIComponent(email)}&exact=true`)).body[0]?.id;
     const actions = await fetch(
-      `${KC}/admin/realms/${REALM}/users/${userId}/execute-actions-email?client_id=agentcity-bff&lifespan=60`,
+      `${KC}/admin/realms/${REALM}/users/${userId}/send-verify-email?client_id=agentcity-provisioner&lifespan=60`,
       {
         method: 'PUT',
-        headers: { authorization: `Bearer ${probeToken}`, 'content-type': 'application/json' },
-        body: JSON.stringify(['VERIFY_EMAIL']),
+        headers: { authorization: `Bearer ${probeToken}` },
       },
     );
     record('view-users + query-users alone can search users', search.status === 200, { status: search.status });
     record('without manage-users, creating a user is refused', create.status === 403, { status: create.status });
-    record('without manage-users, sending execute-actions email is refused', actions.status === 403, {
+    record('without manage-users, sending the verify email is refused', actions.status === 403, {
       status: actions.status,
     });
   } finally {
@@ -226,10 +226,14 @@ async function main() {
     const link = full
       ? /https?:\/\/[^\s"<>]+action-token[^\s"<>]+/.exec(full.Text ?? full.HTML)?.[0]?.replace(/&amp;/g, '&')
       : undefined;
-    record('Mailpit received the verify-email message for the address', !!message && !!link, {
-      subject: message?.Subject,
-      hasActionTokenLink: !!link,
-    });
+    record(
+      'Mailpit received the verify-email message for the address, with the AgentCity subject',
+      !!message && !!link && message.Subject === 'Confirm your email for AgentCity',
+      {
+        subject: message?.Subject,
+        hasActionTokenLink: !!link,
+      },
+    );
 
     // Follow the link like a browser: Keycloak may show a confirmation page before it verifies.
     let landed: string | null = null;

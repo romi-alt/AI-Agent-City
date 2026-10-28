@@ -145,7 +145,7 @@ describe('demo API', () => {
       [
         'GET /admin/realms/agentcity/users',
         'POST /admin/realms/agentcity/users',
-        'PUT /admin/realms/agentcity/users/:id/execute-actions-email',
+        'PUT /admin/realms/agentcity/users/:id/send-verify-email',
       ],
     );
     assert.equal(admin[0]!.query.email, 'new.visitor@example.test');
@@ -160,7 +160,7 @@ describe('demo API', () => {
       requiredActions: [],
     });
     assert.ok(!JSON.stringify(admin[1]!.body).match(/password|credential|secret/i));
-    assert.deepEqual(admin[2]!.body, ['VERIFY_EMAIL']);
+    assert.equal(admin[2]!.body, '', 'no body: Keycloak sends exactly the email check');
     assert.deepEqual(admin[2]!.query, {
       client_id: 'agentcity-provisioner',
       redirect_uri: `${PUBLIC_ORIGIN}/demo/verified?request=${r.body.requestId}`,

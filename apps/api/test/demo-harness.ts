@@ -108,7 +108,7 @@ export async function startMockKeycloak(realm = 'agentcity') {
       users.set(id, { ...b, id, email: String(b.email).toLowerCase() });
       return send(res, 201, undefined, { location: `http://kc${prefix}/users/${id}` });
     }
-    const m = /^\/users\/([^/]+)\/execute-actions-email$/.exec(path);
+    const m = /^\/users\/([^/]+)\/send-verify-email$/.exec(path);
     if (req.method === 'PUT' && m) {
       if (!users.has(m[1]!)) return send(res, 404, { error: 'User not found' });
       return send(res, 204);
