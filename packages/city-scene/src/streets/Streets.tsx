@@ -3,9 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useContext, useEffect, useMemo } from 'react';
 import {
   BoxGeometry,
-  Color,
-  CylinderGeometry,
-  DoubleSide,
+  CircleGeometry,
   InstancedBufferAttribute,
   InstancedMesh,
   type Material,
@@ -27,6 +25,7 @@ import { createBlockMaterial, createGrassMaterial, createRoadMaterial, createWat
 import { CURB_H, type CellKind, districtPlan, ROAD_HALF } from './grid.ts';
 import { planLandscape } from './plazas.ts';
 import { type SignalLight, SignalSourceContext } from './signal-source.ts';
+import { Flags, Fountain } from './PlazaFeatures.tsx';
 import { Trees } from './Trees.tsx';
 
 const KIND: Record<CellKind, number> = { lot: 0, plaza: 1, park: 2, strip: 3 };
@@ -121,6 +120,7 @@ export function Streets() {
         <Fountain key={`${f.x},${f.z}`} x={f.x} z={f.z} r={f.r} shared={rt.uniforms} />
       ))}
       <Flags flags={land.flags} shared={rt.uniforms} />
+      <Ponds ponds={land.ponds} shared={rt.uniforms} />
     </group>
   );
 }
@@ -152,6 +152,23 @@ function StreetParts({
       lawn: new MeshStandardMaterial({ color: '#4f8a3c', roughness: 0.95 }),
       stone: new MeshStandardMaterial({ color: '#b8b0a2', roughness: 0.8 }),
       paving: new MeshStandardMaterial({ color: '#cfc6b6', roughness: 0.85 }),
+      coping: new MeshStandardMaterial({ color: '#dcd8cf', roughness: 0.5 }),
+      soil: new MeshStandardMaterial({ color: '#4a3a2c', roughness: 1 }),
+      hedge: new MeshStandardMaterial({ color: '#3d6e33', roughness: 0.95 }),
+      shrub: new MeshStandardMaterial({ color: '#ffffff', roughness: 0.9 }),
+      flower: new MeshStandardMaterial({ color: '#ffffff', roughness: 0.7 }),
+      kioskGlass: new MeshStandardMaterial({
+        color: '#41586a',
+        roughness: 0.05,
+        metalness: 0.4,
+        emissive: '#ffcf94',
+        emissiveIntensity: 0.35,
+      }),
+      canvas: new MeshStandardMaterial({ color: '#ffffff', roughness: 0.9 }),
+      rubber: new MeshStandardMaterial({ color: '#ffffff', roughness: 0.95 }),
+      paint: new MeshStandardMaterial({ color: '#ffffff', roughness: 0.45, metalness: 0.2 }),
+      line: new MeshStandardMaterial({ color: '#f2f2ee', roughness: 0.8 }),
+      net: new MeshStandardMaterial({ color: '#1d2125', roughness: 0.8, transparent: true, opacity: 0.6 }),
     }),
     [],
   );
@@ -207,7 +224,9 @@ function StreetParts({
         sz: 0.22,
       });
     }
-    const g = buildParts(parts, mats, { noShadow: new Set(['lampHead', 'iron', 'paving', 'stone']) });
+    const g = buildParts(parts, mats, {
+      noShadow: new Set(['lampHead', 'paving', 'stone', 'line', 'rubber', 'soil', 'flower']),
+    });
     g.traverse(o => {
       o.raycast = () => {};
     });
@@ -216,6 +235,7 @@ function StreetParts({
   useEffect(() => () => disposeParts(group), [group]);
   useFrame(() => {
     mats.lampHead.emissiveIntensity = 0.05 + rt.state.nightFactor * 3.2;
+    mats.kioskGlass.emissiveIntensity = 0.3 + rt.state.nightFactor * 1.5;
   });
   return <primitive object={group} />;
 }
@@ -279,141 +299,21 @@ function SignalHeads({
   );
 }
 
-/** A granite fountain: basin, rippling water and a central jet that rises and falls. */
-function Fountain({ x, z, r, shared }: { x: number; z: number; r: number; shared: SharedUniforms }) {
-  const parts = useMemo(() => {
-    const stone = new MeshStandardMaterial({ color: '#b9b4aa', roughness: 0.55 });
-    const water = new MeshStandardMaterial({ color: '#1d3a46', roughness: 0.04, metalness: 0.3 });
-    water.onBeforeCompile = shader => {
-      shader.uniforms.uTime = shared.uTime;
-      shader.uniforms.uMotion = shared.uMotion;
-      shader.fragmentShader = shader.fragmentShader
-        .replace('#include <common>', '#include <common>\nuniform float uTime;\nuniform float uMotion;')
-        .replace(
-          '#include <normal_fragment_maps>',
-          `#include <normal_fragment_maps>
-          {
-            float t = uTime * uMotion;
-            normal = normalize(normal + vec3(sin(gl_FragCoord.x * 0.08 + t * 3.0), 0.0, cos(gl_FragCoord.y * 0.09 - t * 2.4)) * 0.08);
-          }`,
-        );
-    };
-    water.customProgramCacheKey = () => 'a1-water';
-    const jet = new MeshStandardMaterial({
-      color: '#e8f2f5',
-      transparent: true,
-      opacity: 0.55,
-      roughness: 0.2,
-      depthWrite: false,
-    });
-    const basin = new Mesh(new CylinderGeometry(r, r + 0.15, 0.55, 40), stone);
-    basin.position.set(x, CURB_H + 0.275, z);
-    const pool = new Mesh(new CylinderGeometry(r - 0.18, r - 0.18, 0.04, 40), water);
-    pool.position.set(x, CURB_H + 0.5, z);
-    const bowl = new Mesh(new CylinderGeometry(0.75, 0.3, 0.35, 24), stone);
-    bowl.position.set(x, CURB_H + 1.05, z);
-    const stem = new Mesh(new CylinderGeometry(0.16, 0.22, 0.7, 12), stone);
-    stem.position.set(x, CURB_H + 0.75, z);
-    const spout = new Mesh(new CylinderGeometry(0.04, 0.16, 1, 12, 1, true).translate(0, 0.5, 0), jet);
-    spout.position.set(x, CURB_H + 1.2, z);
-    for (const o of [basin, bowl, stem]) {
-      o.castShadow = true;
-      o.receiveShadow = true;
-    }
-    for (const o of [basin, pool, bowl, stem, spout]) o.raycast = () => {};
-    return { stone, water, jet, basin, pool, bowl, stem, spout };
-  }, [x, z, r, shared]);
+/** Park ponds: discs of the bay's water material. */
+function Ponds({ ponds, shared }: { ponds: { x: number; z: number; r: number }[]; shared: SharedUniforms }) {
+  const mesh = useMemo(() => {
+    const geos = ponds.map(p => new CircleGeometry(p.r, 40).rotateX(-Math.PI / 2).translate(p.x, CURB_H + 0.085, p.z));
+    const m = new Mesh(geos.length ? mergeGeometries(geos) : new CircleGeometry(0.01), createWaterMaterial(shared));
+    m.receiveShadow = true;
+    m.raycast = () => {};
+    return m;
+  }, [ponds, shared]);
   useEffect(
     () => () => {
-      for (const o of [parts.basin, parts.pool, parts.bowl, parts.stem, parts.spout]) o.geometry.dispose();
-      for (const mm of [parts.stone, parts.water, parts.jet]) mm.dispose();
+      mesh.geometry.dispose();
+      (mesh.material as Material).dispose();
     },
-    [parts],
+    [mesh],
   );
-  useFrame(() => {
-    const t = shared.uTime.value;
-    const h = shared.uMotion.value ? 1.6 + 0.35 * Math.sin(t * 1.7) + 0.15 * Math.sin(t * 4.3) : 1.6;
-    parts.spout.scale.set(1, h, 1);
-  });
-  return (
-    <>
-      <primitive object={parts.basin} />
-      <primitive object={parts.pool} />
-      <primitive object={parts.stem} />
-      <primitive object={parts.bowl} />
-      <primitive object={parts.spout} />
-    </>
-  );
-}
-
-/** Flags on poles, waving in the vertex shader with their own phase. */
-function Flags({
-  flags,
-  shared,
-}: {
-  flags: { x: number; z: number; h: number; color: string }[];
-  shared: SharedUniforms;
-}) {
-  const { poles, cloth, poleMat, clothMat } = useMemo(() => {
-    const poleMat = new MeshStandardMaterial({ color: '#c9ccd0', roughness: 0.35, metalness: 0.8 });
-    const clothMat = new MeshStandardMaterial({ color: '#ffffff', roughness: 0.85, side: DoubleSide });
-    clothMat.onBeforeCompile = shader => {
-      shader.uniforms.uTime = shared.uTime;
-      shader.uniforms.uMotion = shared.uMotion;
-      shader.vertexShader = shader.vertexShader
-        .replace(
-          '#include <common>',
-          '#include <common>\nuniform float uTime;\nuniform float uMotion;\nattribute float aPhase;',
-        )
-        .replace(
-          '#include <begin_vertex>',
-          `#include <begin_vertex>
-          {
-            float u = clamp(position.x / 1.8, 0.0, 1.0);
-            float t = uTime * uMotion;
-            transformed.z += (sin(position.x * 3.2 - t * 4.2 + aPhase) * 0.16 + sin(position.x * 5.1 - t * 6.1 + aPhase * 2.0) * 0.05) * u;
-            transformed.y -= u * u * 0.08;
-          }`,
-        );
-    };
-    clothMat.customProgramCacheKey = () => 'a1-flag';
-    const poles = new InstancedMesh(new CylinderGeometry(0.05, 0.07, 1, 8).translate(0, 0.5, 0), poleMat, flags.length);
-    const clothGeo = new PlaneGeometry(1.8, 1.1, 14, 6).translate(0.9, -0.55, 0);
-    clothGeo.setAttribute('aPhase', new InstancedBufferAttribute(new Float32Array(flags.map((_, i) => i * 1.9)), 1));
-    const cloth = new InstancedMesh(clothGeo, clothMat, flags.length);
-    const m = new Matrix4();
-    const c = new Color();
-    flags.forEach((f, i) => {
-      poles.setMatrixAt(i, m.compose(new Vector3(f.x, CURB_H, f.z), new Quaternion(), new Vector3(1, f.h, 1)));
-      // Flags stream toward +x (the prevailing breeze), facing the plaza.
-      cloth.setMatrixAt(
-        i,
-        m.compose(new Vector3(f.x + 0.05, CURB_H + f.h - 0.1, f.z), new Quaternion(), new Vector3(1, 1, 1)),
-      );
-      cloth.setColorAt(i, c.set(f.color));
-    });
-    for (const mesh of [poles, cloth]) {
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.castShadow = true;
-      mesh.computeBoundingSphere();
-      mesh.raycast = () => {};
-    }
-    return { poles, cloth, poleMat, clothMat };
-  }, [flags, shared]);
-  useEffect(
-    () => () => {
-      poles.geometry.dispose();
-      cloth.geometry.dispose();
-      poleMat.dispose();
-      clothMat.dispose();
-    },
-    [poles, cloth, poleMat, clothMat],
-  );
-  if (!flags.length) return null;
-  return (
-    <>
-      <primitive object={poles} />
-      <primitive object={cloth} />
-    </>
-  );
+  return <primitive object={mesh} />;
 }

@@ -19,6 +19,17 @@ No downloaded assets. Everything is generated at runtime from code in this packa
 Brand names on dealership signs are the catalog's own building names, set as text; no logos or trademark
 artwork are reproduced.
 
+### X02 additions (A1)
+
+Still no downloaded assets. New procedural pieces:
+
+| What | How | Where |
+|---|---|---|
+| Building facades in 3D (glazing, spandrels, mullions, piers, fins, roofs, parapets), entrances, lobbies, display cars, rooftop plant, solar, helipad | Instanced primitives from a pure facade kit | `src/buildings/{kit,designs,kitmesh}.ts` |
+| Leaf texture for tree canopies | Drawn at runtime with canvas ellipses; no image files | `src/streets/Trees.tsx` |
+| Fountain water, jets, veils; flag cloth; ponds; bay water; plaza paving | Shaders | `src/streets/{PlazaFeatures.tsx,ground.ts}` |
+| Ambient occlusion | N8AO through @react-three/postprocessing (already a dependency) | `src/environment/PostFX.tsx` |
+
 ## A2 — city life (X02)
 
 Traffic, aircraft, birds and rooftop details are generated in code (`src/life/**`). The people use one downloaded,

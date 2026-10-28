@@ -39,6 +39,7 @@ function glassShader(shared: SharedUniforms, mode: 'office' | 'lobby' | 'lantern
     shader.uniforms.uNight = shared.uNight;
     shader.uniforms.uTime = shared.uTime;
     shader.uniforms.uMotion = shared.uMotion;
+    shader.uniforms.uSkyA1 = shared.uFogColor;
     shader.vertexShader = shader.vertexShader
       .replace(
         '#include <common>',
@@ -65,6 +66,7 @@ function glassShader(shared: SharedUniforms, mode: 'office' | 'lobby' | 'lantern
         uniform float uNight;
         uniform float uTime;
         uniform float uMotion;
+        uniform vec3 uSkyA1;
         varying vec3 vA1Local;
         varying float vA1Seed;
         varying vec3 vA1N;`,
@@ -93,7 +95,11 @@ function glassShader(shared: SharedUniforms, mode: 'office' | 'lobby' | 'lantern
           vec3 warm = h2 < 0.6 ? vec3(1.0, 0.72, 0.45) : h2 < 0.88 ? vec3(1.0, 0.86, 0.68) : vec3(0.82, 0.9, 1.0);
           float ceiling = 0.55 + 0.45 * smoothstep(0.1, 0.9, vy / 1.4);
           float edge = smoothstep(0.0, 0.06, fract(u / 0.75)) * smoothstep(1.0, 0.94, fract(u / 0.75));
-          totalEmissiveRadiance += warm * lit * breathe * ceiling * edge * (0.04 + 1.15 * nightK);`
+          totalEmissiveRadiance += warm * lit * breathe * ceiling * edge * (0.04 + 1.15 * nightK);
+          // Sky gradient in the glass: grazing angles and upper floors pick up the bright horizon sky.
+          float fres = pow(1.0 - abs(dot(normal, normalize(vViewPosition))), 3.0);
+          float upper = smoothstep(2.0, 30.0, vA1World.y);
+          totalEmissiveRadiance += uSkyA1 * (0.06 + 0.16 * upper + 0.35 * fres) * (1.0 - uNight) * (1.0 - lit * nightK);`
               : mode === 'lobby'
                 ? `// A lit lobby seen through the glass: bright ceiling with a row of downlights, a soft wash on the back
           // wall, darker floor and furniture zone, and a few columns breaking up the depth.
@@ -103,7 +109,7 @@ function glassShader(shared: SharedUniforms, mode: 'office' | 'lobby' | 'lantern
           float column = step(0.88, fract(u / 3.1 + seed * 0.13));
           vec3 warm = vec3(1.0, 0.8, 0.58);
           vec3 lobby = warm * (0.32 + 0.35 * smoothstep(0.6, 2.4, hgt) + 0.9 * lights) * (1.0 - 0.55 * floorZone) * (1.0 - 0.6 * column);
-          totalEmissiveRadiance += lobby * (0.55 + 0.55 * nightK);`
+          totalEmissiveRadiance += lobby * (0.08 + 0.25 * nightK);`
                 : `totalEmissiveRadiance += vec3(1.0, 0.78, 0.42) * (0.18 + 1.6 * nightK);`
           }
         }`,
@@ -134,7 +140,7 @@ function glassShader(shared: SharedUniforms, mode: 'office' | 'lobby' | 'lantern
 }
 
 /** Masonry variation: world-space noise, and for brick, coursing with lighter mortar. */
-function masonryShader(brick: boolean) {
+function masonryShader(brick: boolean, ashlar = false) {
   return (shader: Shader) => {
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\n${GLSL_NOISE}`)
@@ -156,7 +162,17 @@ function masonryShader(brick: boolean) {
           float fade = 1.0 - smoothstep(0.12, 0.3, max(fw.x, fw.y));
           diffuseColor.rgb *= 1.0 + (0.16 * a1hash12(floor(bp)) - 0.08) * fade;
           diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * 0.6 + vec3(0.22, 0.21, 0.2), mortar * fade * 0.6);`
-              : ''
+              : ashlar
+                ? `// Ashlar: courses 0.45 high, blocks 1.1 long with staggered joints, each block a touch different.
+          vec2 ap = vec2((w.x + w.z) / 1.1, w.y / 0.45);
+          ap.x += mod(floor(ap.y), 2.0) * 0.5;
+          vec2 af = fract(ap);
+          vec2 afw = fwidth(ap) + 1e-4;
+          float jt = 1.0 - smoothstep(0.0, afw.x * 1.2, min(af.x, 1.0 - af.x) - 0.012) * smoothstep(0.0, afw.y * 1.2, min(af.y, 1.0 - af.y) - 0.02);
+          float af2 = 1.0 - smoothstep(0.15, 0.4, max(afw.x, afw.y));
+          diffuseColor.rgb *= 1.0 + (0.08 * a1hash12(floor(ap)) - 0.04) * af2;
+          diffuseColor.rgb *= 1.0 - 0.18 * jt * af2;`
+                : ''
           }
         }`,
       );
@@ -192,9 +208,13 @@ export function createKitMaterials(shared: SharedUniforms): KitMaterials {
     std(p, shared, extra, key);
   return {
     glass: m({ roughness: 0.05, metalness: 0.7, envMapIntensity: 1.25 }, 'glass', glassShader(shared, 'office')),
-    lobbyGlass: m({ roughness: 0.04, metalness: 0.25, envMapIntensity: 0.55 }, 'lobby', glassShader(shared, 'lobby')),
+    lobbyGlass: m(
+      { roughness: 0.03, metalness: 0.4, envMapIntensity: 1.0, transparent: true, opacity: 0.45, depthWrite: false },
+      'lobby',
+      glassShader(shared, 'lobby'),
+    ),
     lantern: m({ roughness: 0.15, metalness: 0.5 }, 'lantern', glassShader(shared, 'lantern')),
-    doorGlass: m({ roughness: 0.05, metalness: 0.4, emissive: new Color('#ffcf94'), emissiveIntensity: 0.35 }, 'door'),
+    doorGlass: m({ roughness: 0.03, metalness: 0.4, transparent: true, opacity: 0.4, depthWrite: false }, 'door'),
     railGlass: m({ roughness: 0.05, metalness: 0.3, transparent: true, opacity: 0.38, depthWrite: false }, 'rail'),
     slab: m({ roughness: 0.85 }, 'slab'),
     metal: m({ roughness: 0.32, metalness: 0.9 }, 'metal'),
@@ -203,7 +223,7 @@ export function createKitMaterials(shared: SharedUniforms): KitMaterials {
     paint: m({ roughness: 0.35, metalness: 0.4 }, 'paint'),
     panel: m({ roughness: 0.45, metalness: 0.2 }, 'panel'),
     concrete: m({ roughness: 0.82 }, 'concrete', masonryShader(false)),
-    stone: m({ roughness: 0.7 }, 'stone', masonryShader(false)),
+    stone: m({ roughness: 0.7 }, 'stone', masonryShader(false, true)),
     brick: m({ roughness: 0.86 }, 'brick', masonryShader(true)),
     wood: m({ roughness: 0.55 }, 'wood'),
     roof: m({ roughness: 0.92 }, 'roof', masonryShader(false)),
@@ -214,6 +234,7 @@ export function createKitMaterials(shared: SharedUniforms): KitMaterials {
     louvre: m({ roughness: 0.4, metalness: 0.8 }, 'louvre'),
     fan: m({ roughness: 0.5, metalness: 0.6, side: DoubleSide }, 'fan', fanShader(shared)),
     canvas: m({ roughness: 0.9 }, 'canvas'),
+    solar: m({ roughness: 0.18, metalness: 0.7 }, 'solar'),
     glow: m({ emissive: new Color('#ffe1b0'), emissiveIntensity: 0.4, roughness: 0.5 }, 'glow'),
     beacon: m({ emissive: new Color('#f5b335'), emissiveIntensity: 0.6, roughness: 0.4 }, 'beacon'),
   };
@@ -223,7 +244,6 @@ export function createKitMaterials(shared: SharedUniforms): KitMaterials {
 export function updateKitMaterials(mats: KitMaterials, s: EnvState, time: number, motion: number): void {
   const n = s.nightFactor;
   (mats.glow as MeshStandardMaterial).emissiveIntensity = 0.35 + 2.2 * n;
-  (mats.doorGlass as MeshStandardMaterial).emissiveIntensity = 0.12 + 1.2 * n;
   (mats.beacon as MeshStandardMaterial).emissiveIntensity =
     (0.6 + 2.6 * n) * (motion ? 0.75 + 0.25 * Math.sin(time * 1.3) : 1);
 }
