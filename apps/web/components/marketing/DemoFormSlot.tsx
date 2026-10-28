@@ -3,6 +3,9 @@
 // checkbox; the button "Get My Demo Office"). At integration, replace <DemoFormSlot /> in GetDemo.tsx with
 // <DemoRequestForm /> (one import, one line). This placeholder takes no input and sends nothing.
 
+import { LiteDemoForm } from '../demo/LiteDemoForm';
+import { LITE_DEMO } from '../../lib/preview';
+
 const FIELDS = [
   { label: 'Full name', optional: false },
   { label: 'Business email', optional: false },
@@ -13,6 +16,7 @@ const FIELDS = [
 ];
 
 export function DemoFormSlot() {
+  if (LITE_DEMO) return <LiteDemoForm />;
   return (
     <div className="mk-form-slot" data-testid="demo-form-slot" role="note" aria-label="Demo request form (coming soon)">
       <div className="mk-form-fields" aria-hidden="true">

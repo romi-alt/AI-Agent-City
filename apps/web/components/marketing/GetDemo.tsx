@@ -1,14 +1,15 @@
 import { DEMO_BUILDING } from './cityFacts';
 import { CtaLink } from './Primitives';
 import { DemoRequestForm } from '../demo/DemoRequestForm';
-import { PUBLIC_PREVIEW } from '../../lib/preview';
+import { LiteDemoForm } from '../demo/LiteDemoForm';
+import { LITE_DEMO, PUBLIC_PREVIEW } from '../../lib/preview';
 
 // The demo invitation, with the demo walkthrough beside the form.
 export function GetDemo({ ttlDays }: { ttlDays: number }) {
   const steps = [
     'Tell us about your business.',
     'Confirm your email with the one-time link.',
-    'Sign in with a code. No password.',
+    LITE_DEMO ? 'Your office opens straight away. No password.' : 'Sign in with a code. No password.',
     `Meet your sample office in ${DEMO_BUILDING.name}.`,
   ];
   return (
@@ -30,12 +31,12 @@ export function GetDemo({ ttlDays }: { ttlDays: number }) {
               ))}
             </ol>
             <p className="mk-footnote">
-              Lasts {ttlDays} days, then it is removed. Everything inside is Sample or Simulated, and demo agents
-              can&rsquo;t contact anyone.
+              {LITE_DEMO ? 'Your demo expires automatically.' : `Lasts ${ttlDays} days, then it is removed.`} Everything
+              inside is Sample or Simulated, and demo agents can&rsquo;t contact anyone.
             </p>
           </div>
           <div className="mk-demo-form">
-            {PUBLIC_PREVIEW ? <ComingSoon /> : <DemoRequestForm headingId="get-demo-title" />}
+            <DemoForm />
           </div>
         </div>
       </div>
@@ -58,4 +59,10 @@ function ComingSoon() {
       </CtaLink>
     </div>
   );
+}
+
+// Which form the visitor gets: the real one when the lite demo is on, a notice in the plain preview, else the full app's.
+function DemoForm() {
+  if (LITE_DEMO) return <LiteDemoForm headingId="get-demo-title" />;
+  return PUBLIC_PREVIEW ? <ComingSoon /> : <DemoRequestForm headingId="get-demo-title" />;
 }

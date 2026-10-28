@@ -1,11 +1,14 @@
 import { DEMO_BUILDING } from './cityFacts';
 import { SectionHead } from './Primitives';
+import { LITE_DEMO } from '../../lib/preview';
 
 export function Faq({ ttlDays }: { ttlDays: number }) {
   const items = [
     [
       'Is the demo free?',
-      'Yes. No card and no password; you need a business email for the confirmation link and sign-in codes.',
+      LITE_DEMO
+        ? 'Yes. No card and no password; you need a business email so we can send you the confirmation link.'
+        : 'Yes. No card and no password; you need a business email for the confirmation link and sign-in codes.',
     ],
     [
       'What will I see?',
@@ -17,11 +20,15 @@ export function Faq({ ttlDays }: { ttlDays: number }) {
     ],
     [
       'How long does the demo last?',
-      `${ttlDays} days. Then access ends and the sample office and its data are removed.`,
+      LITE_DEMO
+        ? 'Your office shows the date it is available until. After that, access ends.'
+        : `${ttlDays} days. Then access ends and the sample office and its data are removed.`,
     ],
     [
-      'Why a code instead of a password?',
-      'There is nothing to reuse or leak. We email a one-time code each time, or you can use a passkey.',
+      'Why no password?',
+      LITE_DEMO
+        ? 'There is nothing to reuse or leak. The link we email you opens your demo office in that browser.'
+        : 'There is nothing to reuse or leak. We email a one-time code each time, or you can use a passkey.',
     ],
     ['Can I connect my CRM?', 'Not yet. Connectors for GoHighLevel, HubSpot and Salesforce are on the roadmap.'],
     [

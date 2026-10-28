@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { LITE_DEMO } from '../../../lib/preview';
 import { CheckEmailStatus } from './CheckEmailStatus';
+import { LiteCheckEmail } from './LiteCheckEmail';
 
 export const metadata: Metadata = { title: 'Check your email — AgentCity', referrer: 'no-referrer' };
 
@@ -20,7 +22,11 @@ export default async function CheckEmailPage({
     process.env.DEMO_DEV_MAILBOX_URL || (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:58025' : null);
   return (
     <main className="dm-main dm-narrow">
-      <CheckEmailStatus requestId={requestId} devMailboxUrl={mailbox} />
+      {LITE_DEMO ? (
+        <LiteCheckEmail requestId={requestId} />
+      ) : (
+        <CheckEmailStatus requestId={requestId} devMailboxUrl={mailbox} />
+      )}
     </main>
   );
 }
