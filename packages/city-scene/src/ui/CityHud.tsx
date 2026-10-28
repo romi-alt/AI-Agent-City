@@ -20,6 +20,7 @@ import {
   IconTurnRight,
 } from './icons.tsx';
 import { NavPanel, type PanelOptions } from './panels.tsx';
+import { OfficeChrome } from './OfficeChrome.tsx';
 import { ViewSettings } from './Settings.tsx';
 import { SceneLabels } from './SceneLabels.tsx';
 import { HudStyles } from './styles.tsx';
@@ -268,6 +269,7 @@ export function CityHud({
             </button>
           </div>
 
+          <OfficeChrome />
           <NavPanel {...panel} directory={directory} onCloseDirectory={() => setDirectory(false)} />
         </>
       )}
