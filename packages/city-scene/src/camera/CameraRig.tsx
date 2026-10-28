@@ -4,8 +4,9 @@ import { useContext, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useCityContext } from '../context.tsx';
 import { OfficeOccupantsContext } from '../interior/occupants.ts';
-import { deskWorld, furnishedPoints } from '../interior/placement.ts';
-import type { CityMode, CityState } from '../types.ts';
+import { roomLayout } from '../interior/room/layout.ts';
+import { deskWorld, occupantsFromLayout, referenceDeskWorld, referencePlanFor } from '../interior/placement.ts';
+import type { CityMode, CityState, LayoutBuilding } from '../types.ts';
 import { ARRIVAL_FADE_SECONDS, ARRIVAL_SECONDS, markArrivalPlayed } from './arrival.ts';
 import {
   type Box,
@@ -45,14 +46,22 @@ import {
   arrivalKeyframes,
   buildingShot,
   deskFromAbove,
-  deskShot,
   floorShot,
   homeShot,
-  officeShot,
   sideHeading,
   topShot,
   type Pose,
 } from './shots.ts';
+import {
+  clampToRoom,
+  OFFICE_EASE_SECONDS,
+  officeDeskShot,
+  officeLimits,
+  officeOverview,
+  officeOverviewOrbit,
+  type OfficeRoom,
+  officeRoom,
+} from './office.ts';
 import { designsForLayout } from '../buildings/info.ts';
 import { navigate } from './useNav.ts';
 import { asMat } from '../interior/r3f.ts';
@@ -77,7 +86,7 @@ interface Rig {
   limits: OrbitLimits;
   boxes: Box[];
   fade: number;
-  insets: { right: number; bottom: number };
+  insets: { right: number; bottom: number; top: number };
   offset: { x: number; y: number };
   frames: number;
   lastProgress: number;
@@ -89,6 +98,8 @@ interface Rig {
   pendingBoxes: Box[] | null;
   /** The visitor has moved the camera since the current framing was made. */
   userMoved: boolean;
+  /** The office being looked at (office mode only): pans stay over it. */
+  room: OfficeRoom | null;
 }
 
 const PICK_SLOP = 6;
@@ -153,7 +164,7 @@ export function CameraRig() {
       cut: undefined,
       sinceMeasure: 0,
       fade: 0,
-      insets: bus.last('insets') ?? { right: 0, bottom: 0 },
+      insets: { top: 0, ...(bus.last('insets') ?? { right: 0, bottom: 0 }) },
       offset: { x: 0, y: 0 },
       frames: 0,
       lastProgress: -1,
@@ -161,6 +172,7 @@ export function CameraRig() {
       explodeT: 0,
       pendingBoxes: null,
       userMoved: false,
+      room: null,
     };
   }
 
@@ -186,6 +198,7 @@ export function CameraRig() {
       height: sizeRef.current.height,
       right: r.insets.right,
       bottom: r.insets.bottom,
+      top: r.insets.top,
       fov: camera.fov,
     });
     /** Every layout building at its real size (measured once rendered). */
@@ -193,6 +206,30 @@ export function CameraRig() {
     const othersThan = (key: string) => realBoxes().filter(x => x.key !== key);
     const target = () => (store.get().explode ? 1 : 0);
     const homeOf = (): Pose => homePose ?? homeShot(realBoxes(), viewport());
+
+    /** Who sits in an office: the host's team on its own floor, else the public layout's desks. */
+    const peopleIn = (mode: { building: string; level: number }) => {
+      const o = occupantsRef.current;
+      if (o && o.building === mode.building && o.level === mode.level) return o.agents;
+      const f = findBuilding(layout, mode.building)?.floors.find(x => x.level === mode.level);
+      return f ? occupantsFromLayout(f.desks) : [];
+    };
+    /** The office room as the reference plan lays it out (its feature wall's height). */
+    const roomOf = (b: LayoutBuilding, mode: { building: string; level: number }) => {
+      const plan = referencePlanFor(b, peopleIn(mode));
+      const r = roomLayout(plan);
+      const m = r.meeting;
+      const f = r.featureWall;
+      const zones = [
+        r.leadRug,
+        r.teamRug,
+        r.loungeRug,
+        { x: m.x, z: m.z, w: m.radius * 2, d: m.radius * 2 },
+        { x: f.x, z: f.z, w: f.w, d: 0.5 },
+        { x: r.liveScreen.x, z: r.liveScreen.z, w: 1.5, d: 1.5 },
+      ];
+      return officeRoom(b, mode.level, plan, zones);
+    };
 
     /** A selected agent's desk on a floor seen in the cut-away (the public city: look, don't enter). */
     const deskOfAgent = (mode: Extract<CityMode, { kind: 'floor' }>, id: string) => {
@@ -241,11 +278,12 @@ export function CameraRig() {
         case 'office': {
           const b = findBuilding(layout, mode.building);
           if (!b) return homeOf();
+          const room = roomOf(b, mode);
           if (mode.desk !== null) {
-            const d = deskWorld(b, mode.level, mode.desk, deskCount(mode));
-            if (d) return deskShot(d.pos, d.facing);
+            const d = referenceDeskWorld(b, mode.level, mode.desk, peopleIn(mode));
+            if (d) return officeDeskShot(d.pos, room);
           }
-          return officeShot(b, mode.level, vp, 0, furnishedPoints(b, mode.level, deskCount(mode)));
+          return officeOverview(room, vp);
         }
       }
     };
@@ -258,10 +296,14 @@ export function CameraRig() {
 
     const currentPose = (): Pose => ({ pos: camera.position.toArray() as V3, target: [...r.cur.target] });
 
-    const go = (mode: CityMode, _prev: CityMode | null, opts: { instant?: boolean; quick?: boolean } = {}) => {
+    const go = (mode: CityMode, prevMode: CityMode | null, opts: { instant?: boolean; quick?: boolean } = {}) => {
       r.userMoved = false;
       const prevCut = r.cut;
       r.limits = limitsFor(mode, store.get().view);
+      const b = mode.kind === 'office' ? findBuilding(layout, mode.building) : null;
+      r.room = mode.kind === 'office' && b ? roomOf(b, mode) : null;
+      // The office's zoom-out limit follows its own overview (a big floor needs more room than a small one).
+      if (r.room) r.limits = officeLimits(officeOverviewOrbit(r.room, viewport()));
       r.cut =
         mode.kind === 'floor' || mode.kind === 'office' ? { building: mode.building, level: mode.level } : undefined;
       const nextBoxes = [...boxesFor(layout, mode, r.measured, Math.max(r.explodeT, target())), ...r.skyline];
@@ -322,7 +364,17 @@ export function CameraRig() {
         r.motion = fadeTo(to, reduced ? 0.5 : 0.7);
         return;
       }
-      r.motion = { kind: 'flight', flight: planFlight(from, to), t: 0 };
+      // Inside one office (a desk chosen, or back to the whole room) the move is a short ease, not a flight.
+      // A re-frame (no previous mode) in an office is a move inside it too.
+      const inRoom =
+        mode.kind === 'office' &&
+        (!prevMode ||
+          (prevMode.kind === 'office' && prevMode.building === mode.building && prevMode.level === mode.level));
+      r.motion = {
+        kind: 'flight',
+        flight: inRoom ? { from, to, duration: OFFICE_EASE_SECONDS, pullBack: 0 } : planFlight(from, to),
+        t: 0,
+      };
     };
 
     const fadeTo = (to: Pose, total: number, done?: () => void): Motion => ({
@@ -375,8 +427,12 @@ export function CameraRig() {
     const offBus = bus.on(e => {
       switch (e.type) {
         case 'insets': {
-          const changed = Math.abs(e.right - r.insets.right) > 8 || Math.abs(e.bottom - r.insets.bottom) > 8;
-          r.insets = { right: e.right, bottom: e.bottom };
+          const top = e.top ?? 0;
+          const changed =
+            Math.abs(e.right - r.insets.right) > 8 ||
+            Math.abs(e.bottom - r.insets.bottom) > 8 ||
+            Math.abs(top - r.insets.top) > 8;
+          r.insets = { right: e.right, bottom: e.bottom, top };
           // A panel opened, closed or resized: re-frame so the subject sits in the visible part, unless the visitor
           // has taken the camera since the view was framed.
           const mode = store.get().mode;
@@ -593,13 +649,16 @@ export function CameraRig() {
   useFrame((_, rawDt) => {
     const r = rig.current;
     const dt = Math.min(rawDt, 0.1);
+    // Camera moves run on wall-clock time (up to half a second a frame): on a slow device a 4 s flight still lands
+    // in about 4 s instead of crawling for minutes at a tenth of a second per frame.
+    const moveDt = Math.min(rawDt, 0.5);
     const reduced = store.get().reducedMotion;
     const m = r.motion;
     // Whether a camera move is under way, for tests and tooling (the canvas carries it as data-city-motion).
     const moving = m ? m.kind : '';
     if (gl.domElement.dataset.cityMotion !== moving) gl.domElement.dataset.cityMotion = moving;
     if (m?.kind === 'flight') {
-      m.t += dt;
+      m.t += moveDt;
       const p = sampleFlight(m.flight, m.t);
       const o = orbitFromPose(p.pos, p.target);
       r.cur = o;
@@ -616,7 +675,7 @@ export function CameraRig() {
     if (m?.kind === 'flight') {
       // Sampled above, before the pending collision boxes are applied.
     } else if (m?.kind === 'glide') {
-      m.t += dt;
+      m.t += moveDt;
       // Fade in from the night-blue curtain over the first second.
       r.fade = clamp(1 - m.t / 1.2, 0, 1);
       const p = sampleGlide(m.glide, m.t);
@@ -634,7 +693,7 @@ export function CameraRig() {
       }
     } else if (m?.kind === 'fade') {
       const before = m.t;
-      m.t += dt;
+      m.t += moveDt;
       if (m.t < m.out) r.fade = m.t / m.out;
       else if (m.t < m.out + m.hold) {
         r.fade = 1;
@@ -665,6 +724,7 @@ export function CameraRig() {
       const c = r.cur;
       const g = r.goal;
       g.target = clampTarget(g.target, boundsRef.current);
+      if (r.room) g.target = clampToRoom(g.target, r.room);
       c.target = [
         c.target[0] + (g.target[0] - c.target[0]) * k,
         c.target[1] + (g.target[1] - c.target[1]) * k,
@@ -701,7 +761,7 @@ export function CameraRig() {
     if (camera instanceof THREE.PerspectiveCamera) {
       const kx = dampFactor(reduced ? 30 : 6, dt);
       r.offset.x += (r.insets.right / 2 - r.offset.x) * kx;
-      r.offset.y += (r.insets.bottom / 2 - r.offset.y) * kx;
+      r.offset.y += ((r.insets.bottom - r.insets.top) / 2 - r.offset.y) * kx;
       const w = size.width;
       const h = size.height;
       if (Math.abs(r.offset.x) > 0.5 || Math.abs(r.offset.y) > 0.5)
