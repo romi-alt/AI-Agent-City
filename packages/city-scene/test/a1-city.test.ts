@@ -79,7 +79,15 @@ describe('the 15 buildings', () => {
       assert.ok(d.parts.filter(p => p.lv === 1 && p.mat === 'glow').length >= 1, `${b.key} has a lit canopy`);
       assert.ok(d.parts.length > 300, `${b.key} has facade members`);
       assert.ok(
-        d.parts.some(p => p.mat === 'mech' || p.mat === 'lantern' || p.mat === 'louvre' || p.shape === 'wedge'),
+        d.parts.some(
+          p =>
+            p.mat === 'mech' ||
+            p.mat === 'lantern' ||
+            p.mat === 'louvre' ||
+            p.mat === 'solar' ||
+            p.shape === 'wedge' ||
+            (p.mat === 'lobbyGlass' && p.lv === b.floors.length),
+        ),
         `${b.key} rooftop`,
       );
       assert.ok(d.signs.length >= 1, `${b.key} signage`);

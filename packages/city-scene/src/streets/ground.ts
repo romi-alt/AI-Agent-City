@@ -139,6 +139,8 @@ export function createRoadMaterial(shared: SharedUniforms, d: District) {
  */
 export function createBlockMaterial(shared: SharedUniforms, d: District) {
   const m = new MeshStandardMaterial({ roughness: 0.85 });
+  const plaza = d.cells.find(c => c.kind === 'plaza');
+  const head = `${roadsGlsl(d)}\nconst vec2 PLAZA = vec2(${(plaza?.cx ?? 0).toFixed(2)}, ${((plaza?.cz ?? 0) - 2).toFixed(2)});`;
   const body = /* glsl */ `
     vec2 w = vA1World.xz;
     float ax = abs(nearX(w.x));
@@ -162,9 +164,25 @@ export function createBlockMaterial(shared: SharedUniforms, d: District) {
     float lawn = (kind > 1.5 ? 1.0 : 0.0) * step(4.6, edge);
     // Plaza: granite field in a large grid with lighter bands.
     if (kind > 0.5 && kind < 1.5 && edge > 4.6) {
-      vec2 g = abs(fract(w / 4.0) - 0.5);
-      float band = smoothstep(0.46, 0.48, max(g.x, g.y));
-      col = mix(vec3(0.5, 0.48, 0.45), vec3(0.62, 0.6, 0.56), band) * (0.95 + 0.08 * grain);
+      // Plaza: concentric granite rings around the fountain, radial joints, a darker border band and
+      // two-tone setts, so the paving has a designed pattern.
+      vec2 pc = w - PLAZA;
+      float rr = length(pc);
+      float ang = atan(pc.y, pc.x);
+      float ringId = floor(rr / 0.8);
+      float rf = fract(rr / 0.8);
+      float seg = fract(ang / 6.28318 * max(8.0, floor(rr * 5.0)));
+      float jointR = smoothstep(0.04, 0.0, min(rf, 1.0 - rf) - aa * 0.6);
+      float jointA = smoothstep(0.04, 0.0, min(seg, 1.0 - seg) - aa * 0.6) * step(3.0, rr);
+      float tone = a1hash12(vec2(ringId, floor(ang / 6.28318 * max(8.0, floor(rr * 5.0)))));
+      vec3 a1 = vec3(0.56, 0.54, 0.5);
+      vec3 b1 = vec3(0.42, 0.41, 0.4);
+      vec3 sett = mix(a1, a1 * 0.9, tone);
+      float accent = step(0.5, mod(ringId, 4.0)) * step(mod(ringId, 4.0), 1.5);
+      sett = mix(sett, b1, accent);
+      col = sett * (0.95 + 0.08 * grain) * (1.0 - 0.22 * max(jointR, jointA));
+      float border = step(edge, 5.6);
+      col = mix(col, vec3(0.36, 0.35, 0.34), border);
     }
     col = mix(col, mix(soil, green, 0.85), max(strip * (1.0 - step(1.5, kind)) * step(edge, 4.15), lawn));
     // Park walks: a diagonal cross and a loop of warm gravel through the lawns.
@@ -187,7 +205,7 @@ export function createBlockMaterial(shared: SharedUniforms, d: District) {
     float gRough = mix(lawn > 0.5 ? 0.95 : 0.85, 0.15, wet * (1.0 - lawn));
     vec3 gEmit = gAlbedo * vec3(1.0, 0.72, 0.45) * lampPools(w) * uNight * 1.1;
   `;
-  inject(m, shared, roadsGlsl(d), body, 'a1-blocks-v2');
+  inject(m, shared, head, body, 'a1-blocks-v3');
   return m;
 }
 

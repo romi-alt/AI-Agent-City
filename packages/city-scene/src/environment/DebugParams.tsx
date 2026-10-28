@@ -39,7 +39,7 @@ export function DebugParams() {
       };
     }
     if (q.get('explode')) store.set({ explode: true, mode: { kind: 'building', building: q.get('explode')! } });
-    (window as unknown as { __city: unknown }).__city = { store, gl, camera };
+    (window as unknown as { __city: unknown }).__city = { store, gl, camera, scene };
     return () => clearTimeout(restore);
   }, [store, camera, gl, scene]);
   // Per-frame renderer totals (shadow, main and postprocessing passes together) for performance notes.

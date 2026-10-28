@@ -118,7 +118,8 @@ export function addVolume(out: KitPart[], v: Volume): void {
       sy: gh,
       sz: v.d - inset * 2,
       lv,
-      cast: true,
+      // Lobby glazing lets sun into the lobby (it does not shade its own interior).
+      cast: kind !== 'store',
     });
     // Ceiling slab inside the glass (seen when floors are exploded or from above through clear glass).
     push({
