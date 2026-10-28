@@ -4,6 +4,8 @@ import { useRef } from 'react';
 import type * as THREE from 'three';
 import { useKit } from './kit.ts';
 import { Box, Capsule, Sphere } from './parts.tsx';
+import { refMat } from './furniture.tsx';
+import { REF_SHIRT } from './occupants.ts';
 import { asMat } from './r3f.ts';
 
 /**
@@ -258,4 +260,48 @@ function apply(
   j.thighR.current!.rotation.x = p.thigh[1];
   j.shinL.current!.rotation.x = p.shin[0];
   j.shinR.current!.rotation.x = p.shin[1];
+}
+
+// ── Reference office: the simplified seated agent ──────────────────────────────────────────────────────────────
+
+const TOY_SKIN = ['#e0b48f', '#c99a6e', '#f0c8a0', '#a87452'];
+const TOY_HAIR = { human: '#3b2a20', ai: '#1e3a5f' } as const;
+
+/**
+ * A low-poly seated agent for the Office view (legacy units, seated on the chair at the desk's +z side, facing
+ * the monitor): capsule body, sphere head, a hair cap. People wear the warm legend shirt, AI agents the cool one.
+ * Working agents bob their heads as they type; agents who need the visitor lean in a little.
+ */
+export function ToyAgent({
+  kind,
+  seed,
+  status,
+  animate,
+}: {
+  kind: 'ai' | 'human';
+  seed: number;
+  status: string;
+  animate: boolean;
+}) {
+  const head = useRef<THREE.Group>(null);
+  const phase = (seed * 1.37) % 6.28;
+  useFrame(({ clock }) => {
+    const h = head.current;
+    if (!h || !animate) return;
+    const t = clock.elapsedTime;
+    h.position.y = status === 'working' ? Math.sin(t * 6 + phase) * 0.03 : 0;
+    h.rotation.x = status === 'needs-you' ? -0.12 + Math.sin(t * 2 + phase) * 0.05 : 0;
+  });
+  const shirt = refMat(REF_SHIRT[kind]);
+  return (
+    <group position={[-0.2, 0, 1.0]} userData={{ dynamic: true }}>
+      <Capsule mat={shirt} position={[0, 1.05, 0]} scale={[0.6, 0.55, 0.6]} castShadow />
+      <group ref={head as never}>
+        <Sphere mat={refMat(TOY_SKIN[seed % TOY_SKIN.length]!)} position={[0, 1.7, 0]} scale={0.48} castShadow />
+        <mesh position={[0, 1.73, 0]} rotation-x={0.3} material={asMat(refMat(TOY_HAIR[kind]))}>
+          <sphereGeometry args={[0.25, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        </mesh>
+      </group>
+    </group>
+  );
 }
