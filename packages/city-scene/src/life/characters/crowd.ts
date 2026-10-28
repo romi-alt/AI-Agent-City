@@ -217,7 +217,8 @@ export interface CrowdInstanceAnim {
 
 /**
  * An instanced crowd of one body type. Set looks once, then per frame set each instance's matrix and animation.
- * Hidden instances: give them a zero-scale matrix.
+ * Hidden instances: give them a zero-scale matrix, or pack the visible people into the first slots with
+ * `assign(slot, person)` and draw only those with `draw(n)` (people out of view then cost nothing).
  */
 export class CrowdMesh {
   readonly mesh: THREE.InstancedMesh;
@@ -304,9 +305,37 @@ export class CrowdMesh {
     c3.setXYZW(i, c.r, c.g, c.b, look.shirt ? packColor(look.shirt) : -1);
     for (const a of this.colors) a.needsUpdate = true;
     this.hair[i] = this.bake.hairIndex[hair] ?? 1;
+    // Remember person i's look, so it can move to another slot later.
+    const saved = new Float32Array(12);
+    this.colors.forEach((a, k) => saved.set([a.getX(i), a.getY(i), a.getZ(i), a.getW(i)], k * 4));
+    this.looks[i] = { colors: saved, hair: this.hair[i]! };
   }
 
   private hair: number[] = [];
+  private looks: { colors: Float32Array; hair: number }[] = [];
+
+  /** Draw person `person`'s look in instance `slot` (set its matrix and animation on that slot too). */
+  assign(slot: number, person: number) {
+    const look = this.looks[person];
+    if (!look) return;
+    this.colors.forEach((a, k) =>
+      a.setXYZW(slot, look.colors[k * 4]!, look.colors[k * 4 + 1]!, look.colors[k * 4 + 2]!, look.colors[k * 4 + 3]!),
+    );
+    this.hair[slot] = look.hair;
+    this.packed = true;
+  }
+
+  private packed = false;
+
+  /** Draw only the first `n` slots. */
+  draw(n: number) {
+    this.mesh.count = Math.max(0, Math.min(n, this.capacity));
+  }
+
+  /** Number of slots (people) the mesh was made for. */
+  get capacity() {
+    return this.mesh.instanceMatrix.count;
+  }
 
   /** Set instance `i`'s animation state (times in seconds, wrapped per clip). */
   setAnim(i: number, a: CrowdInstanceAnim) {
@@ -326,6 +355,7 @@ export class CrowdMesh {
     this.mesh.instanceMatrix.needsUpdate = true;
     this.animA.needsUpdate = true;
     this.animB.needsUpdate = true;
+    if (this.packed) for (const a of this.colors) a.needsUpdate = true;
   }
 
   dispose() {
