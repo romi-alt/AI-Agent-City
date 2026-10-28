@@ -181,3 +181,90 @@ export function signTexture(
   t.anisotropy = 8;
   return t;
 }
+
+/**
+ * Light warm wood planks for the reference-look office (about #EAD9C2), drawn flat and soft so the room reads as a
+ * toy diorama: staggered planks with a faint seam and a little tone change, no heavy grain.
+ */
+export function plankFloorTexture(repeat: [number, number]): THREE.CanvasTexture {
+  const [c, g] = canvas(512, 512);
+  const rnd = seeded(31);
+  const rows = 8;
+  const h = 512 / rows;
+  for (let row = 0; row < rows; row++) {
+    let x = -rnd() * 260;
+    while (x < 512) {
+      const len = 200 + rnd() * 220;
+      const k = (rnd() - 0.5) * 10;
+      g.fillStyle = `rgb(${Math.round(234 + k)},${Math.round(217 + k)},${Math.round(194 + k)})`;
+      g.fillRect(x, row * h, len, h);
+      g.fillStyle = 'rgba(150,110,70,0.10)';
+      for (let s = 0; s < 3; s++) g.fillRect(x + rnd() * len, row * h + 6 + rnd() * (h - 12), 30 + rnd() * 80, 1);
+      g.fillStyle = 'rgba(140,100,60,0.22)';
+      g.fillRect(x, row * h, 1.5, h);
+      x += len;
+    }
+    g.fillStyle = 'rgba(140,100,60,0.18)';
+    g.fillRect(0, row * h, 512, 1.5);
+  }
+  return toTexture(c, repeat);
+}
+
+/**
+ * One storey of a neighbour's facade, two windows wide: the wall colour with white window frames, glazing bars and
+ * sills, like the pastel streets in the legacy floor view. Repeated across and up a whole building.
+ */
+export function windowGridTexture(wall: string): THREE.CanvasTexture {
+  const [c, g] = canvas(128, 128);
+  g.fillStyle = wall;
+  g.fillRect(0, 0, 128, 128);
+  g.fillStyle = 'rgba(0,0,0,0.06)';
+  g.fillRect(0, 120, 128, 8);
+  for (const x of [16, 72]) {
+    g.fillStyle = '#ffffff';
+    g.fillRect(x - 4, 22, 48, 78);
+    const grad = g.createLinearGradient(x, 26, x + 40, 96);
+    grad.addColorStop(0, '#d9ecf7');
+    grad.addColorStop(1, '#9cc3dc');
+    g.fillStyle = grad;
+    g.fillRect(x, 26, 40, 70);
+    g.fillStyle = '#ffffff';
+    g.fillRect(x + 19, 26, 3, 70);
+    g.fillRect(x, 58, 40, 3);
+    g.fillRect(x - 7, 100, 54, 6);
+  }
+  return toTexture(c, [1, 1]);
+}
+
+/** The office-mode sky: a vertical gradient used as the screen-space background. */
+export function skyGradientTexture(top: string, horizon: string): THREE.CanvasTexture {
+  const [c, g] = canvas(4, 256);
+  const grad = g.createLinearGradient(0, 0, 0, 256);
+  grad.addColorStop(0, top);
+  grad.addColorStop(0.75, horizon);
+  grad.addColorStop(1, horizon);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 4, 256);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/** A small framed print: soft pastel shapes on cream, different per seed. */
+export function pictureTexture(seed: number): THREE.CanvasTexture {
+  const [c, g] = canvas(128, 160);
+  const rnd = seeded(seed * 13 + 1);
+  const colours = ['#e9806b', '#f2c14e', '#3bb8a8', '#7baad6', '#f2a2b8', '#8fd3a6'];
+  g.fillStyle = '#f6efe3';
+  g.fillRect(0, 0, 128, 160);
+  for (let i = 0; i < 4; i++) {
+    g.fillStyle = colours[Math.floor(rnd() * colours.length)]!;
+    g.beginPath();
+    if (i % 2) g.arc(20 + rnd() * 88, 30 + rnd() * 100, 14 + rnd() * 22, 0, Math.PI * 2);
+    else g.rect(10 + rnd() * 60, 20 + rnd() * 80, 30 + rnd() * 40, 20 + rnd() * 40);
+    g.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}

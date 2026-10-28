@@ -15,6 +15,8 @@ import { useBuildingCut } from './cutaway.ts';
 import { OfficeOccupantsContext } from './occupants.ts';
 import { OfficeFloor } from './OfficeFloor.tsx';
 import { occupantsFromLayout } from './placement.ts';
+import { officeSize } from './plan.ts';
+import { OfficeStage } from './room/Stage.tsx';
 import { asMat } from './r3f.ts';
 
 /**
@@ -80,8 +82,15 @@ export function Interior() {
             onSelectDesk={selectDesk}
             night={night}
             animate={!reduced && !paused}
+            look={mode.kind === 'office' ? 'reference' : 'classic'}
           />
         </group>
+      )}
+      {b && floor && mode.kind === 'office' && (
+        <OfficeStage
+          centre={[b.x, floorBase(floor.level), b.z]}
+          size={Math.max(officeSize(b).width, officeSize(b).depth)}
+        />
       )}
       <FloorPreviewBand />
       <FloorLabels />
