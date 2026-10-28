@@ -233,14 +233,13 @@ describe('framing', () => {
       }
     }
   });
-  it('keeps exploded floors above an opened one as their own box', () => {
+  it('opens an exploded floor from above: the stack below rises with it, nothing stays over it', () => {
     const mode = { kind: 'floor' as const, building: 'audi', level: 4 };
     const bx = boxesFor(layout, mode, null, 1).filter(x => x.key.startsWith('audi'));
-    assert.equal(bx.length, 2);
-    const above = bx.find(x => x.bottom !== undefined)!;
-    assert.ok(above.bottom! > floorBase(5));
-    const p: V3 = [layout.buildings[0]!.x, (bx[0]!.top + above.bottom!) / 2, layout.buildings[0]!.z];
-    assert.deepEqual(clampPosition(p, bx, bounds), p, 'the gap between the opened floor and the lifted ones is free');
+    assert.equal(bx.length, 1);
+    assert.ok(bx[0]!.top > floorBase(4), 'the opened floor is lifted with the explode');
+    const shut = boxesFor(layout, mode, null, 0).filter(x => x.key.startsWith('audi'));
+    assert.ok(Math.abs(shut[0]!.top - floorBase(4)) < 1e-9);
   });
   it('enters with a short reveal that starts high above and ends on the overview or the visitor’s building', () => {
     const b = layout.buildings.find(x => x.key === 'rental-2')!;

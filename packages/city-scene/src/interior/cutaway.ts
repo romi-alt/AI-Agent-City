@@ -6,7 +6,7 @@ import { measureBuildings } from '../camera/measure.ts';
 import { dampFactor } from '../camera/math.ts';
 import { floorLift, liveExplode } from '../camera/explode.ts';
 import { useCityContext } from '../context.tsx';
-import { type CityLayout, FLOOR_HEIGHT } from '../types.ts';
+import type { CityLayout } from '../types.ts';
 
 /**
  * Cuts one building open above a floor, like a section drawing. A1 merges the details of every building (crowns,
@@ -32,8 +32,8 @@ export function useBuildingCut(
       new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
       new THREE.Plane(new THREE.Vector3(0, 0, -1), 0),
       new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
-      // Top of the cut region: open (far above) normally; with exploded floors only the opened floor's own shell
-      // is removed, so the floors lifted above it stay in view.
+      // Top of the cut region: open (far above). With exploded floors the opened floor rides on top of the
+      // separated stack below it, so everything above it stays removed and the room can be seen from above.
       new THREE.Plane(new THREE.Vector3(0, 1, 0), -1e4),
     ],
     [],
@@ -134,6 +134,5 @@ export function useBuildingCut(
     const k = instant ? 1 : dampFactor(3.2, dt);
     height.current += (bottom - height.current) * k;
     planes[0]!.constant = height.current;
-    planes[5]!.constant = t > 0.01 ? -(bottom + FLOOR_HEIGHT + 0.04 + (1 - t) * 40) : -1e4;
   });
 }

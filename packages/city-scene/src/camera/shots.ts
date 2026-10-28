@@ -148,6 +148,15 @@ export function deskShot(deskWorld: V3, facing: number): Pose {
 }
 
 /**
+ * A desk seen over the top of an opened floor (the public cut-away, whose curtain walls stay standing): close
+ * enough to read the agent at work, high enough to look over the glass rather than through it.
+ */
+export function deskFromAbove(deskWorld: V3, facing: number): Pose {
+  const target = add(deskWorld, [0, 0.1, 0]);
+  return poseFromOrbit({ target, theta: facing + Math.PI + 0.55, phi: 0.92, radius: 3.4 });
+}
+
+/**
  * The entrance reveal: a short descent from high above, sweeping round the district to settle on the overview
  * (or on the visitor's building). Every keyframe but the last stays well above the roofs.
  */

@@ -6,8 +6,8 @@ import { floorBase } from './shots.ts';
 
 /**
  * The camera's collision boxes for a mode: every building at its real (measured) size; the focused building grows
- * when its floors are exploded; an opened floor cuts its building, keeping a box for the floors below and one for
- * the floors lifted above it.
+ * when its floors are exploded; an opened floor cuts its building, keeping a box for the floors below it (lifted
+ * with them when exploded).
  */
 export function boxesFor(
   layout: CityLayout,
@@ -25,14 +25,7 @@ export function boxesFor(
     if (box.key !== b.key) return [box];
     if (mode.kind === 'building') return [{ ...box, top: box.top + extra }];
     const cut = floorBase(mode.level) + floorLift(b.key, mode.level, explodeT);
-    const below: Box = { ...box, top: cut, cut: true };
-    if (explodeT <= 0.01 || mode.level >= n) return [below];
-    const above: Box = {
-      ...box,
-      key: `${box.key}:above`,
-      bottom: floorBase(mode.level + 1) + floorLift(b.key, mode.level + 1, explodeT),
-      top: box.top + extra,
-    };
-    return [below, above];
+    // Everything above an opened floor is cut away, exploded or not: one box for the stack below it.
+    return [{ ...box, top: cut, cut: true }];
   });
 }

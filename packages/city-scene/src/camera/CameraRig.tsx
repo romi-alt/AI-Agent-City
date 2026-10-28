@@ -44,6 +44,7 @@ import {
 import {
   arrivalKeyframes,
   buildingShot,
+  deskFromAbove,
   deskShot,
   floorShot,
   homeShot,
@@ -233,7 +234,7 @@ export function CameraRig() {
           const b = findBuilding(layout, mode.building);
           if (!b) return homeOf();
           const agent = st.selectedAgent ? deskOfAgent(mode, st.selectedAgent) : null;
-          if (agent) return deskShot(agent.pos, agent.facing);
+          if (agent) return deskFromAbove(agent.pos, agent.facing);
           return floorShot(b, mode.level, vp, floorLift(b.key, mode.level, target()));
         }
         case 'office': {

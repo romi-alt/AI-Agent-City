@@ -93,7 +93,10 @@ await check('city-arrival-skip-and-navigate', async () => {
   await shot(page, 'city-building-exploded');
   // 3D floor labels beside the building: real buttons that open their floor.
   assert.ok((await page.locator('.ac-floor-tag').count()) >= 10, 'floor labels in 3D');
-  await page.locator('.ac-panel').getByRole('button', { name: /^Floor 12, Sales Dept\./ }).click();
+  await page
+    .locator('.ac-panel')
+    .getByRole('button', { name: /^Floor 12, Sales Dept\./ })
+    .click();
   await page.getByRole('heading', { name: 'Sales Dept.' }).waitFor();
   assert.equal(await crumb(page), 'Floor 12');
   await page.getByRole('button', { name: 'Enter office' }).click();
@@ -108,7 +111,9 @@ await check('city-arrival-skip-and-navigate', async () => {
   await shot(page, 'city-agent');
   await page.locator('[data-city-focus]').focus();
   await page.keyboard.press('Escape');
-  await page.waitForFunction(() => document.querySelector('.ac-crumbs [aria-current="page"]')?.textContent === 'Floor 12');
+  await page.waitForFunction(
+    () => document.querySelector('.ac-crumbs [aria-current="page"]')?.textContent === 'Floor 12',
+  );
   // Esc goes back one step at a time; closing the panel returns focus.
   await page.locator('[data-city-focus]').focus();
   await page.keyboard.press('Escape');
@@ -198,7 +203,10 @@ await check('city-mobile', async () => {
     if (r) assert.ok(r.height >= 40, 'touch targets at least 40px tall');
   }
   await shot(page, 'city-mobile-building');
-  await page.locator('.ac-panel').getByRole('button', { name: /^Floor 12,/ }).tap();
+  await page
+    .locator('.ac-panel')
+    .getByRole('button', { name: /^Floor 12,/ })
+    .tap();
   await page.getByRole('heading', { name: 'Admin / CEO / Accounting' }).waitFor();
   await page.getByRole('button', { name: 'Enter office' }).tap();
   await page.getByRole('link', { name: 'Request a demo' }).waitFor();
@@ -226,7 +234,10 @@ await check('city-no-webgl', async () => {
   assert.match(await page.locator('.ac-map2d header').innerText(), /cannot show the 3D city/);
   await page.getByRole('button', { name: /^Maserati Dealership/ }).click();
   await page.getByRole('heading', { name: 'Maserati Dealership' }).waitFor();
-  await page.locator('.ac-panel').getByRole('button', { name: /^Floor 9,/ }).click();
+  await page
+    .locator('.ac-panel')
+    .getByRole('button', { name: /^Floor 9,/ })
+    .click();
   await page.getByRole('heading', { name: 'Social Media Dept.' }).waitFor();
   await page.getByRole('button', { name: 'Enter office' }).click();
   await page.getByRole('link', { name: 'Request a demo' }).waitFor();
@@ -243,17 +254,19 @@ const cam = page => page.evaluate(() => window.three.camera.position.toArray());
 const mode = page => page.evaluate(() => window.cityStore.get().mode);
 const waitMode = (page, kind, timeout = 120_000) =>
   page.waitForFunction(k => window.cityStore.get().mode.kind === k, kind, { timeout });
-const settle = async (page, ms = 150_000) => {
+const settle = async (page, ms = 300_000) => {
   log('settle');
-  // Wait until the camera has stopped moving for two readings in a row (SwiftShader frames are slow here, so a
-  // flight may not have started at the first reading).
+  // Wait for a frame (so a move just asked for has begun), then until no camera move is under way (the canvas
+  // carries data-city-motion) and the camera has stopped for two readings in a row. SwiftShader frames are slow.
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
   let prev = await cam(page);
   let still = 0;
   const t0 = Date.now();
   while (still < 2 && Date.now() - t0 < ms) {
     await page.waitForTimeout(2500);
     const now = await cam(page);
-    still = Math.hypot(now[0] - prev[0], now[1] - prev[1], now[2] - prev[2]) < 0.02 ? still + 1 : 0;
+    const busy = await page.evaluate(() => [...document.querySelectorAll('canvas')].some(c => c.dataset.cityMotion));
+    still = !busy && Math.hypot(now[0] - prev[0], now[1] - prev[1], now[2] - prev[2]) < 0.02 ? still + 1 : 0;
     prev = now;
   }
   return prev;

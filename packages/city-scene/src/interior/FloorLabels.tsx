@@ -51,23 +51,42 @@ export function FloorLabels() {
   }, [b, current, anchors, reg, store, layout]);
 
   const right = useMemo(() => new THREE.Vector3(), []);
+  const probe = useMemo(() => new THREE.Vector3(), []);
+  const size = useThree(s => s.size);
   useFrame(() => {
     if (!b) return;
+    const cam = camera as unknown as THREE.Camera;
     // Beside the building on the screen's right, whatever the heading.
-    right.set(1, 0, 0).applyQuaternion((camera as unknown as THREE.Camera).quaternion);
+    right.set(1, 0, 0).applyQuaternion(cam.quaternion);
     right.y = 0;
     right.normalize();
     const off = Math.hypot(b.w, b.d) / 2 + 1.2;
     const t = liveExplode(store, b.key);
-    b.floors.forEach((f, i) => {
-      const a = anchors[i]!;
-      a.position.set(
-        b.x + right.x * off,
-        floorBase(f.level) + floorLift(b.key, f.level, t) + FLOOR_HEIGHT * 0.75,
-        b.z + right.z * off,
-      );
-      a.updateMatrixWorld();
-    });
+    const x = b.x + right.x * off;
+    const z = b.z + right.z * off;
+    const screenY = (y: number) => (1 - probe.set(x, y, z).project(cam).y) * 0.5 * size.height;
+    // Floors are stacked in order; where they sit closer on screen than a label is tall (a double-height lobby
+    // seen from afar, the ground floors of an exploded tower), the labels above are nudged up to keep a gap.
+    const MIN_PX = 26;
+    let lastPx = Infinity;
+    let raise = 0;
+    [...b.floors]
+      .sort((p, q) => p.level - q.level)
+      .forEach(f => {
+        const i = b.floors.indexOf(f);
+        const a = anchors[i]!;
+        let y = floorBase(f.level) + floorLift(b.key, f.level, t) + FLOOR_HEIGHT * 0.75 + raise;
+        const px = screenY(y);
+        if (lastPx - px < MIN_PX && Number.isFinite(lastPx)) {
+          const perUnit = Math.max(1, Math.abs(screenY(y) - screenY(y + 1)));
+          const extra = (MIN_PX - (lastPx - px)) / perUnit;
+          raise += extra;
+          y += extra;
+        }
+        lastPx = screenY(y);
+        a.position.set(x, y, z);
+        a.updateMatrixWorld();
+      });
   });
   return null;
 }
