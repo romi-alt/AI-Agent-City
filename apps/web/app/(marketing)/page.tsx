@@ -12,7 +12,7 @@ import { SiteFooter } from '../../components/marketing/SiteFooter';
 
 const TITLE = 'AgentCity: Your Business. Your AI Team. Your City.';
 const DESCRIPTION =
-  'An office in a living 3D city, staffed by AI agents for follow-up, content, scheduling and reporting. Get a free demo office with sample data.';
+  'Bring customer follow-up, content planning and daily priorities into one visible workspace. Meet your AI team and get a free sample office. Demo activity is simulated.';
 
 // Not launched yet: the landing page may be indexed only when the deployment opts in.
 const allowIndex = process.env.NEXT_PUBLIC_ALLOW_INDEX === 'true';

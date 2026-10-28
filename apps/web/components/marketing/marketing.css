@@ -360,6 +360,24 @@ html:has(.mk) {
   color: var(--c-muted);
   text-wrap: pretty;
 }
+.mk-hero-note {
+  margin-top: var(--s-2);
+  text-align: center;
+}
+.mk-hero-actions + .mk-hero-note {
+  margin-top: var(--s-3);
+}
+.mk-cta-short {
+  display: none;
+}
+@media (max-width: 639px) {
+  .mk-cta-long {
+    display: none;
+  }
+  .mk-cta-short {
+    display: inline;
+  }
+}
 .mk-hero-actions {
   display: flex;
   flex-wrap: wrap;

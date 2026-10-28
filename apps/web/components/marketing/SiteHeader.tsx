@@ -37,7 +37,10 @@ export function SiteHeader() {
             </a>
           )}
           <CtaLink href="#get-demo" variant="dark" size="sm" testId="header-cta">
-            Get a demo
+            <span className="mk-cta-long">Get My Free Demo Office</span>
+            <span className="mk-cta-short" aria-hidden="true">
+              Get a demo
+            </span>
           </CtaLink>
         </div>
       </div>

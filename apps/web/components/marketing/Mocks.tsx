@@ -7,7 +7,7 @@ import { Icon, Tag } from './Primitives';
 const STATUS: Record<string, { label: string; tone: 'busy' | 'wait' | 'idle' | 'done' }> = {
   CEO: { label: 'Daily report ready', tone: 'done' },
   closer: { label: 'Booking a call', tone: 'busy' },
-  'follow-up': { label: 'Waiting for your OK', tone: 'wait' },
+  'follow-up': { label: 'Awaiting review', tone: 'wait' },
   content: { label: 'Planning week 2', tone: 'busy' },
   ads: { label: 'Between tasks', tone: 'idle' },
   students: { label: 'Class reminders', tone: 'busy' },
@@ -59,11 +59,11 @@ export function AgentDeskMock() {
 }
 
 const TASKS = [
-  { done: true, title: 'Follow up with new web leads', who: 'Vera', when: '09:12' },
-  { done: true, title: 'Draft week 2 content calendar', who: 'Luna', when: '10:40' },
-  { done: false, title: 'Ownership-anniversary message, Jordan R.', who: 'Nico', when: 'Needs you' },
-  { done: false, title: 'Call back: lease ends in 60 days', who: 'Vera', when: '15:00' },
-  { done: false, title: 'Daily report', who: 'Max', when: '18:00' },
+  { done: true, title: 'Draft a reply to a new website inquiry', who: 'Vera', when: '09:12' },
+  { done: true, title: 'Plan next week’s content', who: 'Luna', when: '10:40' },
+  { done: false, title: 'Follow up: prospect asked for more time', who: 'Nico', when: 'Needs you' },
+  { done: false, title: 'Service reminder awaiting review', who: 'Nico', when: '15:00' },
+  { done: false, title: 'Daily report: decisions to review', who: 'Max', when: '18:00' },
 ];
 
 export function TaskListMock() {
@@ -91,18 +91,18 @@ export function ApprovalMock() {
   return (
     <MockFrame title="Approval" meta="Nico · Follow-up">
       <div className="mk-approval">
-        <p className="mk-approval-to">To Jordan R. · Text message</p>
+        <p className="mk-approval-to">Sample draft · To Alex · Text message</p>
         <p className="mk-approval-msg">
-          Hi Jordan, it&rsquo;s been a year since you drove home your new SUV. Your first service is due this month.
-          Would Tuesday or Thursday morning suit you?
+          Hi Alex, following up on the vehicle you asked about. Would you like us to confirm availability or answer any
+          questions before your next visit?
         </p>
         <div className="mk-approval-foot">
           <span className="mk-status mk-status-wait">
             <span className="mk-status-dot" aria-hidden="true" />
-            Waiting for your OK
+            Awaiting review
           </span>
           <span className="mk-approval-btns" aria-hidden="true">
-            <span className="mk-fake-btn is-quiet">Edit</span>
+            <span className="mk-fake-btn is-quiet">Request change</span>
             <span className="mk-fake-btn">Approve</span>
           </span>
         </div>

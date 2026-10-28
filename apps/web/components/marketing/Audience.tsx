@@ -1,18 +1,23 @@
-import { CITY_FACTS } from './cityFacts';
 import { SectionHead, Tag } from './Primitives';
 
 export function Audience() {
   const items = [
-    { name: 'Auto dealerships', text: 'A tower per store and a floor per department, from sales to service.' },
-    { name: 'Training and education', text: 'A floor per course, with enrolment, follow-up and student agents.' },
+    {
+      name: 'Dealerships',
+      text: 'Bring sales inquiries, ownership follow-up and service tasks into a shared view of the next steps.',
+    },
+    {
+      name: 'Training businesses',
+      text: 'Organize enrollment inquiries, student questions, class reminders and content planning.',
+    },
     {
       name: 'Agencies',
-      text: 'Each client in its own building, with agency and client roles.',
+      text: 'Explore a workspace that gives each client and team a clear place to work.',
       roadmap: 'White-label',
     },
     {
-      name: 'Any business',
-      text: `${CITY_FACTS.rentableFloors} rental floors for teams of any size. Your demo opens on one.`,
+      name: 'Other businesses',
+      text: 'Try the sample office and see how the structure could fit your customer and team workflows.',
     },
   ];
   return (
@@ -21,8 +26,8 @@ export function Audience() {
         <SectionHead
           id="who-title"
           eyebrow="Who it’s for"
-          title="Built from real floor plans."
-          lead="AgentCity started with an auto sales training business and the dealerships around it."
+          title="Built around the way your teams work."
+          lead="Start with the workflow that matters to your business, then explore how it fits into your office."
         />
         <ul className="mk-audience-grid">
           {items.map(it => (

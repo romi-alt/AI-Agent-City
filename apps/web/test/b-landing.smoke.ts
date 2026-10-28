@@ -82,10 +82,10 @@ async function open(
 
 test('the landing page renders its headline and calls to action without console errors', async () => {
   const { page, errors } = await open();
-  assert.match(await page.textContent('h1'), /Your Business\.\s*Your AI Team\.\s*Your City\./);
+  assert.match(await page.textContent('h1'), /Give every\s*opportunity\s*a next step\./);
   assert.equal(await page.locator('h1').count(), 1, 'exactly one h1');
   assert.match(await page.textContent('[data-testid=hero-cta-demo]'), /Get My Free Demo Office/);
-  assert.match(await page.textContent('[data-testid=hero-cta-city]'), /Explore AgentCity/);
+  assert.match(await page.textContent('[data-testid=hero-cta-city]'), /Explore the City/);
   // Give the deferred 3D preview time to load (or fall back) before judging the console.
   await page.waitForTimeout(3000);
   assert.deepEqual(errors, []);
@@ -108,7 +108,7 @@ test('"Get My Free Demo Office" scrolls to the demo form section', async () => {
   await page.context().close();
 });
 
-test('"Explore AgentCity" goes to /city', async () => {
+test('"Explore the City" goes to /city', async () => {
   const { page } = await open();
   assert.equal(await page.getAttribute('[data-testid=hero-cta-city]', 'href'), '/city');
   await page.click('[data-testid=hero-cta-city]');

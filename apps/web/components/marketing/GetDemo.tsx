@@ -1,4 +1,3 @@
-import { DEMO_BUILDING } from './cityFacts';
 import { CtaLink } from './Primitives';
 import { DemoRequestForm } from '../demo/DemoRequestForm';
 import { LiteDemoForm } from '../demo/LiteDemoForm';
@@ -6,12 +5,7 @@ import { LITE_DEMO, PUBLIC_PREVIEW } from '../../lib/preview';
 
 // The demo invitation, with the demo walkthrough beside the form.
 export function GetDemo({ ttlDays }: { ttlDays: number }) {
-  const steps = [
-    'Tell us about your business.',
-    'Confirm your email with the one-time link.',
-    LITE_DEMO ? 'Your office opens straight away. No password.' : 'Sign in with a code. No password.',
-    `Meet your sample office in ${DEMO_BUILDING.name}.`,
-  ];
+  const steps = ['Share your business details.', 'Confirm your email.', 'Explore your sample office.'];
   return (
     <section className="mk-section mk-get-demo" aria-labelledby="get-demo-title" id="get-demo" tabIndex={-1}>
       <div className="mk-container">
@@ -19,9 +13,12 @@ export function GetDemo({ ttlDays }: { ttlDays: number }) {
           <div className="mk-demo-copy" id="demo-walkthrough">
             <p className="mk-eyebrow">Free demo</p>
             <h2 id="get-demo-title" className="mk-h2">
-              Get your demo office.
+              See your next workspace in action.
             </h2>
-            <p className="mk-lead">A private sample office with an AI team already at work.</p>
+            <p className="mk-lead">
+              Open a private sample office, meet the AI personas and explore the tasks waiting on their desks. See how
+              the workflow fits your business before discussing a live setup.
+            </p>
             <ol className="mk-demo-steps">
               {steps.map((s, i) => (
                 <li key={s}>
@@ -31,8 +28,10 @@ export function GetDemo({ ttlDays }: { ttlDays: number }) {
               ))}
             </ol>
             <p className="mk-footnote">
-              {LITE_DEMO ? 'Your demo expires automatically.' : `Lasts ${ttlDays} days, then it is removed.`} Everything
-              inside is Sample or Simulated, and demo agents can&rsquo;t contact anyone.
+              {LITE_DEMO
+                ? 'No card required. No password to remember. The sample office expires automatically.'
+                : `No card required. No password to remember. The sample office lasts ${ttlDays} days, then it is removed.`}{' '}
+              Everything inside is simulated, and demo agents can&rsquo;t contact anyone.
             </p>
           </div>
           <div className="mk-demo-form">

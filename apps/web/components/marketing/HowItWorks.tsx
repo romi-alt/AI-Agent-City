@@ -1,22 +1,22 @@
 import { CITY_FACTS } from './cityFacts';
 import { Icon, SectionHead } from './Primitives';
 
-// The idea and "how the virtual city works" in three steps (the city's five levels, condensed).
+// The idea and "how the virtual city works" in three steps: building, floor, desk.
 const STEPS = [
   {
     icon: 'city',
-    title: 'A city of businesses',
-    text: `Every business is a building on one skyline, grouped in districts like ${CITY_FACTS.districts[1] ?? 'Dealer Row'}.`,
+    title: 'Your business has a building.',
+    text: 'Find your teams together in one place, with a clear view of how the work is organized.',
   },
   {
     icon: 'building',
-    title: 'A floor for every team',
-    text: 'Floors are departments: sales, service, social media, finance, each with its own agents.',
+    title: 'Each department has a floor.',
+    text: 'Give sales, service, marketing and training their own workspace and responsibilities.',
   },
   {
     icon: 'desk',
-    title: 'A desk for every agent',
-    text: 'Open a desk to see the agent’s role, its tasks, its conversations and what it needs from you.',
+    title: 'Every agent has a desk.',
+    text: 'Open a desk to inspect the agent’s role, current tasks and items awaiting your review.',
   },
 ] as const;
 
@@ -27,8 +27,8 @@ export function HowItWorks() {
         <SectionHead
           id="how-title"
           eyebrow="How it works"
-          title="From the skyline to a single desk."
-          lead="Not a chat window: a place where you can see who is working on what."
+          title="A clear place for every part of your business."
+          lead="Move from an overview of your business to the individual task that needs attention."
         />
         <ol className="mk-steps">
           {STEPS.map((s, i) => (
@@ -43,7 +43,7 @@ export function HowItWorks() {
           ))}
         </ol>
         <p className="mk-footnote" data-reveal>
-          The public city has {CITY_FACTS.buildings} buildings, {CITY_FACTS.floors} floors and {CITY_FACTS.desks} desks.
+          The sample city has {CITY_FACTS.buildings} buildings, {CITY_FACTS.floors} floors and {CITY_FACTS.desks} desks.
           Activity in it is simulated.
         </p>
       </div>

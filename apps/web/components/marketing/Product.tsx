@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { AgentDeskMock, ApprovalMock, TaskListMock } from './Mocks';
 import { Icon, Tag } from './Primitives';
 
-// Product rows: explore buildings and AI teams, agent capabilities (from the source task documents), and control.
+// Product rows: team visibility, practical workflows (sample data), and approvals.
 const ROWS: {
   key: string;
   eyebrow: string;
@@ -14,35 +14,45 @@ const ROWS: {
 }[] = [
   {
     key: 'teams',
-    eyebrow: 'Buildings and AI teams',
-    title: 'Walk into a floor. Meet the team.',
-    text: 'Every agent has a desk, a role and a status, so you always know who is on what.',
-    points: ['Real floor plans from the public city', 'Agents beside the people they help', 'Status at a glance'],
+    eyebrow: 'Team visibility',
+    title: 'Know who owns the next move.',
+    text: 'See the team’s work without chasing separate updates. Each agent has a defined role, a visible status and a place to review its tasks.',
+    points: [
+      'See responsibility at a glance.',
+      'Find work waiting for your input.',
+      'Review daily priorities in one place.',
+    ],
     mock: <AgentDeskMock />,
   },
   {
     key: 'work',
-    eyebrow: 'What agents do',
-    title: 'Follow-up, content, scheduling, reports.',
-    text: 'Agents work your customers by email, phone and text, plan a month of social content and end each day with a report.',
+    eyebrow: 'Practical workflows',
+    title: 'Put the next customer conversation in view.',
+    text: 'A new inquiry, a customer considering their options, a lease approaching its end: each creates work worth tracking. Explore how an AI team can organize that work and prepare the next step for review.',
     points: [
-      'Prospects, sold customers, birthdays, lease ends, service visits',
-      'Strategy, 30-day calendar, captions and briefs',
-      'A daily report with what needs your decision',
+      'Draft responses to new website inquiries and follow-ups for prospects who need more time.',
+      'Service reminders and a daily report that highlights your decisions.',
+      'Give your content a clear purpose: review ideas, captions and campaign plans that invite the next inquiry.',
     ],
     note: (
       <>
-        <Tag tone="roadmap">Roadmap</Tag> Sending from your own accounts, social publishing and calendar booking.
+        <Tag tone="roadmap">Roadmap</Tag> Sending through connected business accounts, social publishing and calendar
+        booking.
       </>
     ),
     mock: <TaskListMock />,
   },
   {
     key: 'control',
-    eyebrow: 'Control',
-    title: 'Nothing goes out without you.',
-    text: 'AgentCity is designed so agents draft and people approve; in a demo, the database refuses every send.',
-    points: ['Clear yes or no on every message', 'Edit before it goes', 'Demo agents can’t contact anyone'],
+    eyebrow: 'Approvals',
+    title: 'Your team prepares. You decide.',
+    text: 'See the draft and the reason behind it before choosing the next step. Review the wording, request a change or approve the work.',
+    points: [
+      'Clear requests for your attention.',
+      'Drafts you can inspect before a decision.',
+      'Visible status for work awaiting review.',
+    ],
+    note: 'Demo agents cannot send messages or contact customers.',
     mock: <ApprovalMock />,
   },
 ];

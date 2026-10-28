@@ -7,21 +7,21 @@ export function SiteFooter({ contactEmail }: { contactEmail?: string }) {
       <div className="mk-container">
         <section className="mk-contact" id="contact" aria-labelledby="contact-title">
           <h2 id="contact-title" className="mk-contact-title">
-            Questions first?
+            See the work. Meet the team. Find your next step.
           </h2>
           <p className="mk-body">
-            {contactEmail ? (
+            Explore a sample office and picture how your business could organize its daily follow-up.
+            {contactEmail && (
               <>
-                Write to <a href={`mailto:${contactEmail}`}>{contactEmail}</a>, or request a demo and tell us what
-                you&rsquo;d like to know.
+                {' '}
+                Questions first? Write to <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
               </>
-            ) : (
-              <>Request a demo and tell us what you&rsquo;d like to know. Every request reaches our team.</>
             )}
           </p>
           <CtaLink href="#get-demo" variant="secondary" size="sm" testId="footer-cta-demo">
             Get My Free Demo Office
           </CtaLink>
+          <p className="mk-note">Free demo · Email-link access · Simulated activity</p>
         </section>
         <div className="mk-footer-base">
           <a className="mk-wordmark" href="/" aria-label="AgentCity home">

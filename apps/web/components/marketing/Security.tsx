@@ -6,31 +6,37 @@ import { Icon, SectionHead } from './Primitives';
 const POINTS = [
   {
     icon: 'check',
-    title: 'People approve',
+    title: 'People make the decisions',
     text: LITE_DEMO
-      ? 'Designed so agents draft and people decide. The demo office is simulated: nothing is sent to anyone.'
-      : 'Designed so agents draft and people decide. Demo sends are refused by the database.',
+      ? 'The product is designed around reviewing AI-prepared work. The demo sends nothing to customers.'
+      : 'The product is designed around reviewing AI-prepared work. Demo sends are refused by the database.',
   },
   {
     icon: 'shield',
-    title: 'Data sealed per client',
+    title: 'Separate workspaces',
     text: LITE_DEMO
-      ? 'Each demo office is tied to the verified visitor’s session and nothing else can read it. The full platform separates every organisation with database row-level security.'
-      : 'PostgreSQL row-level security separates every organisation inside the database.',
+      ? 'Access to your demo office is tied to your verified session.'
+      : 'Each organisation’s work is kept apart inside the database.',
   },
   {
     icon: 'key',
-    title: 'No passwords',
+    title: 'Email-link access',
     text: LITE_DEMO
-      ? 'The demo uses a one-time link sent to your email. There is no password to create or leak.'
+      ? 'Enter through a one-time email link, with no password to create.'
       : 'Email codes, passkeys or agency single sign-on, with sessions tied to your device.',
   },
   {
     icon: 'users',
-    title: 'Roles, not shared logins',
-    text: 'Agency owner, staff, client admin and viewer. Viewers can’t change anything.',
+    title: 'Access by role',
+    text: 'The platform separates owner, staff, client administrator and viewer permissions. Viewers can’t change anything.',
   },
-  { icon: 'log', title: 'Append-only audit log', text: 'Entries can be added, never changed or deleted.' },
+  {
+    icon: 'log',
+    title: 'Recorded activity',
+    text: LITE_DEMO
+      ? 'The platform is built around an append-only audit log. This single-visitor sample office does not include it.'
+      : 'Entries can be added, never changed or deleted.',
+  },
 ] as const;
 
 export function Security() {
@@ -40,8 +46,8 @@ export function Security() {
         <SectionHead
           id="security-title"
           eyebrow="Security and control"
-          title="You stay in charge."
-          lead="Built in from the start. AgentCity holds no security certification today, and we don’t imply one."
+          title="Clear responsibilities. Visible control."
+          lead="Understand who can access the work, what needs approval and how the demo behaves. AgentCity holds no security certification today, and we don’t imply one."
         />
         <ul className="mk-security">
           {POINTS.map(p => (
