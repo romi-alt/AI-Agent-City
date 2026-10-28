@@ -81,6 +81,8 @@ export function SceneLabels() {
 /**
  * The Office view's name pills (the reference look): a small white rounded pill with a hairline border, the name in
  * bold monospaced capitals and the role after it in the legend colour (amber for people, blue for AI agents).
+ * On phones only the name stays (the role is in the pill's accessible name and in the panel), so eight pills fit
+ * the strip of room above the sheet.
  * JetBrains Mono is self-hosted by the app (`--font-jetbrains-mono`); the system monospace stands in elsewhere.
  */
 const AGENT_PILL_CSS = `
@@ -95,5 +97,5 @@ const AGENT_PILL_CSS = `
 .ac-agent-pill:hover { border-color: #c9bfae; }
 .ac-agent-pill.is-selected { border-color: #f5b335; box-shadow: 0 0 0 2px rgba(245, 179, 53, 0.45), 0 2px 8px rgba(31, 35, 40, 0.12); }
 .ac-agent-pill:focus-visible { outline: 2px solid #0c0c0d; outline-offset: 2px; }
-@media (max-width: 640px) { .ac-agent-pill { font-size: 10px; padding: 2px 6px; gap: 6px; } }
+@media (max-width: 640px) { .ac-agent-pill { font-size: 10px; padding: 2px 6px; gap: 6px; } .ac-agent-pill span { display: none; } }
 `;
