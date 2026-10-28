@@ -127,6 +127,7 @@ export function CameraRig() {
         opacity: 0,
         depthTest: false,
         depthWrite: false,
+        name: 'a3-fade-curtain',
       }),
     [],
   );
@@ -708,6 +709,9 @@ export function CameraRig() {
       else if (camera.view) camera.clearViewOffset();
     }
 
+    // The curtain belongs to a glide or a fade alone: whatever replaced or ended one of those (a skip, a flight
+    // that interrupted it, the visitor taking over, a mode change) lifts it at once, so it can never hang.
+    if (m?.kind !== 'glide' && m?.kind !== 'fade' && !r.pendingArrival && r.fade > 0) r.fade = 0;
     const quad = fadeRef.current;
     if (quad) {
       fadeMat.opacity = r.fade;
@@ -750,6 +754,7 @@ export function CameraRig() {
     <>
       <mesh
         ref={fadeRef}
+        name="a3-fade-curtain"
         material={asMat(fadeMat)}
         renderOrder={10_000}
         frustumCulled={false}

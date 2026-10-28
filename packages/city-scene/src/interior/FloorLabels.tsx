@@ -20,8 +20,9 @@ export function FloorLabels() {
   const mode = useCity(s => s.mode);
   const { camera } = useThree();
   // Building mode only: in the floor view the side panel offers floor above/below, and the labels would sit
-  // where the panel is.
-  const b = mode.kind === 'building' ? findBuilding(layout, mode.building) : null;
+  // where the panel is. On a phone the bottom sheet lists the floors and there is no room beside the building.
+  const wide = useThree(s => s.size.width >= 640);
+  const b = mode.kind === 'building' && wide ? findBuilding(layout, mode.building) : null;
   const current = mode.kind === 'floor' ? mode.level : null;
   const reg = labelRegistry(store);
   const anchors = useMemo(() => (b ? b.floors.map(() => new THREE.Object3D()) : []), [b]);
@@ -52,7 +53,7 @@ export function FloorLabels() {
 
   const right = useMemo(() => new THREE.Vector3(), []);
   const probe = useMemo(() => new THREE.Vector3(), []);
-  const size = useThree(s => s.size);
+  const size = useThree(st => st.size);
   useFrame(() => {
     if (!b) return;
     const cam = camera as unknown as THREE.Camera;
