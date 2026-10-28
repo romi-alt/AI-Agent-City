@@ -283,9 +283,9 @@ export class PeopleSim {
     const { roadsZ } = layout.streets;
     let left = n;
     let k = 0;
-    // About a third of the people out and about are in the plaza, talking in small groups.
+    // About half the people out and about are in the plaza, talking in small groups.
     const plaza = plazaSpots(layout);
-    let plazaLeft = Math.round(n * 0.35);
+    let plazaLeft = Math.round(n * 0.5);
     for (let round = 0; plazaLeft > 0 && plaza.groups.length > 0 && round < 2; round++) {
       for (const g of plaza.groups) {
         if (plazaLeft <= 0) break;
