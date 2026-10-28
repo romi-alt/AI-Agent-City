@@ -56,7 +56,7 @@ cat > "$STAGE/package.json" <<'JSON'
   "private": true,
   "description": "Prebuilt Next.js standalone server for the AgentCity public preview (landing page and 3D city, no backend).",
   "engines": { "node": ">=22 <23" },
-  "dependencies": { "next": "16.4.3", "react": "19.3.1", "react-dom": "19.3.1" },
+  "dependencies": { "next": "16.4.3", "react": "19.3.1", "react-dom": "19.3.1", "mysql2": "3.14.1" },
   "scripts": {
     "build": "echo prebuilt",
     "start": "NODE_ENV=production node apps/web/server.js"
