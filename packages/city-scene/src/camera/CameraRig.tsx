@@ -744,7 +744,7 @@ export function CameraRig() {
       // The first framing was made before the real architecture was known: re-frame once, gently, unless the
       // visitor has already taken over.
       const mode = store.get().mode;
-      if (first && !touched.current && !r.motion && mode.kind !== 'explore' && mode.kind !== 'arrival')
+      if (first && !touched.current && !r.motion && mode.kind !== 'arrival')
         rigApi.current?.go(mode);
     }
     clockRef.current += rawDt;

@@ -39,6 +39,8 @@ async function open(url, opts = {}) {
     ...opts.context,
   });
   const page = await context.newPage();
+  // Software GL renders a frame of the full city in seconds; actions wait for stable frames, so give them room.
+  page.setDefaultTimeout(120_000);
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => m.type() === 'error' && errors.push(m.text()));
