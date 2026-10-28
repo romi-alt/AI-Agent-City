@@ -43,6 +43,8 @@ export const OVERVIEW_PITCH = 32 * DEG;
 export const OVERVIEW_HEADING = 0.12;
 /** Orbit: the same low angle, a touch higher so the turn keeps the whole district in view. */
 export const ORBIT_PITCH = 35 * DEG;
+/** Orbit starts from the south-east three-quarter view (fronts and east facades), then turns. */
+export const ORBIT_HEADING = 0.62;
 /** Top: almost straight down, north up (a hair of tilt keeps "up" on screen meaning north). */
 export const TOP_PHI = 0.04;
 /** Seconds for a move between presets: long enough to follow, short enough to feel direct. */
@@ -56,8 +58,8 @@ function heroes(boxes: Box[]): Box[] {
   return boxes.filter(b => !b.key.startsWith('skyline:'));
 }
 
-function corners(boxes: Box[], ground = false): V3[] {
-  return boxes.flatMap(b => boxCorners(b.minX, b.maxX, 0, ground ? 0 : b.top, b.minZ, b.maxZ));
+function corners(boxes: Box[]): V3[] {
+  return boxes.flatMap(b => boxCorners(b.minX, b.maxX, 0, b.top, b.minZ, b.maxZ));
 }
 
 /** Width / height of the part of the view the HUD leaves visible. */
@@ -112,16 +114,19 @@ export function overviewPreset(boxes: Box[], frame: CityFrame, vp: Viewport): Or
   return o;
 }
 
-/** City Top: straight down, tight on the client buildings so the generated blocks run off every edge. */
+/**
+ * City Top: straight down, tight on the client buildings (roofs included, no margin), so the blocks around them run
+ * off every edge of the screen.
+ */
 export function topPreset(boxes: Box[], vp: Viewport): Orbit {
-  return fitPoints(corners(framedHeroes(boxes, vp), true), 0, TOP_PHI, vp, -0.02);
+  return fitPoints(corners(framedHeroes(boxes, vp)), 0, TOP_PHI, vp, 0);
 }
 
 /**
  * City Orbit: a slow turn round the district's centre at the low angle, at the mean of eight headings' fits: the
  * district fills the view along its length and runs a little off the sides when seen end-on.
  */
-export function orbitPreset(boxes: Box[], vp: Viewport, theta = OVERVIEW_HEADING): Orbit {
+export function orbitPreset(boxes: Box[], vp: Viewport, theta = ORBIT_HEADING): Orbit {
   const pts = corners(framedHeroes(boxes, vp));
   const c = centroid(pts);
   const phi = phiOfPitch(ORBIT_PITCH);

@@ -73,23 +73,23 @@ describe('city presets', () => {
       assert.ok(now.radius * Math.cos(now.phi) < old.radius * Math.cos(old.phi) * 0.75, 'camera height');
     }
   });
-  it('Top looks straight down, tight enough that the client buildings fill the view on one axis', () => {
+  it('Top looks straight down, every client building whole and filling the view on one axis', () => {
     for (const vp of VIEWPORTS) {
       const o = topPreset(boxes, vp);
       assert.ok(o.phi < 0.06);
-      let spanX = 0;
-      let spanY = 0;
-      for (const b of framedHeroes(boxes, vp)) {
+      const keys = new Set(framedHeroes(boxes, vp).map(b => b.key));
+      inView(o, vp, keys);
+      let span = 0;
+      for (const b of boxes.filter(x => keys.has(x.key))) {
         for (const p of [
-          [b.minX, 0, b.minZ],
-          [b.maxX, 0, b.maxZ],
+          [b.minX, b.top, b.minZ],
+          [b.maxX, b.top, b.maxZ],
         ] as [number, number, number][]) {
           const [x, y] = projectToVisible(o, p, vp);
-          spanX = Math.max(spanX, Math.abs(x));
-          spanY = Math.max(spanY, Math.abs(y));
+          span = Math.max(span, Math.abs(x), Math.abs(y));
         }
       }
-      assert.ok(Math.max(spanX, spanY) > 0.97, `buildings reach ${Math.max(spanX, spanY).toFixed(2)} of the view`);
+      assert.ok(span > 0.98, `buildings reach ${span.toFixed(2)} of the view`);
     }
   });
   it('Orbit turns round the district centre at the low angle', () => {
