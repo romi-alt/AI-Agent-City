@@ -86,6 +86,22 @@ export function createService(deps: ServiceDeps) {
 
   const available = () => !!(secret && mailer);
 
+  /**
+   * Expired demos and stale rows are cleaned up by whoever uses the funnel next, at most once an hour per process,
+   * so a deployment without a scheduler still ends demos on time. The admin route does the same on demand.
+   */
+  let lastSweep = 0;
+  function sweepSoon() {
+    if (now() - lastSweep < 3_600_000) return;
+    lastSweep = now();
+    const p = adminExpire().then(
+      () => undefined,
+      e => log(`lite: sweep failed (${(e as Error).name})`),
+    );
+    pending.add(p);
+    void p.finally(() => pending.delete(p));
+  }
+
   async function limit(klass: string, subject: string, max: number, windowSeconds: number, failOpen: boolean) {
     const windowMs = windowSeconds * 1000;
     const index = Math.floor(now() / windowMs);
@@ -104,6 +120,7 @@ export function createService(deps: ServiceDeps) {
 
   async function formToken(ip: string) {
     if (!secret) throw demoUnavailable();
+    sweepSoon();
     await limit('public', ip, config.limits.publicPerMinute, 60, true);
     return { token: issueFormToken(formKey!, now()) };
   }

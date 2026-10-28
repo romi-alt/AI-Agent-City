@@ -375,3 +375,21 @@ test('status says so when the email provider refused the confirmation link', asy
   assert.ok(ctx.logs.some(l => l.includes('verify link not sent (ResendHttp422)')));
   assert.ok(!ctx.logs.some(l => l.includes('ada@acme.test')), 'no address in the logs');
 });
+
+test('funnel traffic sweeps expired demos by itself, at most once an hour', async () => {
+  const ctx = await setup();
+  await ctx.service.submit(await body(ctx), '1.1.1.1');
+  await ctx.service.whenIdle();
+  await ctx.service.verify(tokenOf(ctx.sent[0]!.link), '1.1.1.1');
+  const sweeps = () => ctx.logs.filter(l => l.includes('lite: expired')).length;
+  const before = sweeps(); // the first form token of the journey already swept once
+  ctx.clock.t += 8 * 86_400_000; // the demo is over
+  await ctx.service.formToken('9.9.9.9');
+  await ctx.service.whenIdle();
+  assert.equal(sweeps(), before + 1, 'swept once more');
+  const lead = (await ctx.service.adminLeads(1, 10, true)).leads[0]!;
+  assert.equal(lead.status, 'expired');
+  await ctx.service.formToken('9.9.9.9');
+  await ctx.service.whenIdle();
+  assert.equal(sweeps(), before + 1, 'not again within the hour');
+});
