@@ -14,7 +14,7 @@ export type CameraCommand =
 export type SceneEvent =
   | CameraCommand
   /** Screen space covered by HUD panels (px), so framings centre in the visible part of the view. */
-  | { type: 'insets'; right: number; bottom: number }
+  | { type: 'insets'; right: number; bottom: number; top?: number }
   /** A floor the visitor is pointing at in the floor list (highlighted on the building), or null. */
   | { type: 'floor-preview'; level: number | null }
   /** The scene has drawn its first frames. */

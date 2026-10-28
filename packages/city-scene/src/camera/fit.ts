@@ -8,6 +8,8 @@ export interface Viewport {
   /** Pixels covered on the right (side panel) and at the bottom (phone sheet). */
   right: number;
   bottom: number;
+  /** Pixels covered at the top (the office's title and legend on phones); none when left out. */
+  top?: number;
   /** Vertical field of view, degrees. */
   fov: number;
 }
@@ -32,7 +34,7 @@ function basis(theta: number, phi: number) {
 /** Half-extents (as tangents) of the part of the view left visible by the HUD. */
 export function visibleTangents(vp: Viewport): { tx: number; ty: number } {
   const t = Math.tan((vp.fov * Math.PI) / 360);
-  const h = Math.max(1, vp.height - vp.bottom);
+  const h = Math.max(1, vp.height - vp.bottom - (vp.top ?? 0));
   const w = Math.max(1, vp.width - vp.right);
   return { tx: (t * w) / vp.height, ty: (t * h) / vp.height };
 }

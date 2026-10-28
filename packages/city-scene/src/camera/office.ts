@@ -155,11 +155,11 @@ function featureWallTop(room: OfficeRoom): V3[] {
 }
 
 /**
- * A chosen desk, seen from the same side as the overview and a little lower, close enough that the person and
+ * A chosen desk, seen from the same side as the overview and a little lower, close enough that the person, their neighbours and
  * their screens read: the move is a dolly in rather than a swing round, so a short ease stays comfortable.
  */
 export function officeDeskShot(desk: V3, room: OfficeRoom): Pose {
-  return poseFromOrbit({ target: add(desk, [0, 0.05, 0]), theta: officeHeading(room), phi: 0.9, radius: 1.7 });
+  return poseFromOrbit({ target: add(desk, [0, 0.05, 0]), theta: officeHeading(room), phi: 0.88, radius: 3 });
 }
 
 /** Seconds for moves inside one office (choosing a desk, back to the room): short, eased, interruptible. */

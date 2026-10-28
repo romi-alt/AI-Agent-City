@@ -86,13 +86,18 @@ export function NavPanel({
       const phone = window.matchMedia('(max-width: 720px)').matches;
       const r = el.getBoundingClientRect();
       bus.emit(
-        phone ? { type: 'insets', right: 0, bottom: r.height } : { type: 'insets', right: r.width + 16, bottom: 0 },
+        phone
+          ? { type: 'insets', right: 0, bottom: r.height, top: officeTop(el) }
+          : { type: 'insets', right: r.width + 16, bottom: 0 },
       );
     };
     report();
+    // Again once the office's own chrome (its legend, measured for the top inset) has rendered.
+    const raf = requestAnimationFrame(report);
     const ro = new ResizeObserver(report);
     ro.observe(el);
     return () => {
+      cancelAnimationFrame(raf);
       ro.disconnect();
       bus.emit({ type: 'insets', right: 0, bottom: 0 });
     };
@@ -126,6 +131,17 @@ export function NavPanel({
       <div className="ac-panel-scroll">{body}</div>
     </section>
   );
+}
+
+/**
+ * On phones the office's title chip and legend stack under the breadcrumb at the top: the space down to the
+ * legend's foot is reported too, so the room is framed below them rather than behind them. Zero elsewhere.
+ */
+function officeTop(panel: HTMLElement): number {
+  const hud = panel.closest('.ac-hud');
+  const legend = hud?.querySelector('.ac-legend');
+  if (!hud || !legend) return 0;
+  return Math.max(0, legend.getBoundingClientRect().bottom - hud.getBoundingClientRect().top + 8);
 }
 
 function panelKey(mode: CityMode, directory?: boolean): string | null {
