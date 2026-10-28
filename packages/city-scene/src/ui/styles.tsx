@@ -99,7 +99,7 @@ export const HUD_CSS = `
 .ac-actions .ac-btn { flex: 1 1 auto; }
 .ac-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--ac-line); }
 .ac-list > li { border-bottom: 1px solid var(--ac-line); }
-.ac-row { width: 100%; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; text-align: left; min-height: 52px;
+.ac-row { box-sizing: border-box; width: 100%; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; text-align: left; min-height: 52px;
   padding: 10px 8px; border-radius: 8px; border: 0; background: transparent; color: var(--ac-ink); }
 button.ac-row:hover, button.ac-row:focus-visible { background: var(--ac-tint); }
 .ac-row[aria-current="true"], .ac-row[aria-pressed="true"] { background: var(--ac-tint); box-shadow: inset 2px 0 0 var(--ac-ink); }

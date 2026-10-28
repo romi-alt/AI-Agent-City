@@ -101,7 +101,7 @@ export function CityHud({
         <Arrival
           subtitle={arrivalSubtitle}
           highlight={findBuilding(layout, store.get().highlight)?.name ?? null}
-          onSkip={() => bus.emit({ type: 'skip' })}
+          onSkip={() => nav({ type: 'arrival-done' })}
           bus={bus}
         />
       ) : (
@@ -283,6 +283,19 @@ function Arrival({
 }) {
   const [progress, setProgress] = useState(0);
   useEffect(() => bus.on(e => e.type === 'arrival-progress' && setProgress(e.value)), [bus]);
+  // Any key skips the arrival. Handled here, in the page, because the 3D scene (and its own key handling) can take
+  // a few seconds to mount on slow devices, while this card is already on screen.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || ['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(e.key)) return;
+      const t = e.target as HTMLElement | null;
+      if (t && t !== document.body && !t.closest('.ac-hud')) return;
+      e.preventDefault();
+      onSkip();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onSkip]);
   return (
     <div className="ac-arrival ac-glass">
       <p className="ac-arrival-title">Welcome to AgentCity</p>

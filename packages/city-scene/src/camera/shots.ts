@@ -145,7 +145,8 @@ export function arrivalKeyframes(
   const focus: V3 = highlight ? [highlight.x, 0, highlight.z] : [0, 0, 0];
   const tallest = Math.max(...layout.buildings.map(buildingHeight), measuredTallest, 10);
   return [
-    { pos: [-e * 2.6, tallest * 1.4, e * 4.2], target: [0, tallest * 0.7, 0] },
+    // High over the surrounding skyline, looking across it to the districts.
+    { pos: [-e * 1.7, tallest * 3.6 + 30, e * 2.3], target: [0, tallest * 0.5, 0] },
     { pos: [-e * 1.1, tallest * 3.2, e * 2.1], target: [0, tallest * 0.25, 0] },
     { pos: [focus[0] * 0.4 + e * 0.35, tallest * 3.6, focus[2] + e * 1.15], target: [focus[0] * 0.7, 0, focus[2]] },
     end,

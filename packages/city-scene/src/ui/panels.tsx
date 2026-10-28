@@ -322,7 +322,7 @@ function FloorBody({
         ) : (
           <button
             type="button"
-            className="ac-btn ac-primary"
+            className={offer ? 'ac-btn' : 'ac-btn ac-primary'}
             aria-expanded={offer}
             aria-controls={offerId}
             onClick={() => setOffer(o => !o)}

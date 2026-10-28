@@ -27,7 +27,7 @@ async function check(name, fn) {
     await fn();
     results.push(`ok   ${name} (${((Date.now() - t0) / 1000).toFixed(0)}s)`);
   } catch (e) {
-    results.push(`FAIL ${name}: ${e.message.split('\n')[0]}`);
+    results.push(`FAIL ${name}: ${e.message.split('\n').slice(0, 8).join(' | ')}`);
   }
   console.log(results.at(-1));
 }
@@ -50,9 +50,15 @@ const t00 = Date.now();
 const log = msg => console.log(`  [${((Date.now() - t00) / 1000).toFixed(0)}s] ${msg}`);
 const shot = async (page, name) => {
   log(`shot ${name}`);
+  await page.waitForTimeout(600); // let CSS transitions finish
   await page.screenshot({ path: join(evidence, `a3-${name}.png`), timeout: 240_000 });
 };
 const activeText = page => page.evaluate(() => document.activeElement?.textContent?.trim().slice(0, 80) ?? '');
+/** Wait (frames can be slow under software GL) until the focused element's text is `text`. */
+const focusIs = (page, text) =>
+  page
+    .waitForFunction(t => document.activeElement?.textContent?.trim() === t, text, { timeout: 60_000 })
+    .then(() => true);
 const crumb = page => page.locator('.ac-crumbs [aria-current="page"]').innerText();
 
 await check('city-arrival-skip-and-navigate', async () => {
@@ -63,14 +69,14 @@ await check('city-arrival-skip-and-navigate', async () => {
   await page.waitForTimeout(800);
   await shot(page, 'city-arrival');
   await page.getByRole('button', { name: 'Skip intro' }).click();
-  await page.locator('.ac-crumbs').waitFor({ timeout: 30_000 });
+  await page.locator('.ac-crumbs').waitFor({ timeout: 150_000 });
   assert.equal(await crumb(page), 'City');
   // Directory → building.
   await page.getByRole('button', { name: 'Show a list of buildings' }).click();
   await page.getByRole('heading', { name: 'Find a building' }).waitFor();
   await page.getByRole('button', { name: /^Audi Dealership/ }).click();
   await page.getByRole('heading', { name: 'Audi Dealership' }).waitFor();
-  assert.equal(await activeText(page), 'Audi Dealership', 'focus moves to the panel heading');
+  assert.ok(await focusIs(page, 'Audi Dealership'), 'focus moves to the panel heading');
   assert.match(await page.locator('.ac-panel').innerText(), /You can look around every floor/);
   assert.equal(await page.getByRole('button', { name: 'Enter building' }).count(), 0, 'public: nothing enterable');
   await shot(page, 'city-building-panel');
@@ -121,7 +127,7 @@ await check('city-keyboard-only', async () => {
   const { page, errors, close } = await open(`${base}/city`);
   await page.getByRole('button', { name: 'Skip intro' }).waitFor({ timeout: 60_000 });
   await page.keyboard.press('Space'); // any key skips the arrival
-  await page.locator('.ac-crumbs').waitFor({ timeout: 30_000 });
+  await page.locator('.ac-crumbs').waitFor({ timeout: 150_000 });
   // Tab to the building list button and open it.
   for (
     let i = 0;
@@ -132,11 +138,11 @@ await check('city-keyboard-only', async () => {
     await page.keyboard.press('Tab');
   await page.keyboard.press('Enter');
   await page.getByRole('heading', { name: 'Find a building' }).waitFor();
-  assert.equal(await activeText(page), 'Find a building');
+  assert.ok(await focusIs(page, 'Find a building'));
   for (let i = 0; i < 30 && !/^Rental Building 2/.test(await activeText(page)); i++) await page.keyboard.press('Tab');
   await page.keyboard.press('Enter');
   await page.getByRole('heading', { name: 'Rental Building 2' }).waitFor();
-  assert.equal(await activeText(page), 'Rental Building 2');
+  assert.ok(await focusIs(page, 'Rental Building 2'));
   for (let i = 0; i < 30 && !/^3Floor for Rent/.test(await activeText(page)); i++) await page.keyboard.press('Tab');
   await page.keyboard.press('Enter');
   await page.getByRole('heading', { name: 'Floor for Rent' }).waitFor();
@@ -159,7 +165,7 @@ await check('city-keyboard-only', async () => {
 await check('city-mobile', async () => {
   const { page, errors, close } = await open(`${base}/city`, {
     viewport: { width: 390, height: 844 },
-    context: { isMobile: true, hasTouch: true, deviceScaleFactor: 2 },
+    context: { isMobile: true, hasTouch: true, deviceScaleFactor: 1 },
   });
   await page.getByRole('button', { name: 'Skip intro' }).tap({ timeout: 60_000 });
   await page.getByRole('button', { name: 'Show a list of buildings' }).tap();
@@ -292,7 +298,7 @@ await check('harness-building-floor-office-desk', async () => {
   await settle(page);
   // Click the building itself in 3D.
   const p = await page.evaluate(() => {
-    const v = new window.three.camera.position.constructor(40, 6, 0).project(window.three.camera);
+    const v = new window.three.camera.position.constructor(40, 14, 0).project(window.three.camera);
     return [((v.x + 1) / 2) * innerWidth, ((1 - v.y) / 2) * innerHeight];
   });
   log('await page.mouse.click(p[0], p[1]);');

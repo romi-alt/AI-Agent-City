@@ -162,3 +162,24 @@ export function withMeasured(boxes: Box[], measured: ReadonlyMap<string, Omit<Bo
     return out;
   });
 }
+
+/**
+ * Raise each keyframe (all but the last) until it, the path to the next keyframe and its own line of sight are
+ * clear of every box: the arrival never grazes a tower of the background skyline.
+ */
+export function liftClear<T extends { pos: V3; target: V3 }>(keys: T[], boxes: Box[], step = 6, maxLift = 160): T[] {
+  const out = keys.map(k => ({ ...k, pos: [...k.pos] as V3 }));
+  for (let i = 0; i < out.length - 1; i++) {
+    const k = out[i]!;
+    const next = out[i + 1]!;
+    for (let lifted = 0; lifted <= maxLift; lifted += step) {
+      const blocked = boxes.some(
+        b =>
+          isInsideBox(k.pos, b, 1) || segmentHitsBox(k.pos, next.pos, b, 1) || segmentHitsBox(k.pos, k.target, b, 0.5),
+      );
+      if (!blocked) break;
+      k.pos[1] += step;
+    }
+  }
+  return out;
+}

@@ -69,3 +69,31 @@ function findKey(o: THREE.Object3D): string | undefined {
     if (p.userData.buildingKey) return String(p.userData.buildingKey);
   return undefined;
 }
+
+/**
+ * The background skyline's towers (A1's `a1-skyline` instanced facade, one instance per mass) as collision boxes,
+ * so the camera keeps clear of them too. Thin spires on top are covered by a little headroom.
+ */
+export function measureSkyline(scene: THREE.Object3D): Box[] {
+  const mesh = scene.getObjectByName('a1-skyline') as THREE.InstancedMesh | undefined;
+  if (!mesh?.isInstancedMesh || !mesh.geometry) return [];
+  if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+  const local = mesh.geometry.boundingBox!;
+  mesh.updateWorldMatrix(true, false);
+  const out: Box[] = [];
+  const box = new THREE.Box3();
+  const m4 = new THREE.Matrix4();
+  for (let i = 0; i < mesh.count; i++) {
+    mesh.getMatrixAt(i, m4);
+    box.copy(local).applyMatrix4(m4.premultiply(mesh.matrixWorld));
+    out.push({
+      key: `skyline:${i}`,
+      minX: box.min.x,
+      maxX: box.max.x,
+      minZ: box.min.z,
+      maxZ: box.max.z,
+      top: box.max.y + 3,
+    });
+  }
+  return out;
+}
