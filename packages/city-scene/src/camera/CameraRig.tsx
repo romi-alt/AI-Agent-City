@@ -42,15 +42,7 @@ import {
   rotate,
   zoom,
 } from './orbit.ts';
-import {
-  arrivalKeyframes,
-  buildingShot,
-  deskFromAbove,
-  floorShot,
-  homeShot,
-  sideHeading,
-  type Pose,
-} from './shots.ts';
+import { arrivalKeyframes, buildingShot, deskFromAbove, floorShot, homeShot, sideHeading, type Pose } from './shots.ts';
 import {
   clampToRoom,
   OFFICE_EASE_SECONDS,
