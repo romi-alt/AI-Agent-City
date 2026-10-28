@@ -22,7 +22,10 @@ import {
 } from '../src/camera/presets.ts';
 import { homeShot } from '../src/camera/shots.ts';
 import layoutJson from '../src/data/city-layout.json' with { type: 'json' };
-import type { CityLayout } from '../src/types.ts';
+import { presetFor } from '../src/environment/presets.ts';
+import type { CityLayout, TimeOfDay } from '../src/types.ts';
+
+const TIMES: TimeOfDay[] = ['day', 'golden', 'evening', 'night'];
 
 const layout = layoutJson as CityLayout;
 const boxes = cityBoxes(layout);
@@ -33,8 +36,8 @@ const PANEL: Viewport = { ...DESK, right: 396 };
 const PHONE: Viewport = { width: 390, height: 844, right: 0, bottom: 0, fov: 42 };
 const PHONE_SHEET: Viewport = { ...PHONE, bottom: 300 };
 const VIEWPORTS = [DESK, PANEL, PHONE, PHONE_SHEET];
-/** A linear fog whose far plane is the city's half-size (thicker fog only hides more). */
-const FOG = { far: 400 };
+/** D1's linear fog at its thinnest (clear day; evening, night and weather only hide more). */
+const FOG = { far: Math.max(...TIMES.map(t => presetFor(t, 'clear').fogFar)) };
 const pitchOf = (phi: number) => 90 - (phi * 180) / Math.PI;
 
 function inView(o: ReturnType<typeof overviewPreset>, vp: Viewport, keys: Set<string>) {
@@ -105,10 +108,7 @@ describe('city presets', () => {
     const views = ['overview', 'top', 'orbit'] as const;
     for (const from of views) {
       for (const to of views) {
-        const f = presetFlight(
-          presetPose(from, boxes, frame, DESK, lim),
-          presetPose(to, boxes, frame, DESK, lim),
-        );
+        const f = presetFlight(presetPose(from, boxes, frame, DESK, lim), presetPose(to, boxes, frame, DESK, lim));
         assert.ok(f.duration >= 0.9 && f.duration <= 1.3 && f.duration === PRESET_SECONDS);
         assert.ok(dist(sampleFlight(f, f.duration).pos, f.to.pos) < 1e-6);
       }

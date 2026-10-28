@@ -91,11 +91,12 @@ export function mainStreet(frame: CityFrame): number {
   return roads.reduce((best, x) => (Math.abs(x - cx) < Math.abs(best - cx) - 1e-6 ? x : best), roads[0] ?? cx);
 }
 
+const inside = ([x, y]: [number, number]) => Math.abs(x) <= 1 && Math.abs(y) <= 1;
+
 /**
  * City Overview: low and close, looking up the main street so it recedes into the haze, with the client buildings
  * filling the visible part of the view.
  */
-const inside = ([x, y]: [number, number]) => Math.abs(x) <= 1 && Math.abs(y) <= 1;
 export function overviewPreset(boxes: Box[], frame: CityFrame, vp: Viewport): Orbit {
   const o = fitPoints(corners(framedHeroes(boxes, vp)), OVERVIEW_HEADING, phiOfPitch(OVERVIEW_PITCH), vp, 0.02);
   // Slide sideways (along the view's right axis) towards the main street, so it runs up the middle of the picture,
@@ -315,8 +316,7 @@ export function edgeLimits(
   const hit = cache.get(key);
   if (hit) return hit;
   // A wider margin than the check's: the search samples tilts and distances, the margin covers what lies between.
-  const ok = (phi: number, radius: number) =>
-    edgeHidden(phi, radius, frame, vp, fogDepth, targetExtent, SEARCH_MARGIN);
+  const ok = (phi: number, radius: number) => edgeHidden(phi, radius, frame, vp, fogDepth, targetExtent, SEARCH_MARGIN);
   const presetPhi = Math.min(phiOfPitch(OVERVIEW_PITCH), base.maxPhi);
   const want = Math.min(base.maxRadius, Math.max(presetRadius * 1.35, base.minRadius));
   const preset = Math.min(want, Math.max(base.minRadius, presetRadius));
