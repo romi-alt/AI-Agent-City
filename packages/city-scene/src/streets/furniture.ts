@@ -45,7 +45,16 @@ export function planFurniture(layout: CityLayout, district = districtPlan(layout
   const reachX = B.maxX + 20;
   const reachZ = B.maxZ + 20;
   const blocked = (x: number, z: number, m: number) =>
-    inBuilding(layout, x, z, m) || d.cells.some(c => c.kind === 'decor' && x > c.x0 && x < c.x1 && z > c.z0 && z < c.z1 && Math.min(x - c.x0, c.x1 - x, z - c.z0, c.z1 - z) > 1.2);
+    inBuilding(layout, x, z, m) ||
+    d.cells.some(
+      c =>
+        c.kind === 'decor' &&
+        x > c.x0 &&
+        x < c.x1 &&
+        z > c.z0 &&
+        z < c.z1 &&
+        Math.min(x - c.x0, c.x1 - x, z - c.z0, c.z1 - z) > 1.2,
+    );
   let n = 0;
   const along = (lines: number[], axis: 'x' | 'z') => {
     const reach = axis === 'z' ? reachZ : reachX;

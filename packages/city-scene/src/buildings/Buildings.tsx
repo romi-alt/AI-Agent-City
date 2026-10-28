@@ -22,6 +22,7 @@ import type { LayoutBuilding } from '../types.ts';
 import { type BuildingDesign, designAll } from './designs.ts';
 import { EXPLODE_GAP, easeExplode, explodeRuntime, floorOffset, lobbyLevels, stepExplode } from './explode.ts';
 import { buildKitMeshes } from './kitmesh.ts';
+import { DistrictDecor } from './DistrictDecor.tsx';
 import { BuildingLabels } from './Labels.tsx';
 import { createKitMaterials, updateKitMaterials } from './materials.ts';
 import { buildSigns } from './signs.ts';
@@ -86,10 +87,13 @@ export function Buildings() {
       designs.map(({ building: b, design: d }) => ({
         key: b.key,
         name: b.name,
+        short: b.shortName,
         x: b.x,
         y: d.top + 1.4,
         z: b.z,
         floors: b.floors.length,
+        desks: b.floors.reduce((n, f) => n + f.desks.filter(k => k.kind === 'ai').length, 0),
+        forRent: b.floors.filter(f => f.rentable).length,
       })),
     [designs],
   );
@@ -121,14 +125,17 @@ export function Buildings() {
   });
 
   return (
-    <group name="a1-buildings">
-      <primitive object={kit.group} />
-      <primitive object={signs.mesh} />
-      {designs.map(({ building, design }) => (
-        <BuildingFrame key={building.key} building={building} design={design} />
-      ))}
-      <BuildingLabels items={labels} />
-    </group>
+    <>
+      <group name="a1-buildings">
+        <primitive object={kit.group} />
+        <primitive object={signs.mesh} />
+        {designs.map(({ building, design }) => (
+          <BuildingFrame key={building.key} building={building} design={design} />
+        ))}
+        <BuildingLabels items={labels} />
+      </group>
+      <DistrictDecor />
+    </>
   );
 }
 

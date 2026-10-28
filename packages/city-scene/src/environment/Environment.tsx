@@ -2,6 +2,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import {
+  type Camera,
   Color,
   DirectionalLight,
   Fog,
@@ -10,6 +11,7 @@ import {
   PMREMGenerator,
   Scene,
   SphereGeometry,
+  Vector3,
   type WebGLRenderer,
   type WebGLRenderTarget,
 } from 'three';
@@ -105,6 +107,7 @@ export function Environment() {
     [pmrem, scene],
   );
 
+  const camDir = useMemo(() => new Vector3(), []);
   useFrame((state, rawDt) => {
     const dt = Math.min(rawDt, 0.1);
     const st = store.get();
@@ -142,8 +145,15 @@ export function Environment() {
     hemi.intensity = s.hemiIntensity;
 
     fog.color.setRGB(...s.fogColor);
-    fog.near = s.fogNear;
-    fog.far = s.fogFar;
+    // Fog is measured from the camera: a view looking down from high up (top view, wide orbit) pushes it out by
+    // the height, so the city below stays clear, while views toward the horizon keep the preset distances (and
+    // the generated city's edge stays hidden).
+    const cam = state.camera as unknown as Camera;
+    cam.getWorldDirection(camDir);
+    const down = Math.max(0, -camDir.y) ** 2;
+    const lift = Math.max(0, cam.position.y - 40) * down;
+    fog.near = s.fogNear + lift;
+    fog.far = s.fogFar + lift * 1.15;
     u.uFogColor.value.setRGB(...s.fogColor);
 
     skyUniforms.uZenith.value.setRGB(...s.zenith);
