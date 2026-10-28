@@ -43,7 +43,7 @@ export function birdGeometry() {
 export const BIRD_VERTEX_HEAD = /* glsl */ `
 uniform float uTime;
 attribute float aPart;
-attribute vec4 iBird; // x phase offset, y flap amplitude, z beats per second, w folded (0..1)
+attribute vec4 iBird; // x wing-beat phase (radians, accumulated on the CPU), y amplitude, z beats per second (0: phase only), w folded (0..1)
 mat3 bdRotX(float a) { float c = cos(a), s = sin(a); return mat3(1.0, 0.0, 0.0, 0.0, c, s, 0.0, -s, c); }
 void bdPose(inout vec3 p, inout vec3 n) {
   float part = floor(aPart + 0.5);

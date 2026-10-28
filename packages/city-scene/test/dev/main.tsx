@@ -168,23 +168,29 @@ function Stage() {
 }
 
 /** ?view=plane / ?view=heli: keep the first visible airliner or helicopter in frame (read from the life meshes). */
-function Follow({ what }: { what: 'plane' | 'heli' }) {
+function Follow({ what }: { what: 'plane' | 'heli' | 'birds' }) {
   const camera = useThree(s => s.camera);
   const scene = useThree(s => s.scene);
   const hold = Number(q.get('dist') ?? (what === 'plane' ? 60 : 14));
   const m = useMemo(() => new THREE.Matrix4(), []);
   const p = useMemo(() => new THREE.Vector3(), []);
   useFrame(() => {
-    const mesh = scene.getObjectByName(what === 'plane' ? 'life-airliners' : 'life-helicopters') as
-      THREE.InstancedMesh | undefined;
+    const name = what === 'plane' ? 'life-airliners' : what === 'heli' ? 'life-helicopters' : 'life-birds';
+    const mesh = scene.getObjectByName(name) as THREE.InstancedMesh | undefined;
     if (!mesh) return;
     let found = false;
     for (let i = 0; i < mesh.count && !found; i++) {
       mesh.getMatrixAt(i, m);
       p.setFromMatrixPosition(m);
-      found = p.lengthSq() > 1;
+      found = what === 'birds' ? p.y > 4 && p.y < (Number(q.get('below')) || 15) : p.lengthSq() > 1;
     }
     if (!found) return;
+    if (what === 'birds') {
+      // A vantage point a little behind and beside the flock, eased so the flock moves through the frame.
+      camera.position.lerp(new THREE.Vector3(p.x + 9, p.y + 1.5, p.z + 9), 0.05);
+      camera.lookAt(p.x, p.y, p.z);
+      return;
+    }
     const d = Math.hypot(p.x, p.z) || 1;
     if (q.get('from') === 'city') {
       // Stand on the far side of the city and look past the towers at the aircraft.
@@ -300,7 +306,7 @@ function App() {
           <Stats />
           {view === 'models' && <Models />}
           {view === 'chars' && <Characters />}
-          {(view === 'plane' || view === 'heli') && <Follow what={view} />}
+          {(view === 'plane' || view === 'heli' || view === 'birds') && <Follow what={view} />}
         </CityContext.Provider>
       </Canvas>
     </CityContext.Provider>

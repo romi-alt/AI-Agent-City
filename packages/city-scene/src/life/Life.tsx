@@ -1,6 +1,6 @@
 'use client';
-import { useFrame } from '@react-three/fiber';
-import { useMemo } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { useEffect, useMemo } from 'react';
 import { useCity, useCityContext } from '../context.tsx';
 import { useSharedUniforms } from '../environment/palette.ts';
 import { QUALITY } from '../quality/quality.ts';
@@ -31,6 +31,15 @@ function Stepper({ sim, clock, animate }: { sim: StreetSim; clock: LifeClock; an
   return null;
 }
 
+/** Development only: exposes the scene on `window.__life` so screenshot scripts can frame flocks and aircraft. */
+function LifeDebug() {
+  const scene = useThree(s => s.scene);
+  useEffect(() => {
+    (window as unknown as { __life?: unknown }).__life = { scene };
+  }, [scene]);
+  return null;
+}
+
 /**
  * City life (workstream A2): traffic, pedestrians, aircraft, helicopters, birds and rooftop details. Every system
  * sizes itself from `QUALITY[store.quality]`; `paused` freezes everything; `reducedMotion` shows a calm, still but
@@ -54,6 +63,7 @@ export function Life() {
   return (
     <group name="life">
       <Stepper sim={sim} clock={clock} animate={animate} />
+      {process.env.NODE_ENV !== 'production' && <LifeDebug />}
       <Traffic
         sim={sim}
         env={env}

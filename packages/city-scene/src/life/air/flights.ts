@@ -21,12 +21,18 @@ export interface AirSample {
   fade: number;
 }
 
+/**
+ * Airliners at real scale (an 11-unit, 38 m narrow-body) on climb-out or approach: about 0.9–1.8 km up and 2–3.5 km
+ * away, moving at about 80 m/s, so they cross the distant sky slowly and small, as real aircraft do.
+ */
 export const AIRLINER = {
-  speed: 24,
-  duration: 52,
+  speed: 30,
+  duration: 70,
   /** Closest horizontal approach to the city centre. */
-  minDistance: 380,
-  minAltitudeAboveRoofs: 120,
+  minDistance: 700,
+  minAltitudeAboveRoofs: 320,
+  /** Altitude band above the floor. */
+  band: 350,
 } as const;
 
 export const HELICOPTER = {
@@ -44,7 +50,7 @@ interface Flight {
 function airlinerFlight(seed: number): Flight {
   const rng = createRng(seed);
   const theta = rng() * Math.PI * 2;
-  const dist = range(rng, AIRLINER.minDistance + 20, AIRLINER.minDistance + 420);
+  const dist = range(rng, AIRLINER.minDistance + 30, AIRLINER.minDistance + 600);
   const turn = range(rng, -0.45, 0.45);
   const n = 96;
   const len = AIRLINER.speed * AIRLINER.duration;
@@ -107,7 +113,7 @@ export class AirTraffic {
     this.airlinerFloor = roofs + AIRLINER.minAltitudeAboveRoofs;
     this.heliFloor = roofs + HELICOPTER.minAltitudeAboveRoofs;
     for (let k = 0; k < opts.aircraft; k++)
-      this.airliners.push({ period: 75 + k * 31, offset: k * 23 + 6, seed: seed * 1000 + k * 97, cache: new Map() });
+      this.airliners.push({ period: 95 + k * 37, offset: k * 29 + 6, seed: seed * 1000 + k * 97, cache: new Map() });
     for (let k = 0; k < opts.helicopters; k++) this.helis.push(this.heliLoop(layout, seed * 31 + k * 7, k));
   }
 
@@ -166,7 +172,7 @@ export class AirTraffic {
       out.fade = 0;
       return out;
     }
-    samplePath(this.flight(slot, n), u, this.airlinerFloor, 70, out);
+    samplePath(this.flight(slot, n), u, this.airlinerFloor, AIRLINER.band, out);
     const edge = Math.min(u, 1 - u) / 0.14;
     out.fade = Math.max(0, Math.min(1, edge));
     return out;
