@@ -1,6 +1,6 @@
 'use client';
 import { type ThreeEvent, useFrame } from '@react-three/fiber';
-import { useContext, useEffect, useMemo, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useSceneLabel } from '../camera/labels.ts';
 import { METRES_PER_UNIT, floorBase } from '../camera/shots.ts';
@@ -28,9 +28,24 @@ import { OfficeOccupantsContext, statusColor, statusLabel } from './occupants.ts
 import { Box, Cyl, Plane, Sphere } from './parts.tsx';
 import { deskLabel, DESK_HEIGHT } from './placement.ts';
 import { type OfficePlan, officeSize, planOffice, type Rect, variantFor, type Workstation } from './plan.ts';
-import { DeskScreen, drawRoster } from './screens.ts';
+import { DeskScreen, drawLiveScreen, drawRoster, drawTaskBoard } from './screens.ts';
 import { signTexture } from './textures.ts';
 import { asMat } from './r3f.ts';
+import { Backdrop } from './room/Backdrop.tsx';
+import { createRoomKit, RoomKitContext } from './room/kit.ts';
+import { roomLayout, type RoomLayout } from './room/layout.ts';
+import {
+  FeatureWall,
+  Library,
+  LiveScreen,
+  Lounge as RefLounge,
+  MeetingCorner,
+  Plants,
+  RoomShell,
+  Rugs,
+  useCanvasMaterial,
+  Utilities,
+} from './room/Room.tsx';
 
 export interface OfficeFloorProps {
   building: LayoutBuilding;
@@ -43,6 +58,11 @@ export interface OfficeFloorProps {
   /** 0 at day, 1 at night: interior lights glow brighter as it gets dark. */
   night: number;
   animate: boolean;
+  /**
+   * 'reference': the bright toy-diorama room of the legacy floor view (Office mode only: rugs, slatted feature wall,
+   * glass with a timber rail, pastel neighbours outside). 'classic': the furnished tower floor (floor cut-away).
+   */
+  look?: 'reference' | 'classic';
 }
 
 /**
@@ -59,33 +79,108 @@ export function OfficeFloor(props: OfficeFloorProps) {
     () => planOffice(width, depth, props.occupants.length, variantFor(b.kind)),
     [width, depth, props.occupants.length, b.kind],
   );
+  const reference = props.look === 'reference';
+  const room = useMemo(() => roomLayout(width, depth), [width, depth]);
+  const roomKit = useMemo(() => (reference ? createRoomKit(width, depth) : null), [reference, width, depth]);
+  useEffect(() => () => roomKit?.dispose(), [roomKit]);
+  const root = useRef<THREE.Group>(null);
   const batchVersion = `${b.key}:${floor.level}:${plan.variant}:${props.detail}:${props.occupants
     .map(o => `${o.kind}${o.status}`)
     .join(',')}`;
+  // The reference room is lit by one soft-shadowed sun: its merged (static) meshes cast shadows too, except glass.
+  useLayoutEffect(() => {
+    if (!reference) return;
+    root.current?.traverse(o => {
+      const mesh = o as THREE.Mesh;
+      if (mesh.isMesh && mesh.userData.batched) mesh.castShadow = !(mesh.material as THREE.Material).transparent;
+    });
+  }, [reference, batchVersion]);
   return (
     <KitContext.Provider value={kit}>
       <group
+        ref={root as never}
         position={[b.x, floorBase(floor.level), b.z]}
         scale={1 / METRES_PER_UNIT}
         userData={{ interior: true, building: b.key, level: floor.level }}
       >
-        <StaticBatch version={batchVersion}>
-          <Shell plan={plan} night={props.night} />
-          <Core plan={plan} building={b} floor={floor} />
-          <Reception plan={plan} />
-          {plan.variant === 'showroom' ? <Showroom rect={plan.lounge} /> : <Lounge rect={plan.lounge} />}
-          <MeetingRoom rect={plan.meeting} plan={plan} building={b} floor={floor} occupants={props.occupants} />
-          {plan.variant === 'classroom' && <ClassroomFront plan={plan} building={b} floor={floor} />}
-          <Desks plan={plan} {...props} />
-          {plan.variant !== 'classroom' && plan.workstations.length > 0 && <CoffeeBar plan={plan} />}
-          {plan.variant !== 'classroom' && plan.workstations.length > 0 && <FocusBooths plan={plan} />}
-          {plan.plants.map((p, i) => (
-            <Plant key={i} position={[p.x, 0, p.z]} size={p.size} seed={i + 1} />
-          ))}
-        </StaticBatch>
-        <InteriorLights plan={plan} night={props.night} />
+        {reference ? (
+          <RoomKitContext.Provider value={roomKit!}>
+            <StaticBatch version={`ref:${batchVersion}`}>
+              <ReferenceRoom room={room} building={b} floor={floor} occupants={props.occupants} />
+              <Desks plan={plan} {...props} />
+            </StaticBatch>
+          </RoomKitContext.Provider>
+        ) : (
+          <StaticBatch version={batchVersion}>
+            <Shell plan={plan} night={props.night} />
+            <Core plan={plan} building={b} floor={floor} />
+            <Reception plan={plan} />
+            {plan.variant === 'showroom' ? <Showroom rect={plan.lounge} /> : <Lounge rect={plan.lounge} />}
+            <MeetingRoom rect={plan.meeting} plan={plan} building={b} floor={floor} occupants={props.occupants} />
+            {plan.variant === 'classroom' && <ClassroomFront plan={plan} building={b} floor={floor} />}
+            <Desks plan={plan} {...props} />
+            {plan.variant !== 'classroom' && plan.workstations.length > 0 && <CoffeeBar plan={plan} />}
+            {plan.variant !== 'classroom' && plan.workstations.length > 0 && <FocusBooths plan={plan} />}
+            {plan.plants.map((p, i) => (
+              <Plant key={i} position={[p.x, 0, p.z]} size={p.size} seed={i + 1} />
+            ))}
+          </StaticBatch>
+        )}
+        {!reference && <InteriorLights plan={plan} night={props.night} />}
       </group>
     </KitContext.Provider>
+  );
+}
+
+/**
+ * The reference-look room (Office mode): warm plank floor, zone rugs, glass on three sides with a timber rail, the
+ * slatted feature wall with the task board and clock, a live screen, lounge, round meeting table, bookshelf, plants
+ * and the pastel street outside. Desks and people are drawn by the caller on the team and leadership rugs.
+ */
+function ReferenceRoom({
+  room,
+  building,
+  floor,
+  occupants,
+}: {
+  room: RoomLayout;
+  building: LayoutBuilding;
+  floor: LayoutFloor;
+  occupants: DeskOccupant[];
+}) {
+  const board = useCanvasMaterial(
+    1024,
+    440,
+    g =>
+      drawTaskBoard(
+        g,
+        1024,
+        440,
+        `TASK BOARD · ${building.shortName.toUpperCase()} · L${floor.level}`,
+        floor.name,
+        occupants,
+      ),
+    [building.shortName, floor.level, floor.name, occupants],
+  );
+  const live = useCanvasMaterial(
+    512,
+    640,
+    g => drawLiveScreen(g, 512, 640, `${building.shortName} · Floor ${floor.level}`, occupants),
+    [building.shortName, floor.level, occupants],
+  );
+  return (
+    <group>
+      <RoomShell room={room} />
+      <Rugs room={room} />
+      <FeatureWall room={room} board={board} />
+      <LiveScreen room={room} screen={live} />
+      <RefLounge room={room} />
+      <MeetingCorner room={room} />
+      <Library room={room} />
+      <Utilities room={room} />
+      <Plants room={room} />
+      <Backdrop room={room} />
+    </group>
   );
 }
 

@@ -146,3 +146,88 @@ function wrap(g: CanvasRenderingContext2D, text: string, x: number, y: number, m
   }
   if (line) g.fillText(line, x, y + n * lh);
 }
+
+/**
+ * The task board on the timber feature wall (reference-look office): an amber header with the building and floor,
+ * then one column per person with their status stripe, name, role and what they are doing (their summary). Dark
+ * #121A24 with amber #F5B335 header text, like the legacy floor view.
+ */
+export function drawTaskBoard(
+  g: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  heading: string,
+  subtitle: string,
+  people: DeskOccupant[],
+) {
+  g.fillStyle = '#121a24';
+  g.fillRect(0, 0, w, h);
+  g.fillStyle = '#f5b335';
+  g.font = `700 ${Math.round(h * 0.068)}px system-ui, sans-serif`;
+  g.fillText(heading.slice(0, 48), w * 0.028, h * 0.11);
+  g.fillStyle = '#9fb3c8';
+  g.font = `500 ${Math.round(h * 0.045)}px system-ui, sans-serif`;
+  g.fillText(subtitle.slice(0, 70), w * 0.028, h * 0.18);
+  const cols = people.slice(0, 8);
+  if (!cols.length) {
+    g.fillStyle = '#9fb3c8';
+    g.font = `400 ${Math.round(h * 0.06)}px system-ui, sans-serif`;
+    g.fillText('This floor is ready for a new team.', w * 0.028, h * 0.45);
+    return;
+  }
+  const cw = (w - w * 0.04) / cols.length;
+  const top = h * 0.23;
+  const colH = h * 0.72;
+  cols.forEach((o, i) => {
+    const x = w * 0.02 + i * cw;
+    g.fillStyle = '#1d2733';
+    g.fillRect(x + 4, top, cw - 8, colH);
+    g.fillStyle = statusColor(o.status);
+    g.fillRect(x + 4, top, cw - 8, 6);
+    g.fillStyle = '#ffffff';
+    g.font = `700 ${Math.round(h * 0.045)}px system-ui, sans-serif`;
+    g.fillText((o.name ?? (o.kind === 'human' ? 'Team member' : 'AI agent')).slice(0, 12), x + 12, top + h * 0.08);
+    g.fillStyle = '#9fb3c8';
+    g.font = `400 ${Math.round(h * 0.036)}px system-ui, sans-serif`;
+    g.fillText(o.role.slice(0, 16), x + 12, top + h * 0.13);
+    g.fillStyle = '#e5e7eb';
+    wrap(g, o.summary ?? statusLabel(o.status), x + 12, top + h * 0.21, cw - 24, h * 0.045, 6);
+    g.fillStyle = statusColor(o.status);
+    g.fillText(statusLabel(o.status), x + 12, top + colH - h * 0.03);
+  });
+}
+
+/**
+ * The freestanding live screen: the floor's name and how many people are working, waiting for the visitor or idle
+ * right now (counted from the desks, so it never shows invented figures).
+ */
+export function drawLiveScreen(g: CanvasRenderingContext2D, w: number, h: number, title: string, people: DeskOccupant[]) {
+  const count = (s: string) => people.filter(p => (s === 'idle' ? statusLabel(p.status) === 'Idle' : p.status === s)).length;
+  const lines: [string, string, string][] = [
+    ['On this floor', String(people.length), '#f5b335'],
+    ['Working', String(count('working')), statusColor('working')],
+    ['Needs you', String(count('needs-you')), statusColor('needs-you')],
+    ['Idle', String(count('idle')), statusColor('idle')],
+  ];
+  g.fillStyle = '#0e141b';
+  g.fillRect(0, 0, w, h);
+  g.fillStyle = '#f5b335';
+  g.font = `700 ${Math.round(h * 0.05)}px system-ui, sans-serif`;
+  g.fillText('LIVE', w * 0.05, h * 0.08);
+  g.fillStyle = '#9fb3c8';
+  g.font = `400 ${Math.round(h * 0.032)}px system-ui, sans-serif`;
+  g.fillText(title.slice(0, 32), w * 0.05, h * 0.13);
+  lines.forEach(([k, v, colour], i) => {
+    const y = h * 0.2 + i * h * 0.12;
+    g.fillStyle = '#1d2733';
+    g.fillRect(w * 0.04, y, w * 0.92, h * 0.1);
+    g.fillStyle = '#9fb3c8';
+    g.font = `400 ${Math.round(h * 0.032)}px system-ui, sans-serif`;
+    g.fillText(k, w * 0.08, y + h * 0.062);
+    g.fillStyle = colour;
+    g.font = `700 ${Math.round(h * 0.055)}px system-ui, sans-serif`;
+    g.textAlign = 'right';
+    g.fillText(v, w * 0.92, y + h * 0.07);
+    g.textAlign = 'left';
+  });
+}
