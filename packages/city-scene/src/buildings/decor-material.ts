@@ -1,4 +1,13 @@
-import { BoxGeometry, Color, InstancedBufferAttribute, InstancedMesh, Matrix4, MeshStandardMaterial, Quaternion, Vector3 } from 'three';
+import {
+  BoxGeometry,
+  Color,
+  InstancedBufferAttribute,
+  InstancedMesh,
+  Matrix4,
+  MeshStandardMaterial,
+  Quaternion,
+  Vector3,
+} from 'three';
 import { injectCloudShadow } from '../environment/cloud-shadow.ts';
 import type { SharedUniforms } from '../environment/palette.ts';
 import { CURB_H } from '../streets/grid.ts';
@@ -16,7 +25,10 @@ export function createDecorMaterial(shared: SharedUniforms): MeshStandardMateria
     shader.uniforms.uNight = shared.uNight;
     injectCloudShadow(shader, shared);
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float aSeedD;\nvarying vec4 vFacD;\nvarying float vSeedD;')
+      .replace(
+        '#include <common>',
+        '#include <common>\nattribute float aSeedD;\nvarying vec4 vFacD;\nvarying float vSeedD;',
+      )
       .replace(
         '#include <begin_vertex>',
         `#include <begin_vertex>

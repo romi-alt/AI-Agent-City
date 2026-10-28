@@ -89,7 +89,17 @@ function addDetails(parts: Part[], b: DecorBox, face: 1 | -1, r: () => number) {
     color: AWNINGS[Math.floor(r() * AWNINGS.length)]!,
   });
   // Cornice and parapet.
-  parts.push({ shape: 'box', mat: 'cornice', x: b.x, y: top + 0.1, z: b.z, sx: b.w + 0.16, sy: 0.2, sz: b.d + 0.16, color: '#f3efe6' });
+  parts.push({
+    shape: 'box',
+    mat: 'cornice',
+    x: b.x,
+    y: top + 0.1,
+    z: b.z,
+    sx: b.w + 0.16,
+    sy: 0.2,
+    sz: b.d + 0.16,
+    color: '#f3efe6',
+  });
   // Roof item.
   const k = r();
   const rx = b.x + (r() - 0.5) * (b.w - 1.6);
@@ -102,14 +112,43 @@ function addDetails(parts: Part[], b: DecorBox, face: 1 | -1, r: () => number) {
       [0.35, 0.35],
     ] as const)
       parts.push({ shape: 'box', mat: 'steel', x: rx + lx, y: top + 0.45, z: rz + lz, sx: 0.07, sy: 0.7, sz: 0.07 });
-    parts.push({ shape: 'octa', mat: 'tank', x: rx, y: top + 1.25, z: rz, sx: 1.1, sy: 1.0, sz: 1.1, color: '#8a6243' });
+    parts.push({
+      shape: 'octa',
+      mat: 'tank',
+      x: rx,
+      y: top + 1.25,
+      z: rz,
+      sx: 1.1,
+      sy: 1.0,
+      sz: 1.1,
+      color: '#8a6243',
+    });
     parts.push({ shape: 'cone', mat: 'tankRoof', x: rx, y: top + 1.95, z: rz, sx: 1.2, sy: 0.45, sz: 1.2 });
   } else if (k < 0.65) {
     for (let i = 0; i < 2; i++)
-      parts.push({ shape: 'box', mat: 'hvac', x: rx + (i - 0.5) * 0.9, y: top + 0.45, z: rz, sx: 0.7, sy: 0.5, sz: 0.7 });
+      parts.push({
+        shape: 'box',
+        mat: 'hvac',
+        x: rx + (i - 0.5) * 0.9,
+        y: top + 0.45,
+        z: rz,
+        sx: 0.7,
+        sy: 0.5,
+        sz: 0.7,
+      });
   } else if (k < 0.85) {
     parts.push({ shape: 'box', mat: 'garden', x: b.x, y: top + 0.24, z: b.z, sx: b.w - 0.7, sy: 0.12, sz: b.d - 0.9 });
-    parts.push({ shape: 'sphere', mat: 'shrub', x: rx, y: top + 0.55, z: rz, sx: 0.8, sy: 0.65, sz: 0.8, color: '#5a9a48' });
+    parts.push({
+      shape: 'sphere',
+      mat: 'shrub',
+      x: rx,
+      y: top + 0.55,
+      z: rz,
+      sx: 0.8,
+      sy: 0.65,
+      sz: 0.8,
+      color: '#5a9a48',
+    });
   } else {
     parts.push({ shape: 'cyl', mat: 'steel', x: rx, y: top + 1.2, z: rz, sx: 0.06, sy: 2.2, sz: 0.06 });
   }
