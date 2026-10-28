@@ -50,12 +50,13 @@ import {
   homeShot,
   officeShot,
   sideHeading,
-  topShot,
   type Pose,
 } from './shots.ts';
 import { designsForLayout } from '../buildings/info.ts';
 import { navigate } from './useNav.ts';
 import { asMat } from '../interior/r3f.ts';
+// D4 (city presets): explore-mode framings, preset easing and the edge-hiding limits live in presets.ts.
+import { cityFrame, exploreLimits, presetFlight, presetPose } from './presets.ts';
 
 type Motion =
   | { kind: 'flight'; flight: Flight; t: number }
@@ -119,6 +120,7 @@ export function CameraRig() {
   const bus = useMemo(() => sceneBus(store), [store]);
   const baseBounds = useMemo(() => cityBounds(layout), [layout]);
   const boundsRef = useRef<CityBounds>(baseBounds);
+  const presetFrame = useMemo(() => cityFrame(layout), [layout]); // D4
   const fadeMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
@@ -163,6 +165,10 @@ export function CameraRig() {
       userMoved: false,
     };
   }
+
+  /** D4: explore limits narrowed so the edge of the generated city never shows (cached in presets.ts). */
+  const presetLimits = (base: OrbitLimits, vp: Viewport) =>
+    exploreLimits(base, presetFrame, rig.current.boxes, vp, scene.fog, boundsRef.current.targetExtent);
 
   const clockRef = useRef(0);
   const touched = useRef(false);
@@ -215,8 +221,9 @@ export function CameraRig() {
         case 'arrival':
           return homeOf();
         case 'explore':
-          // Overview and orbit start from the aerial overview; the plan view looks straight down.
-          return st.view === 'top' ? topShot(realBoxes(), vp) : homeOf();
+          // D4: Overview, Top and Orbit are framed by presets.ts (district bounds plus HUD insets).
+          if (homePose && st.view === 'overview') return homePose;
+          return presetPose(st.view, realBoxes(), presetFrame, vp, r.limits);
         case 'building': {
           const b = findBuilding(layout, mode.building);
           if (!b) return homeOf();
@@ -262,6 +269,8 @@ export function CameraRig() {
       r.userMoved = false;
       const prevCut = r.cut;
       r.limits = limitsFor(mode, store.get().view);
+      // D4: in the city, the limits also keep the edge of the generated city out of sight.
+      if (mode.kind === 'explore') r.limits = presetLimits(r.limits, viewport());
       r.cut =
         mode.kind === 'floor' || mode.kind === 'office' ? { building: mode.building, level: mode.level } : undefined;
       const nextBoxes = [...boxesFor(layout, mode, r.measured, Math.max(r.explodeT, target())), ...r.skyline];
@@ -322,7 +331,10 @@ export function CameraRig() {
         r.motion = fadeTo(to, reduced ? 0.5 : 0.7);
         return;
       }
-      r.motion = { kind: 'flight', flight: planFlight(from, to), t: 0 };
+      // D4: re-framing the city (a preset, reset or HUD change) is a short fixed ease; input or another preset
+      // interrupts it from wherever the camera is.
+      const flight = mode.kind === 'explore' && !_prev ? presetFlight(from, to) : planFlight(from, to);
+      r.motion = { kind: 'flight', flight, t: 0 };
     };
 
     const fadeTo = (to: Pose, total: number, done?: () => void): Motion => ({
@@ -402,7 +414,7 @@ export function CameraRig() {
       unsub();
       offBus();
     };
-  }, [store, layout, bus, camera]);
+  }, [store, layout, bus, camera, presetFrame]);
 
   /** Any explore input: stops a flight where it is (the visitor took over) and edits the goal orbit. */
   const takeOver = () => {
@@ -676,6 +688,15 @@ export function CameraRig() {
     }
 
     r.idle += dt;
+    // D4: fog and viewport change (weather, time of day, resize): keep the edge-hiding limits current.
+    if (!r.motion && store.get().mode.kind === 'explore') {
+      const vp = { width: size.width, height: size.height, ...r.insets, fov: camera.fov };
+      const l = presetLimits(limitsFor(store.get().mode, store.get().view), vp);
+      if (l !== r.limits) {
+        r.limits = l;
+        r.goal = clampOrbit(r.goal, l);
+      }
+    }
     // Exploded floors (animated by A1): the collision boxes follow the focused building's live progress.
     const focus = store.get().mode;
     const liveT = 'building' in focus ? liveExplode(store, focus.building) : 0;
