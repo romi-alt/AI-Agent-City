@@ -88,24 +88,86 @@ function quad(pts: [number, number][]) {
   return s;
 }
 
+/**
+ * Tyres with five-spoke alloy rims and a hub cap. Every vertex is tagged with its hub so the vertex shader rolls the
+ * wheel by the car's odometer (angle = distance / radius): rotation is exact at any speed and frame rate.
+ */
 function wheels(b: PartBuilder, xs: number[], halfW: number, r: number, detail: VehicleDetail, tread = 0.12) {
   const seg = detail === 'low' ? 8 : 14;
   for (const x of xs)
     for (const z of [-halfW, halfW]) {
+      const wheel: [number, number, number, number] = [x, r, z, r];
       b.add(new THREE.CylinderGeometry(r, r, tread, seg, 1), {
         at: [x, r, z],
         rot: [Math.PI / 2, 0, 0],
         color: TYRE,
         slot: SLOT.fixed,
+        wheel,
       });
-      if (detail === 'full')
-        b.add(new THREE.CylinderGeometry(r * 0.62, r * 0.62, tread + 0.006, 8, 1), {
-          at: [x, r, z],
+      const out = Math.sign(z) * (tread / 2 + 0.002);
+      if (detail === 'full') {
+        // Recessed dark wheel well face, then spokes and hub on top of it.
+        b.add(new THREE.CylinderGeometry(r * 0.66, r * 0.66, 0.004, 12, 1), {
+          at: [x, r, z + out],
           rot: [Math.PI / 2, 0, 0],
+          color: '#26292d',
+          slot: SLOT.fixed,
+          wheel,
+        });
+        for (let k = 0; k < 5; k++) {
+          const a = (k / 5) * Math.PI * 2;
+          b.add(new THREE.BoxGeometry(r * 0.6, r * 0.13, 0.008), {
+            at: [x + Math.cos(a) * r * 0.3, r + Math.sin(a) * r * 0.3, z + out + Math.sign(z) * 0.003],
+            rot: [0, 0, a],
+            color: RIM,
+            slot: SLOT.fixed,
+            wheel,
+          });
+        }
+        b.add(new THREE.CylinderGeometry(r * 0.16, r * 0.16, 0.012, 8, 1), {
+          at: [x, r, z + out + Math.sign(z) * 0.004],
+          rot: [Math.PI / 2, 0, 0],
+          color: '#a7adb3',
+          slot: SLOT.fixed,
+          wheel,
+        });
+      } else
+        b.add(new THREE.BoxGeometry(r * 1.1, r * 0.18, 0.006), {
+          at: [x, r, z + out],
           color: RIM,
           slot: SLOT.fixed,
+          wheel,
         });
     }
+}
+
+/** Mirrors, door seams, grille and number plates: the small things that make a body read as a real car. */
+function trims(
+  b: PartBuilder,
+  c: { len: number; w: number; belt: number; sill: number; mirrorX: number; doors: number[] },
+  detail: VehicleDetail,
+) {
+  const half = c.len / 2;
+  b.add(new THREE.BoxGeometry(0.012, 0.055, c.w * 0.42), {
+    at: [half + 0.012, c.sill + 0.13, 0],
+    color: '#111316',
+    slot: SLOT.fixed,
+  });
+  for (const x of [half + 0.03, -half - 0.03])
+    b.add(new THREE.BoxGeometry(0.006, 0.04, 0.17), { at: [x, c.sill + 0.06, 0], color: '#e9e7df', slot: SLOT.fixed });
+  if (detail === 'low') return;
+  for (const s of [-1, 1]) {
+    b.add(new THREE.BoxGeometry(0.06, 0.035, 0.05), {
+      at: [c.mirrorX, c.belt + 0.035, s * (c.w / 2 + 0.03)],
+      slot: SLOT.paint,
+    });
+    for (const x of c.doors)
+      b.add(new THREE.BoxGeometry(0.006, c.belt - c.sill - 0.06, 0.003), {
+        at: [x, (c.belt + c.sill) / 2, s * (c.w / 2 + 0.003)],
+        color: '#0f1113',
+        slot: SLOT.fixed,
+      });
+  }
 }
 
 /** Head and tail lamps, slightly proud of the bumper faces. */
@@ -217,6 +279,18 @@ function car(b: PartBuilder, c: CarShape, detail: VehicleDetail) {
   sideLines(b, c.len * 0.8, c.w + (detail === 'low' ? 0 : 0.0), c.belt - 0.05, c.sill + 0.03, detail);
   bumpers(b, half + 0.01, -half - 0.01, c.w, c.sill + 0.07);
   lamps(b, half - 0.01, -half + 0.005, c.belt - 0.06, c.w * 0.33);
+  trims(
+    b,
+    {
+      len: c.len,
+      w: c.w,
+      belt: c.belt,
+      sill: c.sill,
+      mirrorX: front - 0.04,
+      doors: [front - 0.02, pillarX + 0.01, rear + 0.08],
+    },
+    detail,
+  );
   wheels(b, wheelXs, c.w / 2 - 0.065, c.wheelR, detail);
 }
 
@@ -453,10 +527,20 @@ function emergency(b: PartBuilder, len: number, w: number, detail: VehicleDetail
   });
 }
 
+/** Wheel radius per kind (the odometer is wrapped by one turn of it before it reaches the shader). */
+export const WHEEL_RADIUS: Record<VehicleKind, number> = {
+  sedan: 0.135,
+  taxi: 0.135,
+  suv: 0.16,
+  van: 0.15,
+  emergency: 0.15,
+  bus: 0.19,
+};
+
 /** One merged geometry per kind, facing +x, wheels on y = 0. */
 export function vehicleGeometry(kind: VehicleKind, detail: VehicleDetail = 'full'): THREE.BufferGeometry {
   const { len, width } = VEHICLE_SPEC[kind];
-  const b = new PartBuilder();
+  const b = new PartBuilder({ wheels: true });
   if (kind === 'sedan' || kind === 'taxi') sedan(b, len, width, detail, kind === 'taxi');
   else if (kind === 'suv') suv(b, len, width, detail);
   else if (kind === 'van') van(b, len, width, detail, '#f5b335');
@@ -494,21 +578,37 @@ export const PAINTS: Record<VehicleKind, string[]> = {
 
 export const VEHICLE_VERTEX_HEAD = /* glsl */ `
 attribute float aSlot;
-attribute vec2 iState;
+attribute vec4 aWheel;
+attribute vec4 iState; // brake, beacon phase, odometer (wrapped), edge fade
 varying float vSlot;
-varying vec2 vState;
+varying vec4 vState;
+/** Roll a wheel vertex (or normal) about its hub by the distance driven. */
+vec3 acRoll(vec3 p, bool isPoint) {
+  if (aWheel.w <= 0.0) return p;
+  float a = -iState.z / aWheel.w;
+  float c = cos(a);
+  float s = sin(a);
+  vec2 d = isPoint ? p.xy - aWheel.xy : p.xy;
+  vec2 r = vec2(c * d.x - s * d.y, s * d.x + c * d.y);
+  return vec3(isPoint ? aWheel.xy + r : r, p.z);
+}
 `;
 
 export const VEHICLE_FRAGMENT_HEAD = /* glsl */ `
 uniform float uNight;
 uniform float uTime;
 varying float vSlot;
-varying vec2 vState;
+varying vec4 vState;
 `;
 
 /** Glow per slot: headlights and signs scale with night; brake lights add to the tail lights; beacons flash. */
 export const VEHICLE_EMISSIVE = /* glsl */ `
 {
+  // Arriving and leaving at the district edge: dissolve with a stable screen-space dither instead of shrinking.
+  if (vState.w < 0.999) {
+    float n = fract(sin(dot(floor(gl_FragCoord.xy), vec2(12.9898, 78.233))) * 43758.5453);
+    if (n > vState.w) discard;
+  }
   float slot = floor(vSlot + 0.5);
   vec3 glow = vec3(0.0);
   if (slot == 2.0) glow = vec3(1.0, 0.93, 0.78) * (0.15 + uNight * 2.6);
