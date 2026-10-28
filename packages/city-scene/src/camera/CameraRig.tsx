@@ -86,7 +86,7 @@ interface Rig {
   limits: OrbitLimits;
   boxes: Box[];
   fade: number;
-  insets: { right: number; bottom: number };
+  insets: { right: number; bottom: number; top: number };
   offset: { x: number; y: number };
   frames: number;
   lastProgress: number;
@@ -164,7 +164,7 @@ export function CameraRig() {
       cut: undefined,
       sinceMeasure: 0,
       fade: 0,
-      insets: bus.last('insets') ?? { right: 0, bottom: 0 },
+      insets: { top: 0, ...(bus.last('insets') ?? { right: 0, bottom: 0 }) },
       offset: { x: 0, y: 0 },
       frames: 0,
       lastProgress: -1,
@@ -198,6 +198,7 @@ export function CameraRig() {
       height: sizeRef.current.height,
       right: r.insets.right,
       bottom: r.insets.bottom,
+      top: r.insets.top,
       fov: camera.fov,
     });
     /** Every layout building at its real size (measured once rendered). */
@@ -426,8 +427,12 @@ export function CameraRig() {
     const offBus = bus.on(e => {
       switch (e.type) {
         case 'insets': {
-          const changed = Math.abs(e.right - r.insets.right) > 8 || Math.abs(e.bottom - r.insets.bottom) > 8;
-          r.insets = { right: e.right, bottom: e.bottom };
+          const top = e.top ?? 0;
+          const changed =
+            Math.abs(e.right - r.insets.right) > 8 ||
+            Math.abs(e.bottom - r.insets.bottom) > 8 ||
+            Math.abs(top - r.insets.top) > 8;
+          r.insets = { right: e.right, bottom: e.bottom, top };
           // A panel opened, closed or resized: re-frame so the subject sits in the visible part, unless the visitor
           // has taken the camera since the view was framed.
           const mode = store.get().mode;
@@ -756,7 +761,7 @@ export function CameraRig() {
     if (camera instanceof THREE.PerspectiveCamera) {
       const kx = dampFactor(reduced ? 30 : 6, dt);
       r.offset.x += (r.insets.right / 2 - r.offset.x) * kx;
-      r.offset.y += (r.insets.bottom / 2 - r.offset.y) * kx;
+      r.offset.y += ((r.insets.bottom - r.insets.top) / 2 - r.offset.y) * kx;
       const w = size.width;
       const h = size.height;
       if (Math.abs(r.offset.x) > 0.5 || Math.abs(r.offset.y) > 0.5)
