@@ -3,6 +3,7 @@ import { useEffect, useMemo } from 'react';
 import {
   Color,
   CylinderGeometry,
+  Float32BufferAttribute,
   IcosahedronGeometry,
   InstancedMesh,
   Matrix4,
@@ -16,36 +17,52 @@ import type { SharedUniforms } from '../environment/palette.ts';
 import { hex } from '../environment/presets.ts';
 import { rng } from './grid.ts';
 
-const GREENS = ['#5fa04e', '#6cae55', '#4f8f44', '#78b35c', '#5a9a4a', '#64a852'];
+const GREENS = ['#4f8a3e', '#5c9846', '#457c38', '#6a9f4c', '#527f3a', '#5f9343', '#3f7236'];
 
 /** A lumpy crown of three blobs, so a tree reads as foliage rather than a ball. */
 function crownGeometry(): BufferGeometry {
+  // Seven overlapping leaf clusters, slightly irregular, with baked ambient occlusion (darker inside and below).
   const blobs: BufferGeometry[] = [];
   const r = rng(5);
-  for (const [x, y, z, s, detail] of [
-    [0, 1.75, 0, 0.8, 1],
-    [0.35, 1.5, 0.15, 0.6, 0],
-    [-0.3, 1.55, -0.2, 0.62, 0],
-  ] as const) {
-    const ico = new IcosahedronGeometry(s, detail);
+  const clusters: [number, number, number, number][] = [
+    [0, 1.95, 0, 0.62],
+    [0.42, 1.7, 0.12, 0.5],
+    [-0.38, 1.72, -0.18, 0.52],
+    [0.1, 1.62, 0.44, 0.48],
+    [-0.12, 1.6, -0.46, 0.46],
+    [0.28, 2.2, -0.2, 0.42],
+    [-0.25, 2.18, 0.22, 0.4],
+  ];
+  clusters.forEach(([x, y, z, s], ci) => {
+    // The main cluster is rounder; the small ones stay coarse (they read as leaf masses, and keep triangles low).
+    const ico = new IcosahedronGeometry(s, ci === 0 ? 1 : 0);
     ico.deleteAttribute('normal');
     ico.deleteAttribute('uv');
     // Welded so the crown shades smoothly instead of faceted.
     const g = mergeVertices(ico);
     const p = g.getAttribute('position');
+    const col: number[] = [];
     for (let i = 0; i < p.count; i++) {
-      const k = 0.88 + r() * 0.24;
-      p.setXYZ(i, p.getX(i) * k + x, p.getY(i) * k * 0.9 + y, p.getZ(i) * k + z);
+      const k = 0.85 + r() * 0.3;
+      const px = p.getX(i) * k + x;
+      const py = p.getY(i) * k * 0.92 + y;
+      const pz = p.getZ(i) * k + z;
+      p.setXYZ(i, px, py, pz);
+      const out = Math.min(1, Math.hypot(px, pz) / 0.9);
+      const up = Math.min(1, Math.max(0, (py - 1.2) / 1.3));
+      const ao = 0.45 + 0.35 * up + 0.2 * out;
+      col.push(ao, ao, ao);
     }
+    g.setAttribute('color', new Float32BufferAttribute(col, 3));
     g.computeVertexNormals();
     blobs.push(g.toNonIndexed());
-  }
+  });
   return mergeGeometries(blobs);
 }
 
 /** Wind sway in the vertex shader: amplitude grows with height; each tree has its own phase. */
-function swayMaterial(color: string, shared: SharedUniforms, flat = false) {
-  const m = new MeshStandardMaterial({ color, roughness: 0.9, flatShading: flat });
+function swayMaterial(color: string, shared: SharedUniforms, baked = false) {
+  const m = new MeshStandardMaterial({ color, roughness: 0.85, vertexColors: baked });
   m.onBeforeCompile = shader => {
     shader.uniforms.uTime = shared.uTime;
     shader.uniforms.uMotion = shared.uMotion;
@@ -72,7 +89,7 @@ function swayMaterial(color: string, shared: SharedUniforms, flat = false) {
         }`,
       );
   };
-  m.customProgramCacheKey = () => `a1-sway-${flat}`;
+  m.customProgramCacheKey = () => `a1-sway-${baked}`;
   return m;
 }
 
@@ -90,7 +107,7 @@ export function Trees({
     const n = Math.max(1, items.length);
     const trunkGeo = new CylinderGeometry(0.07, 0.11, 1.3, 6).translate(0, 0.65, 0);
     const trunk = new InstancedMesh(trunkGeo, swayMaterial('#5a4634', shared), n);
-    const crown = new InstancedMesh(crownGeometry(), swayMaterial('#ffffff', shared), n);
+    const crown = new InstancedMesh(crownGeometry(), swayMaterial('#ffffff', shared, true), n);
     const m = new Matrix4();
     const q = new Quaternion();
     const p = new Vector3();

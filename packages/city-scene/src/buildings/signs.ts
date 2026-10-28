@@ -16,7 +16,15 @@ const WIDTH = 1024;
  * Every building sign drawn as text into one canvas atlas (text set with fillText, never parsed as markup) and
  * merged into a single mesh: one texture, one draw call. Signs glow softly at night via the emissive map.
  */
-export function buildSigns(signs: SignSpec[]): { mesh: Mesh; material: MeshStandardMaterial } {
+export interface SignMesh {
+  mesh: Mesh;
+  material: MeshStandardMaterial;
+  /** Per building (by index): eased explode gap, set each frame; and its lobby level. */
+  explode: { value: number[] };
+}
+
+export function buildSigns(signs: SignSpec[], buildings: { key: string; lobby: number }[]): SignMesh {
+  const bIndex = new Map(buildings.map((b, i) => [b.key, i]));
   const rows = Math.max(1, signs.length);
   const height = 2 ** Math.ceil(Math.log2(rows * ROW));
   const canvas = document.createElement('canvas');
@@ -27,6 +35,8 @@ export function buildSigns(signs: SignSpec[]): { mesh: Mesh; material: MeshStand
   const uv: number[] = [];
   const nor: number[] = [];
   const idx: number[] = [];
+  const bld: number[] = [];
+  const lvl: number[] = [];
   signs.forEach((s, i) => {
     const cellW = Math.min(WIDTH, Math.round((ROW * s.w) / s.h));
     const y0 = i * ROW;
@@ -67,6 +77,8 @@ export function buildSigns(signs: SignSpec[]): { mesh: Mesh; material: MeshStand
       pos.push(s.x + ax * hw * sx, s.y + hh * sy, s.z + az * hw * sx);
       uv.push(u, v);
       nor.push(nx, 0, nz);
+      bld.push(bIndex.get(s.b ?? '') ?? 0);
+      lvl.push(s.lv);
     }
     idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
   });
@@ -74,6 +86,8 @@ export function buildSigns(signs: SignSpec[]): { mesh: Mesh; material: MeshStand
   geo.setAttribute('position', new Float32BufferAttribute(pos, 3));
   geo.setAttribute('uv', new Float32BufferAttribute(uv, 2));
   geo.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  geo.setAttribute('aBld', new Float32BufferAttribute(bld, 1));
+  geo.setAttribute('aLv', new Float32BufferAttribute(lvl, 1));
   geo.setIndex(idx);
   geo.computeBoundingSphere();
   const tex = new CanvasTexture(canvas);
@@ -92,5 +106,31 @@ export function buildSigns(signs: SignSpec[]): { mesh: Mesh; material: MeshStand
   });
   const mesh = new Mesh(geo, material);
   mesh.receiveShadow = true;
-  return { mesh, material };
+  // Exploded floors: each sign rises with its floor (same rule as floorOffset).
+  const n = Math.max(1, buildings.length);
+  const explode = { value: new Array<number>(n).fill(0) };
+  const lobby = { value: buildings.map(b => b.lobby) };
+  material.onBeforeCompile = shader => {
+    shader.uniforms.uExplode = explode;
+    shader.uniforms.uLobby = lobby;
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+        attribute float aBld;
+        attribute float aLv;
+        uniform float uExplode[${n}];
+        uniform float uLobby[${n}];`,
+      )
+      .replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+        {
+          int bi = int(aBld + 0.5);
+          transformed.y += max(aLv - uLobby[bi], 0.0) * uExplode[bi];
+        }`,
+      );
+  };
+  material.customProgramCacheKey = () => `a1-signs-${n}`;
+  return { mesh, material, explode };
 }

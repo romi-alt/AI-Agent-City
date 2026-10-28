@@ -21,11 +21,10 @@ export const QUALITY: Record<QualityLevel, QualityBudget> = {
   ultra: {
     dpr: [1, 2],
     shadows: true,
-    shadowMapSize: 2048,
-    // Off: three applies fog after tone mapping in its own shaders, but a postprocessing chain tone-maps at the
-    // end, after fog, so the haze (and the whole city) read brighter and flatter on ultra than on balanced.
-    // MSAA (antialias) covers edges. Turn on only together with a fog-before-tone-mapping fix for every material.
-    postprocessing: false,
+    shadowMapSize: 4096,
+    // Ambient occlusion (N8AO), SMAA and tone mapping in a composer. Balanced uses the same chain (so both look
+    // alike; fog is only at the far horizon, where the fog/tone-mapping order no longer shows).
+    postprocessing: true,
     vehicles: 90,
     pedestrians: 160,
     birds: 60,
@@ -39,8 +38,8 @@ export const QUALITY: Record<QualityLevel, QualityBudget> = {
   balanced: {
     dpr: [1, 1.5],
     shadows: true,
-    shadowMapSize: 1024,
-    postprocessing: false,
+    shadowMapSize: 2048,
+    postprocessing: true,
     vehicles: 50,
     pedestrians: 80,
     birds: 30,
