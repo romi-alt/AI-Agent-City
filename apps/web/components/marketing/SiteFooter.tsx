@@ -1,5 +1,5 @@
 import { CtaLink, Mark } from './Primitives';
-import { PUBLIC_PREVIEW } from '../../lib/preview';
+import { CONTACT_EMAIL, PUBLIC_PREVIEW } from '../../lib/preview';
 
 export function SiteFooter({ contactEmail }: { contactEmail?: string }) {
   return (
@@ -7,20 +7,20 @@ export function SiteFooter({ contactEmail }: { contactEmail?: string }) {
       <div className="mk-container">
         <section className="mk-contact" id="contact" aria-labelledby="contact-title">
           <h2 id="contact-title" className="mk-contact-title">
-            See the work. Meet the team. Find your next step.
+            See how your next team could work.
           </h2>
           <p className="mk-body">
-            Explore a sample office and picture how your business could organize its daily follow-up.
-            {contactEmail && (
-              <>
-                {' '}
-                Questions first? Write to <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
-              </>
-            )}
+            Explore the office, meet the AI personas and picture a clearer way to manage your daily opportunities.
           </p>
           <CtaLink href="#get-demo" variant="secondary" size="sm" testId="footer-cta-demo">
             Get My Free Demo Office
           </CtaLink>
+          <p className="mk-note">
+            Questions about setup?{' '}
+            <a href={`mailto:${contactEmail ?? CONTACT_EMAIL}?subject=${encodeURIComponent('Setup question')}`}>
+              {contactEmail ?? CONTACT_EMAIL}
+            </a>
+          </p>
           <p className="mk-note">Free demo · Email-link access · Simulated activity</p>
         </section>
         <div className="mk-footer-base">

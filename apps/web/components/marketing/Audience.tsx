@@ -4,20 +4,20 @@ export function Audience() {
   const items = [
     {
       name: 'Dealerships',
-      text: 'Bring sales inquiries, ownership follow-up and service tasks into a shared view of the next steps.',
+      text: 'Organize vehicle inquiries, buyer follow-up and service-related tasks in one view.',
     },
     {
       name: 'Training businesses',
-      text: 'Organize enrollment inquiries, student questions, class reminders and content planning.',
+      text: 'Bring enrollment inquiries, student questions, class reminders and course content together.',
     },
     {
       name: 'Agencies',
-      text: 'Explore a workspace that gives each client and team a clear place to work.',
+      text: 'Explore a clearer way to organize client work, responsibilities and approvals.',
       roadmap: 'White-label',
     },
     {
       name: 'Other businesses',
-      text: 'Try the sample office and see how the structure could fit your customer and team workflows.',
+      text: 'Try a sample office and see how the structure fits your customers, team and daily priorities.',
     },
   ];
   return (
@@ -26,8 +26,8 @@ export function Audience() {
         <SectionHead
           id="who-title"
           eyebrow="Who it’s for"
-          title="Built around the way your teams work."
-          lead="Start with the workflow that matters to your business, then explore how it fits into your office."
+          title="Built around the work your business does."
+          lead="Start with the conversations and tasks that matter most to your team."
         />
         <ul className="mk-audience-grid">
           {items.map(it => (

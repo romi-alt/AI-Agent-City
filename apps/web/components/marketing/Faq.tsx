@@ -1,38 +1,50 @@
 import { SectionHead } from './Primitives';
-import { CONTACT_EMAIL, LITE_DEMO } from '../../lib/preview';
+import { LITE_DEMO } from '../../lib/preview';
 
 export function Faq({ ttlDays }: { ttlDays: number }) {
   const items = [
     [
       'Is the demo free?',
-      'Yes. You can explore the sample office without a payment card. A business email is required to receive your access link.',
+      'Yes. You can explore a sample office without a credit card. Access is provided through an email link, and the demo expires automatically.',
     ],
     [
       'What can I explore?',
-      'A sample office with AI personas, assigned roles, example tasks and work awaiting review. The activity and customer information are simulated.',
+      'A virtual workspace with AI personas, sample tasks and approval examples. It lets you see how the team and its responsibilities could fit your business.',
     ],
-    ['Will an agent contact my customers?', 'No. Demo agents cannot send messages or contact anyone.'],
+    ['Will an agent contact my customers?', 'No. The demo uses simulated activity and cannot send customer messages.'],
     [
-      'Can I connect my CRM or business accounts?',
-      `The demo is a sample environment. Live connections depend on the integrations currently available. Tell us which tools you use so we can confirm what is supported: write to ${CONTACT_EMAIL}.`,
+      'Can I connect GoHighLevel or other business tools?',
+      'Connections are part of the proposed live setup and must be scoped before launch. The public demo does not activate CRM or business-account integrations.',
     ],
     [
       'Can agents publish content or book appointments?',
-      'Social publishing, calendar booking and sending through connected business accounts are listed on the roadmap. The demo lets you explore sample workflows.',
+      'These are planned connected workflows. They are not active in the public demo, and availability must be confirmed for your live setup.',
+    ],
+    [
+      'What does the full setup cost?',
+      'The proposed Full Office Setup is $1,200 one time. Ongoing operation is separate at approximately $800 per month. Final scope and currency are confirmed in your quote.',
+    ],
+    [
+      'What is included in the monthly estimate?',
+      'The estimate combines a $399 monthly full-team office service with approximately $400 for AI usage, automations and hosting. Actual usage varies.',
+    ],
+    [
+      'Does the setup payment replace the monthly fee?',
+      'No. The setup payment covers initial configuration. The monthly service covers ongoing operation of the agreed office and workflows.',
+    ],
+    [
+      'Are there additional costs?',
+      'Advertising spend, GoHighLevel call minutes and SMS are separate. Any sales commission or partner revenue share must be agreed in writing.',
+    ],
+    [
+      'What happens after the demo?',
+      'We review your workflows, confirm the available integrations and agree on scope, pricing and a launch plan before setup begins.',
     ],
     [
       'How long will I have access?',
       LITE_DEMO
         ? 'The demo expires automatically. Your office shows the date it is available until.'
         : `The demo expires automatically, after ${ttlDays} days.`,
-    ],
-    [
-      'What happens after the demo?',
-      `Use the demo to identify the workflows you would like to support. Write to ${CONTACT_EMAIL} to discuss available capabilities and next steps.`,
-    ],
-    [
-      'What does a live setup cost?',
-      `The demo is free. Write to ${CONTACT_EMAIL} to request current pricing for the capabilities and scope you need.`,
     ],
     [
       'Why don’t I need a password?',

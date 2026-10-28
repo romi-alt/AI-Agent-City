@@ -1,4 +1,4 @@
-import { TRAINING_DIRECTORY, TRAINING_NAME } from './cityFacts';
+import { TRAINING_DIRECTORY } from './cityFacts';
 import { Icon, Tag } from './Primitives';
 
 // Monochrome product mocks, drawn as real UI (not illustrations). Every one is labelled "Sample": the data is made
@@ -11,7 +11,19 @@ const STATUS: Record<string, { label: string; tone: 'busy' | 'wait' | 'idle' | '
   content: { label: 'Planning week 2', tone: 'busy' },
   ads: { label: 'Between tasks', tone: 'idle' },
   students: { label: 'Class reminders', tone: 'busy' },
+  dealers: { label: 'Between tasks', tone: 'idle' },
   'dealer partnerships': { label: 'Between tasks', tone: 'idle' },
+};
+
+/** What each sample persona is for. Illustrative only: a row here does not mean the agent is a working feature. */
+const ROLE_TEXT: Record<string, string> = {
+  Max: 'Team coordination and daily priorities',
+  Vera: 'Lead qualification and sales preparation',
+  Nico: 'Follow-up and re-engagement',
+  Luna: 'Content ideas and campaign planning',
+  Teo: 'Advertising and funnel planning',
+  Iris: 'Student and customer support',
+  Dante: 'Dealer and business partnerships',
 };
 
 function MockFrame({ title, meta, children }: { title: string; meta: string; children: React.ReactNode }) {
@@ -31,9 +43,9 @@ function MockFrame({ title, meta, children }: { title: string; meta: string; chi
 /** The agents on the Training Center's top floor, from the public layout. */
 export function AgentDeskMock() {
   const top = TRAINING_DIRECTORY[0];
-  const agents = (top?.agents ?? []).filter(a => a.name).slice(0, 6);
+  const agents = (top?.agents ?? []).filter(a => a.name).slice(0, 7);
   return (
-    <MockFrame title={`L${top?.level ?? 12} · ${top?.name ?? 'Admin / CEO'}`} meta={TRAINING_NAME}>
+    <MockFrame title={`L${top?.level ?? 12} · ${top?.name ?? 'Admin / CEO'}`} meta="Illustrative sample team">
       <ul className="mk-agents">
         {agents.map(a => {
           const s = STATUS[a.role] ?? { label: 'Working', tone: 'busy' as const };
@@ -44,7 +56,7 @@ export function AgentDeskMock() {
               </span>
               <span className="mk-agent-name">
                 {a.name}
-                <span className="mk-agent-role">{a.role === 'CEO' ? 'CEO' : a.role}</span>
+                <span className="mk-agent-role">{ROLE_TEXT[a.name!] ?? a.role}</span>
               </span>
               <span className={`mk-status mk-status-${s.tone}`}>
                 <span className="mk-status-dot" aria-hidden="true" />

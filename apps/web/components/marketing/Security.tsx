@@ -46,8 +46,8 @@ export function Security() {
         <SectionHead
           id="security-title"
           eyebrow="Security and control"
-          title="Clear responsibilities. Visible control."
-          lead="Understand who can access the work, what needs approval and how the demo behaves. AgentCity holds no security certification today, and we don’t imply one."
+          title="Clear access. Visible decisions."
+          lead="Know who can enter your workspace, what needs your review and how the demo behaves. AgentCity holds no security certification today, and we don’t imply one."
         />
         <ul className="mk-security">
           {POINTS.map(p => (

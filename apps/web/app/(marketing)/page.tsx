@@ -4,6 +4,7 @@ import { Faq } from '../../components/marketing/Faq';
 import { GetDemo } from '../../components/marketing/GetDemo';
 import { Hero } from '../../components/marketing/Hero';
 import { HowItWorks } from '../../components/marketing/HowItWorks';
+import { Pricing } from '../../components/marketing/Pricing';
 import { Product } from '../../components/marketing/Product';
 import { Security } from '../../components/marketing/Security';
 import { SiteFooter } from '../../components/marketing/SiteFooter';
@@ -11,9 +12,9 @@ import { CONTACT_EMAIL } from '../../lib/preview';
 
 // Owner: workstream B. The public landing page: static, rendered at build time.
 
-const TITLE = 'AgentCity: Your Business. Your AI Team. Your City.';
+const TITLE = 'AgentCity | Your Business. Your AI Team. One Clear View.';
 const DESCRIPTION =
-  'Bring customer follow-up, content planning and daily priorities into one visible workspace. Meet your AI team and get a free sample office. Demo activity is simulated.';
+  'Explore a virtual AI office for sales, follow-up and content planning. Try a free simulated demo and view one-time setup and monthly service pricing.';
 
 // Not launched yet: the landing page may be indexed only when the deployment opts in.
 const allowIndex = process.env.NEXT_PUBLIC_ALLOW_INDEX === 'true';
@@ -52,6 +53,7 @@ export default function LandingPage() {
         <Product />
         <Audience />
         <Security />
+        <Pricing />
         <GetDemo ttlDays={ttlDays} />
         <Faq ttlDays={ttlDays} />
       </main>

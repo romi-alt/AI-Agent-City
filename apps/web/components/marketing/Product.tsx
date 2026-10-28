@@ -14,45 +14,45 @@ const ROWS: {
 }[] = [
   {
     key: 'teams',
-    eyebrow: 'Team visibility',
-    title: 'Know who owns the next move.',
-    text: 'See the team’s work without chasing separate updates. Each agent has a defined role, a visible status and a place to review its tasks.',
+    eyebrow: 'Meet your AI team',
+    title: 'Clear roles. Shared priorities.',
+    text: 'Explore a team organized around the work that keeps your business moving: sales conversations, follow-up, content, customer care and partnerships. Max brings the priorities together so you can see where your attention matters.',
     points: [
-      'See responsibility at a glance.',
-      'Find work waiting for your input.',
-      'Review daily priorities in one place.',
+      'See who is responsible for each task.',
+      'Review progress without chasing updates.',
+      'Bring questions and approvals into one place.',
     ],
     mock: <AgentDeskMock />,
   },
   {
     key: 'work',
-    eyebrow: 'Practical workflows',
-    title: 'Put the next customer conversation in view.',
-    text: 'A new inquiry, a customer considering their options, a lease approaching its end: each creates work worth tracking. Explore how an AI team can organize that work and prepare the next step for review.',
+    eyebrow: 'From interest to the next step',
+    title: 'Keep good opportunities moving.',
+    text: 'A new inquiry needs a reply. An undecided buyer needs a thoughtful follow-up. A future student needs a clear path to enrollment. Bring those moments into view so your team can prepare the next step.',
     points: [
-      'Draft responses to new website inquiries and follow-ups for prospects who need more time.',
-      'Service reminders and a daily report that highlights your decisions.',
-      'Give your content a clear purpose: review ideas, captions and campaign plans that invite the next inquiry.',
+      'Prepare relevant replies and follow-up drafts.',
+      'Organize customer questions and class reminders.',
+      'Plan content that gives people a reason to get in touch.',
     ],
     note: (
       <>
-        <Tag tone="roadmap">Roadmap</Tag> Sending through connected business accounts, social publishing and calendar
-        booking.
+        <Tag tone="roadmap">Roadmap</Tag> Planned integrations: connected messaging, CRM workflows, social publishing
+        and calendar booking. Availability is confirmed during setup.
       </>
     ),
     mock: <TaskListMock />,
   },
   {
     key: 'control',
-    eyebrow: 'Approvals',
-    title: 'Your team prepares. You decide.',
-    text: 'See the draft and the reason behind it before choosing the next step. Review the wording, request a change or approve the work.',
+    eyebrow: 'You stay in control',
+    title: 'Your team prepares. You make the call.',
+    text: 'Review the draft, understand the context and decide what happens next. Keep your judgment close to the work, especially when a message, offer or campaign needs your approval.',
     points: [
-      'Clear requests for your attention.',
-      'Drafts you can inspect before a decision.',
-      'Visible status for work awaiting review.',
+      'Inspect prepared work before approving it.',
+      'Request changes when the details need attention.',
+      'See which decisions are still waiting.',
     ],
-    note: 'Demo agents cannot send messages or contact customers.',
+    note: 'Demo approvals are simulated and do not send messages.',
     mock: <ApprovalMock />,
   },
 ];

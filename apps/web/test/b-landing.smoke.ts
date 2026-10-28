@@ -82,7 +82,7 @@ async function open(
 
 test('the landing page renders its headline and calls to action without console errors', async () => {
   const { page, errors } = await open();
-  assert.match(await page.textContent('h1'), /Give every\s*opportunity\s*a next step\./);
+  assert.match(await page.textContent('h1'), /Your business\.\s*Your AI team\.\s*One clear view\./);
   assert.equal(await page.locator('h1').count(), 1, 'exactly one h1');
   assert.match(await page.textContent('[data-testid=hero-cta-demo]'), /Get My Free Demo Office/);
   assert.match(await page.textContent('[data-testid=hero-cta-city]'), /Explore the City/);

@@ -678,7 +678,6 @@ html:has(.mk) {
   font-weight: 400;
   font-size: var(--fs-xs);
   color: var(--c-muted);
-  text-transform: capitalize;
 }
 .mk-status {
   display: inline-flex;
@@ -1140,4 +1139,61 @@ html:has(.mk) {
 .mk-coming-soon-text {
   margin: 0 0 var(--s-1);
   color: var(--text-muted);
+}
+
+/* ---------- Pricing ---------- */
+.mk-text-link {
+  color: var(--c-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.mk-pricing-grid {
+  display: grid;
+  gap: var(--s-4);
+  margin-top: var(--s-6);
+}
+.mk-price-card {
+  display: grid;
+  align-content: start;
+  gap: var(--s-2);
+  padding: clamp(20px, 3vw, 36px);
+  border-radius: 24px;
+  border: 1px solid var(--rule);
+  background: var(--c-white);
+  box-shadow: var(--shadow-card);
+}
+.mk-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+}
+.mk-price-amount {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--c-ink);
+}
+.mk-price-suffix {
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
+}
+.mk-price-card .mk-btn {
+  justify-self: start;
+  margin-top: var(--s-1);
+}
+.mk-pricing-notes {
+  display: grid;
+  gap: var(--s-1);
+  margin-top: var(--s-5);
+}
+.mk-pricing-together {
+  font-weight: 600;
+  color: var(--c-ink);
+}
+@media (min-width: 900px) {
+  .mk-pricing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-6);
+  }
 }

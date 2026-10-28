@@ -11,13 +11,13 @@ export function GetDemo({ ttlDays }: { ttlDays: number }) {
       <div className="mk-container">
         <div className="mk-demo-card" data-reveal>
           <div className="mk-demo-copy" id="demo-walkthrough">
-            <p className="mk-eyebrow">Free demo</p>
+            <p className="mk-eyebrow">Start with a free demo</p>
             <h2 id="get-demo-title" className="mk-h2">
-              See your next workspace in action.
+              Step inside your future workspace.
             </h2>
             <p className="mk-lead">
-              Open a private sample office, meet the AI personas and explore the tasks waiting on their desks. See how
-              the workflow fits your business before discussing a live setup.
+              Meet the AI personas, explore their desks and review sample tasks. See how the office feels before
+              discussing a live setup for your business.
             </p>
             <ol className="mk-demo-steps">
               {steps.map((s, i) => (
@@ -29,9 +29,8 @@ export function GetDemo({ ttlDays }: { ttlDays: number }) {
             </ol>
             <p className="mk-footnote">
               {LITE_DEMO
-                ? 'No card required. No password to remember. The sample office expires automatically.'
-                : `No card required. No password to remember. The sample office lasts ${ttlDays} days, then it is removed.`}{' '}
-              Everything inside is simulated, and demo agents can&rsquo;t contact anyone.
+                ? 'No card required. No password to create. Your sample office expires automatically. All activity is simulated.'
+                : `No card required. No password to create. Your sample office lasts ${ttlDays} days, then it is removed. All activity is simulated.`}
             </p>
           </div>
           <div className="mk-demo-form">
