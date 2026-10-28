@@ -10,7 +10,7 @@ import { createLifeClock, type LifeClock } from './clock.ts';
 import { Details } from './details/Details.tsx';
 import { useLifeEnv } from './env-adapter.ts';
 import { People } from './people/People.tsx';
-import { StreetSim } from './street-sim.ts';
+import { cityLifeCounts, StreetSim } from './street-sim.ts';
 import { Traffic } from './traffic/Traffic.tsx';
 
 /** Simulated seconds run before the first frame, so the streets start mid-flow. */
@@ -38,6 +38,12 @@ function Stepper({ sim, clock, animate }: { sim: StreetSim; clock: LifeClock; an
 function LifeDebug() {
   const store = useStore();
   const scene = useThree(s => s.scene);
+  // Also frame before the life systems run (negative priority keeps automatic rendering), so their camera-based
+  // culling and level of detail see the scripted camera, not the rig's.
+  useFrame(state => {
+    const debug = (window as unknown as { __life?: { frame?: (scene: unknown, camera: unknown) => void } }).__life;
+    debug?.frame?.(state.scene, state.camera);
+  }, -500);
   useEffect(() => {
     const debug: { scene: unknown; frame?: (scene: unknown, camera: unknown) => void } = { scene };
     (window as unknown as { __life?: unknown }).__life = debug;
@@ -71,10 +77,11 @@ export function Life() {
   const clock = useMemo(() => createLifeClock(), []);
   const roofWorkers = budget.microAnimations ? 1 : 0;
   const sim = useMemo(() => {
-    const s = new StreetSim(layout, { vehicles: budget.vehicles, pedestrians: budget.pedestrians, roofWorkers });
+    const s = new StreetSim(layout, { ...cityLifeCounts(budget), roofWorkers });
     s.warmUp(WARM_UP);
     return s;
-  }, [layout, budget.vehicles, budget.pedestrians, roofWorkers]);
+    // The budget object is a constant per quality level.
+  }, [layout, budget, roofWorkers]);
   const animate = !paused && !reduced;
   return (
     <group name="life">

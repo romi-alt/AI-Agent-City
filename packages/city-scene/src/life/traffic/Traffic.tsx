@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import type { LifeEnv } from '../env-adapter.ts';
 import { ROAD_Y } from '../geometry.ts';
-import { hideInstance, instanceAttr, Placer } from '../mesh-utils.ts';
+import { instanceAttr, Placer } from '../mesh-utils.ts';
 import { createRng } from '../rng.ts';
 import type { StreetSim } from '../street-sim.ts';
 import { VEHICLE_KINDS, type VehicleKind } from './sim.ts';
@@ -77,33 +77,59 @@ function poolTexture() {
   return t;
 }
 
-/** Vehicles: one instanced mesh per kind (per-instance paint), plus additive headlight pools at night. */
+/** Beyond this distance from the camera a vehicle is drawn with the low-detail model (no rims, bevels, trims). */
+const NEAR = 70;
+/** Vehicles farther than this are lost in the fog (and a few pixels long), so they are not drawn at all. */
+const FAR = 420;
+
+interface Lod {
+  mesh: THREE.InstancedMesh;
+  state: THREE.InstancedBufferAttribute;
+  /** Per-vehicle paint, copied into the instance slot it gets this frame. */
+  paint: Map<number, THREE.Color>;
+  n: number;
+}
+
+function lodMesh(kind: VehicleKind, detail: VehicleDetail, material: THREE.Material, count: number, name: string) {
+  const mesh = new THREE.InstancedMesh(vehicleGeometry(kind, detail), material, count);
+  mesh.name = name;
+  mesh.frustumCulled = false;
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  const state = instanceAttr(mesh, 'iState', 4);
+  mesh.setColorAt(0, new THREE.Color());
+  mesh.instanceColor!.setUsage(THREE.DynamicDrawUsage);
+  return { mesh, state, paint: new Map<number, THREE.Color>(), n: 0 };
+}
+
+/**
+ * Vehicles, instanced per kind and level of detail: full models near the camera (casting shadows), low-detail ones
+ * farther out, none beyond the fog or outside the view. Instances are packed every frame so only drawn vehicles
+ * cost anything. Additive headlight pools follow the near vehicles at night.
+ */
 export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
   const vehicles = sim.traffic.vehicles;
   const built = useMemo(() => {
     const uniforms = { uNight: { value: 0 }, uTime: { value: 0 } };
     const material = vehicleMaterial(uniforms);
     const rng = createRng(99);
-    const meshes = new Map<VehicleKind, THREE.InstancedMesh>();
-    const slot: number[] = [];
-    const color = new THREE.Color();
+    const near = new Map<VehicleKind, Lod>();
+    const far = new Map<VehicleKind, Lod>();
+    const paint: THREE.Color[] = [];
+    const beacon: number[] = [];
     for (const kind of VEHICLE_KINDS) {
       const ofKind = vehicles.filter(v => v.kind === kind);
       if (!ofKind.length) continue;
-      const mesh = new THREE.InstancedMesh(vehicleGeometry(kind, detail), material, ofKind.length);
-      mesh.name = `life-vehicles-${kind}`;
-      mesh.frustumCulled = false;
-      mesh.castShadow = shadows;
-      mesh.receiveShadow = shadows;
-      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      instanceAttr(mesh, 'iState', 4);
-      ofKind.forEach((v, i) => {
-        slot[v.id] = i;
+      const n = ofKind.length;
+      const a = lodMesh(kind, detail, material, n, `life-vehicles-${kind}`);
+      a.mesh.castShadow = shadows;
+      a.mesh.receiveShadow = shadows;
+      near.set(kind, a);
+      if (detail !== 'low') far.set(kind, lodMesh(kind, 'low', material, n, `life-vehicles-${kind}-far`));
+      for (const v of ofKind) {
         const paints = PAINTS[kind];
-        mesh.setColorAt(i, color.set(paints[Math.floor(rng() * paints.length)]!));
-        (mesh.geometry.getAttribute('iState') as THREE.InstancedBufferAttribute).setY(i, rng());
-      });
-      meshes.set(kind, mesh);
+        paint[v.id] = new THREE.Color(paints[Math.floor(rng() * paints.length)]!);
+        beacon[v.id] = rng();
+      }
     }
     const poolMat = new THREE.MeshBasicMaterial({
       map: poolTexture(),
@@ -118,12 +144,12 @@ export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
     poolMesh.name = 'life-headlight-pools';
     poolMesh.frustumCulled = false;
     poolMesh.renderOrder = 2;
-    return { meshes, slot, uniforms, material, poolMesh, poolMat };
+    return { near, far, paint, beacon, uniforms, material, poolMesh, poolMat };
   }, [vehicles, shadows, detail]);
 
   useEffect(
     () => () => {
-      for (const m of built.meshes.values()) m.geometry.dispose();
+      for (const l of [...built.near.values(), ...built.far.values()]) l.mesh.geometry.dispose();
       built.material.dispose();
       built.poolMesh.geometry.dispose();
       built.poolMat.map?.dispose();
@@ -132,41 +158,56 @@ export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
     [built],
   );
 
-  const placer = useMemo(() => new Placer(), []);
+  const tmp = useMemo(
+    () => ({ placer: new Placer(), frustum: new THREE.Frustum(), m: new THREE.Matrix4(), sphere: new THREE.Sphere() }),
+    [],
+  );
   useFrame(state => {
+    const { near, far, poolMesh } = built;
     built.uniforms.uNight.value = env.nightFactor;
     if (animate) built.uniforms.uTime.value = state.clock.elapsedTime;
     built.poolMat.opacity = pools ? Math.max(0, env.nightFactor - 0.25) * 0.75 : 0;
-    built.poolMesh.visible = built.poolMat.opacity > 0.01;
+    poolMesh.visible = built.poolMat.opacity > 0.01;
+    const cam = state.camera as unknown as THREE.Camera;
+    tmp.frustum.setFromProjectionMatrix(tmp.m.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse));
+    const cx = cam.position.x;
+    const cy = cam.position.y;
+    const cz = cam.position.z;
+    for (const l of near.values()) l.n = 0;
+    for (const l of far.values()) l.n = 0;
+    let poolCount = 0;
     for (const v of vehicles) {
-      const mesh = built.meshes.get(v.kind)!;
-      const i = built.slot[v.id]!;
       const fade = v.active ? sim.traffic.edgeFade(v) : 0;
-      if (fade <= 0) {
-        hideInstance(mesh, i);
-        hideInstance(built.poolMesh, v.id);
-        continue;
-      }
-      const m = placer.set(v.pose.x, ROAD_Y, v.pose.z, v.pose.yaw);
-      mesh.setMatrixAt(i, m);
-      built.poolMesh.setMatrixAt(v.id, placer.set(v.pose.x, ROAD_Y + 0.02, v.pose.z, v.pose.yaw, fade));
-      const state = mesh.geometry.getAttribute('iState') as THREE.InstancedBufferAttribute;
+      if (fade <= 0) continue;
+      const d = Math.hypot(v.pose.x - cx, cy, v.pose.z - cz);
+      if (d > FAR) continue;
+      // Near vehicles keep a margin outside the view, so their shadows still fall into it.
+      tmp.sphere.center.set(v.pose.x, ROAD_Y + 0.5, v.pose.z);
+      tmp.sphere.radius = d < NEAR ? 6 : 2.5;
+      if (!tmp.frustum.intersectsSphere(tmp.sphere)) continue;
+      const lod = (d < NEAR ? near : far).get(v.kind) ?? near.get(v.kind)!;
+      const i = lod.n++;
+      lod.mesh.setMatrixAt(i, tmp.placer.set(v.pose.x, ROAD_Y, v.pose.z, v.pose.yaw));
+      lod.mesh.setColorAt(i, built.paint[v.id]!);
       const turn = 2 * Math.PI * WHEEL_RADIUS[v.kind];
-      state.setX(i, v.brake);
-      state.setZ(i, v.odo % turn);
-      state.setW(i, fade);
+      lod.state.setXYZW(i, v.brake, built.beacon[v.id]!, v.odo % turn, fade);
+      if (d < NEAR && poolMesh.visible)
+        poolMesh.setMatrixAt(poolCount++, tmp.placer.set(v.pose.x, ROAD_Y + 0.02, v.pose.z, v.pose.yaw, fade));
     }
-    for (const mesh of built.meshes.values()) {
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.geometry.getAttribute('iState').needsUpdate = true;
+    for (const l of [...near.values(), ...far.values()]) {
+      l.mesh.count = l.n;
+      l.mesh.instanceMatrix.needsUpdate = true;
+      l.mesh.instanceColor!.needsUpdate = true;
+      l.state.needsUpdate = true;
     }
-    built.poolMesh.instanceMatrix.needsUpdate = true;
+    poolMesh.count = poolCount;
+    poolMesh.instanceMatrix.needsUpdate = true;
   });
 
   return (
     <group name="life-traffic">
-      {[...built.meshes.values()].map(m => (
-        <primitive key={m.name} object={m} />
+      {[...built.near.values(), ...built.far.values()].map(l => (
+        <primitive key={l.mesh.name} object={l.mesh} />
       ))}
       {pools && <primitive object={built.poolMesh} />}
     </group>
