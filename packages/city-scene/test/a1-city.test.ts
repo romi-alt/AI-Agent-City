@@ -29,10 +29,10 @@ describe('district plan', () => {
     assert.equal(SIDEWALK, 2.7);
   });
 
-  it('is the layout grid closed by a parkway, with exactly the 15 lots and a central plaza', () => {
+  it('continues the layout grid to the horizon, with exactly the 15 lots, one plaza and one small park', () => {
     for (const r of layout.streets.roadsX) assert.ok(district.xs.includes(r));
     for (const r of layout.streets.roadsZ) assert.ok(district.zs.includes(r));
-    assert.equal(Math.max(...district.xs), layout.streets.extent);
+    assert.ok(Math.max(...district.xs) >= 300 && Math.min(...district.zs) <= -300, 'roads run far past the district');
     const lots = district.cells.filter(c => c.kind === 'lot');
     assert.equal(lots.length, layout.buildings.length);
     for (const b of layout.buildings)
@@ -41,6 +41,13 @@ describe('district plan', () => {
         b.key,
       );
     assert.equal(district.cells.filter(c => c.kind === 'plaza').length, 1);
+    assert.equal(district.cells.filter(c => c.kind === 'park').length, 1);
+    // Every other district block is filled with decor; beyond the district the surround city takes over.
+    const b = district.bounds;
+    for (const c of district.cells) {
+      const inside = c.cx > b.minX && c.cx < b.maxX && c.cz > b.minZ && c.cz < b.maxZ;
+      assert.equal(c.kind === 'city', !inside);
+    }
   });
 });
 
@@ -141,10 +148,10 @@ describe('exploded floors', () => {
 describe('street furniture', () => {
   const plan = planFurniture(layout, district);
   it('keeps lamps and trees off the roads and the walking line, and out of buildings', () => {
-    assert.ok(plan.lamps.length > 60 && plan.trees.length > 150);
+    assert.ok(plan.lamps.length > 60 && plan.trees.length > 80);
     for (const p of [...plan.lamps, ...plan.trees.map(([x, , z]) => ({ x, z }))]) {
       assert.ok(!onRoad(district, p.x, p.z), `${p.x},${p.z} on a road`);
-      if (Math.max(Math.abs(p.x), Math.abs(p.z)) <= district.ring)
+      if (Math.abs(p.x) <= district.bounds.maxX && Math.abs(p.z) <= district.bounds.maxZ)
         assert.ok(distToRoad(p.x, p.z) > SIDEWALK + 0.3, `${p.x},${p.z} on the walking line`);
       for (const b of layout.buildings)
         assert.ok(Math.abs(p.x - b.x) >= b.w / 2 || Math.abs(p.z - b.z) >= b.d / 2, `${p.x},${p.z} inside ${b.key}`);
@@ -179,5 +186,41 @@ describe('automatic quality', () => {
     assert.equal(stepDown('ultra'), 'balanced');
     assert.equal(stepDown('balanced'), 'low');
     assert.equal(stepDown('low'), 'low');
+  });
+});
+
+describe('X04 extent and district decor', () => {
+  it('extends the roads evenly, bounds the district and clears every hero', async () => {
+    const { cityRoads, districtBounds, heroClearance } = await import('../src/streets/extent.ts');
+    const r = cityRoads(layout);
+    for (const v of layout.streets.roadsX) assert.ok(r.roadsX.includes(v));
+    const steps = new Set(r.roadsX.slice(1).map((v, i) => v - r.roadsX[i]!));
+    assert.deepEqual([...steps], [20]);
+    const d = districtBounds(layout);
+    for (const b of layout.buildings) assert.ok(b.x > d.minX && b.x < d.maxX && b.z > d.minZ && b.z < d.maxZ);
+    const clear = heroClearance(layout);
+    assert.equal(clear.filter(c => c.kind === 'hero').length, 15);
+  });
+
+  it('fills decor blocks with street walls that stay off roads, lots, plaza and park, and stay lower than the heroes', async () => {
+    const { planDecor } = await import('../src/buildings/decor.ts');
+    const plan = planDecor(district.cells.filter(c => c.kind === 'decor'));
+    assert.ok(plan.boxes.length > 60);
+    const lowestHero = Math.min(...layout.buildings.map(b => b.floors.length));
+    for (const bx of plan.boxes) {
+      assert.ok(bx.floors < lowestHero);
+      assert.ok(distToRoad(bx.x - bx.w / 2, bx.z) >= ROAD_HALF && distToRoad(bx.x + bx.w / 2, bx.z) >= ROAD_HALF);
+      for (const b of layout.buildings) assert.ok(Math.abs(bx.x - b.x) > 8 || Math.abs(bx.z - b.z) > 8);
+    }
+  });
+
+  it('simulates building activity deterministically within the desk count', async () => {
+    const { simulatedActivity } = await import('../src/buildings/activity.ts');
+    for (const t of [0, 100, 1000]) {
+      const a = simulatedActivity('audi', 23, t);
+      assert.deepEqual(a, simulatedActivity('audi', 23, t));
+      assert.ok(a.working >= 1 && a.working <= 23 && a.needs >= 0 && a.needs <= 2);
+    }
+    assert.deepEqual(simulatedActivity('rental-1', 0, 5), { working: 0, needs: 0 });
   });
 });

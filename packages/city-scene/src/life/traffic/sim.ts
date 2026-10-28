@@ -1,6 +1,15 @@
 import { createRng, range, weighted, type Rng } from '../rng.ts';
 import { signalPhase, type SignalColor } from '../signals.ts';
-import { buildNetwork, poseAt, type Connector, type Link, type Network, type Piece, type Pose } from './network.ts';
+import {
+  buildNetwork,
+  HEADINGS,
+  poseAt,
+  type Connector,
+  type Link,
+  type Network,
+  type Piece,
+  type Pose,
+} from './network.ts';
 import type { CityLayout } from '../../types.ts';
 
 export type VehicleKind = 'sedan' | 'suv' | 'taxi' | 'van' | 'bus' | 'emergency';
@@ -69,16 +78,33 @@ const DECEL_MAX = 10;
 const TURN_SPEED = { straight: Infinity, right: 3.2, left: 4 };
 const LOOKAHEAD = 30;
 
+export interface Area {
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
+}
+
 export interface TrafficOptions {
   seed?: number;
   count: number;
+  /**
+   * The downtown the camera looks at. Drivers outside it lean towards it at each junction (they are heading into
+   * town), so the district stays busy while the outer grid carries thinner traffic that thins out into the fog.
+   */
+  focus?: Area;
+  /** Distance over which vehicles fade in and out at the edge of the road grid (deep in the fog). */
+  edgeFade?: number;
 }
+
+/** How much more likely a driver outside the focus takes a turn towards it than away from it. */
+const PULL = 1.6;
 
 /**
  * Deterministic traffic on the lane graph: cars follow their lane, choose a movement at each junction, commit to
  * it only with a green light (or an amber they cannot stop for), a free path through the box, clear crosswalks
  * and room on the exit link, then keep their distance from the car ahead. Vehicles that leave the city re-enter
- * at a random edge when there is room.
+ * at a random edge when there is room (on the generated city's grid that edge is deep in the fog).
  */
 export class TrafficSim {
   readonly net: Network;
@@ -94,11 +120,17 @@ export class TrafficSim {
   /** Pedestrians on (or committed to) each crosswalk; set by the pedestrian simulation. */
   readonly pedsOnCrosswalk: Int32Array;
   private rng: Rng;
+  private focus: Area | null;
+  private fadeLength: number;
+  /** Pieces whose occupant order may have changed this step (sorting all of a large grid's pieces is wasteful). */
+  private dirty = new Set<number>();
   time = 0;
 
   constructor(streets: CityLayout['streets'], opts: TrafficOptions) {
     this.net = buildNetwork(streets);
     this.rng = createRng(opts.seed ?? 7);
+    this.focus = opts.focus ?? null;
+    this.fadeLength = opts.edgeFade ?? 6;
     this.occ = this.net.pieces.map(() => []);
     this.reserved = new Float64Array(this.net.links.length);
     this.boxes = this.net.junctions.map(() => []);
@@ -144,9 +176,11 @@ export class TrafficSim {
     const order = links.map((_, i) => i);
     let li = Math.floor(this.rng() * order.length);
     for (const v of this.vehicles) {
-      for (let tries = 0; tries < links.length; tries++) {
+      for (let tries = 0; tries < links.length * 2; tries++) {
         const link = links[order[li % order.length]!]!;
         li += 3;
+        // Start close to the steady state: denser downtown, thinner towards the fog.
+        if (this.rng() > this.startDensity(link)) continue;
         const used = this.occ[link.id]!;
         const tail = used.reduce((m, o) => Math.min(m, o.s - o.len / 2), link.length);
         const s = tail - GAP_DESIRED * 2 - v.len / 2;
@@ -157,6 +191,31 @@ export class TrafficSim {
     }
   }
 
+  /** Relative traffic density by distance from the focus (1 inside it), for the starting spread. */
+  private startDensity(link: Link): number {
+    const f = this.focus;
+    if (!f) return 1;
+    const mid = link.start + ((link.heading === 0 || link.heading === 1 ? 1 : -1) * link.length) / 2;
+    const x = link.heading % 2 === 0 ? mid : link.lane;
+    const z = link.heading % 2 === 0 ? link.lane : mid;
+    const d = Math.max(f.minX - x, x - f.maxX, f.minZ - z, z - f.maxZ, 0);
+    return 1 / (1 + d / 25);
+  }
+
+  /** Weight for a movement: towards the focus when outside it, neutral inside. */
+  private pull(link: Link, conn: number): number {
+    const f = this.focus;
+    if (!f || conn < 0 || link.toJ < 0) return 1;
+    const J = this.net.junctions[link.toJ]!;
+    const out = this.net.links[(this.net.pieces[conn] as Connector).to]!.heading;
+    const dx = J.x < f.minX ? 1 : J.x > f.maxX ? -1 : 0;
+    const dz = J.z < f.minZ ? 1 : J.z > f.maxZ ? -1 : 0;
+    if (dx === 0 && dz === 0) return 1;
+    const [hx, hz] = HEADINGS[out]!;
+    const toward = hx * dx + hz * dz;
+    return toward > 0 ? PULL : toward < 0 ? 1 / PULL : 1;
+  }
+
   private place(v: Vehicle, link: Link, s: number, speed: number) {
     v.active = true;
     v.piece = link.id;
@@ -165,6 +224,7 @@ export class TrafficSim {
     v.committed = false;
     v.holding = -1;
     this.occ[link.id]!.push(v);
+    this.dirty.add(link.id);
     this.chooseNext(v, link);
     poseAt(link, s, v.pose);
   }
@@ -181,9 +241,9 @@ export class TrafficSim {
     v.blocked = 0;
     const options = (
       [
-        [straight, 0.62 * w(straight)],
-        [right, 0.22 * w(right)],
-        [left, 0.16 * w(left)],
+        [straight, 0.62 * w(straight) * this.pull(link, straight)],
+        [right, 0.22 * w(right) * this.pull(link, right)],
+        [left, 0.16 * w(left) * this.pull(link, left)],
       ] as [number, number][]
     ).filter(([c]) => c >= 0);
     // Buses keep straight on where they can (at a ring corner they must turn).
@@ -356,9 +416,14 @@ export class TrafficSim {
       if (!v.active) continue;
       v.s += advance[v.id]!;
       v.odo += advance[v.id]!;
+      this.dirty.add(v.piece);
       this.transition(v);
     }
-    for (const list of this.occ) list.sort((a, b) => a.s - b.s);
+    for (const id of this.dirty) {
+      const list = this.occ[id]!;
+      if (list.length > 1) list.sort((a, b) => a.s - b.s);
+    }
+    this.dirty.clear();
     // 3. Bring back vehicles that left the city.
     for (const v of vs) if (!v.active) this.respawn(v);
   }
@@ -397,6 +462,7 @@ export class TrafficSim {
     v.piece = piece;
     v.s = s;
     this.occ[piece]!.push(v);
+    this.dirty.add(piece);
   }
 
   private remove(v: Vehicle) {
@@ -423,6 +489,6 @@ export class TrafficSim {
     if (this.net.closed) return 1;
     const e = this.net.extent;
     const d = e - Math.max(Math.abs(v.pose.x), Math.abs(v.pose.z));
-    return Math.max(0, Math.min(1, d / 6));
+    return Math.max(0, Math.min(1, d / this.fadeLength));
   }
 }

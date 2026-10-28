@@ -21,20 +21,20 @@ import { useCity, useCityContext } from '../context.tsx';
 import { type SharedUniforms, useEnvRuntime } from '../environment/palette.ts';
 import { QUALITY } from '../quality/quality.ts';
 import { planFurniture } from './furniture.ts';
-import { createBlockMaterial, createGrassMaterial, createRoadMaterial, createWaterMaterial } from './ground.ts';
+import { createBlockMaterial, createFarGroundMaterial, createRoadMaterial, createWaterMaterial } from './ground.ts';
 import { CURB_H, type CellKind, districtPlan, ROAD_HALF } from './grid.ts';
 import { planLandscape } from './plazas.ts';
 import { type SignalLight, SignalSourceContext } from './signal-source.ts';
 import { Flags, Fountain } from './PlazaFeatures.tsx';
 import { Trees } from './Trees.tsx';
 
-const KIND: Record<CellKind, number> = { lot: 0, plaza: 1, park: 2, strip: 3 };
+const KIND: Record<CellKind, number> = { lot: 0, plaza: 1, park: 2, decor: 3, city: 4 };
 
 /**
- * The district's ground (X02): merged road strips with crisp markings, curbed sidewalk blocks with planting
- * strips and lawns, the central plaza with fountain, benches, beds and flags, street lamps, traffic signals and
- * street trees, parkland beyond the parkway and a waterfront promenade on the bay. Street geometry matches the
- * legacy street.ts so A2's traffic and pedestrians line up. Owner: A1.
+ * The city's ground (X04): one road grid to the horizon (merged strips with crisp markings), curbed sidewalk
+ * blocks for every block of the city, the fountain plaza and one small park, street lamps, signals and street
+ * trees in the district, and paving beyond the last road that dissolves into the fog — no edge, no water.
+ * Street geometry matches the legacy street.ts so traffic and pedestrians line up. Owner: D1.
  */
 export function Streets() {
   const { layout } = useCityContext();
@@ -43,8 +43,8 @@ export function Streets() {
   const budget = QUALITY[quality];
   const district = useMemo(() => districtPlan(layout.streets), [layout]);
 
-  const { road, blocks, grass, water } = useMemo(() => {
-    const R = district.ring + ROAD_HALF;
+  const { road, blocks, ground } = useMemo(() => {
+    const R = district.extent + ROAD_HALF;
     const strips = [
       ...district.xs.map(x => new PlaneGeometry(ROAD_HALF * 2, R * 2).rotateX(-Math.PI / 2).translate(x, 0.012, 0)),
       ...district.zs.map(z => new PlaneGeometry(R * 2, ROAD_HALF * 2).rotateX(-Math.PI / 2).translate(0, 0.012, z)),
@@ -72,45 +72,33 @@ export function Streets() {
     blocks.receiveShadow = true;
     blocks.computeBoundingSphere();
     blocks.name = 'a1-blocks';
-    const grass = new Mesh(
-      new PlaneGeometry(3000, 3000).rotateX(-Math.PI / 2),
-      createGrassMaterial(rt.uniforms, district),
+    // Ground beyond the blocks: paving far past the last road, into the fog (no edge from any allowed view).
+    const ground = new Mesh(
+      new PlaneGeometry(6000, 6000).rotateX(-Math.PI / 2).translate(0, -0.01, 0),
+      createFarGroundMaterial(rt.uniforms, district),
     );
-    grass.receiveShadow = true;
-    grass.name = 'a1-parkland';
-    const water = new Mesh(
-      new PlaneGeometry(4000, 4000).rotateX(-Math.PI / 2).translate(0, -0.45, 0),
-      createWaterMaterial(rt.uniforms),
-    );
-    water.receiveShadow = true;
-    water.name = 'a1-bay';
-    for (const o of [road, blocks, grass, water]) o.raycast = () => {};
-    return { road, blocks, grass, water };
+    ground.receiveShadow = true;
+    ground.name = 'a1-ground';
+    for (const o of [road, blocks, ground]) o.raycast = () => {};
+    return { road, blocks, ground };
   }, [rt, district]);
   useEffect(
     () => () => {
-      for (const o of [road, blocks, grass, water]) {
+      for (const o of [road, blocks, ground]) {
         o.geometry.dispose();
         (o.material as Material).dispose();
       }
     },
-    [road, blocks, grass, water],
+    [road, blocks, ground],
   );
 
   const furniture = useMemo(() => planFurniture(layout, district), [layout, district]);
   const land = useMemo(() => planLandscape(district), [district]);
-  const trees = useMemo(() => {
-    const all = [...furniture.trees, ...land.trees];
-    // Low quality: fewer far parkland trees.
-    return budget.decorBuildingDetail === 'minimal'
-      ? all.filter(t => Math.max(Math.abs(t[0]), Math.abs(t[2])) < 110)
-      : all;
-  }, [furniture, land, budget.decorBuildingDetail]);
+  const trees = useMemo(() => [...furniture.trees, ...land.trees], [furniture, land]);
 
   return (
     <group name="a1-streets">
-      <primitive object={water} />
-      <primitive object={grass} />
+      <primitive object={ground} />
       <primitive object={road} />
       <primitive object={blocks} />
       <StreetParts lamps={furniture.lamps} signals={furniture.signals} extra={land.parts} />

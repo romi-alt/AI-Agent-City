@@ -126,12 +126,14 @@ export function People({ sim, env, shadows, animate }: Props) {
   );
 
   const placer = useMemo(() => new Placer(), []);
+  const view = useMemo(() => new CrowdView(), []);
   const clock = useMemo(() => ({ t: 0 }), []);
   useFrame((state, dt) => {
     if (animate) clock.t += Math.min(dt, 0.25);
     built.mesh.visible = !crowd;
     if (crowd) {
-      crowd.update(poses, clock.t, animate, env.nightFactor, placer);
+      view.update(state.camera as unknown as THREE.Camera);
+      crowd.update(poses, clock.t, animate, env.nightFactor, placer, view);
       return;
     }
     built.uNight.value = env.nightFactor;
@@ -160,6 +162,28 @@ export function People({ sim, env, shadows, animate }: Props) {
       {built.benches && <primitive object={built.benches} />}
     </group>
   );
+}
+
+/** People farther than this from the camera are a few pixels tall and lost in the haze, so they are not drawn. */
+const PEOPLE_FAR = 150;
+
+/** What the camera sees this frame (with a margin so shadows of people just out of view still fall into it). */
+class CrowdView {
+  private frustum = new THREE.Frustum();
+  private m = new THREE.Matrix4();
+  private sphere = new THREE.Sphere(new THREE.Vector3(), 1.5);
+  private cam = new THREE.Vector3();
+
+  update(camera: THREE.Camera) {
+    this.frustum.setFromProjectionMatrix(this.m.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    this.cam.setFromMatrixPosition(camera.matrixWorld);
+  }
+
+  sees(x: number, y: number, z: number) {
+    if (Math.hypot(x - this.cam.x, y - this.cam.y, z - this.cam.z) > PEOPLE_FAR) return false;
+    this.sphere.center.set(x, y + 0.3, z);
+    return this.frustum.intersectsSphere(this.sphere);
+  }
 }
 
 interface Persona {
@@ -217,19 +241,31 @@ function skeletalCrowd(
   const strideOf = (p: Persona) => (p.mesh.bake.stride[p.walk] ?? 1.4) * CITY_SCALE;
   return {
     meshes: [meshes.male.mesh, meshes.female.mesh],
-    update(list: StreetSim['people']['poses'], t: number, animate: boolean, night: number, placer: Placer) {
+    update(
+      list: StreetSim['people']['poses'],
+      t: number,
+      animate: boolean,
+      night: number,
+      placer: Placer,
+      view: CrowdView,
+    ) {
+      const used = new Map<CrowdMesh, number>([
+        [meshes.male, 0],
+        [meshes.female, 0],
+      ]);
       list.forEach((p, i) => {
         const who = personas[i]!;
         const k = p.scale * CITY_SCALE;
-        if (p.scale === 0) {
-          who.mesh.mesh.setMatrixAt(who.index, placer.set(0, -100, 0, 0, 0));
-          return;
-        }
+        if (p.scale === 0 || !view.sees(p.x, p.y, p.z)) return;
+        // Visible people are packed into the first slots, so the rest are not drawn at all.
+        const slot = used.get(who.mesh)!;
+        used.set(who.mesh, slot + 1);
+        who.mesh.assign(slot, who.index);
         const seated = p.mode === MODE.seated;
         // Characters face +z; city yaw is measured for a model facing +x.
         const back = seated ? -0.08 : 0;
         who.mesh.mesh.setMatrixAt(
-          who.index,
+          slot,
           placer.set(
             p.x + Math.cos(p.yaw) * back,
             seated ? SIDEWALK_Y : p.y,
@@ -239,13 +275,13 @@ function skeletalCrowd(
           ),
         );
         const own = t + who.offset;
-        if (seated) who.mesh.setAnim(who.index, { clip: who.sit, time: own });
-        else if (p.mode === MODE.talk) who.mesh.setAnim(who.index, { clip: who.talk, time: own });
+        if (seated) who.mesh.setAnim(slot, { clip: who.sit, time: own });
+        else if (p.mode === MODE.talk) who.mesh.setAnim(slot, { clip: who.talk, time: own });
         else {
           const walkClip = who.mesh.bake.clips[who.walk];
           const walkTime = (p.dist / (strideOf(who) * p.scale)) * walkClip.duration;
           const gait = animate ? Math.max(0, Math.min(1, p.gait)) : 0;
-          who.mesh.setAnim(who.index, {
+          who.mesh.setAnim(slot, {
             clip: who.walk,
             time: walkTime,
             next: who.idle,
@@ -255,6 +291,7 @@ function skeletalCrowd(
         }
       });
       for (const m of [meshes.male, meshes.female]) {
+        m.draw(used.get(m)!);
         m.uniforms.uNight.value = night;
         m.commit();
       }

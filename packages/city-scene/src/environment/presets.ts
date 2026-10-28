@@ -25,7 +25,10 @@ export interface EnvState {
   horizon: Rgb;
   sunGlow: Rgb;
   fogColor: Rgb;
-  fogDensity: number;
+  /** Linear fog: fully clear before `fogNear`, fully fogged at `fogFar` (world units). The generated city ends
+   * beyond `fogFar`, so its edge is never visible. */
+  fogNear: number;
+  fogFar: number;
   /** 0 by day, 1 at night: drives window lights, street lamps, headlights. */
   nightFactor: number;
   stars: number;
@@ -53,29 +56,31 @@ export function hex(h: string): Rgb {
 
 const TIME: Record<TimeOfDay, EnvState> = {
   // Architectural-visualisation daylight: crisp warm-white sun, cool sky fill, clear blue gradient, light haze.
+  // The legacy daylight (X04 brief): sky #5AA9E6 to #D6ECFA, warm hemisphere #FFFFFF/#B5A48A ~1.6, sun #FFF4E0 ~2.2.
   day: {
-    sunElevation: 48,
+    sunElevation: 50,
     sunAzimuth: 132,
-    sunColor: hex('#fff3e3'),
-    sunIntensity: 3.0,
+    sunColor: hex('#fff4e0'),
+    sunIntensity: 2.2,
     sunDisk: 1,
     moon: 0,
-    hemiSky: hex('#b9d3f0'),
-    hemiGround: hex('#b6a891'),
-    hemiIntensity: 0.42,
-    zenith: hex('#2869c8'),
-    horizon: hex('#d2e4f3'),
+    hemiSky: hex('#ffffff'),
+    hemiGround: hex('#b5a48a'),
+    hemiIntensity: 1.6,
+    zenith: hex('#5aa9e6'),
+    horizon: hex('#d6ecfa'),
     sunGlow: hex('#fff3d8'),
-    fogColor: hex('#d7e6f3'),
-    fogDensity: 0.0006,
+    fogColor: hex('#d6ecfa'),
+    fogNear: 110,
+    fogFar: 330,
     nightFactor: 0,
     stars: 0,
     cloudCover: 0.2,
     cloudLit: hex('#ffffff'),
-    cloudShade: hex('#c6d5e5'),
+    cloudShade: hex('#d4e2ef'),
     rain: 0,
     wetness: 0,
-    envIntensity: 0.8,
+    envIntensity: 0.3,
     bloom: 0.1,
     exposure: 1.0,
   },
@@ -93,7 +98,8 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#f8d0a4'),
     sunGlow: hex('#ffb257'),
     fogColor: hex('#f0d0ae'),
-    fogDensity: 0.0007,
+    fogNear: 110,
+    fogFar: 320,
     nightFactor: 0.08,
     stars: 0,
     cloudCover: 0.2,
@@ -120,7 +126,8 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#e7a07c'),
     sunGlow: hex('#ff9a66'),
     fogColor: hex('#6c6f98'),
-    fogDensity: 0.0009,
+    fogNear: 90,
+    fogFar: 300,
     nightFactor: 0.6,
     stars: 0.2,
     cloudCover: 0.2,
@@ -143,11 +150,12 @@ const TIME: Record<TimeOfDay, EnvState> = {
     hemiSky: hex('#34508f'),
     hemiGround: hex('#2f2b36'),
     hemiIntensity: 0.75,
-    zenith: hex('#07122b'),
-    horizon: hex('#24365e'),
+    zenith: hex('#050a1f'),
+    horizon: hex('#1b2a55'),
     sunGlow: hex('#3a5290'),
-    fogColor: hex('#1a2744'),
-    fogDensity: 0.0009,
+    fogColor: hex('#1b2a55'),
+    fogNear: 90,
+    fogFar: 300,
     nightFactor: 1,
     stars: 1,
     cloudCover: 0.2,
@@ -191,7 +199,8 @@ export function presetFor(time: TimeOfDay, weather: Weather): EnvState {
     s.horizon = grey(s.horizon, k, rain ? 0.85 : 0.95);
     s.sunGlow = grey(s.sunGlow, 0.9, 0.4);
     s.fogColor = grey(s.fogColor, k, rain ? 0.82 : 0.95);
-    s.fogDensity *= rain ? 3.2 : 2.2;
+    s.fogNear *= rain ? 0.45 : 0.6;
+    s.fogFar *= rain ? 0.7 : 0.8;
     s.cloudLit = grey(s.cloudLit, 0.8, time === 'night' ? 1.4 : 0.9);
     s.cloudShade = grey(s.cloudShade, 0.8, 0.8);
     if (time === 'night' || time === 'evening') {

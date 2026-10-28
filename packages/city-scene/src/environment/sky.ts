@@ -49,10 +49,8 @@ export function createSkyMaterial(uniforms: SkyUniforms, reflection = false) {
         float up = clamp(h, 0.0, 1.0);
         ${reflection ? '// Glass mirrors the sky downward too (softened), so curtain walls read as sky, not as street.\n        up = max(up, 0.22 + abs(h) * 0.6);' : ''}
         // Three stops (horizon, pale sky blue, zenith) so warm horizons never mix into grey-lavender.
-        float zl = dot(uZenith, vec3(0.2126, 0.7152, 0.0722));
-        vec3 mid = mix(uZenith, vec3(1.0), 0.45 * smoothstep(0.02, 0.15, zl));
-        vec3 col = mix(uHorizon, mid, smoothstep(0.0, 0.14, up));
-        col = mix(col, uZenith, pow(smoothstep(0.06, 0.8, up), 0.8));
+        // Legacy gradient (X04): the horizon colour (= the fog) rising quickly into the sky blue.
+        vec3 col = mix(uHorizon, uZenith, pow(smoothstep(0.0, 0.45, up), 0.75));
         col = mix(col, uHorizon * 1.04, exp(-up * 22.0) * 0.6);
         float mu = max(dot(d, uSunDir), 0.0);
         vec3 sunFlat = normalize(vec3(uSunDir.x, 0.0, uSunDir.z) + 1e-5);
@@ -82,5 +80,8 @@ export function createSkyMaterial(uniforms: SkyUniforms, reflection = false) {
     side: BackSide,
     depthWrite: false,
     fog: false,
+    // The horizon must equal the fog colour exactly (three adds fog after tone mapping without a composer), so
+    // the sky is not tone-mapped there; with the composer the final pass maps sky and fog alike.
+    toneMapped: false,
   });
 }
