@@ -13,6 +13,7 @@ failed / complete.
 | M03 | **Local passed** (identity, sessions, access and realtime built and tested locally against the real local Keycloak). **Not merged into `main`, not pushed** | Branch `migration/m03-identity` @ 689ca54 (from `main` @ ade42f4). Files: section M03.2 | `planning/agentcity-migration/m03/` (DESIGN.md, IDP.md, evidence/) | Back-channel logout cannot reach the API locally (refresh revalidation is the backstop). The parallel end-to-end suite was stopped by the owner and is not committed. CI not yet run on GitHub. See M03.5 | Owner review, then merge M03 into `main` |
 | M04 | **In progress** (common plumbing and the route inventory done; module porting not started) | Inventory, conventions and `apps/api/src/common` are in `feature/cinematic-city-demo` (via `m04/inventory`). Branch `m04/revisions` (revision hash, approval invalidation) is **not merged anywhere** | `planning/agentcity-migration/m04/` (ROUTE-PARITY.md, API-CONVENTIONS.md) | Decision for the owner: typed-client tooling (no-dependency scripts, or approve openapi-typescript / graphql-codegen / dataloader) | Port the legacy modules after M03 is merged |
 | X01 (owner-directed, out of order) | **Local passed** (cinematic city, landing page and automated demo, verified end to end on the local stack). **Not merged into `main`, not pushed** | Branch `feature/cinematic-city-demo` (built on M03 @ 689ca54), HEAD after this entry. Files: section X01.2 | `planning/agentcity-migration/x01-cinematic-city/` (PLAN.md, evidence/, evidence/e2e/) | No real-device frame-rate measurement (software GL only). Production email sender not approved, so nothing is sent outside Mailpit. Includes M03, so it cannot reach `main` before M03. See X01.5 | Owner review on a real browser and GPU; then merge after M03 |
+| X02–X05 (owner-directed, out of order) | **Deployed as a public preview, not a production release.** Dense 3D city, restyled office, sales copy, and a "lite" demo funnel (MySQL, one-time email links, no passwords) run on https://autosalescity.site. Not merged into `main` | Branch `deploy/live` (merges `design/city-dense-district`, `design/floor-reference-look`, `lite/backend`, `lite/frontend`). Files: section X05.2 | Section X05.3; screenshots in `planning/agentcity-migration/{x03-floor-look,x04-city-dense,lite-demo}/` | Resend key and sender set by the owner; real-device frame rates never measured (software GL only); phone layouts unverified on devices. See X05.4 | Owner review; city polish (`polish/city`); decide on merge order into `main` |
 | M05–M10, P01–P10 | Not started (parts of M05/M06 and the product demo pulled forward by X01) | — | — | — | In order, one at a time |
 
 # X01 — cinematic 3D city, premium landing page and automated demo (owner-directed)
@@ -120,6 +121,45 @@ Owner review of `feature/cinematic-city-demo` in a real browser with a GPU (`pnp
 Prompt: `planning/agentcity-migration/prompts/M03-oidc-access-and-session-cutover.md`. Prerequisite checked: M02 is
 "local passed" and merged into `main` (002406e, status ade42f4). Built in parallel workstreams and integrated on
 `migration/m03-identity` (689ca54). The legacy app keeps its own sign-in until cutover.
+
+## X05 Public preview and lite demo (owner-directed)
+
+### X05.1 What was built
+| Area | State |
+|---|---|
+| Dense city (X04) | District filled with instanced street-wall blocks, three generated rings into fog, no island edge, traffic and crowds on the extended road grid, Overview/Top/Orbit presets with eased moves and edge limits. Tests: city-scene 141/141 |
+| Office restyle (X03) | Light wood floor, glass walls, feature wall, low-poly agents, status rings, cream chrome, 40-degree front camera, 0.8 s ease to a desk. Tests: city-scene 136/136 on its own branch |
+| Landing copy | Follow-up, visibility and approvals copy in the existing components; sample data labelled; roadmap items tagged; Security section reworded to what the lite demo does |
+| Lite demo backend | `apps/web/app/api/lite/**`, `apps/web/lib/lite/**`: form token, submit, status, one-time verify link, session cookie, simulated office, sign-in link for returning visitors, owner-only leads and expiry routes. MySQL tables `lite_*` created on first use |
+| Lite demo frontend | Form, check-email (polls, resend, shows when the provider refused the email), welcome, tour, demo office with the visitor's building enterable, sign-in page |
+| Email | Resend over HTTPS from hello@autosalescity.site. Only the confirmation and sign-in emails exist; nothing is ever sent to customers |
+| Hosting | Hostinger Node.js (Next standalone, prebuilt zip via `scripts/package-preview.sh`), production MySQL, secrets in the host's environment (never in the repo) |
+
+### X05.2 Where
+`apps/web/lib/lite/*`, `apps/web/app/api/lite/**`, `apps/web/app/demo/**`, `apps/web/components/demo/*`,
+`apps/web/components/marketing/*`, `apps/web/proxy.ts` (lite routes allowed only when `NEXT_PUBLIC_LITE_DEMO=true`),
+`packages/city-scene/src/{buildings/surround,streets,environment,life,camera,ui}`, `scripts/package-preview.sh`.
+
+### X05.3 Checks run
+| Check | Result |
+|---|---|
+| city-scene typecheck and tests (integrated dense city) | clean, 141/141 |
+| web typecheck, prettier, `node --test test/*.test.ts` | clean, 40+ pass (31 lite tests, including single-use links, same answer for unknown addresses, expiry, refused-email status, cron token) |
+| Lite service tests against real MariaDB 11.8 | all passed at the time (LB, before the sign-in and cron additions) |
+| Live journey on the production site | form submit 200, lead stored, real confirmation email delivered to the owner's inbox, link opened, welcome page and the first tour step shown (owner's screenshots). Not exercised live by me: the rest of the tour, the office floor, sign-in by email, the refused-email message |
+| Leads/expiry routes | locked (401 without a token), owner token returns the leads list |
+
+### X05.4 Not run, or not claimed
+- No frame rates anywhere (software GL only); no real phone or GPU testing.
+- The 2D map fallback for browsers without WebGL was not tested.
+- Resend was exercised for real once (the owner's confirmation email); its refusal path is covered by a unit test only.
+- The expiry job is a scheduled call to `POST /api/lite/admin/expire` with a cron-only token derived from the session secret; see the deployment notes for whether it is scheduled.
+- No privacy-policy page and no contact address exist; the form carries a short inline notice. Marketing consent stays optional and separate.
+- The audit log and role model are platform features; the lite demo has neither, and the page says so.
+- Hostinger's GitHub auto-deploy from `main` is still enabled and could overwrite this deployment.
+
+### X05.5 Next safe step
+Owner review of the live site, then decide the merge order into `main` (M03, X01, X02, then the design and demo branches). The full platform (Postgres, Keycloak, real agents) still needs a VPS; the lite demo does not depend on it.
 
 ## M03.1 What was built
 
