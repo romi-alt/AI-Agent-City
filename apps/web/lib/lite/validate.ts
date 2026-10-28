@@ -85,7 +85,9 @@ export function parseAttribution(input: unknown): Record<string, string> {
 export function parseDemoRequest(body: unknown): DemoInput {
   if (typeof body !== 'object' || body === null || Array.isArray(body))
     throw new ValidationError({ body: 'Send the form as JSON.' });
-  const src = body as Record<string, unknown>;
+  const raw = body as Record<string, unknown>;
+  // The form sends the visitor's name as `name`; `fullName` is the field the platform API uses. Accept both.
+  const src: Record<string, unknown> = { ...raw, fullName: raw.fullName ?? raw.name };
   const errors: Fields = {};
   const fullName = text(src, 'fullName', errors, { required: true, max: 200, what: 'name' });
   const company = text(src, 'company', errors, { required: true, max: 200 });

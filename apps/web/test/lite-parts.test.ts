@@ -140,3 +140,15 @@ test('the session cookie is HttpOnly and SameSite=Lax, and Secure in production'
     env.NODE_ENV = before;
   }
 });
+
+test('accepts the visitor name as `name` too (the form field)', () => {
+  const v = parseDemoRequest({
+    name: 'Ada Lovelace',
+    email: 'ada@acme.test',
+    company: 'Acme',
+    marketingConsent: false,
+    formToken: 'x',
+    website2: '',
+  });
+  assert.equal(v.fullName, 'Ada Lovelace');
+});
