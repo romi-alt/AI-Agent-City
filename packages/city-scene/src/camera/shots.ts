@@ -88,6 +88,8 @@ export function buildingShot(
   others: Box[] = [],
   top = buildingHeight(b),
   extra = 0,
+  /** Heading of the entrance side (0 for +z, π/2 for +x, π for -z, -π/2 for -x). */
+  facing = 0,
 ): Pose {
   const pts = boxCorners(b.x - b.w / 2, b.x + b.w / 2, 0, top + extra, b.z - b.d / 2, b.z + b.d / 2);
   // Room for the floor labels standing beside the building (on its right in the three-quarter view).
@@ -101,7 +103,8 @@ export function buildingShot(
     ];
   };
   let best: { pose: Pose; blocked: number } | null = null;
-  for (const theta of HEADINGS) {
+  for (const heading of HEADINGS) {
+    const theta = heading + facing;
     for (const phi of ELEVATIONS) {
       const pose = poseFromOrbit(fitPoints([...pts, ...labels(theta)], theta, phi, vp, 0.08));
       const blocked = others.length ? blockedSightLines(pose.pos, b, others, top) : 0;
@@ -160,4 +163,9 @@ export function arrivalKeyframes(
   const high = (o: Orbit, theta: number, phi: number, k: number): Pose =>
     poseFromOrbit({ ...o, theta, phi, radius: Math.max(o.radius * k, tallest * 4) });
   return [high(over, over.theta - 1.25, 0.28, 1.7), high(over, over.theta - 0.55, 0.48, 1.25), end];
+}
+
+/** Orbit heading that looks at a building's entrance side. */
+export function sideHeading(side: '+x' | '-x' | '+z' | '-z'): number {
+  return side === '+z' ? 0 : side === '+x' ? Math.PI / 2 : side === '-z' ? Math.PI : -Math.PI / 2;
 }

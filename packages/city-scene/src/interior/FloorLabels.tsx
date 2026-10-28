@@ -2,7 +2,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
-import { explodeState, floorLift } from '../camera/explode.ts';
+import { floorLift, liveExplode } from '../camera/explode.ts';
 import { labelRegistry } from '../camera/labels.ts';
 import { findBuilding } from '../camera/modes.ts';
 import { floorBase } from '../camera/shots.ts';
@@ -11,7 +11,7 @@ import { useCity, useCityContext } from '../context.tsx';
 import { FLOOR_HEIGHT } from '../types.ts';
 
 /**
- * Floor labels in 3D beside the focused building (building and floor modes): each floor's number and department,
+ * Floor labels in 3D beside the focused building (building mode): each floor's number and department,
  * at its height (lifted with exploded floors), always on the building's screen-right side. Each is a button that
  * opens its floor; the current floor is marked.
  */
@@ -19,7 +19,9 @@ export function FloorLabels() {
   const { store, layout } = useCityContext();
   const mode = useCity(s => s.mode);
   const { camera } = useThree();
-  const b = mode.kind === 'building' || mode.kind === 'floor' ? findBuilding(layout, mode.building) : null;
+  // Building mode only: in the floor view the side panel offers floor above/below, and the labels would sit
+  // where the panel is.
+  const b = mode.kind === 'building' ? findBuilding(layout, mode.building) : null;
   const current = mode.kind === 'floor' ? mode.level : null;
   const reg = labelRegistry(store);
   const anchors = useMemo(() => (b ? b.floors.map(() => new THREE.Object3D()) : []), [b]);
@@ -56,12 +58,12 @@ export function FloorLabels() {
     right.y = 0;
     right.normalize();
     const off = Math.hypot(b.w, b.d) / 2 + 1.2;
-    const t = explodeState(store).t;
+    const t = liveExplode(store, b.key);
     b.floors.forEach((f, i) => {
       const a = anchors[i]!;
       a.position.set(
         b.x + right.x * off,
-        floorBase(f.level) + floorLift(f.level, t) + FLOOR_HEIGHT * 0.75,
+        floorBase(f.level) + floorLift(b.key, f.level, t) + FLOOR_HEIGHT * 0.75,
         b.z + right.z * off,
       );
       a.updateMatrixWorld();

@@ -20,17 +20,17 @@ export function boxesFor(
   const b = layout.buildings.find(x => x.key === mode.building);
   if (!b) return base;
   const n = b.floors.length;
-  const extra = explodedExtra(n, explodeT);
+  const extra = explodedExtra(b.key, n, explodeT);
   return base.flatMap(box => {
     if (box.key !== b.key) return [box];
     if (mode.kind === 'building') return [{ ...box, top: box.top + extra }];
-    const cut = floorBase(mode.level) + floorLift(mode.level, explodeT);
+    const cut = floorBase(mode.level) + floorLift(b.key, mode.level, explodeT);
     const below: Box = { ...box, top: cut, cut: true };
     if (explodeT <= 0.01 || mode.level >= n) return [below];
     const above: Box = {
       ...box,
       key: `${box.key}:above`,
-      bottom: floorBase(mode.level + 1) + floorLift(mode.level + 1, explodeT),
+      bottom: floorBase(mode.level + 1) + floorLift(b.key, mode.level + 1, explodeT),
       top: box.top + extra,
     };
     return [below, above];

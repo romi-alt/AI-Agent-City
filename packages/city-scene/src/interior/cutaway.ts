@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { measureBuildings } from '../camera/measure.ts';
 import { dampFactor } from '../camera/math.ts';
-import { explodeState, floorLift } from '../camera/explode.ts';
+import { floorLift, liveExplode } from '../camera/explode.ts';
 import { useCityContext } from '../context.tsx';
 import { type CityLayout, FLOOR_HEIGHT } from '../types.ts';
 
@@ -124,8 +124,8 @@ export function useBuildingCut(
     // Architecture that mounts after the cut started (quality change, streamed detail) is picked up too.
     since.current += dt;
     if (since.current > 1.5 && since.current - dt <= 1.5) apply(region.current);
-    const t = explodeState(store).t;
-    const bottom = cutY + floorLift(level, t);
+    const t = key ? liveExplode(store, key) : 0;
+    const bottom = cutY + (key ? floorLift(key, level, t) : 0);
     region.current.min.y = bottom;
     const k = instant ? 1 : dampFactor(3.2, dt);
     height.current += (bottom - height.current) * k;

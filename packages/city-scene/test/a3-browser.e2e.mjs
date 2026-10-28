@@ -71,6 +71,11 @@ await check('city-arrival-skip-and-navigate', async () => {
   await page.getByRole('button', { name: 'Skip intro' }).click();
   await page.locator('.ac-crumbs').waitFor({ timeout: 150_000 });
   assert.equal(await crumb(page), 'City');
+  // View modes: Overview / Top / Orbit.
+  for (const v of ['Top', 'Orbit', 'Overview']) {
+    await page.getByRole('radio', { name: v }).check();
+    assert.ok(await page.getByRole('radio', { name: v }).isChecked());
+  }
   // Directory → building.
   await page.getByRole('button', { name: 'Show a list of buildings' }).click();
   await page.getByRole('heading', { name: 'Find a building' }).waitFor();
@@ -81,7 +86,14 @@ await check('city-arrival-skip-and-navigate', async () => {
   assert.equal(await page.getByRole('button', { name: 'Enter building' }).count(), 0, 'public: nothing enterable');
   await shot(page, 'city-building-panel');
   // Floor → "Enter office" offers the demo.
-  await page.getByRole('button', { name: /^Floor 12, Sales Dept\./ }).click();
+  // Exploded floors: a switch in building mode.
+  const explode = page.getByRole('switch', { name: 'Explode floors' });
+  await explode.click();
+  assert.equal(await explode.getAttribute('aria-checked'), 'true');
+  await shot(page, 'city-building-exploded');
+  // 3D floor labels beside the building: real buttons that open their floor.
+  assert.ok((await page.locator('.ac-floor-tag').count()) >= 10, 'floor labels in 3D');
+  await page.locator('.ac-panel').getByRole('button', { name: /^Floor 12, Sales Dept\./ }).click();
   await page.getByRole('heading', { name: 'Sales Dept.' }).waitFor();
   assert.equal(await crumb(page), 'Floor 12');
   await page.getByRole('button', { name: 'Enter office' }).click();
@@ -89,6 +101,14 @@ await check('city-arrival-skip-and-navigate', async () => {
   assert.equal(await cta.getAttribute('href'), '/#get-demo');
   assert.match(await page.locator('.ac-panel').innerText(), /Ava/);
   await shot(page, 'city-floor-cta');
+  // Agent selection in the cut-away: the panel shows the agent, the breadcrumb names them, Esc goes back.
+  await page.locator('.ac-desk-tag', { hasText: 'Ava' }).click();
+  await page.locator('.ac-agent[data-agent="audi/12/0"]').waitFor();
+  assert.equal(await crumb(page), 'Ava');
+  await shot(page, 'city-agent');
+  await page.locator('[data-city-focus]').focus();
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => document.querySelector('.ac-crumbs [aria-current="page"]')?.textContent === 'Floor 12');
   // Esc goes back one step at a time; closing the panel returns focus.
   await page.locator('[data-city-focus]').focus();
   await page.keyboard.press('Escape');
@@ -178,7 +198,7 @@ await check('city-mobile', async () => {
     if (r) assert.ok(r.height >= 40, 'touch targets at least 40px tall');
   }
   await shot(page, 'city-mobile-building');
-  await page.getByRole('button', { name: /^Floor 12,/ }).tap();
+  await page.locator('.ac-panel').getByRole('button', { name: /^Floor 12,/ }).tap();
   await page.getByRole('heading', { name: 'Admin / CEO / Accounting' }).waitFor();
   await page.getByRole('button', { name: 'Enter office' }).tap();
   await page.getByRole('link', { name: 'Request a demo' }).waitFor();
@@ -206,7 +226,7 @@ await check('city-no-webgl', async () => {
   assert.match(await page.locator('.ac-map2d header').innerText(), /cannot show the 3D city/);
   await page.getByRole('button', { name: /^Maserati Dealership/ }).click();
   await page.getByRole('heading', { name: 'Maserati Dealership' }).waitFor();
-  await page.getByRole('button', { name: /^Floor 9,/ }).click();
+  await page.locator('.ac-panel').getByRole('button', { name: /^Floor 9,/ }).click();
   await page.getByRole('heading', { name: 'Social Media Dept.' }).waitFor();
   await page.getByRole('button', { name: 'Enter office' }).click();
   await page.getByRole('link', { name: 'Request a demo' }).waitFor();

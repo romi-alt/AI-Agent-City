@@ -6,7 +6,7 @@ import { sceneBus } from '../camera/bus.ts';
 import { findBuilding } from '../camera/modes.ts';
 import { floorBase } from '../camera/shots.ts';
 import { navigate } from '../camera/useNav.ts';
-import { explodeState, floorLift } from '../camera/explode.ts';
+import { floorLift, liveExplode } from '../camera/explode.ts';
 import { FloorLabels } from './FloorLabels.tsx';
 import { useCity, useCityContext } from '../context.tsx';
 import { useEnvironmentLight } from '../environment/palette.ts';
@@ -64,7 +64,7 @@ export function Interior() {
   const lift = useRef<THREE.Group>(null);
   const level = floor?.level ?? 1;
   useFrame(() => {
-    if (lift.current) lift.current.position.y = floorLift(level, explodeState(store).t);
+    if (lift.current && b) lift.current.position.y = floorLift(b.key, level, liveExplode(store, b.key));
   });
 
   return (
@@ -111,7 +111,7 @@ function FloorPreviewBand() {
     <mesh
       ref={mesh}
       material={asMat(mat)}
-      position={[b.x, floorBase(level) + floorLift(level, explodeState(store).t) + FLOOR_HEIGHT / 2, b.z]}
+      position={[b.x, floorBase(level) + floorLift(b.key, level, liveExplode(store, b.key)) + FLOOR_HEIGHT / 2, b.z]}
       scale={[b.w + 0.35, FLOOR_HEIGHT * 0.92, b.d + 0.35]}
       raycast={() => null}
     >

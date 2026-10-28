@@ -214,10 +214,10 @@ describe('framing', () => {
   it('makes room for exploded floors', () => {
     const b = layout.buildings.find(x => x.key === 'audi')!;
     const shut = orbitFromPose(buildingShot(b, VP).pos, buildingShot(b, VP).target);
-    const open = buildingShot(b, VP, [], undefined, explodedExtra(b.floors.length, 1));
+    const open = buildingShot(b, VP, [], undefined, explodedExtra(b.key, b.floors.length, 1));
     assert.ok(orbitFromPose(open.pos, open.target).radius > shut.radius * 1.3);
-    assert.equal(floorLift(1, 1), 0);
-    assert.ok(floorLift(5, 1) > floorLift(4, 1) && floorLift(5, 0) === 0);
+    assert.equal(floorLift('audi', 1, 1), 0, 'the lobby stays on the ground');
+    assert.ok(floorLift('audi', 5, 1) > floorLift('audi', 4, 1) && floorLift('audi', 5, 0) === 0);
   });
   it('looks into an opened floor from above the cut, and into the office from inside the cut', () => {
     for (const b of layout.buildings) {

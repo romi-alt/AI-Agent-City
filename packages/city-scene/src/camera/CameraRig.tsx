@@ -25,7 +25,7 @@ import { type Flight, type Glide, planFlight, planGlide, sampleFlight, sampleGli
 import { keyBelongsToControl, keyToCommand } from './keyboard.ts';
 import { clamp, dampFactor, dist, type V3 } from './math.ts';
 import { arrivalEnd, findBuilding, sameMode } from './modes.ts';
-import { explodeState, explodedExtra, floorLift } from './explode.ts';
+import { explodedExtra, floorLift, liveExplode } from './explode.ts';
 import { DEFAULT_VIEWPORT, type Viewport } from './fit.ts';
 import { boxesFor } from './scene-boxes.ts';
 import {
@@ -48,9 +48,11 @@ import {
   floorShot,
   homeShot,
   officeShot,
+  sideHeading,
   topShot,
   type Pose,
 } from './shots.ts';
+import { designsForLayout } from '../buildings/info.ts';
 import { navigate } from './useNav.ts';
 import { asMat } from '../interior/r3f.ts';
 
@@ -80,6 +82,12 @@ interface Rig {
   lastProgress: number;
   /** Seconds since the visitor last touched the controls (auto-orbit resumes after a while). */
   idle: number;
+  /** The focused building's live explode progress, last seen. */
+  explodeT: number;
+  /** Collision boxes to switch to once the current flight lands. */
+  pendingBoxes: Box[] | null;
+  /** The visitor has moved the camera since the current framing was made. */
+  userMoved: boolean;
 }
 
 const PICK_SLOP = 6;
@@ -122,9 +130,9 @@ export function CameraRig() {
     [],
   );
   const fadeRef = useRef<THREE.Mesh>(null);
+  const designs = useMemo(() => new Map(designsForLayout(layout).map(d => [d.key, d] as const)), [layout]);
   const sizeRef = useRef(size);
   sizeRef.current = size;
-  const explode = useMemo(() => explodeState(store), [store]);
 
   const rig = useRef<Rig>(null as unknown as Rig);
   if (!rig.current) {
@@ -148,6 +156,9 @@ export function CameraRig() {
       frames: 0,
       lastProgress: -1,
       idle: 0,
+      explodeT: 0,
+      pendingBoxes: null,
+      userMoved: false,
     };
   }
 
@@ -192,7 +203,7 @@ export function CameraRig() {
       if (!(slot >= 0)) return null;
       const d = deskWorld(b, mode.level, slot, n);
       if (!d) return null;
-      return { pos: [d.pos[0], d.pos[1] + floorLift(mode.level, target()), d.pos[2]] as V3, facing: d.facing };
+      return { pos: [d.pos[0], d.pos[1] + floorLift(b.key, mode.level, target()), d.pos[2]] as V3, facing: d.facing };
     };
 
     const shotFor = (mode: CityMode): Pose => {
@@ -207,15 +218,23 @@ export function CameraRig() {
         case 'building': {
           const b = findBuilding(layout, mode.building);
           if (!b) return homeOf();
-          const top = r.measured?.get(b.key)?.top ?? b.floors.length * 1.4;
-          return buildingShot(b, vp, othersThan(b.key), top, explodedExtra(b.floors.length, target()));
+          const info = designs.get(b.key);
+          const top = Math.max(info?.height ?? 0, r.measured?.get(b.key)?.top ?? b.floors.length * 1.4);
+          return buildingShot(
+            b,
+            vp,
+            othersThan(b.key),
+            top,
+            explodedExtra(b.key, b.floors.length, target()),
+            info ? sideHeading(info.entrance) : 0,
+          );
         }
         case 'floor': {
           const b = findBuilding(layout, mode.building);
           if (!b) return homeOf();
           const agent = st.selectedAgent ? deskOfAgent(mode, st.selectedAgent) : null;
           if (agent) return deskShot(agent.pos, agent.facing);
-          return floorShot(b, mode.level, vp, floorLift(mode.level, target()));
+          return floorShot(b, mode.level, vp, floorLift(b.key, mode.level, target()));
         }
         case 'office': {
           const b = findBuilding(layout, mode.building);
@@ -238,10 +257,17 @@ export function CameraRig() {
     const currentPose = (): Pose => ({ pos: camera.position.toArray() as V3, target: [...r.cur.target] });
 
     const go = (mode: CityMode, _prev: CityMode | null, opts: { instant?: boolean; quick?: boolean } = {}) => {
+      r.userMoved = false;
+      const prevCut = r.cut;
       r.limits = limitsFor(mode, store.get().view);
       r.cut =
         mode.kind === 'floor' || mode.kind === 'office' ? { building: mode.building, level: mode.level } : undefined;
-      r.boxes = [...boxesFor(layout, mode, r.measured, Math.max(explode.t, target())), ...r.skyline];
+      const nextBoxes = [...boxesFor(layout, mode, r.measured, Math.max(r.explodeT, target())), ...r.skyline];
+      // Leaving an opened floor: the camera starts inside the building, so the opened boxes stay in force until the
+      // flight out has landed (otherwise the closed building would pin the camera against its own facade).
+      const leavingCut = !r.cut && !!prevCut;
+      r.boxes = leavingCut ? r.boxes : nextBoxes;
+      r.pendingBoxes = leavingCut ? nextBoxes : null;
       const near = mode.kind === 'office' ? 0.03 : mode.kind === 'floor' ? 0.1 : 0.5;
       if (camera instanceof THREE.PerspectiveCamera && camera.near !== near) {
         camera.near = near;
@@ -346,9 +372,15 @@ export function CameraRig() {
 
     const offBus = bus.on(e => {
       switch (e.type) {
-        case 'insets':
+        case 'insets': {
+          const changed = Math.abs(e.right - r.insets.right) > 8 || Math.abs(e.bottom - r.insets.bottom) > 8;
           r.insets = { right: e.right, bottom: e.bottom };
+          // A panel opened, closed or resized: re-frame so the subject sits in the visible part, unless the visitor
+          // has taken the camera since the view was framed.
+          const mode = store.get().mode;
+          if (changed && !r.userMoved && mode.kind !== 'arrival') go(mode, null);
           break;
+        }
         case 'skip':
           finishArrival();
           break;
@@ -374,6 +406,7 @@ export function CameraRig() {
   const takeOver = () => {
     touched.current = true;
     rig.current.idle = 0;
+    rig.current.userMoved = true;
     const r = rig.current;
     if (!r.motion) return true;
     if (store.get().mode.kind === 'arrival') {
@@ -570,6 +603,13 @@ export function CameraRig() {
         r.motion = null;
         r.goal = clampOrbit(r.goal, r.limits);
       }
+    }
+    if (!r.motion && r.pendingBoxes) {
+      r.boxes = r.pendingBoxes;
+      r.pendingBoxes = null;
+    }
+    if (m?.kind === 'flight') {
+      // Sampled above, before the pending collision boxes are applied.
     } else if (m?.kind === 'glide') {
       m.t += dt;
       // Fade in from the night-blue curtain over the first second.
@@ -631,12 +671,12 @@ export function CameraRig() {
     }
 
     r.idle += dt;
-    // Exploded floors open and close smoothly (instantly with reduced motion); the collision boxes follow.
-    const goalT = store.get().explode ? 1 : 0;
-    if (Math.abs(goalT - explode.t) > 1e-3) {
-      explode.t += (goalT - explode.t) * dampFactor(reduced ? 60 : 3.5, dt);
-      if (Math.abs(goalT - explode.t) < 1e-3) explode.t = goalT;
-      r.boxes = [...boxesFor(layout, store.get().mode, r.measured, explode.t), ...r.skyline];
+    // Exploded floors (animated by A1): the collision boxes follow the focused building's live progress.
+    const focus = store.get().mode;
+    const liveT = 'building' in focus ? liveExplode(store, focus.building) : 0;
+    if (Math.abs(liveT - r.explodeT) > 1e-3) {
+      r.explodeT = liveT;
+      r.boxes = [...boxesFor(layout, focus, r.measured, liveT), ...r.skyline];
     }
 
     // Never inside a building, below the street or outside the city.
@@ -692,7 +732,7 @@ export function CameraRig() {
         boundsRef.current = { ...baseBounds, extent: Math.max(baseBounds.extent, reach + 40) };
       }
       if (r.pendingArrival && store.get().mode.kind === 'arrival') rigApi.current?.go(store.get().mode);
-      r.boxes = [...boxesFor(layout, store.get().mode, r.measured, explode.t), ...r.skyline];
+      r.boxes = [...boxesFor(layout, store.get().mode, r.measured, r.explodeT), ...r.skyline];
       // The first framing was made before the real architecture was known: re-frame once, gently, unless the
       // visitor has already taken over.
       const mode = store.get().mode;

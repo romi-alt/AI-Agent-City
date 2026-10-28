@@ -1,29 +1,21 @@
-import { FLOOR_HEIGHT } from '../types.ts';
+import { explodeRuntime, floorOffset } from '../buildings/explode.ts';
+import type { CityStore } from '../store.ts';
 
 /**
- * Exploded floors: how far a floor is lifted when the building is opened up like a physical model. A1 renders the
- * building with the same rule (buildings/explode.ts once it lands); camera, labels and interiors use this one.
- * `t` is the eased explode amount, 0 (closed) to 1 (fully apart).
+ * Exploded floors, read from A1's contract (buildings/explode.ts): the building is opened like a physical model;
+ * lobby levels stay on the ground and each floor above lifts by A1's gap. A1 animates the progress per building;
+ * the camera frames the end state (t = 0 or 1), labels and interiors follow the live progress.
  */
-export const EXPLODE_GAP = FLOOR_HEIGHT * 0.85;
-
-export function floorLift(level: number, t: number): number {
-  return Math.max(0, level - 1) * EXPLODE_GAP * t;
+export function floorLift(buildingKey: string, level: number, t: number): number {
+  return floorOffset(buildingKey, level, t);
 }
 
-/** Extra height the whole building gains when exploded. */
-export function explodedExtra(floors: number, t: number): number {
-  return floorLift(floors, t);
+/** Extra height the whole building gains (the roof moves with the top floor). */
+export function explodedExtra(buildingKey: string, floors: number, t: number): number {
+  return floorOffset(buildingKey, floors, t);
 }
 
-/** The live, eased explode amount of one city (0..1), advanced by the camera rig each frame and read by labels and
- *  interiors. One per store, like the scene bus. */
-export interface ExplodeState {
-  t: number;
-}
-const states = new WeakMap<object, ExplodeState>();
-export function explodeState(store: object): ExplodeState {
-  let s = states.get(store);
-  if (!s) states.set(store, (s = { t: 0 }));
-  return s;
+/** A building's live explode progress (0..1, before easing), as A1's <Buildings> animates it. */
+export function liveExplode(store: CityStore, buildingKey: string): number {
+  return explodeRuntime(store).progress.get(buildingKey) ?? 0;
 }
