@@ -593,6 +593,9 @@ export function CameraRig() {
     const dt = Math.min(rawDt, 0.1);
     const reduced = store.get().reducedMotion;
     const m = r.motion;
+    // Whether a camera move is under way, for tests and tooling (the canvas carries it as data-city-motion).
+    const moving = m ? m.kind : '';
+    if (gl.domElement.dataset.cityMotion !== moving) gl.domElement.dataset.cityMotion = moving;
     if (m?.kind === 'flight') {
       m.t += dt;
       const p = sampleFlight(m.flight, m.t);

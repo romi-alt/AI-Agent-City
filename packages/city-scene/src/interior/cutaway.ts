@@ -61,33 +61,37 @@ export function useBuildingCut(
 
   /** Put the planes on every architecture material whose mesh reaches into the cut region. */
   const apply = (region: THREE.Box3) => {
-    const root = scene.getObjectByName('a1-buildings') ?? scene;
+    // A1's architecture, plus A2's rooftop details (fans, beacon masts, billboards) standing on the opened roof.
+    const roots = [scene.getObjectByName('a1-buildings') ?? scene, scene.getObjectByName('life-details')].filter(
+      (o): o is THREE.Object3D => !!o,
+    );
     const box = new THREE.Box3();
-    root.traverse(o => {
-      const mesh = o as THREE.Mesh;
-      if (!mesh.isMesh || mesh.userData.interior || mesh.userData.noPick || !mesh.geometry) return;
-      const inst = mesh as THREE.InstancedMesh;
-      if (inst.isInstancedMesh) {
-        if (!inst.boundingBox) inst.computeBoundingBox();
-        box.copy(inst.boundingBox!).applyMatrix4(mesh.matrixWorld);
-      } else {
-        if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
-        box.copy(mesh.geometry.boundingBox!).applyMatrix4(mesh.matrixWorld);
-      }
-      if (!box.intersectsBox(region)) return;
-      for (const mat of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
-        if (patched.current.has(mat)) continue;
-        patched.current.set(mat, {
-          planes: mat.clippingPlanes,
-          intersect: mat.clipIntersection,
-          shadows: mat.clipShadows,
-        });
-        mat.clippingPlanes = planes;
-        mat.clipIntersection = true;
-        mat.clipShadows = true;
-        mat.needsUpdate = true;
-      }
-    });
+    for (const root of roots)
+      root.traverse(o => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh || mesh.userData.interior || mesh.userData.noPick || !mesh.geometry) return;
+        const inst = mesh as THREE.InstancedMesh;
+        if (inst.isInstancedMesh) {
+          if (!inst.boundingBox) inst.computeBoundingBox();
+          box.copy(inst.boundingBox!).applyMatrix4(mesh.matrixWorld);
+        } else {
+          if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+          box.copy(mesh.geometry.boundingBox!).applyMatrix4(mesh.matrixWorld);
+        }
+        if (!box.intersectsBox(region)) return;
+        for (const mat of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+          if (patched.current.has(mat)) continue;
+          patched.current.set(mat, {
+            planes: mat.clippingPlanes,
+            intersect: mat.clipIntersection,
+            shadows: mat.clipShadows,
+          });
+          mat.clippingPlanes = planes;
+          mat.clipIntersection = true;
+          mat.clipShadows = true;
+          mat.needsUpdate = true;
+        }
+      });
   };
 
   const region = useRef<THREE.Box3 | null>(null);

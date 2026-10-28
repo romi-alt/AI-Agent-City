@@ -20,7 +20,8 @@ import {
   Sofa,
 } from './furniture.tsx';
 import { StaticBatch } from './batch.tsx';
-import { type Activity, Figure } from './figure.tsx';
+import { OfficeAgent } from './agent.tsx';
+import type { Activity } from './figure.tsx';
 import { createKit, KitContext, useKit } from './kit.ts';
 import type { DeskOccupant } from './occupants.ts';
 import { OfficeOccupantsContext, statusColor, statusLabel } from './occupants.ts';
@@ -639,7 +640,7 @@ function Desk({
       {occupant && (
         <>
           <group userData={{ dynamic: true }}>
-            <Figure
+            <OfficeAgent
               kind={occupant.kind}
               seed={index}
               activity={activityOf(occupant.status)}
