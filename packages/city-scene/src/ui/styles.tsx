@@ -222,8 +222,9 @@ button.ac-row .ac-meta::after { content: " \\203A"; color: var(--ac-faint); }
   --ac-paper: #f4f1ea; --ac-white: #ffffff; --ac-ink: #1f2328; --ac-ink-2: #3a3f46; --ac-muted: #676c74; --ac-faint: #8b9098;
   --ac-line: #e6e0d4; --ac-line-2: #d8cfbf; --ac-tint: #f7f4ee; --ac-gold: #f5b335; --ac-gold-ink: #3a2a05;
   --ac-glass: rgba(247, 244, 238, 0.82); --ac-shadow: 0 6px 24px rgba(40, 30, 10, 0.12);
-  --ac-font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --ac-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* The web app self-hosts both faces (apps/web/app/layout.tsx); other hosts fall back to the system's. */
+  --ac-font: var(--font-inter, "Inter"), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ac-mono: var(--font-jetbrains-mono, "JetBrains Mono"), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   /* Room the side panel takes on the right (its width and gutter); the bottom sheet on phones takes none. */
   --ac-right: min(396px, 100vw);
   font-size: 14px; letter-spacing: 0;
@@ -282,8 +283,8 @@ button.ac-row .ac-meta::after { content: " \\203A"; color: var(--ac-faint); }
 .ac-hud[data-mode="office"] .ac-agent[data-kind="human"] { border-left-color: #f2b33d; }
 .ac-hud[data-mode="office"] .ac-agent h3 { font: 600 17px/1.25 var(--ac-font) !important; text-transform: none !important; letter-spacing: -0.01em !important;
   color: var(--ac-ink) !important; }
-.ac-hud[data-mode="office"] .ac-btn { border-color: var(--ac-line-2); border-radius: 10px; font-size: 14px; min-height: 42px; }
-.ac-hud[data-mode="office"] .ac-btn:hover { border-color: var(--ac-gold); }
+.ac-hud[data-mode="office"] .ac-btn:not(.ac-quiet) { border-color: var(--ac-line-2); border-radius: 10px; font-size: 14px; min-height: 42px; }
+.ac-hud[data-mode="office"] .ac-btn:not(.ac-quiet):hover { border-color: var(--ac-gold); }
 .ac-hud[data-mode="office"] .ac-btn.ac-primary { background: var(--ac-gold); color: var(--ac-gold-ink); }
 .ac-hud[data-mode="office"] .ac-btn.ac-quiet:hover:not(:disabled) { background: var(--ac-white); }
 .ac-hud[data-mode="office"] .ac-sheet-handle { background: var(--ac-line-2); }
@@ -301,6 +302,12 @@ button.ac-row .ac-meta::after { content: " \\203A"; color: var(--ac-faint); }
 }
 @media (max-width: 720px) {
   .ac-hud[data-mode="office"] { --ac-right: 0px; }
+  /* One line of crumbs beside the view tools: tighter type, long names cut short. */
+  .ac-hud[data-mode="office"] .ac-brandbar { min-width: 0; padding: 4px; }
+  .ac-hud[data-mode="office"] .ac-crumbs { flex-wrap: nowrap; overflow: hidden; }
+  .ac-hud[data-mode="office"] .ac-crumbs li + li::before { padding: 0; }
+  .ac-hud[data-mode="office"] .ac-crumbs button, .ac-hud[data-mode="office"] .ac-crumbs [aria-current="page"] {
+    font-size: 10px; letter-spacing: 0.04em; padding: 6px 5px; min-height: 36px; max-width: 76px; display: flex; align-items: center; }
   .ac-office-title-wrap { top: 62px; left: 10px; right: 10px; }
   .ac-office-title { padding: 6px 14px; }
   .ac-office-title b { font-size: 13px; }

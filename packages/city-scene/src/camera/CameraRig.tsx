@@ -4,8 +4,8 @@ import { useContext, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useCityContext } from '../context.tsx';
 import { OfficeOccupantsContext } from '../interior/occupants.ts';
-import { deskWorld } from '../interior/placement.ts';
-import type { CityMode, CityState } from '../types.ts';
+import { deskWorld, occupantsFromLayout, referenceDeskWorld, referencePlanFor } from '../interior/placement.ts';
+import type { CityMode, CityState, LayoutBuilding } from '../types.ts';
 import { ARRIVAL_FADE_SECONDS, ARRIVAL_SECONDS, markArrivalPlayed } from './arrival.ts';
 import {
   type Box,
@@ -205,6 +205,17 @@ export function CameraRig() {
     const target = () => (store.get().explode ? 1 : 0);
     const homeOf = (): Pose => homePose ?? homeShot(realBoxes(), viewport());
 
+    /** Who sits in an office: the host's team on its own floor, else the public layout's desks. */
+    const peopleIn = (mode: { building: string; level: number }) => {
+      const o = occupantsRef.current;
+      if (o && o.building === mode.building && o.level === mode.level) return o.agents;
+      const f = findBuilding(layout, mode.building)?.floors.find(x => x.level === mode.level);
+      return f ? occupantsFromLayout(f.desks) : [];
+    };
+    /** The office room as the reference plan lays it out (its feature wall's height). */
+    const roomOf = (b: LayoutBuilding, mode: { building: string; level: number }) =>
+      officeRoom(b, mode.level, referencePlanFor(b, peopleIn(mode)));
+
     /** A selected agent's desk on a floor seen in the cut-away (the public city: look, don't enter). */
     const deskOfAgent = (mode: Extract<CityMode, { kind: 'floor' }>, id: string) => {
       const b = findBuilding(layout, mode.building);
@@ -252,9 +263,9 @@ export function CameraRig() {
         case 'office': {
           const b = findBuilding(layout, mode.building);
           if (!b) return homeOf();
-          const room = officeRoom(b, mode.level);
+          const room = roomOf(b, mode);
           if (mode.desk !== null) {
-            const d = deskWorld(b, mode.level, mode.desk, deskCount(mode));
+            const d = referenceDeskWorld(b, mode.level, mode.desk, peopleIn(mode));
             if (d) return officeDeskShot(d.pos, room);
           }
           return officeOverview(room, vp);
@@ -275,7 +286,7 @@ export function CameraRig() {
       const prevCut = r.cut;
       r.limits = limitsFor(mode, store.get().view);
       const b = mode.kind === 'office' ? findBuilding(layout, mode.building) : null;
-      r.room = mode.kind === 'office' && b ? officeRoom(b, mode.level) : null;
+      r.room = mode.kind === 'office' && b ? roomOf(b, mode) : null;
       // The office's zoom-out limit follows its own overview (a big floor needs more room than a small one).
       if (r.room) r.limits = officeLimits(officeOverviewOrbit(r.room, viewport()));
       r.cut =
