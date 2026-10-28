@@ -40,28 +40,45 @@ function nearJunction(d: District, x: number, z: number, r: number): boolean {
 export function planFurniture(layout: CityLayout, district = districtPlan(layout.streets)): FurniturePlan {
   const d = district;
   const plan: FurniturePlan = { lamps: [], trees: [], signals: [] };
-  const R = d.ring;
+  const B = d.bounds;
+  // Furniture lines the district's streets and the first ring around it; beyond that the fog takes over.
+  const reachX = B.maxX + 20;
+  const reachZ = B.maxZ + 20;
+  const blocked = (x: number, z: number, m: number) =>
+    inBuilding(layout, x, z, m) ||
+    d.cells.some(
+      c =>
+        c.kind === 'decor' &&
+        x > c.x0 &&
+        x < c.x1 &&
+        z > c.z0 &&
+        z < c.z1 &&
+        Math.min(x - c.x0, c.x1 - x, z - c.z0, c.z1 - z) > 1.2,
+    );
   let n = 0;
-  // Lamps and street trees along both sides of every road inside the parkway (and the parkway itself).
   const along = (lines: number[], axis: 'x' | 'z') => {
-    for (const r of lines)
+    const reach = axis === 'z' ? reachZ : reachX;
+    for (const r of lines) {
+      if (Math.abs(r) > (axis === 'z' ? reachX : reachZ)) continue;
       for (const side of [-1, 1] as const) {
-        // Outside the parkway there is no sidewalk on the outer side.
-        if (Math.abs(r) >= R && Math.sign(r) === side) continue;
-        for (let s = -R + LAMP_STEP; s <= R - LAMP_STEP; s += LAMP_STEP) {
+        for (let s = -reach + LAMP_STEP; s <= reach - LAMP_STEP; s += LAMP_STEP) {
           const a = r + side * LAMP_OFFSET;
           const [x, z] = axis === 'z' ? [a, s] : [s, a];
-          if (nearJunction(d, x, z, 4.6) || inBuilding(layout, x, z, 0.4)) continue;
+          if (nearJunction(d, x, z, 4.6) || blocked(x, z, 0.4)) continue;
           const ry = axis === 'z' ? (side > 0 ? Math.PI : 0) : side > 0 ? Math.PI / 2 : -Math.PI / 2;
           plan.lamps.push({ x, z, ry });
         }
-        for (let s = -R + 2.5; s <= R - 2.5; s += 5) {
+        // Street trees only along the client lots and the open blocks (decor blocks have shopfronts at the curb).
+        for (let s = -reach + 2.5; s <= reach - 2.5; s += 5) {
           const a = r + side * TREE_OFFSET;
           const [x, z] = axis === 'z' ? [a, s] : [s, a];
-          if (nearJunction(d, x, z, 6) || inBuilding(layout, x, z, 1.0)) continue;
+          if (nearJunction(d, x, z, 6) || blocked(x, z, 1.0)) continue;
+          const cell = d.cells.find(c => x > c.x0 && x < c.x1 && z > c.z0 && z < c.z1);
+          if (!cell || cell.kind === 'decor' || cell.kind === 'city') continue;
           plan.trees.push([x, CURB_H, z, 0.9 + ((n++ * 7) % 5) * 0.06]);
         }
       }
+    }
   };
   along(d.xs, 'z');
   along(d.zs, 'x');
@@ -71,16 +88,15 @@ export function planFurniture(layout: CityLayout, district = districtPlan(layout
       plan.signals.push({ x: x + SIGNAL_CORNER, z: z + SIGNAL_CORNER, sx: 1, sz: 1 });
       plan.signals.push({ x: x - SIGNAL_CORNER, z: z - SIGNAL_CORNER, sx: -1, sz: -1 });
     }
-  // Park blocks: loose groves away from the walks.
+  // The small park: a loose grove away from its walks.
   const r = rng(41);
   for (const c of d.cells) {
-    if (c.kind !== 'park' && c.kind !== 'strip') continue;
-    const inner = { x0: c.x0 + 5, x1: c.x1 - 5, z0: c.z0 + 5, z1: c.z1 - 5 };
-    if (inner.x1 <= inner.x0 || inner.z1 <= inner.z0) continue;
-    const count = Math.round(((inner.x1 - inner.x0) * (inner.z1 - inner.z0)) / 22);
-    for (let i = 0; i < count; i++) {
+    if (c.kind !== 'park') continue;
+    const inner = { x0: c.x0 + 4.6, x1: c.x1 - 4.6, z0: c.z0 + 4.6, z1: c.z1 - 4.6 };
+    for (let i = 0; i < 6; i++) {
       const x = inner.x0 + r() * (inner.x1 - inner.x0);
       const z = inner.z0 + r() * (inner.z1 - inner.z0);
+      if (Math.abs(x - c.cx) < 4.5 && Math.abs(z - c.cz) < 3.8) continue;
       plan.trees.push([x, CURB_H, z, 1.0 + r() * 0.5]);
     }
   }
@@ -89,7 +105,6 @@ export function planFurniture(layout: CityLayout, district = districtPlan(layout
 
 /** True when (x, z) lies on a road surface. */
 export function onRoad(d: District, x: number, z: number): boolean {
-  const inside = (v: number) => Math.abs(v) <= d.ring + ROAD_HALF;
-  if (!inside(x) || !inside(z)) return false;
+  if (Math.abs(x) > d.extent + ROAD_HALF || Math.abs(z) > d.extent + ROAD_HALF) return false;
   return d.xs.some(r => Math.abs(x - r) < ROAD_HALF) || d.zs.some(r => Math.abs(z - r) < ROAD_HALF);
 }

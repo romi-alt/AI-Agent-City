@@ -4,6 +4,7 @@ import { type ReactNode, useMemo } from 'react';
 import { CameraRig } from './camera/CameraRig.tsx';
 import { CityContext, type CityContextValue } from './context.tsx';
 import { Buildings } from './buildings/Buildings.tsx';
+import { Surround } from './buildings/surround/index.ts';
 import layoutJson from './data/city-layout.json';
 import { Environment } from './environment/Environment.tsx';
 import { Interior } from './interior/Interior.tsx';
@@ -69,6 +70,7 @@ export function CityScene({ store: given, initial, overlay, onNavigate, homePose
               <Environment />
               <Streets />
               <Buildings />
+              <Surround />
               <Life />
               <Interior />
               <CameraRig />

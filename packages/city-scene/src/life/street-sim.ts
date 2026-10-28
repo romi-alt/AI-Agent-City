@@ -1,4 +1,3 @@
-import { districtPlan } from '../streets/grid.ts';
 import type { CityLayout } from '../types.ts';
 import { PeopleSim } from './people/sim.ts';
 import { TrafficSim } from './traffic/sim.ts';
@@ -43,6 +42,7 @@ export class StreetSim {
  * streets/grid.ts), which closes the network so vehicles circulate inside the district.
  */
 export function districtStreets(layout: CityLayout): CityLayout['streets'] {
-  const d = districtPlan(layout.streets);
-  return { roadsX: d.xs, roadsZ: d.zs, extent: d.ring };
+  // X04 (D1 interim fix, until D3 moves traffic onto cityRoads): the street grid now runs to the horizon, so
+  // traffic keeps to the layout's own roads, which all exist in the extended grid.
+  return layout.streets;
 }
