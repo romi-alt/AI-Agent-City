@@ -132,9 +132,19 @@ export function floorShot(b: LayoutBuilding, level: number, vp: Viewport = DEFAU
 }
 
 /** Office Interior: a close dollhouse view into the floor (the ceiling is hidden from above). */
-export function officeShot(b: LayoutBuilding, level: number, vp: Viewport = DEFAULT_VIEWPORT, lift = 0): Pose {
+export function officeShot(
+  b: LayoutBuilding,
+  level: number,
+  vp: Viewport = DEFAULT_VIEWPORT,
+  lift = 0,
+  furnished?: V3[],
+): Pose {
   const y = floorBase(level) + lift;
-  const pts = boxCorners(b.x - b.w / 2, b.x + b.w / 2, y, y + 0.5, b.z - b.d / 2, b.z + b.d / 2);
+  // Framed on the furnished area (the team and reception) when known: the slab's empty margins and the
+  // glass are cropped so the agents read at a useful size.
+  const pts = furnished?.length
+    ? furnished
+    : boxCorners(b.x - b.w / 2, b.x + b.w / 2, y, y + 0.5, b.z - b.d / 2, b.z + b.d / 2);
   return poseFromOrbit(fitPoints(pts, 0.6, 0.86, vp, 0.02));
 }
 

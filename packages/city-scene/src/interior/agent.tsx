@@ -33,6 +33,8 @@ const SIT_UNTIL = 14;
 const STAND = 1.6;
 const PAUSE = 4;
 const SPEED = 1.15;
+/** How far towards the desk the seated model sits from the chair's seat point (metres). */
+const SIT_IN = 0.1;
 
 function SkinnedAgent({
   kind,
@@ -57,7 +59,10 @@ function SkinnedAgent({
     // AI agents in the brand teal; people keep their own colours.
     return kind === 'ai' ? { ...l, look: { ...l.look, top: '#2b8f9c', shirt: undefined } } : l;
   }, [seed, kind]);
-  const seatedClip: CharacterClip = activity === 'working' ? 'type' : activity === 'needs-you' ? 'sitTalk' : 'sit';
+  // At the desk: typing when working (and always when picked out for the close-up, hands on the keyboard and
+  // eyes on the screen), talking it through when they need the visitor, sitting back when idle.
+  const seatedClip: CharacterClip =
+    activity === 'working' || pinned ? 'type' : activity === 'needs-you' ? 'sitTalk' : 'sit';
   const [clip, setClip] = useState<CharacterClip>(seatedClip);
   const mover = useRef<THREE.Group>(null);
   const halo = useRef<THREE.Mesh>(null);
@@ -69,8 +74,9 @@ function SkinnedAgent({
     const g = mover.current;
     if (!g) return;
     let next: CharacterClip = seatedClip;
+    // Seated, the model sits a hand's width further in than the stand-in, so its hands rest on the keyboard.
     let x = seat[0];
-    let z = seat[1];
+    let z = seat[1] + SIT_IN;
     let yaw = 0;
     let standing = false;
     if (path && animate && !pinned) {
@@ -98,7 +104,7 @@ function SkinnedAgent({
   });
 
   return (
-    <group ref={mover as never} position={[seat[0], 0, seat[1]]}>
+    <group ref={mover as never} position={[seat[0], 0, seat[1] + SIT_IN]}>
       <Character body={body} hair={hair} look={look} clip={clip} scale={1} offset={seed * 0.77} castShadow={false} />
       {kind === 'ai' && (
         <mesh ref={halo as never} position={[0, 1.42, 0.05]} rotation-x={Math.PI / 2} material={asMat(m.halo)}>

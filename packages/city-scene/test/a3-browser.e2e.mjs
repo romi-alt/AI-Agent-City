@@ -16,7 +16,11 @@ const { chromium } = createRequire(join(globalRoot, 'noop.js'))('playwright');
 
 const base = process.argv.find(a => a.startsWith('http')) ?? 'http://127.0.0.1:3203';
 const only = (process.argv.find(a => a.startsWith('--only=')) ?? '').slice(7).split(',').filter(Boolean);
-const harness = `file://${join(here, 'harness/dist/index.html')}`;
+// The harness opens from file:// by default; pass --harness=<url> to serve it over HTTP (with /city/ assets, so
+// A2's character model loads), e.g. a static server on the dist folder with `city` linked to apps/web/public/city.
+const harness =
+  (process.argv.find(a => a.startsWith('--harness=')) ?? '').slice(10) ||
+  `file://${join(here, 'harness/dist/index.html')}`;
 const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
 const results = [];
 
@@ -42,8 +46,12 @@ async function open(url, opts = {}) {
   // Software GL renders a frame of the full city in seconds; actions wait for stable frames, so give them room.
   page.setDefaultTimeout(120_000);
   const errors = [];
-  page.on('pageerror', e => errors.push(e.message));
-  page.on('console', m => m.type() === 'error' && errors.push(m.text()));
+  // The file:// harness cannot fetch A2's character model; the office then shows its stand-in figures (the
+  // Next app serves the model, and those checks keep the strict no-errors rule).
+  const known = url.startsWith('file:') ? /Fetch API cannot load file:\/\/\/city\/models\// : null;
+  const keep = msg => !(known && known.test(msg)) && errors.push(msg);
+  page.on('pageerror', e => keep(e.message));
+  page.on('console', m => m.type() === 'error' && keep(m.text()));
   if (opts.reducedMotion) await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(url);
   return { browser, page, errors, close: () => browser.close() };

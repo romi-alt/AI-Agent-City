@@ -68,7 +68,7 @@ export function FloorLabels() {
     const screenY = (y: number) => (1 - probe.set(x, y, z).project(cam).y) * 0.5 * size.height;
     // Floors are stacked in order; where they sit closer on screen than a label is tall (a double-height lobby
     // seen from afar, the ground floors of an exploded tower), the labels above are nudged up to keep a gap.
-    const MIN_PX = 26;
+    const MIN_PX = 34;
     let lastPx = Infinity;
     let raise = 0;
     [...b.floors]

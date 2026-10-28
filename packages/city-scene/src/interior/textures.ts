@@ -166,7 +166,11 @@ export function signTexture(
   g.textBaseline = 'top';
   for (const l of lines) {
     g.fillStyle = l.color;
-    g.font = `${l.weight ?? '600'} ${l.size}px "Inter", system-ui, sans-serif`;
+    // Long names shrink to fit the wall before anything is cut short.
+    let size = l.size;
+    const font = (px: number) => `${l.weight ?? '600'} ${px}px "Inter", system-ui, sans-serif`;
+    g.font = font(size);
+    while (g.measureText(l.text).width > w * 0.92 && size > l.size * 0.5) g.font = font((size -= 2));
     let text = l.text;
     while (g.measureText(text).width > w * 0.92 && text.length > 4) text = `${text.slice(0, -2)}…`;
     g.fillText(text, w / 2, y);

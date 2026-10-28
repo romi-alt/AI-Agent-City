@@ -69,7 +69,9 @@ export function useBuildingCut(
     for (const root of roots)
       root.traverse(o => {
         const mesh = o as THREE.Mesh;
-        if (!mesh.isMesh || mesh.userData.interior || mesh.userData.noPick || !mesh.geometry) return;
+        // Meshes, and line work too (A1's gold hover outline would otherwise stand above the opened floor).
+        const drawn = mesh.isMesh || (o as THREE.LineSegments).isLineSegments;
+        if (!drawn || mesh.userData.interior || mesh.userData.noPick || !mesh.geometry) return;
         const inst = mesh as THREE.InstancedMesh;
         if (inst.isInstancedMesh) {
           if (!inst.boundingBox) inst.computeBoundingBox();

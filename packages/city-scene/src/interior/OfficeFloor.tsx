@@ -94,7 +94,8 @@ function Shell({ plan, night }: { plan: OfficePlan; night: number }) {
   const W = plan.width;
   const D = plan.depth;
   const H = plan.ceiling;
-  const floorMat = plan.variant === 'showroom' ? m.stone : m.wood;
+  // Oak throughout (the showroom's display car stands on its own stone plinth); carpet marks the team area.
+  const floorMat = m.wood;
   const sides: { from: [number, number]; to: [number, number] }[] = [
     { from: [-W / 2, -D / 2], to: [W / 2, -D / 2] },
     { from: [W / 2, -D / 2], to: [W / 2, D / 2] },
@@ -106,7 +107,7 @@ function Shell({ plan, night }: { plan: OfficePlan; night: number }) {
     <group>
       <Box mat={m.concrete} position={[0, -0.16, 0]} scale={[W, 0.3, D]} receiveShadow />
       <Plane mat={floorMat} position={[0, 0.002, 0]} rotation-x={-Math.PI / 2} scale={[W, D, 1]} receiveShadow />
-      {plan.variant === 'office' && plan.workstations.length > 0 && <TeamCarpet plan={plan} />}
+      {plan.workstations.length > 0 && <TeamCarpet plan={plan} />}
       {/* Floor-to-ceiling glass with slim mullions; a dark spandrel band hides the slab and services above. */}
       {sides.map((s, i) => {
         const len = Math.hypot(s.to[0] - s.from[0], s.to[1] - s.from[1]);
@@ -278,7 +279,7 @@ function Core({ plan, building, floor }: { plan: OfficePlan; building: LayoutBui
       {/* Lit reveal and the building's name on the reception wall. */}
       <Box mat={m.warmLight} position={[0, plan.ceiling - 0.25, c.d / 2 + 0.01]} scale={[c.w * 0.92, 0.04, 0.02]} />
       <mesh material={asMat(signMat)} position={[0, 2.05, c.d / 2 + 0.02]}>
-        <planeGeometry args={[Math.min(c.w * 0.85, 6.4), Math.min(c.w * 0.85, 6.4) * 0.375]} />
+        <planeGeometry args={[Math.min(c.w * 0.7, 4.8), Math.min(c.w * 0.7, 4.8) * 0.375]} />
       </mesh>
       {/* Lift doors on the far side. */}
       {[-1, 1].map(s => (
@@ -632,8 +633,8 @@ function Desk({
           </mesh>
         </group>
       )}
-      <Box mat={m.white} position={[0, top + 0.01, -0.13]} scale={[0.42, 0.015, 0.13]} />
-      <Box mat={m.white} position={[0.3, top + 0.012, -0.12]} scale={[0.06, 0.02, 0.1]} />
+      <Box mat={m.white} position={[0, top + 0.01, -0.23]} scale={[0.42, 0.015, 0.13]} />
+      <Box mat={m.white} position={[0.3, top + 0.012, -0.22]} scale={[0.06, 0.02, 0.1]} />
       {index % 3 === 1 && <Cyl mat={m.fabricCoral} position={[-0.55, top + 0.05, 0.05]} scale={[0.08, 0.1, 0.08]} />}
       {index % 4 === 2 && <Plant position={[-0.6, top, 0.18]} size={0.25} seed={index + 50} />}
       <Chair position={[0, 0, occupant ? -0.72 : -0.5]} rotation={occupant ? 0 : 0.25 * ((index % 3) - 1)} />

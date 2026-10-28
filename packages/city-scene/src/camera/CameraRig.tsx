@@ -4,7 +4,7 @@ import { useContext, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useCityContext } from '../context.tsx';
 import { OfficeOccupantsContext } from '../interior/occupants.ts';
-import { deskWorld } from '../interior/placement.ts';
+import { deskWorld, furnishedPoints } from '../interior/placement.ts';
 import type { CityMode, CityState } from '../types.ts';
 import { ARRIVAL_FADE_SECONDS, ARRIVAL_SECONDS, markArrivalPlayed } from './arrival.ts';
 import {
@@ -245,7 +245,7 @@ export function CameraRig() {
             const d = deskWorld(b, mode.level, mode.desk, deskCount(mode));
             if (d) return deskShot(d.pos, d.facing);
           }
-          return officeShot(b, mode.level, vp);
+          return officeShot(b, mode.level, vp, 0, furnishedPoints(b, mode.level, deskCount(mode)));
         }
       }
     };
