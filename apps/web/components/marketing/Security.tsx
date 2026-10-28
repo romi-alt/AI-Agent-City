@@ -1,3 +1,4 @@
+import { LITE_DEMO } from '../../lib/preview';
 import { Icon, SectionHead } from './Primitives';
 
 // True of the platform today (M02 tenancy and RLS, M03 identity, X01 demo isolation), except where it says
@@ -6,17 +7,23 @@ const POINTS = [
   {
     icon: 'check',
     title: 'People approve',
-    text: 'Designed so agents draft and people decide. Demo sends are refused by the database.',
+    text: LITE_DEMO
+      ? 'Designed so agents draft and people decide. The demo office is simulated: nothing is sent to anyone.'
+      : 'Designed so agents draft and people decide. Demo sends are refused by the database.',
   },
   {
     icon: 'shield',
     title: 'Data sealed per client',
-    text: 'PostgreSQL row-level security separates every organisation inside the database.',
+    text: LITE_DEMO
+      ? 'Each demo office is tied to the verified visitor’s session and nothing else can read it. The full platform separates every organisation with database row-level security.'
+      : 'PostgreSQL row-level security separates every organisation inside the database.',
   },
   {
     icon: 'key',
     title: 'No passwords',
-    text: 'Email codes, passkeys or agency single sign-on, with sessions tied to your device.',
+    text: LITE_DEMO
+      ? 'The demo uses a one-time link sent to your email. There is no password to create or leak.'
+      : 'Email codes, passkeys or agency single sign-on, with sessions tied to your device.',
   },
   {
     icon: 'users',
