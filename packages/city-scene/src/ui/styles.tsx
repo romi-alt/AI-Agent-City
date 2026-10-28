@@ -212,6 +212,102 @@ button.ac-row .ac-meta::after { content: " \\203A"; color: var(--ac-faint); }
 @media (prefers-reduced-motion: reduce) {
   .ac-veil, .ac-btn, .ac-seg label, .ac-icon-btn { transition: none; }
 }
+
+/*
+ * Office view only: the reference look (legacy app's floor view, apps/legacy/src/style.css). Cream surfaces, warm
+ * hairlines, amber accent, small monospaced uppercase labels, Inter for text. Every rule is scoped to office mode
+ * so the city, building and floor views keep their own look.
+ */
+.ac-hud[data-mode="office"] {
+  --ac-paper: #f4f1ea; --ac-white: #ffffff; --ac-ink: #1f2328; --ac-ink-2: #3a3f46; --ac-muted: #676c74; --ac-faint: #8b9098;
+  --ac-line: #e6e0d4; --ac-line-2: #d8cfbf; --ac-tint: #f7f4ee; --ac-gold: #f5b335; --ac-gold-ink: #3a2a05;
+  --ac-glass: rgba(247, 244, 238, 0.82); --ac-shadow: 0 6px 24px rgba(40, 30, 10, 0.12);
+  --ac-font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ac-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Room the side panel takes on the right (its width and gutter); the bottom sheet on phones takes none. */
+  --ac-right: min(396px, 100vw);
+  font-size: 14px; letter-spacing: 0;
+}
+.ac-hud[data-mode="office"] .ac-glass { border-radius: 12px; -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); }
+.ac-hud[data-mode="office"] .ac-icon-btn:hover { background: var(--ac-white); }
+
+/* Breadcrumb: the legacy menu, a stack of small monospaced uppercase links (horizontal again on phones). */
+.ac-hud[data-mode="office"] .ac-brandbar { padding: 6px; min-height: 0; }
+.ac-hud[data-mode="office"] .ac-brand, .ac-hud[data-mode="office"] .ac-crumbs button,
+.ac-hud[data-mode="office"] .ac-crumbs [aria-current="page"] {
+  font: 500 11px/1.2 var(--ac-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+.ac-hud[data-mode="office"] .ac-brand { font-weight: 700; color: var(--ac-ink); border-color: var(--ac-line); padding: 7px 10px; margin-right: 4px; }
+.ac-hud[data-mode="office"] .ac-brand::before { border-radius: 2px; }
+.ac-hud[data-mode="office"] .ac-crumbs button { color: var(--ac-muted); min-height: 32px; padding: 7px 10px; border-radius: 7px; }
+.ac-hud[data-mode="office"] .ac-crumbs button:hover { color: var(--ac-ink); background: var(--ac-white); }
+.ac-hud[data-mode="office"] .ac-crumbs [aria-current="page"] { color: var(--ac-ink); font-weight: 700; padding: 7px 10px; border-radius: 7px;
+  background: var(--ac-white); box-shadow: inset 2px 0 0 var(--ac-gold); }
+.ac-hud[data-mode="office"] .ac-crumbs li + li::before { color: var(--ac-line-2); }
+
+/* Title chip, top centre of the part of the view the panel leaves visible. */
+.ac-office-title-wrap { position: absolute; top: 16px; left: 200px; right: calc(var(--ac-right) + 200px); display: flex; justify-content: center;
+  pointer-events: none; }
+.ac-office-title { pointer-events: auto; display: grid; gap: 2px; padding: 8px 18px; text-align: center; max-width: 100%; }
+.ac-office-title b { font-size: 14px; font-weight: 600; color: var(--ac-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ac-office-title span { font-size: 12px; color: var(--ac-muted); }
+
+/* Legend, bottom left. */
+.ac-legend { position: absolute; left: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 7px 12px; list-style: none;
+  font: 500 11px/1.4 var(--ac-mono); color: var(--ac-ink-2); }
+.ac-legend li { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ac-legend i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+
+/* Camera pad, bottom right of the visible view: a frosted card of cream keys that turn amber on hover. */
+.ac-hud[data-mode="office"] .ac-cam { left: auto; right: calc(var(--ac-right) + 16px); bottom: 16px; grid-template-columns: repeat(3, 34px); gap: 4px; padding: 8px; }
+.ac-hud[data-mode="office"] .ac-cam .ac-icon-btn { width: 34px; height: 34px; border-radius: 7px; background: var(--ac-tint); color: var(--ac-ink-2); }
+.ac-hud[data-mode="office"] .ac-cam .ac-icon-btn:hover { background: var(--ac-gold); color: var(--ac-gold-ink); }
+.ac-hud[data-mode="office"] .ac-cam .ac-icon-btn svg { width: 16px; height: 16px; }
+
+/* Panel: the legacy right panel's cream surface, hairlines and monospaced section labels. */
+.ac-hud[data-mode="office"] .ac-panel { background: rgba(247, 244, 238, 0.96); border-color: var(--ac-line); }
+.ac-hud[data-mode="office"] .ac-panel-scroll { padding: 20px; gap: 16px; }
+.ac-hud[data-mode="office"] .ac-kicker, .ac-hud[data-mode="office"] .ac-panel h3, .ac-hud[data-mode="office"] .ac-list-title {
+  font: 700 11px/1.3 var(--ac-mono) !important; text-transform: uppercase !important; letter-spacing: 0.08em !important; color: var(--ac-muted) !important; }
+.ac-hud[data-mode="office"] .ac-panel h2 { font-size: 22px; letter-spacing: -0.02em; }
+.ac-hud[data-mode="office"] .ac-panel p { font-size: 14px; }
+.ac-hud[data-mode="office"] .ac-list { border-color: var(--ac-line); }
+.ac-hud[data-mode="office"] .ac-list > li { border-color: var(--ac-line); }
+.ac-hud[data-mode="office"] .ac-row { min-height: 48px; padding: 8px; border-radius: 7px; font-size: 14px; }
+.ac-hud[data-mode="office"] button.ac-row:hover, .ac-hud[data-mode="office"] button.ac-row:focus-visible { background: var(--ac-white); }
+.ac-hud[data-mode="office"] .ac-row[aria-pressed="true"] { background: var(--ac-white); box-shadow: inset 3px 0 0 var(--ac-gold); }
+.ac-hud[data-mode="office"] .ac-row small { font-size: 12px; }
+.ac-hud[data-mode="office"] .ac-row .ac-meta { font: 500 11px/1.2 var(--ac-mono); text-transform: uppercase; letter-spacing: 0.06em; }
+.ac-hud[data-mode="office"] .ac-dot { width: 7px; height: 7px; box-shadow: none; }
+.ac-hud[data-mode="office"] .ac-agent { background: var(--ac-white); border-color: var(--ac-line); border-left: 4px solid #4aa8d8; border-radius: 10px; padding: 14px; }
+.ac-hud[data-mode="office"] .ac-agent[data-kind="human"] { border-left-color: #f2b33d; }
+.ac-hud[data-mode="office"] .ac-agent h3 { font: 600 17px/1.25 var(--ac-font) !important; text-transform: none !important; letter-spacing: -0.01em !important;
+  color: var(--ac-ink) !important; }
+.ac-hud[data-mode="office"] .ac-btn { border-color: var(--ac-line-2); border-radius: 10px; font-size: 14px; min-height: 42px; }
+.ac-hud[data-mode="office"] .ac-btn:hover { border-color: var(--ac-gold); }
+.ac-hud[data-mode="office"] .ac-btn.ac-primary { background: var(--ac-gold); color: var(--ac-gold-ink); }
+.ac-hud[data-mode="office"] .ac-btn.ac-quiet:hover:not(:disabled) { background: var(--ac-white); }
+.ac-hud[data-mode="office"] .ac-sheet-handle { background: var(--ac-line-2); }
+
+@media (min-width: 721px) {
+  .ac-hud[data-mode="office"] .ac-brandbar { flex-direction: column; align-items: stretch; gap: 2px; }
+  .ac-hud[data-mode="office"] .ac-brand { margin: 0 0 2px; border-right: 0; border-bottom: 1px solid var(--ac-line); padding: 8px 10px 10px; }
+  .ac-hud[data-mode="office"] .ac-crumbs { flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 2px; }
+  .ac-hud[data-mode="office"] .ac-crumbs li + li::before { content: none; }
+  .ac-hud[data-mode="office"] .ac-crumbs li > * { width: 100%; text-align: left; max-width: 200px; box-sizing: border-box; }
+}
+/* Narrower desktops: the chip clears the stacked breadcrumb instead of centring over the scene. */
+@media (min-width: 721px) and (max-width: 1180px) {
+  .ac-office-title-wrap { right: calc(var(--ac-right) + 16px); }
+}
+@media (max-width: 720px) {
+  .ac-hud[data-mode="office"] { --ac-right: 0px; }
+  .ac-office-title-wrap { top: 62px; left: 10px; right: 10px; }
+  .ac-office-title { padding: 6px 14px; }
+  .ac-office-title b { font-size: 13px; }
+  .ac-office-title span { font-size: 11.5px; }
+  /* Under the title on phones: the bottom sheet takes the foot of the screen. */
+  .ac-legend { left: 50%; transform: translateX(-50%); bottom: auto; top: 118px; padding: 5px 10px; gap: 4px 10px; font-size: 10.5px; flex-wrap: nowrap; }
+}
 `;
 
 export function HudStyles() {

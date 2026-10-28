@@ -305,7 +305,7 @@ function useFloorPeople(b: LayoutBuilding, f: LayoutFloor) {
 /** The selected agent: who they are, their role and status, and what they are doing. */
 function AgentCard({ who, onClose, closeLabel }: { who: DeskOccupant; onClose: () => void; closeLabel: string }) {
   return (
-    <div className="ac-agent" aria-live="polite" data-agent={who.id}>
+    <div className="ac-agent" aria-live="polite" data-agent={who.id} data-kind={who.kind}>
       <span className="ac-kicker">{who.kind === 'ai' ? 'AI agent' : 'Team member'}</span>
       <h3>{who.name ?? (who.kind === 'human' ? 'Team member' : 'AI agent')}</h3>
       <p>
