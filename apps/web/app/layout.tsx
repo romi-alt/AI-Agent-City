@@ -13,6 +13,29 @@ const sans = localFont({
   fallback: ['system-ui', 'sans-serif'],
 });
 
+// The Office view's type: JetBrains Mono for name pills and small labels, Inter for body text (self-hosted, OFL,
+// see public/fonts/LICENSES.md). Not preloaded: only the office uses them, and @font-face fetches on first use.
+const mono = localFont({
+  src: [
+    { path: '../public/fonts/JetBrainsMono-Medium.ttf', weight: '500', style: 'normal' },
+    { path: '../public/fonts/JetBrainsMono-Bold.ttf', weight: '700', style: 'normal' },
+  ],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+  preload: false,
+  fallback: ['ui-monospace', 'monospace'],
+});
+const inter = localFont({
+  src: [
+    { path: '../public/fonts/Inter-Regular.otf', weight: '400', style: 'normal' },
+    { path: '../public/fonts/Inter-SemiBold.otf', weight: '600', style: 'normal' },
+  ],
+  variable: '--font-inter',
+  display: 'swap',
+  preload: false,
+  fallback: ['system-ui', 'sans-serif'],
+});
+
 // Absolute URLs for Open Graph. PUBLIC_ORIGIN is the site's own address (infra/local-dev.env).
 const origin = process.env.PUBLIC_ORIGIN ?? 'http://localhost:3000';
 
@@ -31,7 +54,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={sans.variable}>
+    <html lang="en" className={`${sans.variable} ${mono.variable} ${inter.variable}`}>
       <body>{children}</body>
     </html>
   );
