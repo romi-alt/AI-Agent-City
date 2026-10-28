@@ -2,77 +2,119 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { measureBuildings } from '../camera/measure.ts';
 import { dampFactor } from '../camera/math.ts';
+import type { CityLayout } from '../types.ts';
 
 /**
- * Cuts one building open at a height: every mesh under an object tagged `userData.buildingKey === key` (A1's
- * architecture) gets a clipping plane, animated down from the roof so the floor is revealed like a section drawing.
- * Materials are cloned per mesh (they may be shared with other buildings) and restored when the cut ends.
- *
- * Instanced meshes shared by several buildings cannot be cut for one building; they are left alone.
+ * Cuts one building open above a floor, like a section drawing. A1 merges the details of every building (crowns,
+ * spires, signs, rooftop planting) into shared instanced meshes, so the cut is a region of space rather than a set
+ * of meshes: five clipping planes with `clipIntersection` remove whatever lies above the cut height *and* inside
+ * the building's lot (measured, so canopies and crowns are included). The planes go on the materials of the
+ * architecture near that lot; nothing else in the city occupies that volume. The cut slides down from the roof.
  */
-export function useBuildingCut(key: string | null, cutY: number | null, topY: number, instant: boolean) {
+export function useBuildingCut(layout: CityLayout, key: string | null, cutY: number | null, instant: boolean) {
   const { scene: sceneR3f, gl } = useThree();
   const scene = sceneR3f as unknown as THREE.Scene;
-  const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), topY), [topY]);
-  const height = useRef(topY);
-  const patched = useRef(new Map<THREE.Mesh, THREE.Material | THREE.Material[]>());
-  const lastScan = useRef(-1);
+  const planes = useMemo(
+    () => [
+      new THREE.Plane(new THREE.Vector3(0, -1, 0), 0),
+      new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0),
+      new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
+      new THREE.Plane(new THREE.Vector3(0, 0, -1), 0),
+      new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
+    ],
+    [],
+  );
+  const height = useRef(1e4);
+  const top = useRef(1e4);
+  const patched = useRef(
+    new Map<THREE.Material, { planes: THREE.Plane[] | null; intersect: boolean; shadows: boolean }>(),
+  );
+  const since = useRef(0);
 
   useEffect(() => {
     gl.localClippingEnabled = true;
   }, [gl]);
 
   const restore = () => {
-    for (const [mesh, original] of patched.current) {
-      const cloned = mesh.material;
-      mesh.material = original;
-      for (const c of Array.isArray(cloned) ? cloned : [cloned]) c.dispose();
+    for (const [mat, prev] of patched.current) {
+      mat.clippingPlanes = prev.planes;
+      mat.clipIntersection = prev.intersect;
+      mat.clipShadows = prev.shadows;
+      mat.needsUpdate = true;
     }
     patched.current.clear();
   };
 
-  const scan = () => {
-    if (!key) return;
-    scene.traverse(o => {
-      if (o.userData.buildingKey !== key) return;
-      o.traverse(child => {
-        const mesh = child as unknown as THREE.Mesh;
-        if (!mesh.isMesh || (mesh as THREE.InstancedMesh).isInstancedMesh || patched.current.has(mesh)) return;
-        if (mesh.userData.interior) return;
-        const original = mesh.material;
-        const clone = (mat: THREE.Material) => {
-          const c = mat.clone();
-          c.clippingPlanes = [plane];
-          c.clipShadows = true;
-          return c;
-        };
-        mesh.material = Array.isArray(original) ? original.map(clone) : clone(original);
-        patched.current.set(mesh, original);
-      });
+  /** Put the planes on every architecture material whose mesh reaches into the cut region. */
+  const apply = (region: THREE.Box3) => {
+    const root = scene.getObjectByName('a1-buildings') ?? scene;
+    const box = new THREE.Box3();
+    root.traverse(o => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh || mesh.userData.interior || mesh.userData.noPick || !mesh.geometry) return;
+      const inst = mesh as THREE.InstancedMesh;
+      if (inst.isInstancedMesh) {
+        if (!inst.boundingBox) inst.computeBoundingBox();
+        box.copy(inst.boundingBox!).applyMatrix4(mesh.matrixWorld);
+      } else {
+        if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+        box.copy(mesh.geometry.boundingBox!).applyMatrix4(mesh.matrixWorld);
+      }
+      if (!box.intersectsBox(region)) return;
+      for (const mat of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+        if (patched.current.has(mat)) continue;
+        patched.current.set(mat, {
+          planes: mat.clippingPlanes,
+          intersect: mat.clipIntersection,
+          shadows: mat.clipShadows,
+        });
+        mat.clippingPlanes = planes;
+        mat.clipIntersection = true;
+        mat.clipShadows = true;
+        mat.needsUpdate = true;
+      }
     });
   };
 
+  const region = useRef<THREE.Box3 | null>(null);
   useEffect(() => {
     if (key === null || cutY === null) {
       restore();
+      region.current = null;
+      height.current = 1e4;
       return;
     }
-    if (instant) height.current = cutY;
-    else if (height.current < cutY) height.current = topY;
-    scan();
-    lastScan.current = 0;
+    const lot = layout.buildings.find(b => b.key === key);
+    if (!lot) return;
+    const m = measureBuildings(scene, layout).get(key);
+    const pad = 0.3;
+    const minX = Math.min(lot.x - lot.w / 2, m?.minX ?? Infinity) - pad;
+    const maxX = Math.max(lot.x + lot.w / 2, m?.maxX ?? -Infinity) + pad;
+    const minZ = Math.min(lot.z - lot.d / 2, m?.minZ ?? Infinity) - pad;
+    const maxZ = Math.max(lot.z + lot.d / 2, m?.maxZ ?? -Infinity) + pad;
+    top.current = (m?.top ?? lot.floors.length * 1.4) + 2;
+    planes[1]!.constant = minX;
+    planes[2]!.constant = -maxX;
+    planes[3]!.constant = minZ;
+    planes[4]!.constant = -maxZ;
+    region.current = new THREE.Box3(new THREE.Vector3(minX, cutY, minZ), new THREE.Vector3(maxX, 1e4, maxZ));
+    // A new building starts the reveal from its roof; moving between floors slides the cut from where it is.
+    height.current = instant ? cutY : Math.min(height.current, top.current);
+    since.current = 0;
+    apply(region.current);
     return restore;
-    // A new building or a new cut restarts the reveal.
-  }, [key, cutY === null, plane]);
+  }, [key, cutY === null, layout]);
 
   useFrame((_, dt) => {
-    if (key === null || cutY === null) return;
-    // Architecture may mount after the cut starts (streamed detail): pick it up during the first seconds.
-    lastScan.current += dt;
-    if (lastScan.current < 3 && Math.round(lastScan.current * 4) !== Math.round((lastScan.current - dt) * 4)) scan();
+    if (key === null || cutY === null || !region.current) return;
+    // Architecture that mounts after the cut started (quality change, streamed detail) is picked up too.
+    since.current += dt;
+    if (since.current > 1.5 && since.current - dt <= 1.5) apply(region.current);
+    region.current.min.y = cutY;
     const k = instant ? 1 : dampFactor(3.2, dt);
     height.current += (cutY - height.current) * k;
-    plane.constant = height.current;
+    planes[0]!.constant = height.current;
   });
 }

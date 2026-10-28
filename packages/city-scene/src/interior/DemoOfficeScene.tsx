@@ -28,6 +28,8 @@ export interface DemoOfficeSceneProps {
   selectedAgentId?: string | null;
   /** The visitor clicked or chose an agent's desk. */
   onSelectAgent?: (id: string) => void;
+  /** `data-testid` for each desk's name tag, e.g. id => `office-desk-${id}`. */
+  deskTestId?: (id: string) => string;
   /** The visitor asked to leave the office (Esc / Back with no desk selected). The scene stays in the office. */
   onExit?: () => void;
   /** DOM overlay over the canvas (the host's panels). */
@@ -97,8 +99,9 @@ export function DemoOfficeScene(props: DemoOfficeSceneProps) {
         summary: a.summary ?? null,
       })),
       ...(onSelectAgent ? { onSelect: onSelectAgent } : {}),
+      ...(props.deskTestId ? { deskTestId: props.deskTestId } : {}),
     }),
-    [agents, building, level, onSelectAgent],
+    [agents, building, level, onSelectAgent, props.deskTestId],
   );
 
   return (

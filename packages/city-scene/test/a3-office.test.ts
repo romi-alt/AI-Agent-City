@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { buildingBox } from '../src/camera/bounds.ts';
-import { deskShot } from '../src/camera/shots.ts';
+import { deskShot, floorBase } from '../src/camera/shots.ts';
 import layoutJson from '../src/data/city-layout.json' with { type: 'json' };
 import { deskLabel, deskWorld, occupantsFromLayout } from '../src/interior/placement.ts';
 import {
@@ -88,7 +88,7 @@ describe('desks in the city', () => {
           assert.ok(d);
           assert.ok(d.pos[0] > box.minX && d.pos[0] < box.maxX && d.pos[2] > box.minZ && d.pos[2] < box.maxZ);
           const shot = deskShot(d.pos, d.facing);
-          const floorY = (f.level - 1) * 1.4;
+          const floorY = floorBase(f.level);
           assert.ok(shot.pos[1] > floorY + 0.3 && shot.pos[1] < floorY + 3.3 / 3.5, 'below the ceiling');
           assert.ok(
             shot.pos[0] > box.minX && shot.pos[0] < box.maxX && shot.pos[2] > box.minZ && shot.pos[2] < box.maxZ,

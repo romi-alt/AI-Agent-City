@@ -1,4 +1,5 @@
 import { type CityLayout, FLOOR_HEIGHT, type LayoutBuilding } from '../types.ts';
+import { CURB_H } from '../streets/grid.ts';
 import { clamp, type V3 } from './math.ts';
 
 /** Axis-aligned box of a building's mass, in world units. */
@@ -56,7 +57,7 @@ export function buildingBox(b: LayoutBuilding, cutAt?: number): Box {
  */
 export function cityBoxes(layout: CityLayout, cut?: { building: string; level: number }): Box[] {
   return layout.buildings.map(b =>
-    cut && cut.building === b.key ? buildingBox(b, (cut.level - 1) * FLOOR_HEIGHT) : buildingBox(b),
+    cut && cut.building === b.key ? buildingBox(b, CURB_H + (cut.level - 1) * FLOOR_HEIGHT) : buildingBox(b),
   );
 }
 
@@ -138,4 +139,47 @@ export function segmentHitsBox(a: V3, b: V3, box: Box, margin = 0): boolean {
     if (t0 > t1) return false;
   }
   return true;
+}
+
+/**
+ * Merge boxes measured from the rendered architecture (crowns, spires, canopies that the layout does not know)
+ * into the layout's boxes: each building keeps the larger extent.
+ */
+export function withMeasured(boxes: Box[], measured: ReadonlyMap<string, Omit<Box, 'key'>> | null): Box[] {
+  if (!measured) return boxes;
+  return boxes.map(b => {
+    const m = measured.get(b.key);
+    if (!m) return b;
+    const out: Box = {
+      ...b,
+      minX: Math.min(b.minX, m.minX),
+      maxX: Math.max(b.maxX, m.maxX),
+      minZ: Math.min(b.minZ, m.minZ),
+      maxZ: Math.max(b.maxZ, m.maxZ),
+    };
+    // A cut box keeps its cut height; otherwise the real top plus a little headroom.
+    if (!b.cut) out.top = Math.max(b.top, m.top + 1.2);
+    return out;
+  });
+}
+
+/**
+ * Raise each keyframe (all but the last) until it, the path to the next keyframe and its own line of sight are
+ * clear of every box: the arrival never grazes a tower of the background skyline.
+ */
+export function liftClear<T extends { pos: V3; target: V3 }>(keys: T[], boxes: Box[], step = 6, maxLift = 160): T[] {
+  const out = keys.map(k => ({ ...k, pos: [...k.pos] as V3 }));
+  for (let i = 0; i < out.length - 1; i++) {
+    const k = out[i]!;
+    const next = out[i + 1]!;
+    for (let lifted = 0; lifted <= maxLift; lifted += step) {
+      const blocked = boxes.some(
+        b =>
+          isInsideBox(k.pos, b, 1) || segmentHitsBox(k.pos, next.pos, b, 1) || segmentHitsBox(k.pos, k.target, b, 0.5),
+      );
+      if (!blocked) break;
+      k.pos[1] += step;
+    }
+  }
+  return out;
 }

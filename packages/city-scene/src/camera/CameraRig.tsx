@@ -7,7 +7,17 @@ import { OfficeOccupantsContext } from '../interior/occupants.ts';
 import { deskWorld } from '../interior/placement.ts';
 import type { CityMode } from '../types.ts';
 import { ARRIVAL_FADE_SECONDS, ARRIVAL_SECONDS, markArrivalPlayed } from './arrival.ts';
-import { type Box, cityBounds, cityBoxes, clampPosition, clampTarget } from './bounds.ts';
+import {
+  type Box,
+  type CityBounds,
+  cityBounds,
+  cityBoxes,
+  clampPosition,
+  clampTarget,
+  liftClear,
+  withMeasured,
+} from './bounds.ts';
+import { type MeasuredBox, measureBuildings, measureSkyline } from './measure.ts';
 import { sceneBus } from './bus.ts';
 import { Callout } from './Callout.tsx';
 import { LabelProjector } from './labels.ts';
@@ -47,6 +57,14 @@ type Motion =
   | { kind: 'fade'; to: Pose; t: number; out: number; hold: number; in: number; done?: () => void };
 
 interface Rig {
+  /** Real extents of the buildings, measured from the scene once it has rendered. */
+  measured: Map<string, MeasuredBox> | null;
+  /** The background skyline's towers. */
+  skyline: Box[];
+  /** An arrival waiting for the first measurement (so its path can clear the real skyline). */
+  pendingArrival: boolean;
+  cut: { building: string; level: number } | undefined;
+  sinceMeasure: number;
   cur: Orbit;
   goal: Orbit;
   motion: Motion | null;
@@ -79,11 +97,12 @@ export function CameraRig() {
   const camera = cameraR3f as unknown as THREE.PerspectiveCamera;
   const scene = sceneR3f as unknown as THREE.Scene;
   const bus = useMemo(() => sceneBus(store), [store]);
-  const bounds = useMemo(() => cityBounds(layout), [layout]);
+  const baseBounds = useMemo(() => cityBounds(layout), [layout]);
+  const boundsRef = useRef<CityBounds>(baseBounds);
   const fadeMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: '#0f1b2d',
+        color: '#fafaf9',
         transparent: true,
         opacity: 0,
         depthTest: false,
@@ -106,6 +125,11 @@ export function CameraRig() {
       motion: null,
       limits: EXPLORE_LIMITS,
       boxes: cityBoxes(layout),
+      measured: null,
+      skyline: [],
+      pendingArrival: false,
+      cut: undefined,
+      sinceMeasure: 0,
       fade: 0,
       insets: bus.last('insets') ?? { right: 0, bottom: 0 },
       offset: { x: 0, y: 0 },
@@ -114,6 +138,8 @@ export function CameraRig() {
     };
   }
 
+  const clockRef = useRef(0);
+  const touched = useRef(false);
   const rigApi = useRef<{ go(m: CityMode): void; finishArrival(): void } | null>(null);
 
   // Desk positions depend on how many people sit on the floor (the plan grows with the team).
@@ -146,7 +172,7 @@ export function CameraRig() {
         }
         case 'building': {
           const b = findBuilding(layout, mode.building);
-          return b ? buildingShot(b, a, othersThan(b.key)) : homeShot(layout, a);
+          return b ? buildingShot(b, a, othersThan(b.key), r.measured?.get(b.key)?.top) : homeShot(layout, a);
         }
         case 'floor': {
           const b = findBuilding(layout, mode.building);
@@ -164,7 +190,7 @@ export function CameraRig() {
       }
     };
 
-    const othersThan = (key: string) => cityBoxes(layout).filter(x => x.key !== key);
+    const othersThan = (key: string) => withMeasured(cityBoxes(layout), r.measured).filter(x => x.key !== key);
 
     const setCamera = (p: Pose) => {
       const o = orbitFromPose(p.pos, p.target);
@@ -176,22 +202,41 @@ export function CameraRig() {
 
     const go = (mode: CityMode, prev: CityMode | null, opts: { instant?: boolean; quick?: boolean } = {}) => {
       r.limits = limitsFor(mode);
-      r.boxes = cityBoxes(
-        layout,
-        mode.kind === 'floor' || mode.kind === 'office' ? { building: mode.building, level: mode.level } : undefined,
-      );
+      r.cut =
+        mode.kind === 'floor' || mode.kind === 'office' ? { building: mode.building, level: mode.level } : undefined;
+      r.boxes = [...withMeasured(cityBoxes(layout, r.cut), r.measured), ...r.skyline];
       const near = mode.kind === 'office' ? 0.03 : mode.kind === 'floor' ? 0.1 : 0.5;
       if (camera instanceof THREE.PerspectiveCamera && camera.near !== near) {
         camera.near = near;
         camera.updateProjectionMatrix();
       }
       const reduced = store.get().reducedMotion;
+      if (r.pendingArrival && mode.kind !== 'arrival') {
+        // Skipped before it started: lift the curtain.
+        r.pendingArrival = false;
+        r.fade = 0;
+      }
       if (mode.kind === 'arrival') {
+        if (r.measured === null) {
+          // Hold behind the curtain until the real city (and its skyline) has been measured, a few frames.
+          r.pendingArrival = true;
+          r.fade = 1;
+          return;
+        }
+        r.pendingArrival = false;
         markArrivalPlayed(typeof window === 'undefined' ? null : window.sessionStorage);
         const end = arrivalEnd({ layout, enterable: store.get().enterable, highlight: store.get().highlight });
         const endPose = shotFor(end, null);
-        const keys = arrivalKeyframes(layout, findBuilding(layout, store.get().highlight), aspectRef.current);
+        const keys = arrivalKeyframes(
+          layout,
+          findBuilding(layout, store.get().highlight),
+          aspectRef.current,
+          [],
+          r.measured ? Math.max(...[...r.measured.values()].map(m => m.top)) : 0,
+        );
         keys[keys.length - 1] = endPose;
+        const lifted = liftClear(keys, r.skyline);
+        keys.splice(0, keys.length, ...lifted);
         if (reduced) {
           setCamera(keys[0]!);
           r.motion = fadeTo(endPose, ARRIVAL_FADE_SECONDS, () => finishArrival());
@@ -277,6 +322,7 @@ export function CameraRig() {
 
   /** Any explore input: stops a flight where it is (the visitor took over) and edits the goal orbit. */
   const takeOver = () => {
+    touched.current = true;
     const r = rig.current;
     if (!r.motion) return true;
     if (store.get().mode.kind === 'arrival') {
@@ -426,6 +472,14 @@ export function CameraRig() {
       const tag = t?.tagName ?? 'BODY';
       if (t?.isContentEditable) return;
       if (t && t !== document.body && keyBelongsToControl(e.key, tag, t.getAttribute('role'))) return;
+      // The scene's keys apply when focus is inside the scene, or on the page itself when the scene fills the
+      // window (the city explorer). Embedded in a page (the demo office), page keys keep scrolling the page.
+      const host = gl.domElement.parentElement?.parentElement?.parentElement ?? null;
+      if (t && t !== document.body && !host?.contains(t)) return;
+      if ((!t || t === document.body) && host) {
+        const r = host.getBoundingClientRect();
+        if (r.width * r.height < window.innerWidth * window.innerHeight * 0.8) return;
+      }
       const mode = store.get().mode;
       if (mode.kind === 'arrival') {
         // Any key skips the arrival (modifier keys alone and Tab do not: Tab moves to the Skip button).
@@ -448,7 +502,7 @@ export function CameraRig() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [store, layout, bus]);
+  }, [store, layout, bus, gl]);
 
   useFrame((_, rawDt) => {
     const r = rig.current;
@@ -510,7 +564,7 @@ export function CameraRig() {
       const k = dampFactor(reduced ? 22 : 9, dt);
       const c = r.cur;
       const g = r.goal;
-      g.target = clampTarget(g.target, bounds);
+      g.target = clampTarget(g.target, boundsRef.current);
       c.target = [
         c.target[0] + (g.target[0] - c.target[0]) * k,
         c.target[1] + (g.target[1] - c.target[1]) * k,
@@ -523,11 +577,11 @@ export function CameraRig() {
 
     // Never inside a building, below the street or outside the city.
     const pos = orbitPosition(r.cur);
-    const safe = clampPosition(pos, r.boxes, bounds);
+    const safe = clampPosition(pos, r.boxes, boundsRef.current);
     if (safe[0] !== pos[0] || safe[1] !== pos[1] || safe[2] !== pos[2]) {
       r.cur = orbitFromPose(safe, r.cur.target);
       if (!r.motion) {
-        const gp = clampPosition(orbitPosition(r.goal), r.boxes, bounds);
+        const gp = clampPosition(orbitPosition(r.goal), r.boxes, boundsRef.current);
         r.goal = orbitFromPose(gp, r.goal.target);
       }
     }
@@ -559,6 +613,29 @@ export function CameraRig() {
     }
 
     if (r.frames < 4 && ++r.frames === 3) bus.emit({ type: 'ready' });
+
+    // Measure the real architecture once it has rendered, and again while it settles (details may stream in).
+    r.sinceMeasure += rawDt;
+    if (r.frames >= 3 && (r.measured === null || (r.sinceMeasure > 2 && clockRef.current < 20))) {
+      r.sinceMeasure = 0;
+      const first = r.measured === null;
+      r.measured = measureBuildings(scene, layout);
+      r.skyline = measureSkyline(scene);
+      if (r.skyline.length) {
+        const reach = Math.max(
+          ...r.skyline.map(b => Math.max(Math.abs(b.minX), Math.abs(b.maxX), Math.abs(b.minZ), Math.abs(b.maxZ))),
+        );
+        boundsRef.current = { ...baseBounds, extent: Math.max(baseBounds.extent, reach + 40) };
+      }
+      if (r.pendingArrival && store.get().mode.kind === 'arrival') rigApi.current?.go(store.get().mode);
+      r.boxes = [...withMeasured(cityBoxes(layout, r.cut), r.measured), ...r.skyline];
+      // The first framing was made before the real architecture was known: re-frame once, gently, unless the
+      // visitor has already taken over.
+      const mode = store.get().mode;
+      if (first && !touched.current && !r.motion && mode.kind !== 'explore' && mode.kind !== 'arrival')
+        rigApi.current?.go(mode);
+    }
+    clockRef.current += rawDt;
   });
 
   return (

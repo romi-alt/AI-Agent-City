@@ -18,6 +18,8 @@ export interface SceneLabel {
   status?: string;
   selected?: boolean;
   ariaLabel?: string;
+  /** `data-testid` for the label's button (hosts' end-to-end tests). */
+  testId?: string;
   onSelect?: () => void;
 }
 
@@ -85,6 +87,7 @@ function shallowEqual(a: SceneLabel, b: SceneLabel): boolean {
     a.status === b.status &&
     a.selected === b.selected &&
     a.ariaLabel === b.ariaLabel &&
+    a.testId === b.testId &&
     a.kind === b.kind &&
     !!a.onSelect === !!b.onSelect
   );

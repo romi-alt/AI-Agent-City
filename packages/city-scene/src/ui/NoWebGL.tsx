@@ -65,10 +65,10 @@ function Map2D({ title, reason, panel }: { title: string; reason?: string; panel
           focusable="false"
         >
           {layout.streets.roadsX.map(x => (
-            <rect key={`x${x}`} x={x - 2} y={-e} width={4} height={e * 2} fill="#22344d" />
+            <rect key={`x${x}`} x={x - 2} y={-e} width={4} height={e * 2} fill="#f1f0ee" />
           ))}
           {layout.streets.roadsZ.map(z => (
-            <rect key={`z${z}`} x={-e} y={z - 2} width={e * 2} height={4} fill="#22344d" />
+            <rect key={`z${z}`} x={-e} y={z - 2} width={e * 2} height={4} fill="#f1f0ee" />
           ))}
           {layout.buildings.map(b => (
             <g
@@ -84,7 +84,7 @@ function Map2D({ title, reason, panel }: { title: string; reason?: string; panel
                 height={b.d}
                 rx={0.8}
                 fill={b.color}
-                stroke="#0f1b2d"
+                stroke="#ffffff"
                 strokeWidth={0.4}
               />
               <text
@@ -92,7 +92,7 @@ function Map2D({ title, reason, panel }: { title: string; reason?: string; panel
                 y={b.z + b.d / 2 + 2.6}
                 textAnchor="middle"
                 fontSize={2}
-                fill="#f6f3ec"
+                fill="#3f3f46"
                 style={{ pointerEvents: 'none' }}
               >
                 {b.shortName.length > 16 ? `${b.shortName.slice(0, 15)}…` : b.shortName}
@@ -103,7 +103,7 @@ function Map2D({ title, reason, panel }: { title: string; reason?: string; panel
                 textAnchor="middle"
                 fontSize={2.2}
                 fontWeight={700}
-                fill="#0f1b2d"
+                fill="#0c0c0d"
                 style={{ pointerEvents: 'none' }}
               >
                 {b.floors.length}

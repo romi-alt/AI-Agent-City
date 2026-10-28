@@ -2,26 +2,18 @@
 import { useFrame } from '@react-three/fiber';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { buildingHeight } from '../camera/bounds.ts';
 import { sceneBus } from '../camera/bus.ts';
 import { findBuilding } from '../camera/modes.ts';
 import { floorBase } from '../camera/shots.ts';
 import { navigate } from '../camera/useNav.ts';
 import { useCity, useCityContext } from '../context.tsx';
-import { FLOOR_HEIGHT, type TimeOfDay } from '../types.ts';
+import { useEnvironmentLight } from '../environment/palette.ts';
+import { FLOOR_HEIGHT } from '../types.ts';
 import { useBuildingCut } from './cutaway.ts';
 import { OfficeOccupantsContext } from './occupants.ts';
 import { OfficeFloor } from './OfficeFloor.tsx';
 import { occupantsFromLayout } from './placement.ts';
 import { asMat } from './r3f.ts';
-
-/**
- * How dark it is for interior lighting. A1 exports `useEnvironmentLight().nightFactor` (environment/palette.ts);
- * until the integrator wires it in, the interior derives the same 0..1 value from the time of day.
- */
-export function nightFactorFor(t: TimeOfDay): number {
-  return { day: 0, golden: 0.3, evening: 0.7, night: 1 }[t];
-}
 
 /**
  * The interior layer: the office floor in the floor and office modes (with the building cut open above it), and a
@@ -30,7 +22,12 @@ export function nightFactorFor(t: TimeOfDay): number {
 export function Interior() {
   const { store, layout } = useCityContext();
   const mode = useCity(s => s.mode);
-  const time = useCity(s => s.timeOfDay);
+  const env = useEnvironmentLight();
+  // A1's live night factor changes every frame; the office re-lights only when it has moved noticeably.
+  const [night, setNight] = useState(() => env.nightFactor);
+  useFrame(() => {
+    if (Math.abs(env.nightFactor - night) > 0.04) setNight(env.nightFactor);
+  });
   const reduced = useCity(s => s.reducedMotion);
   const paused = useCity(s => s.paused);
   const host = useContext(OfficeOccupantsContext);
@@ -44,7 +41,7 @@ export function Interior() {
     return occupantsFromLayout(floor.desks);
   }, [b, floor, host]);
 
-  useBuildingCut(b?.key ?? null, floor ? floorBase(floor.level) - 0.02 : null, b ? buildingHeight(b) + 12 : 0, reduced);
+  useBuildingCut(layout, b?.key ?? null, floor ? floorBase(floor.level) - 0.02 : null, reduced);
 
   const selectDesk = (slot: number) => {
     if (mode.kind !== 'office') return;
@@ -64,7 +61,7 @@ export function Interior() {
           detail={mode.kind === 'office' ? 'full' : 'preview'}
           selected={mode.kind === 'office' ? mode.desk : null}
           onSelectDesk={mode.kind === 'office' ? selectDesk : undefined}
-          night={nightFactorFor(time)}
+          night={night}
           animate={!reduced && !paused}
         />
       )}
