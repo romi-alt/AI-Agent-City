@@ -1,0 +1,15 @@
+
+> agentcity@ smoke /home/user/sales-city
+> node scripts/smoke.mjs
+
+ok   API liveness
+ok   API readiness with every dependency up
+ok   GraphQL readiness query
+ok   OpenAPI document served
+ok   Keycloak serves the agentcity realm (OIDC discovery)
+ok   web app renders the API readiness (web -> API request)
+ok   heartbeat workflow round trip (API -> Temporal -> worker -> PostgreSQL)
+ok   workflow survives a worker crash
+ok   readiness fails while postgres is stopped, and recovers
+ok   readiness fails while object-storage is stopped, and recovers
+smoke: PASSED (10 checks)

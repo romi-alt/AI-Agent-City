@@ -1,0 +1,32 @@
+
+> agentcity@ typecheck /home/user/sales-city
+> pnpm --filter './packages/*' run build && pnpm -r run typecheck
+
+Scope: 5 of 10 workspace projects
+packages/contracts build$ tsc -p tsconfig.json
+packages/db build$ tsc -p tsconfig.json
+packages/domain build$ tsc -p tsconfig.json
+packages/contracts build: Done
+packages/domain build: Done
+packages/db build: Done
+packages/legacy-import build$ tsc -p tsconfig.json
+packages/legacy-import build: Done
+Scope: 9 of 10 workspace projects
+apps/legacy typecheck$ tsc -p tsconfig.json && tsc -p tsconfig.server.json
+packages/contracts typecheck$ tsc -p tsconfig.json --noEmit
+packages/db typecheck$ tsc -p tsconfig.json --noEmit
+packages/domain typecheck$ tsc -p tsconfig.json --noEmit
+packages/contracts typecheck: Done
+apps/legacy typecheck: Done
+packages/db typecheck: Done
+packages/domain typecheck: Done
+apps/api typecheck$ tsc -p tsconfig.json --noEmit
+apps/worker typecheck$ tsc -p tsconfig.json --noEmit
+packages/city-scene typecheck$ tsc -p tsconfig.json --noEmit
+packages/legacy-import typecheck$ tsc -p tsconfig.json --noEmit
+packages/legacy-import typecheck: Done
+apps/worker typecheck: Done
+packages/city-scene typecheck: Done
+apps/api typecheck: Done
+apps/web typecheck$ tsc --noEmit
+apps/web typecheck: Done

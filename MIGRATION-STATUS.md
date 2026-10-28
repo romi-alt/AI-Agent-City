@@ -1,7 +1,8 @@
 # Migration status
 
 Stage plan and rules: `planning/agentcity-migration/README.md`. Evidence: `planning/agentcity-migration/m00/`,
-`planning/agentcity-migration/m01/`, `planning/agentcity-migration/m02/`. Statuses: not started / in progress / local passed / external blocked /
+`planning/agentcity-migration/m01/`, `planning/agentcity-migration/m02/`, `planning/agentcity-migration/m03/`,
+`planning/agentcity-migration/x01-cinematic-city/`. Statuses: not started / in progress / local passed / external blocked /
 failed / complete.
 
 | Stage | Status | Commit/files | Evidence | Blockers | Next action |
@@ -9,8 +10,169 @@ failed / complete.
 | M00 | **Local passed** (code complete and verified locally). Merged into `main` at the owner's request; no separate code review | `main` @ a658918 (fast-forward from f96819d). Built on branch `migration/m00-baseline` (from `city-vibes` @ 7bad3b8). Checkpoint = 7bad3b8, the head of `city-vibes` on GitHub. Tag `pre-migration-baseline` is local only: pushing it from this environment did not reach GitHub. Files below | `planning/agentcity-migration/m00/evidence/` | Real data and pilot exports missing (below) | M01 |
 | M01 | **Local passed** (code complete and verified locally, including a from-zero fresh-clone run). Merged into `main` at the owner's request; no separate code review | `main` @ b3c211c (fast-forward from d4c0159). Built on branch `migration/m01-workspace`, which can now be deleted on GitHub (deletion from this environment fails). Files: section M01.2 | `planning/agentcity-migration/m01/` (ARCHITECTURE.md, evidence/) | CI not yet run on GitHub (first run will be the next push or PR to `main`); Node 22 not 24; MinIO replaced by RustFS locally (ADR-004). See M01.5 | M02 |
 | M02 | **Local passed** (schema, RLS, catalog and importer built and tested locally on synthetic fixtures). Merged into `main` at the owner's request; no separate code review | `main` @ 002406e (fast-forward from 7cb0642). Built on branch `migration/m02-tenancy`, which can now be deleted on GitHub (deletion from this environment fails). Files: section M02.2 | `planning/agentcity-migration/m02/` (DATA-MODEL.md, IMPORT-RUNBOOK.md, evidence/) | **Production-input gate open:** no real `state.json`/`auth.json`/mapping provided, so no real import has run. CI not yet run on GitHub (first run will be the next push or PR to `main`). See M02.5 | M03 |
-| M03–M10, P01–P10 | Not started | — | — | — | In order, one at a time |
+| M03 | **Local passed** (identity, sessions, access and realtime built and tested locally against the real local Keycloak). **Not merged into `main`, not pushed** | Branch `migration/m03-identity` @ 689ca54 (from `main` @ ade42f4). Files: section M03.2 | `planning/agentcity-migration/m03/` (DESIGN.md, IDP.md, evidence/) | Back-channel logout cannot reach the API locally (refresh revalidation is the backstop). The parallel end-to-end suite was stopped by the owner and is not committed. CI not yet run on GitHub. See M03.5 | Owner review, then merge M03 into `main` |
+| M04 | **In progress** (common plumbing and the route inventory done; module porting not started) | Inventory, conventions and `apps/api/src/common` are in `feature/cinematic-city-demo` (via `m04/inventory`). Branch `m04/revisions` (revision hash, approval invalidation) is **not merged anywhere** | `planning/agentcity-migration/m04/` (ROUTE-PARITY.md, API-CONVENTIONS.md) | Decision for the owner: typed-client tooling (no-dependency scripts, or approve openapi-typescript / graphql-codegen / dataloader) | Port the legacy modules after M03 is merged |
+| X01 (owner-directed, out of order) | **Local passed** (cinematic city, landing page and automated demo, verified end to end on the local stack). **Not merged into `main`, not pushed** | Branch `feature/cinematic-city-demo` (built on M03 @ 689ca54), HEAD after this entry. Files: section X01.2 | `planning/agentcity-migration/x01-cinematic-city/` (PLAN.md, evidence/, evidence/e2e/) | No real-device frame-rate measurement (software GL only). Production email sender not approved, so nothing is sent outside Mailpit. Includes M03, so it cannot reach `main` before M03. See X01.5 | Owner review on a real browser and GPU; then merge after M03 |
+| M05–M10, P01–P10 | Not started (parts of M05/M06 and the product demo pulled forward by X01) | — | — | — | In order, one at a time |
 
+# X01 — cinematic 3D city, premium landing page and automated demo (owner-directed)
+
+The owner directed this stage directly ("Claude Code master prompt: AgentCity cinematic 3D city, premium UI/UX and
+automated demo"). It runs outside the M00–M10 order and pulls forward parts of M05/M06 (the React Three Fiber city)
+and the product demo funnel. The contract is `planning/agentcity-migration/x01-cinematic-city/PLAN.md`. Six
+workstreams were built in parallel in separate git worktrees and merged into `feature/cinematic-city-demo`, which
+branched from M03 (689ca54) plus the M04 inventory.
+
+The legacy app (`apps/legacy`) is unchanged and is still the running product. `OUTBOUND_ENABLED` stayed unset; demo
+agents cannot send anything (enforced in the database since M02); all mail went to the local Mailpit sink. No
+production deploy, no live messaging, no real customer data.
+
+## X01.1 What was built
+
+| Requirement | Done | Where |
+|---|---|---|
+| NYC-inspired 3D city | 15 lot buildings with individual designs (Fast Sales Training Center glass tower with crown and spire, branded dealership showrooms, brick mid-rises, rental towers), a varied background skyline (setbacks, dark glass, art-deco crowns, pyramids), streets with markings, lamps, trees, signals and a plaza | `packages/city-scene/src/{buildings,streets}` (A1) |
+| Lighting, time of day, weather | Day, golden, evening, night; clear, partly cloudy, overcast, light rain; blended transitions, instant under reduced motion | `packages/city-scene/src/environment` (A1) |
+| Living city | Rule-following traffic (signals, crosswalks, no gridlock), pedestrians, buses and cabs, airliners and helicopters, birds, rooftop details; all stop under reduced motion and when paused | `packages/city-scene/src/life` (A2) |
+| Cinematic camera, city → building → floor → office | Arrival glide, free exploration with collisions, building framings, floor cut-away, furnished offices, desk close-ups; keyboard and touch; phone layout; 2D map without WebGL | `packages/city-scene/src/{camera,interior,ui}`, `apps/web/app/city` (A3) |
+| Quality presets | `ultra`/`balanced`/`low` budgets, chosen automatically and overridable in settings | `packages/city-scene/src/quality` |
+| Premium landing page | Exact headline and CTAs, framed live city preview with a poster fallback, how it works, product rows, who it is for, security, demo form, FAQ; Geist, restrained palette; Sample/Simulated/Roadmap labels; no invented customers, numbers or integrations | `apps/web/app/(marketing)`, `apps/web/components/marketing` (B) |
+| Lead capture | Required name, business email, company; optional industry, phone, website; privacy notice; separate unchecked marketing consent (stored with time and notice version); honeypot, form-age token and rate limits; same answer for known and new addresses | `apps/web/components/demo`, `apps/api/src/demo` (C, D) |
+| Secure lead storage | `marketing.*` tables classified private, no app-role access, SECURITY DEFINER functions; leads never in browser storage; no personal data in logs (tested) | `packages/db/migrations/1793318400000_demo.sql` (C) |
+| Demo provisioning and email verification, no passwords | Per-lead `demo` tenant with synthetic data; Keycloak user without credentials; one-time verify link; sign-in by email code with the address prefilled; demo attached by accepting a server-side invitation | `apps/api/src/demo`, `infra/keycloak` (C) |
+| Welcome, guided tour, demo office, conversion CTAs | "Welcome to AgentCity, [First name]." / "Your virtual AI office is ready to explore."; 7-step tour; 3D office with the 8 sample agents; agent panels with simulated tasks and conversations; CTA cards | `apps/web/app/demo`, `apps/web/app/(signed-in)/office` (D, A3) |
+| Demo expiry and cleanup | 14 days; `app.expire_demos()` from a worker activity, a Temporal workflow and `pnpm demo:expire` | `apps/worker/src/demo-*` |
+| Admin lead view | Platform owners only, step-up required, signed cursors, CSV export with formula-injection guard | `apps/web/app/(signed-in)/admin/leads`, `apps/api/src/demo` |
+| Branded sign-in and emails | AgentCity Keycloak login and email theme; the verify flow continues straight to the site after the confirm click | `infra/keycloak/themes/agentcity` (C) |
+
+## X01.2 Changed files
+
+- **New package `packages/city-scene`:** the whole 3D city (sources above), `src/data/city-layout.json` (generated
+  from the legacy seed, no real person names), tests `test/*.test.ts`, dev harnesses under `test/`, `ASSETS.md`
+  (everything generated in code; no downloaded models).
+- **apps/web:** landing page and design tokens (`app/page.tsx`, `app/(marketing)`, `app/theme.css`, `app/layout.tsx`,
+  `components/marketing`, Geist font with its OFL licence in `public/fonts`), `/city`, demo pages and components,
+  `/office`, `/admin/leads`, the signed-in header, smoke tests `test/b-landing.smoke.ts`, `test/d-demo*.ts`. The
+  status page moved to `/status`.
+- **apps/api:** `src/demo/**`, `loginHint` in `src/auth/{oidc,auth.controller}.ts`, error codes in
+  `src/common/errors.ts`, demo settings in `src/env.ts`, tests `test/demo*.ts`, regenerated `generated/openapi.json`.
+- **apps/worker:** `src/demo-expire.ts`, `src/demo-workflow.ts`, registration in `main.ts` and `workflows.ts`.
+- **packages/db:** migration `1793318400000_demo.sql`, `test/demo.test.ts`.
+- **infra:** `keycloak/agentcity-realm.json` (provisioner client, themes), `keycloak/themes/agentcity/**`,
+  `compose.yaml` (theme mount), `local-dev.env` (provisioner client, local-dev-only secret).
+- **Root:** `package.json` (`demo:expire`), `pnpm-lock.yaml` (three 0.186.1, @react-three/fiber 9.8.2, drei 10.7.9,
+  postprocessing), `.gitignore` (`apps/web/AGENTS.md`, written by `next dev`), `scripts/smoke.mjs` (`/status`).
+
+## X01.3 Commands actually run
+
+Final run on the merged branch, from the repository root (outputs in `x01-cinematic-city/evidence/`):
+
+| Command | Result | Evidence |
+|---|---|---|
+| `pnpm format:check` | exit 0 | `format-check.txt` |
+| `pnpm typecheck` | exit 0 | `typecheck.txt` |
+| `pnpm build` | exit 0 | `build.txt` |
+| `pnpm test` (unit) | domain 7, legacy 33, worker 3, legacy-import 7, api 57, **city-scene 120**, web 13; 0 failures | `unit-tests.txt` |
+| `pnpm db:test` | **db 49/49, legacy-import 9/9, api 102/102** (includes 9 demo database and 15 demo API tests) | `integration-tests.txt` |
+| `pnpm smoke` (M01 regression) | PASSED 10/10 | `m01-smoke-regression.txt` |
+| `apps/web`: `node --test test/b-landing.smoke.ts test/d-demo.smoke.ts` | 21/21 (mock API) | — |
+| `apps/web`: `pnpm test:browser` (M03 browser checks) | 10/10 | — |
+| Real end-to-end journey (`evidence/e2e/journey.cjs`) on web :3000, API :4000, real Keycloak and Mailpit | **12/12 steps, no console errors**: landing → form → "check your email" → verify mail → confirm → `/demo/verified` → email prefilled → code by mail → "Welcome to AgentCity, Ada." → tour → 3D office (8 agents) → city → phone welcome and landing | `evidence/e2e/*.png` |
+| `pnpm keycloak:verify`, the email-code verifier, live provisioning | 34/34, 28/28, 12/12 (run by workstream C with the new theme) | `evidence/c-keycloak-theme.json`, `evidence/c-live-provisioning.json` |
+
+Problems found by the real run and fixed: the verify flow stopped on Keycloak's "Account updated" page (now continues
+to the site); the attribution field name differed between form and API (aligned); the building labels clashed with
+the light HUD and floated over cut-away floors; the live hero camera looked straight down (now uses the poster's
+framing).
+
+## X01.4 Not run, or not claimed
+
+- **No real-device performance numbers.** Every render here used SwiftShader (software GL, about 0.2–1 fps). Draw
+  calls and triangle counts per preset are recorded in the workstream reports, but no frame-rate target is claimed
+  as met. The demo office falls back to the 2D plan on software renderers.
+- **No production email.** Mail went only to Mailpit. No production sender is approved.
+- **Not tested on real phones or non-Chromium browsers.** Phone layouts were checked at 390×844 in Chromium.
+- **CI has not run on GitHub** for M03 or X01.
+- **The M00 characterization harness** was not run (as in M01/M02).
+
+## X01.5 Unresolved risks and decisions
+
+1. **Merge order.** The branch contains M03 and the M04 inventory. M03 must be reviewed and merged first.
+2. **Local Keycloak keeps no data.** After any Keycloak restart, `pnpm keycloak:seed` must run again, or email-code
+   sign-in fails ("Invalid username or password"). CI already does this; it bit this run after a container restart.
+3. **Verification email subject** is "Confirm your email for AgentCity" (not "…for your AgentCity demo") because
+   Keycloak uses one subject for that template, and agency SSO users receive it too. The body names the demo.
+4. **Provisioning after the 202** runs in the background; if Keycloak fails then, the visitor must submit again
+   (logged without personal data).
+5. **Status side channel:** a request id whose demo later expired reports `expired`.
+6. **Brand signage** (Honda, Fiat, Maserati and the other dealership names, and "Fast Sales Training Center") appears
+   on the public city and landing page with the owner's approval.
+7. **Ultra quality has postprocessing off:** fog was being tone-mapped twice. Restoring night bloom needs fog moved
+   before tone mapping for every material.
+
+## X01.6 Next safe step
+
+Owner review of `feature/cinematic-city-demo` in a real browser with a GPU (`pnpm infra:up && pnpm keycloak:seed
+&& pnpm infra:init && pnpm build`, then start the API, worker and web). Then merge M03 into `main`, then X01.
+
+# M03 — OIDC access and session cutover
+
+Prompt: `planning/agentcity-migration/prompts/M03-oidc-access-and-session-cutover.md`. Prerequisite checked: M02 is
+"local passed" and merged into `main` (002406e, status ade42f4). Built in parallel workstreams and integrated on
+`migration/m03-identity` (689ca54). The legacy app keeps its own sign-in until cutover.
+
+## M03.1 What was built
+
+- **The API is a confidential OIDC client** (`agentcity-bff`, PKCE, state and nonce). Tokens never reach the browser;
+  the session cookie is a hashed random token, and the refresh token is encrypted (AES-GCM).
+- **Device-bound sessions:** an ES256 proof on every request (`X-Device-Proof`, DPoP-style), with replay blocked in
+  Redis.
+- **Global session guard and step-up:** step-up needs `acr` 2, a passkey in `amr`, a fresh `auth_time` and the same
+  subject. Normal sign-in sends `acr_values=1` and refuses other levels.
+- **Revocation:** revocations go out on Redis; realtime sockets are disconnected on revocation.
+- **Invitations:** single-use, 48-hour tokens.
+- **Keycloak realm:** passwordless (passkey, plus email code from a first-party authenticator), agency SSO through a
+  broker realm, LoA mapping, and SMTP to Mailpit.
+
+The design and response shapes are in `m03/DESIGN.md`; Keycloak details are in `m03/IDP.md`.
+
+## M03.2 Changed files
+
+- **apps/api:** `src/{auth,access,realtime,platform}`.
+- **packages/db:** migrations `1793145600000_identity.sql` and `1793145600001_access.sql`.
+- **infra/keycloak:** the realm, the seed and verify scripts, and the `email-code-authenticator` (built by
+  `pnpm keycloak:providers`).
+- **apps/web:** sign-in, the account page, `invitations/accept`.
+- **Workflow and docs:** `.github/workflows/ci.yml` (builds the provider, seeds Keycloak, runs the API integration
+  suites), and `m03/` docs and evidence.
+
+## M03.3 Commands actually run (on 689ca54)
+
+| Command | Result | Evidence |
+|---|---|---|
+| `pnpm format:check`, `pnpm typecheck`, `pnpm build` | exit 0 | `m03/evidence/{format-check,typecheck,build}.txt` |
+| `pnpm test` | all unit suites pass (API 91 at that commit, including the acr and passkey refusals) | `unit-tests.txt` |
+| `pnpm db:test` | db 40/40, legacy-import 9/9, api 87/87 | `integration-tests.txt` |
+| `pnpm keycloak:verify` | 34/34. The first run gave 33/34: `sso-user-adds-passkey` failed once, then passed on re-run; recorded as intermittent | `idp-verification.json` |
+| Email-code authenticator verifier | passed | `email-code-verification.json` |
+
+## M03.4 Not run, or not claimed
+
+- **The parallel M03 end-to-end suite** (`/home/user/m03-e2e`, not committed) was stopped by the owner. Its last
+  report was 19/21, with 2 product issues that were not re-checked after the later fixes. It is not counted as
+  evidence.
+- **CI has not run on GitHub.**
+
+## M03.5 Unresolved blockers and risks
+
+1. **Back-channel logout can't reach the API from the local Keycloak container.** The 5-minute refresh revalidation
+   is the backstop until it is deployed where Keycloak can reach the API.
+2. **The `sso-user-adds-passkey` check is intermittent** (one failure in several runs).
+3. **Carried over:** Node 22, RustFS, and the production-input gate from M02.
+
+## M03.6 Next safe stage
+
+Owner review, then merge `migration/m03-identity` into `main`, then continue M04 (module porting).
 
 # M02 — scoped PostgreSQL data, tenancy and legacy import
 

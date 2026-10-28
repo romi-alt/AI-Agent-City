@@ -1,0 +1,1819 @@
+
+> agentcity@ test /home/user/sales-city
+> pnpm -r run test
+
+Scope: 9 of 10 workspace projects
+apps/legacy test$ node --import tsx --test --test-concurrency=1 test/*.test.ts
+packages/db test$ echo 'packages/db has integration tests only: pnpm --filter @agentcity/db test:integration'
+packages/domain test$ node --import tsx --test test/*.test.ts
+packages/db test: packages/db has integration tests only: pnpm --filter @agentcity/db test:integration
+packages/db test: Done
+apps/legacy test: TAP version 13
+packages/domain test: TAP version 13
+packages/domain test: # Subtest: city catalog
+packages/domain test:     # Subtest: keeps the exact legacy inventory (MIGRATION-MAP: 15 / 183 / 281 / 22 / 303)
+packages/domain test:     ok 1 - keeps the exact legacy inventory (MIGRATION-MAP: 15 / 183 / 281 / 22 / 303)
+packages/domain test:       ---
+packages/domain test:       duration_ms: 1.108315
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: keeps every legacy building id as an alias
+packages/domain test:     ok 2 - keeps every legacy building id as an alias
+packages/domain test:       ---
+packages/domain test:       duration_ms: 0.379089
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: keeps Fast Sales as 32 AI agents and Elvis, with seven AI leaders on the leadership floor
+packages/domain test:     ok 3 - keeps Fast Sales as 32 AI agents and Elvis, with seven AI leaders on the leadership floor
+packages/domain test:       ---
+packages/domain test:       duration_ms: 0.447588
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: keeps the 21 named Rick Case associates and Elvis as human desks that can never run an agent
+packages/domain test:     ok 4 - keeps the 21 named Rick Case associates and Elvis as human desks that can never run an agent
+packages/domain test:       ---
+packages/domain test:       duration_ms: 0.173817
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: starts rental buildings empty, with asking rent only
+packages/domain test:     ok 5 - starts rental buildings empty, with asking rent only
+packages/domain test:       ---
+packages/domain test:       duration_ms: 3.378429
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: gives stable ids: the same legacy id always maps to the same uuid
+packages/domain test:     ok 6 - gives stable ids: the same legacy id always maps to the same uuid
+packages/domain test:       ---
+packages/domain test:       duration_ms: 0.417661
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     # Subtest: has an up-to-date generated seed migration
+packages/domain test:     ok 7 - has an up-to-date generated seed migration
+packages/domain test:       ---
+packages/domain test:       duration_ms: 1.584164
+packages/domain test:       type: 'test'
+packages/domain test:       ...
+packages/domain test:     1..7
+packages/domain test: ok 1 - city catalog
+packages/domain test:   ---
+packages/domain test:   duration_ms: 8.269528
+packages/domain test:   type: 'suite'
+packages/domain test:   ...
+packages/domain test: 1..1
+packages/domain test: # tests 7
+packages/domain test: # suites 1
+packages/domain test: # pass 7
+packages/domain test: # fail 0
+packages/domain test: # cancelled 0
+packages/domain test: # skipped 0
+packages/domain test: # todo 0
+packages/domain test: # duration_ms 201.169256
+packages/domain test: Done
+apps/legacy test: # Subtest: outbound kill switch
+apps/legacy test:     # Subtest: stops every provider call while the switch is off, even in Live mode
+apps/legacy test:     ok 1 - stops every provider call while the switch is off, even in Live mode
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 389.847326
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: treats any value other than "true" as off
+apps/legacy test:     ok 2 - treats any value other than "true" as off
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1588.751936
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: never calls a provider in demo (simulate) mode, even with the switch on
+apps/legacy test:     ok 3 - never calls a provider in demo (simulate) mode, even with the switch on
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 318.920077
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: never "sends" a phone call: there is no phone provider
+apps/legacy test:     ok 4 - never "sends" a phone call: there is no phone provider
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.001547
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: does reach the provider when the switch is on and Delivery is Live (so the tests above are not vacuous)
+apps/legacy test:     ok 5 - does reach the provider when the switch is on and Delivery is Live (so the tests above are not vacuous)
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 331.791833
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..5
+apps/legacy test: ok 1 - outbound kill switch
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 2631.338808
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: saved city fails closed
+apps/legacy test:     # Subtest: refuses to start on malformed JSON and leaves state.json byte-identical
+apps/legacy test:     ok 1 - refuses to start on malformed JSON and leaves state.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 469.014977
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: refuses to start on unsupported version and leaves state.json byte-identical
+apps/legacy test:     ok 2 - refuses to start on unsupported version and leaves state.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 451.122196
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: refuses to start on missing lists and leaves state.json byte-identical
+apps/legacy test:     ok 3 - refuses to start on missing lists and leaves state.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 452.217685
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: refuses to start on malformed account file and leaves auth.json byte-identical
+apps/legacy test:     ok 4 - refuses to start on malformed account file and leaves auth.json byte-identical
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 433.944224
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: saves the city readable by its owner only
+apps/legacy test:     ok 5 - saves the city readable by its owner only
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 521.146903
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: loadState never writes, and loads a good file
+apps/legacy test:     ok 6 - loadState never writes, and loads a good file
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 4.891089
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..6
+apps/legacy test: ok 2 - saved city fails closed
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 2332.937514
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: public pulse
+apps/legacy test:     # Subtest: returns only the fixed catalog: no names, work, status or activity counts
+apps/legacy test:     ok 1 - returns only the fixed catalog: no names, work, status or activity counts
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 535.633
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..1
+apps/legacy test: ok 3 - public pulse
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 535.824905
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: the city has data to filter
+apps/legacy test:     # Subtest: has activity in several buildings
+apps/legacy test:     ok 1 - has activity in several buildings
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.502959
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..1
+apps/legacy test: ok 4 - the city has data to filter
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 1.107045
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: opening snapshot
+apps/legacy test:     # Subtest: gives the agency everything
+apps/legacy test:     ok 1 - gives the agency everything
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.830213
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: gives a client only its own buildings and their records
+apps/legacy test:     ok 2 - gives a client only its own buildings and their records
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.711875
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: shows other buildings only as unnamed shapes
+apps/legacy test:     ok 3 - shows other buildings only as unnamed shapes
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.583271
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: leaks no other building, agent or lead names
+apps/legacy test:     ok 4 - leaks no other building, agent or lead names
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 73.626918
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: covers a client with several buildings
+apps/legacy test:     ok 5 - covers a client with several buildings
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 2.190362
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: gives a client with no buildings nothing
+apps/legacy test:     ok 6 - gives a client with no buildings nothing
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.319272
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: keeps the browser mirror working on a filtered snapshot
+apps/legacy test:     ok 7 - keeps the browser mirror working on a filtered snapshot
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.507578
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..7
+apps/legacy test: ok 5 - opening snapshot
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 80.207372
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: live updates
+apps/legacy test:     # Subtest: only ever carry the client's own building
+apps/legacy test:     ok 1 - only ever carry the client's own building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 34.927592
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: pass through unchanged for the agency
+apps/legacy test:     ok 2 - pass through unchanged for the agency
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.266073
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..2
+apps/legacy test: ok 6 - live updates
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 35.308367
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: actions
+apps/legacy test:     # Subtest: lets the agency do anything
+apps/legacy test:     ok 1 - lets the agency do anything
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.212103
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: lets a client admin work its own building
+apps/legacy test:     ok 2 - lets a client admin work its own building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.078687
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: answers "not found" for anything in another client's building
+apps/legacy test:     ok 3 - answers "not found" for anything in another client's building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.188846
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: keeps renting floors with the agency
+apps/legacy test:     ok 4 - keeps renting floors with the agency
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.06279
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: lets a client viewer look but not change anything
+apps/legacy test:     ok 5 - lets a client viewer look but not change anything
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.060782
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..5
+apps/legacy test: ok 7 - actions
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 0.702535
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: # Subtest: accounts and clients
+apps/legacy test:     # Subtest: upgrades old admin and member accounts to agency owner and staff
+apps/legacy test:     ok 1 - upgrades old admin and member accounts to agency owner and staff
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.539342
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: never lets two clients own the same building
+apps/legacy test:     ok 2 - never lets two clients own the same building
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 0.925118
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: requires a client for client roles and drops it for agency roles
+apps/legacy test:     ok 3 - requires a client for client roles and drops it for agency roles
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 2.020256
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: signs someone out when their access changes
+apps/legacy test:     ok 4 - signs someone out when their access changes
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 2.497472
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: signs a client's people out when its buildings change, but not when only the name changes
+apps/legacy test:     ok 5 - signs a client's people out when its buildings change, but not when only the name changes
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.501904
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     # Subtest: keeps at least one agency owner, and won't delete a client that still has people
+apps/legacy test:     ok 6 - keeps at least one agency owner, and won't delete a client that still has people
+apps/legacy test:       ---
+apps/legacy test:       duration_ms: 1.056692
+apps/legacy test:       type: 'test'
+apps/legacy test:       ...
+apps/legacy test:     1..6
+apps/legacy test: ok 8 - accounts and clients
+apps/legacy test:   ---
+apps/legacy test:   duration_ms: 8.760303
+apps/legacy test:   type: 'suite'
+apps/legacy test:   ...
+apps/legacy test: 1..8
+apps/legacy test: # tests 33
+apps/legacy test: # suites 8
+apps/legacy test: # pass 33
+apps/legacy test: # fail 0
+apps/legacy test: # cancelled 0
+apps/legacy test: # skipped 0
+apps/legacy test: # todo 0
+apps/legacy test: # duration_ms 7291.269265
+apps/legacy test: Done
+apps/api test$ node --import tsx --test test/env.test.ts test/common*.test.ts
+apps/worker test$ node --import tsx --test test/*.test.ts
+packages/city-scene test$ node --import tsx --test test/*.test.ts
+packages/legacy-import test$ node --import tsx --test test/plan.test.ts
+apps/api test: TAP version 13
+apps/worker test: TAP version 13
+packages/legacy-import test: TAP version 13
+packages/city-scene test: TAP version 13
+apps/worker test: # Subtest: accepts a complete development configuration
+apps/worker test: ok 1 - accepts a complete development configuration
+apps/worker test:   ---
+apps/worker test:   duration_ms: 2.054461
+apps/worker test:   type: 'test'
+apps/worker test:   ...
+apps/worker test: # Subtest: lists missing settings without printing values
+apps/worker test: ok 2 - lists missing settings without printing values
+apps/worker test:   ---
+apps/worker test:   duration_ms: 2.689928
+apps/worker test:   type: 'test'
+apps/worker test:   ...
+apps/worker test: # Subtest: refuses local-development credentials in production
+apps/worker test: ok 3 - refuses local-development credentials in production
+apps/worker test:   ---
+apps/worker test:   duration_ms: 3.541424
+apps/worker test:   type: 'test'
+apps/worker test:   ...
+apps/worker test: 1..3
+apps/worker test: # tests 3
+apps/worker test: # suites 0
+apps/worker test: # pass 3
+apps/worker test: # fail 0
+apps/worker test: # cancelled 0
+apps/worker test: # skipped 0
+apps/worker test: # todo 0
+apps/worker test: # duration_ms 510.299343
+apps/api test: # Subtest: ETag and If-Match
+apps/api test:     # Subtest: formats strong ETags and parses them back, accepting a proxy-weakened W/ form
+apps/api test:     ok 1 - formats strong ETags and parses them back, accepting a proxy-weakened W/ form
+apps/api test:       ---
+apps/api test:       duration_ms: 1.127295
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: refuses malformed If-Match instead of treating it as absent
+apps/api test:     ok 2 - refuses malformed If-Match instead of treating it as absent
+apps/api test:       ---
+apps/api test:       duration_ms: 0.310916
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..2
+apps/api test: ok 1 - ETag and If-Match
+apps/api test:   ---
+apps/api test:   duration_ms: 2.071515
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: readPrecondition
+apps/api test:     # Subtest: takes the version from If-Match or from expectedVersion
+apps/worker test: Done
+apps/api test:     ok 1 - takes the version from If-Match or from expectedVersion
+apps/api test:       ---
+apps/api test:       duration_ms: 0.246501
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: refuses updates without a version, with "*", with several, or with two that disagree
+apps/api test:     ok 2 - refuses updates without a version, with "*", with several, or with two that disagree
+apps/api test:       ---
+apps/api test:       duration_ms: 0.285362
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..2
+apps/api test: ok 2 - readPrecondition
+apps/api test:   ---
+apps/api test:   duration_ms: 0.636678
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: assertCurrent
+apps/api test:     # Subtest: passes when the version matches
+apps/api test:     ok 1 - passes when the version matches
+apps/api test:       ---
+apps/api test:       duration_ms: 13.052752
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: is stale_revision: 412 for If-Match, 409 for body/GraphQL, with the current version to reload
+apps/api test:     ok 2 - is stale_revision: 412 for If-Match, 409 for body/GraphQL, with the current version to reload
+apps/api test:       ---
+apps/api test:       duration_ms: 0.298911
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: is not_found when the row is missing or out of scope (never reveals which)
+apps/api test:     ok 3 - is not_found when the row is missing or out of scope (never reveals which)
+apps/api test:       ---
+apps/api test:       duration_ms: 0.209652
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: explains a conditional UPDATE that matched no row
+apps/api test:     ok 4 - explains a conditional UPDATE that matched no row
+apps/api test:       ---
+apps/api test:       duration_ms: 0.217074
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: computes the next integer version
+apps/api test:     ok 5 - computes the next integer version
+apps/api test:       ---
+apps/api test:       duration_ms: 0.126951
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..5
+apps/api test: ok 3 - assertCurrent
+apps/api test:   ---
+apps/api test:   duration_ms: 14.197448
+apps/api test:   type: 'suite'
+apps/api test:   ...
+packages/legacy-import test: # Subtest: import plan
+packages/legacy-import test:     # Subtest: hashes records independently of key order
+packages/legacy-import test:     ok 1 - hashes records independently of key order
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 0.638637
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: reads legacy simulator minutes as UTC from the start date
+packages/legacy-import test:     ok 2 - reads legacy simulator minutes as UTC from the start date
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 0.356757
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: refuses a building-wide ownership rule on a building shared by two clients
+packages/legacy-import test:     ok 3 - refuses a building-wide ownership rule on a building shared by two clients
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 4.318775
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: quarantines a real contact with no explicit owner, and sends simulated ones to the demo tenant
+packages/legacy-import test:     ok 4 - quarantines a real contact with no explicit owner, and sends simulated ones to the demo tenant
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 7.896027
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: assigns a real contact mapped by id to exactly that tenant
+packages/legacy-import test:     ok 5 - assigns a real contact mapped by id to exactly that tenant
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 0.610891
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: never carries credentials into planned rows or quarantine
+packages/legacy-import test:     ok 6 - never carries credentials into planned rows or quarantine
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 5.047981
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     # Subtest: is deterministic: the same input gives the same plan
+packages/legacy-import test:     ok 7 - is deterministic: the same input gives the same plan
+packages/legacy-import test:       ---
+packages/legacy-import test:       duration_ms: 1.070933
+packages/legacy-import test:       type: 'test'
+packages/legacy-import test:       ...
+packages/legacy-import test:     1..7
+packages/legacy-import test: ok 1 - import plan
+packages/legacy-import test:   ---
+packages/legacy-import test:   duration_ms: 22.746629
+packages/legacy-import test:   type: 'suite'
+packages/legacy-import test:   ...
+packages/legacy-import test: 1..1
+packages/legacy-import test: # tests 7
+packages/legacy-import test: # suites 1
+packages/legacy-import test: # pass 7
+packages/legacy-import test: # fail 0
+packages/legacy-import test: # cancelled 0
+packages/legacy-import test: # skipped 0
+packages/legacy-import test: # todo 0
+packages/legacy-import test: # duration_ms 612.587177
+packages/legacy-import test: Done
+packages/city-scene test: # Subtest: street grid
+packages/city-scene test:     # Subtest: keeps the legacy street geometry that traffic and pedestrians use
+packages/city-scene test:     ok 1 - keeps the legacy street geometry that traffic and pedestrians use
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.477335
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: continues the layout roads outward and has exactly the 15 lots in its core
+packages/city-scene test:     ok 2 - continues the layout roads outward and has exactly the 15 lots in its core
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.320023
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..2
+packages/city-scene test: ok 1 - street grid
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 1.338039
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: background skyline
+packages/city-scene test:     # Subtest: is deterministic
+packages/city-scene test:     ok 1 - is deterministic
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 48.210169
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: is the same city at every quality: lower levels only drop details
+packages/city-scene test:     ok 2 - is the same city at every quality: lower levels only drop details
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 74.613668
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: stays off the roads, the walking line and the 15 lots, and never overlaps itself
+packages/city-scene test:     ok 3 - stays off the roads, the walking line and the 15 lots, and never overlaps itself
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 70.360554
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: has varied silhouettes: several styles, setbacks, signature tops and a range of heights
+packages/city-scene test:     ok 4 - has varied silhouettes: several styles, setbacks, signature tops and a range of heights
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 5.478067
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..4
+packages/city-scene test: ok 2 - background skyline
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 198.923357
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: layout buildings
+packages/city-scene test:     # Subtest: stack their floors exactly: the last floor ends at base + floors × FLOOR_HEIGHT
+packages/city-scene test:     ok 1 - stack their floors exactly: the last floor ends at base + floors × FLOOR_HEIGHT
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.307619
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: stay inside their lots
+packages/city-scene test:     ok 2 - stay inside their lots
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.16435
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: make the Training Center the tallest point of the lots, and sign every dealership with its brand
+packages/city-scene test:     ok 3 - make the Training Center the tallest point of the lots, and sign every dealership with its brand
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.172462
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..3
+packages/city-scene test: ok 3 - layout buildings
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.898411
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: street furniture
+packages/city-scene test:     # Subtest: keeps lamps and trees off the roads and the walking line, and out of buildings
+packages/city-scene test:     ok 1 - keeps lamps and trees off the roads and the walking line, and out of buildings
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 21.426207
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: puts two signal poles at every junction of the traffic grid
+packages/city-scene test:     ok 2 - puts two signal poles at every junction of the traffic grid
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.171379
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..2
+packages/city-scene test: ok 4 - street furniture
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 21.669719
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: automatic quality
+packages/city-scene test:     # Subtest: picks the initial level from the median frame time
+packages/city-scene test:     ok 1 - picks the initial level from the median frame time
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.170966
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: steps down only after sustained slow seconds, one level at a time
+packages/city-scene test:     ok 2 - steps down only after sustained slow seconds, one level at a time
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.171119
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..2
+packages/city-scene test: ok 5 - automatic quality
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.455922
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: environment presets
+packages/city-scene test:     # Subtest: converts sRGB hex to linear
+packages/city-scene test:     ok 1 - converts sRGB hex to linear
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.946307
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: gets darker and lights up from day to night
+packages/city-scene test:     ok 2 - gets darker and lights up from day to night
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.194167
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: makes light rain wet, overcast and dimmer, and switches some office lights on
+packages/city-scene test:     ok 3 - makes light rain wet, overcast and dimmer, and switches some office lights on
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.131923
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: interpolates every field, colours component-wise, azimuth the short way round
+packages/city-scene test:     ok 4 - interpolates every field, colours component-wise, azimuth the short way round
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.474114
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: blends over a few seconds, eased, and lands exactly on the target
+packages/city-scene test:     ok 5 - blends over a few seconds, eased, and lands exactly on the target
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.27494
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: cuts instantly with reduced motion
+packages/city-scene test:     ok 6 - cuts instantly with reduced motion
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.131838
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: points the sun vector up for positive elevations
+packages/city-scene test:     ok 7 - points the sun vector up for positive elevations
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.115345
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..7
+packages/city-scene test: ok 6 - environment presets
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 9.102161
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: default traffic-signal cycle
+packages/city-scene test:     # Subtest: never shows green both ways and follows the legacy timings
+packages/city-scene test:     ok 1 - never shows green both ways and follows the legacy timings
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.310219
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..1
+packages/city-scene test: ok 7 - default traffic-signal cycle
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.493331
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: keeps airliners high above every building and far from the towers (one simulated hour)
+packages/city-scene test: ok 8 - keeps airliners high above every building and far from the towers (one simulated hour)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 100.214102
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: spaces airliners out: never more than the budget in the sky, and gaps between flights
+packages/city-scene test: ok 9 - spaces airliners out: never more than the budget in the sky, and gaps between flights
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 1.195697
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: keeps helicopters above the roofs and clear of the towers
+packages/city-scene test: ok 10 - keeps helicopters above the roofs and clear of the towers
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 189.932807
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: moves helicopters smoothly (no jumps between frames)
+packages/city-scene test: ok 11 - moves helicopters smoothly (no jumps between frames)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 41.539774
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+apps/api test: # Subtest: error codes
+apps/api test:     # Subtest: include every M03 auth code, each with a status
+apps/api test:     ok 1 - include every M03 auth code, each with a status
+apps/api test:       ---
+apps/api test:       duration_ms: 0.53308
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..1
+apps/api test: ok 4 - error codes
+apps/api test:   ---
+apps/api test:   duration_ms: 1.200732
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: renderError
+apps/api test:     # Subtest: passes an ApiError through with its code, status and details
+apps/api test:     ok 1 - passes an ApiError through with its code, status and details
+apps/api test:       ---
+apps/api test:       duration_ms: 0.984412
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: turns a zod error into validation_failed with paths, never the received values
+apps/api test:     ok 2 - turns a zod error into validation_failed with paths, never the received values
+apps/api test:       ---
+apps/api test:       duration_ms: 4.228788
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: keeps an M03 guard code and its reason (step-up), and fills in a message
+apps/api test:     ok 3 - keeps an M03 guard code and its reason (step-up), and fills in a message
+apps/api test:       ---
+apps/api test:       duration_ms: 0.454567
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: maps plain Nest exceptions by status
+apps/api test:     ok 4 - maps plain Nest exceptions by status
+apps/api test:       ---
+apps/api test:       duration_ms: 0.3151
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: never sends a 5xx exception message
+apps/api test:     ok 5 - never sends a 5xx exception message
+apps/api test:       ---
+apps/api test:       duration_ms: 0.085398
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: maps database errors without SQL, constraint names or values
+apps/api test:     ok 6 - maps database errors without SQL, constraint names or values
+apps/api test:       ---
+apps/api test:       duration_ms: 0.586014
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: maps body-parser errors (bad JSON, too large)
+apps/api test:     ok 7 - maps body-parser errors (bad JSON, too large)
+apps/api test:       ---
+apps/api test:       duration_ms: 0.501146
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: hides unknown errors behind internal_error
+apps/api test:     ok 8 - hides unknown errors behind internal_error
+apps/api test:       ---
+apps/api test:       duration_ms: 0.177718
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: adds Retry-After for rate limits
+apps/api test:     ok 9 - adds Retry-After for rate limits
+apps/api test:       ---
+apps/api test:       duration_ms: 0.278636
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..9
+apps/api test: ok 5 - renderError
+apps/api test:   ---
+apps/api test:   duration_ms: 8.061989
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: StructuredErrorFilter
+apps/api test:     # Subtest: writes the structured body with the request id, no-store, and logs 5xx with the stack server-side only
+apps/api test:     ok 1 - writes the structured body with the request id, no-store, and logs 5xx with the stack server-side only
+apps/api test:       ---
+apps/api test:       duration_ms: 6.088882
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: does not log 4xx, and drops the first line of a pg error (it can quote values) from the log
+apps/api test:     ok 2 - does not log 4xx, and drops the first line of a pg error (it can quote values) from the log
+apps/api test:       ---
+apps/api test:       duration_ms: 0.389153
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: generates a request id if the middleware did not run
+apps/api test:     ok 3 - generates a request id if the middleware did not run
+apps/api test:       ---
+apps/api test:       duration_ms: 0.182776
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: only ends a response whose headers were already sent (a started stream)
+apps/api test:     ok 4 - only ends a response whose headers were already sent (a started stream)
+apps/api test:       ---
+apps/api test:       duration_ms: 0.17124
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: returns a GraphQLError with the same code, request id and details in GraphQL
+apps/api test:     ok 5 - returns a GraphQLError with the same code, request id and details in GraphQL
+apps/api test:       ---
+apps/api test:       duration_ms: 0.383428
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..5
+apps/api test: ok 6 - StructuredErrorFilter
+apps/api test:   ---
+apps/api test:   duration_ms: 7.353884
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: expressErrorHandler
+apps/api test:     # Subtest: renders errors raised outside Nest the same way
+apps/api test:     ok 1 - renders errors raised outside Nest the same way
+apps/api test:       ---
+apps/api test:       duration_ms: 0.229917
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..1
+apps/api test: ok 7 - expressErrorHandler
+apps/api test:   ---
+apps/api test:   duration_ms: 0.277577
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: queryLimitsRule
+apps/api test:     # Subtest: allows queries within the limits
+apps/api test:     ok 1 - allows queries within the limits
+apps/api test:       ---
+apps/api test:       duration_ms: 13.279167
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: refuses queries nested too deeply, including through fragments
+apps/api test:     ok 2 - refuses queries nested too deeply, including through fragments
+apps/api test:       ---
+apps/api test:       duration_ms: 5.120923
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: counts aliases and repeated fragment spreads toward the field limit
+apps/api test:     ok 3 - counts aliases and repeated fragment spreads toward the field limit
+apps/api test:       ---
+apps/api test:       duration_ms: 8.555529
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: does not loop on fragment cycles (graphql reports them itself)
+apps/api test:     ok 4 - does not loop on fragment cycles (graphql reports them itself)
+apps/api test:       ---
+apps/api test:       duration_ms: 0.792364
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..4
+apps/api test: ok 8 - queryLimitsRule
+apps/api test:   ---
+apps/api test:   duration_ms: 28.535887
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: formatGraphqlError
+apps/api test:     # Subtest: keeps our codes, request id and details
+apps/api test:     ok 1 - keeps our codes, request id and details
+apps/api test:       ---
+apps/api test:       duration_ms: 6.348834
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: translates Apollo request errors and hides everything else
+apps/api test:     ok 2 - translates Apollo request errors and hides everything else
+apps/api test:       ---
+apps/api test:       duration_ms: 0.185474
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..2
+apps/api test: ok 9 - formatGraphqlError
+apps/api test:   ---
+apps/api test:   duration_ms: 6.776871
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: common plumbing in a Nest app
+apps/api test:     # Subtest: ApiError → structured body, echoed request id
+apps/api test:     ok 1 - ApiError → structured body, echoed request id
+apps/api test:       ---
+apps/api test:       duration_ms: 19.062124
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: zod failure → validation_failed; malformed JSON → bad_request; both with a generated request id
+apps/api test:     ok 2 - zod failure → validation_failed; malformed JSON → bad_request; both with a generated request id
+apps/api test:       ---
+apps/api test:       duration_ms: 28.651387
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: unknown route → not_found in the same format
+apps/api test:     ok 3 - unknown route → not_found in the same format
+apps/api test:       ---
+apps/api test:       duration_ms: 2.616897
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: unexpected error → internal_error, no SQL in the body, stack logged with the request id
+apps/api test:     ok 4 - unexpected error → internal_error, no SQL in the body, stack logged with the request id
+apps/api test:       ---
+apps/api test:       duration_ms: 12.588002
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: If-Match: missing → 428, stale → 412 with current version, current → 200
+apps/api test:     ok 5 - If-Match: missing → 428, stale → 412 with current version, current → 200
+apps/api test:       ---
+apps/api test:       duration_ms: 24.352445
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: GraphQL errors carry the same code and request id; internal ones are hidden
+apps/api test:     ok 6 - GraphQL errors carry the same code and request id; internal ones are hidden
+apps/api test:       ---
+apps/api test:       duration_ms: 30.880644
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: GraphQL depth limit refuses before any resolver runs; batched requests are refused
+apps/api test:     ok 7 - GraphQL depth limit refuses before any resolver runs; batched requests are refused
+apps/api test:       ---
+apps/api test:       duration_ms: 37.895265
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..7
+apps/api test: ok 10 - common plumbing in a Nest app
+apps/api test:   ---
+apps/api test:   duration_ms: 389.166834
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: cursor codec
+apps/api test:     # Subtest: round-trips a keyset position for the same binding
+apps/api test:     ok 1 - round-trips a keyset position for the same binding
+apps/api test:       ---
+apps/api test:       duration_ms: 6.91185
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: does not write the tenant, workspace or filter into the cursor
+apps/api test:     ok 2 - does not write the tenant, workspace or filter into the cursor
+apps/api test:       ---
+apps/api test:       duration_ms: 0.282785
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: refuses a cursor used for another tenant, workspace, list or filter
+apps/api test:     ok 3 - refuses a cursor used for another tenant, workspace, list or filter
+apps/api test:       ---
+apps/api test:       duration_ms: 0.551029
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: refuses edited, truncated, junk and oversized cursors
+apps/api test:     ok 4 - refuses edited, truncated, junk and oversized cursors
+apps/api test:       ---
+apps/api test:       duration_ms: 0.443716
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: refuses a cursor signed with another key (another deployment or purpose)
+apps/api test:     ok 5 - refuses a cursor signed with another key (another deployment or purpose)
+apps/api test:       ---
+apps/api test:       duration_ms: 0.339768
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: accepts cursors from the previous key during rotation
+apps/api test:     ok 6 - accepts cursors from the previous key during rotation
+apps/api test:       ---
+apps/api test:       duration_ms: 0.220219
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: expires cursors after maxAge
+apps/api test:     ok 7 - expires cursors after maxAge
+apps/api test:       ---
+apps/api test:       duration_ms: 0.247515
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: refuses short keys and short secrets
+apps/api test:     ok 8 - refuses short keys and short secrets
+apps/api test:       ---
+apps/api test:       duration_ms: 0.15857
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..8
+apps/api test: ok 11 - cursor codec
+apps/api test:   ---
+apps/api test:   duration_ms: 9.921848
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: page helpers
+apps/api test:     # Subtest: parses page sizes: default, numeric strings, refuses out of range
+apps/api test:     ok 1 - parses page sizes: default, numeric strings, refuses out of range
+apps/api test:       ---
+apps/api test:       duration_ms: 0.347192
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: stableFilterKey ignores key order and undefined, but not values
+apps/api test:     ok 2 - stableFilterKey ignores key order and undefined, but not values
+apps/api test:       ---
+apps/api test:       duration_ms: 0.451707
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: builds a page from limit+1 rows, with a cursor only when there is more
+apps/api test:     ok 3 - builds a page from limit+1 rows, with a cursor only when there is more
+apps/api test:       ---
+apps/api test:       duration_ms: 0.308332
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..3
+apps/api test: ok 12 - page helpers
+apps/api test:   ---
+apps/api test:   duration_ms: 1.254133
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: request id
+apps/api test:     # Subtest: accepts a well-formed incoming X-Request-Id and echoes it
+apps/api test:     ok 1 - accepts a well-formed incoming X-Request-Id and echoes it
+apps/api test:       ---
+apps/api test:       duration_ms: 1.137718
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: replaces missing, malformed, oversized or repeated ids instead of echoing them
+apps/api test:     ok 2 - replaces missing, malformed, oversized or repeated ids instead of echoing them
+apps/api test:       ---
+apps/api test:       duration_ms: 7.142707
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: generates UUIDs by default and exposes the id only inside the request
+apps/api test:     ok 3 - generates UUIDs by default and exposes the id only inside the request
+apps/api test:       ---
+apps/api test:       duration_ms: 0.269352
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     # Subtest: requestIdOf falls back to a fresh id for requests the middleware never saw
+apps/api test:     ok 4 - requestIdOf falls back to a fresh id for requests the middleware never saw
+apps/api test:       ---
+apps/api test:       duration_ms: 0.187515
+apps/api test:       type: 'test'
+apps/api test:       ...
+apps/api test:     1..4
+apps/api test: ok 13 - request id
+apps/api test:   ---
+apps/api test:   duration_ms: 9.443072
+apps/api test:   type: 'suite'
+apps/api test:   ...
+apps/api test: # Subtest: accepts a complete configuration with safe defaults
+apps/api test: ok 14 - accepts a complete configuration with safe defaults
+apps/api test:   ---
+apps/api test:   duration_ms: 4.409863
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/api test: # Subtest: lists every missing setting without printing values
+apps/api test: ok 15 - lists every missing setting without printing values
+apps/api test:   ---
+apps/api test:   duration_ms: 0.998852
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/api test: # Subtest: refuses local-development credentials and dev routes in production
+apps/api test: ok 16 - refuses local-development credentials and dev routes in production
+apps/api test:   ---
+apps/api test:   duration_ms: 0.514774
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/api test: # Subtest: refuses insecure cookies and plain-http identity URLs in production
+apps/api test: ok 17 - refuses insecure cookies and plain-http identity URLs in production
+apps/api test:   ---
+apps/api test:   duration_ms: 0.510066
+apps/api test:   type: 'test'
+apps/api test:   ...
+apps/api test: 1..17
+apps/api test: # tests 57
+apps/api test: # suites 13
+apps/api test: # pass 57
+apps/api test: # fail 0
+apps/api test: # cancelled 0
+apps/api test: # skipped 0
+apps/api test: # todo 0
+apps/api test: # duration_ms 2698.737059
+apps/api test: Done
+packages/city-scene test: # Subtest: keeps every bird in bounds and out of the buildings (ultra, 30 simulated minutes)
+packages/city-scene test: ok 12 - keeps every bird in bounds and out of the buildings (ultra, 30 simulated minutes)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 1743.346137
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: keeps every bird in bounds and out of the buildings (balanced, 30 simulated minutes)
+packages/city-scene test: ok 13 - keeps every bird in bounds and out of the buildings (balanced, 30 simulated minutes)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 522.680416
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: keeps every bird in bounds and out of the buildings (low, 30 simulated minutes)
+packages/city-scene test: ok 14 - keeps every bird in bounds and out of the buildings (low, 30 simulated minutes)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 156.599331
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: staggers wing beats and flights (nothing moves in lockstep)
+packages/city-scene test: ok 15 - staggers wing beats and flights (nothing moves in lockstep)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.615197
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: sizes every system from the quality budget
+packages/city-scene test: ok 16 - sizes every system from the quality budget
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 46.214405
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: is deterministic for a seed
+packages/city-scene test: ok 17 - is deterministic for a seed
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 406.835804
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: puts rooftop details on the roofs, with restraint
+packages/city-scene test: ok 18 - puts rooftop details on the roofs, with restraint
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.920994
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: places a lobby door on a facade of every building, facing a street
+packages/city-scene test: ok 19 - places a lobby door on a facade of every building, facing a street
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.231331
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: keeps model triangle counts within budget (full detail on ultra/balanced, cheaper on low)
+packages/city-scene test: ok 20 - keeps model triangle counts within budget (full detail on ultra/balanced, cheaper on low)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 101.794449
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: fills the pedestrian budget exactly
+packages/city-scene test: ok 21 - fills the pedestrian budget exactly
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 89.729732
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: crosses only on walk, and no car is ever on a crosswalk with people on it (5 simulated minutes)
+packages/city-scene test: ok 22 - crosses only on walk, and no car is ever on a crosswalk with people on it (5 simulated minutes)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 1553.506387
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: starts crossing only while the walk signal is on
+packages/city-scene test: ok 23 - starts crossing only while the walk signal is on
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 115.475451
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: keeps walkers moving (nobody is stuck forever)
+packages/city-scene test: ok 24 - keeps walkers moving (nobody is stuck forever)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 207.82496
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: never shows green or amber to both directions at once
+packages/city-scene test: ok 25 - never shows green or amber to both directions at once
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 24.362385
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: keeps the legacy 16 s cycle: east-west green 6.5 s, amber 1.5 s, then north-south
+packages/city-scene test: ok 26 - keeps the legacy 16 s cycle: east-west green 6.5 s, amber 1.5 s, then north-south
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 1.806917
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: lets people start crossing only with enough green left, parallel to the moving traffic
+packages/city-scene test: ok 27 - lets people start crossing only with enough green left, parallel to the moving traffic
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.55075
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: builds a lane graph that matches the streets
+packages/city-scene test: ok 28 - builds a lane graph that matches the streets
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 14.436288
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: splits the vehicle budget between kinds and respects it
+packages/city-scene test: ok 29 - splits the vehicle budget between kinds and respects it
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 15.682621
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: never overlaps, never commits on red, keeps moving (ultra, 4 simulated minutes)
+packages/city-scene test: ok 30 - never overlaps, never commits on red, keeps moving (ultra, 4 simulated minutes)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 1040.978517
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: never overlaps, never commits on red, keeps moving (low, 4 simulated minutes)
+packages/city-scene test: ok 31 - never overlaps, never commits on red, keeps moving (low, 4 simulated minutes)
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 116.420181
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: stops at the line on red and waits there
+packages/city-scene test: ok 32 - stops at the line on red and waits there
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 77.021266
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: never gridlocks: full budget with pedestrians, several seeds, 10 simulated minutes each
+packages/city-scene test: ok 33 - never gridlocks: full budget with pedestrians, several seeds, 10 simulated minutes each
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 2276.369822
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: easing and smoothing
+packages/city-scene test:     # Subtest: eases from 0 to 1, monotonically, with zero speed at both ends
+packages/city-scene test:     ok 1 - eases from 0 to 1, monotonically, with zero speed at both ends
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.677261
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: damps the same over one long frame as over many short ones
+packages/city-scene test:     ok 2 - damps the same over one long frame as over many short ones
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.16606
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: passes the spline through its first and last points
+packages/city-scene test:     ok 3 - passes the spline through its first and last points
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.515222
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..3
+packages/city-scene test: ok 34 - easing and smoothing
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 1.931334
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: orbit
+packages/city-scene test:     # Subtest: round-trips a pose
+packages/city-scene test:     ok 1 - round-trips a pose
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.244817
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: keeps zoom and tilt within limits
+packages/city-scene test:     ok 2 - keeps zoom and tilt within limits
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.244477
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: pans forward along the view heading, in the ground plane
+packages/city-scene test:     ok 3 - pans forward along the view heading, in the ground plane
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.110511
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..3
+packages/city-scene test: ok 35 - orbit
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.740736
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: bounds and collisions
+packages/city-scene test:     # Subtest: pushes a camera out of every building, whichever side it entered
+packages/city-scene test:     ok 1 - pushes a camera out of every building, whichever side it entered
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 1.889279
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: leaves through the nearest face (over the roof when close to it)
+packages/city-scene test:     ok 2 - leaves through the nearest face (over the roof when close to it)
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.157719
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: stays above the street and inside the city
+packages/city-scene test:     ok 3 - stays above the street and inside the city
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.142735
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: lets the camera into an opened floor but not below it
+packages/city-scene test:     ok 4 - lets the camera into an opened floor but not below it
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.268616
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: detects a sight line through a box
+packages/city-scene test:     ok 5 - detects a sight line through a box
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.265484
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..5
+packages/city-scene test: ok 36 - bounds and collisions
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 2.949528
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: framings
+packages/city-scene test:     # Subtest: frames every building from outside every building, with a clear line of sight
+packages/city-scene test:     ok 1 - frames every building from outside every building, with a clear line of sight
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 7.015859
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: looks into an opened floor from above the cut, and into the office from inside the cut
+packages/city-scene test:     ok 2 - looks into an opened floor from above the cut, and into the office from inside the cut
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 1.101277
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: starts the arrival far away and ends on the highlighted building
+packages/city-scene test:     ok 3 - starts the arrival far away and ends on the highlighted building
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.501943
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..3
+packages/city-scene test: ok 37 - framings
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 8.725775
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: comfort limits
+packages/city-scene test:     # Subtest: never turns or slides faster than the limits between any two buildings or floors
+packages/city-scene test:     ok 1 - never turns or slides faster than the limits between any two buildings or floors
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 71.021004
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: keeps the arrival glide calm
+packages/city-scene test:     ok 2 - keeps the arrival glide calm
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 11.633171
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: gives short hops a short (but not abrupt) flight
+packages/city-scene test:     ok 3 - gives short hops a short (but not abrupt) flight
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.156383
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..3
+packages/city-scene test: ok 38 - comfort limits
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 82.970353
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: mode transitions
+packages/city-scene test:     # Subtest: goes city → building → floor → office → desk and back one step at a time
+packages/city-scene test:     ok 1 - goes city → building → floor → office → desk and back one step at a time
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 1.197069
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: lets anyone look at any floor, but only enter offices they may enter
+packages/city-scene test:     ok 2 - lets anyone look at any floor, but only enter offices they may enter
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.200869
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: ignores unknown buildings and floors, desks outside an office, and bad desk numbers
+packages/city-scene test:     ok 3 - ignores unknown buildings and floors, desks outside an office, and bad desk numbers
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.146437
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: moves between floors and buildings directly
+packages/city-scene test:     ok 4 - moves between floors and buildings directly
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.104634
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: ends the arrival at the visitor’s building, or in the open city
+packages/city-scene test:     ok 5 - ends the arrival at the visitor’s building, or in the open city
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.085581
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: builds the breadcrumb City › Building › Floor › Office with the last one current
+packages/city-scene test:     ok 6 - builds the breadcrumb City › Building › Floor › Office with the last one current
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.152711
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..6
+packages/city-scene test: ok 39 - mode transitions
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 2.628906
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: arrival plays once per session
+packages/city-scene test:     # Subtest: plays the first time, then not again
+packages/city-scene test:     ok 1 - plays the first time, then not again
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.256196
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: treats blocked storage as not played (and does not throw)
+packages/city-scene test:     ok 2 - treats blocked storage as not played (and does not throw)
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.229901
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..2
+packages/city-scene test: ok 40 - arrival plays once per session
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.62518
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: keyboard
+packages/city-scene test:     # Subtest: maps arrows and WASD to panning, +/- to zoom, Q/E to turn, R/H/Esc
+packages/city-scene test:     ok 1 - maps arrows and WASD to panning, +/- to zoom, Q/E to turn, R/H/Esc
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.218796
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: leaves browser shortcuts alone
+packages/city-scene test:     ok 2 - leaves browser shortcuts alone
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.159222
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: lets fields and buttons keep the keys they use
+packages/city-scene test:     ok 3 - lets fields and buttons keep the keys they use
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.1699
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..3
+packages/city-scene test: ok 41 - keyboard
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.650192
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: HUD text
+packages/city-scene test:     # Subtest: summarises floors from the visitor’s side, never naming people
+packages/city-scene test:     ok 1 - summarises floors from the visitor’s side, never naming people
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.146005
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: announces each view
+packages/city-scene test:     ok 2 - announces each view
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.208792
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..2
+packages/city-scene test: ok 42 - HUD text
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.431486
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: office floor plan
+packages/city-scene test:     # Subtest: office 31.5×31.5 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 1 - office 31.5×31.5 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 2.225107
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 31.5×31.5 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 2 - office 31.5×31.5 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 1.497
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 31.5×31.5 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 3 - office 31.5×31.5 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.335352
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 31.5×31.5 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 4 - office 31.5×31.5 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.341517
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 28×28 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 5 - office 28×28 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.322894
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 28×28 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 6 - office 28×28 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 2.188359
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 28×28 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 7 - office 28×28 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.370351
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 28×28 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 8 - office 28×28 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.835963
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 49×42 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 9 - office 49×42 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.413752
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 49×42 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 10 - office 49×42 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.440508
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 49×42 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 11 - office 49×42 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.271697
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: office 49×42 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 12 - office 49×42 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.237166
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 31.5×31.5 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 13 - showroom 31.5×31.5 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.141204
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 31.5×31.5 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 14 - showroom 31.5×31.5 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.121954
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 31.5×31.5 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 15 - showroom 31.5×31.5 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.267234
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 31.5×31.5 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 16 - showroom 31.5×31.5 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.272481
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 28×28 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 17 - showroom 28×28 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.14217
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 28×28 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 18 - showroom 28×28 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.115673
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 28×28 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 19 - showroom 28×28 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.2589
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 28×28 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 20 - showroom 28×28 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.4833
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 49×42 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 21 - showroom 49×42 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.105477
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 49×42 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 22 - showroom 49×42 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.084007
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 49×42 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 23 - showroom 49×42 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.146924
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: showroom 49×42 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 24 - showroom 49×42 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.139429
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 31.5×31.5 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 25 - classroom 31.5×31.5 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.265703
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 31.5×31.5 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 26 - classroom 31.5×31.5 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.174325
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 31.5×31.5 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 27 - classroom 31.5×31.5 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.083226
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 31.5×31.5 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 28 - classroom 31.5×31.5 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.093441
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 28×28 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 29 - classroom 28×28 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.05998
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 28×28 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 30 - classroom 28×28 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.056693
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 28×28 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 31 - classroom 28×28 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.077655
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 28×28 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 32 - classroom 28×28 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.146917
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 49×42 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 33 - classroom 49×42 m with 0 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.088185
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 49×42 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 34 - classroom 49×42 m with 3 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.085255
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 49×42 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 35 - classroom 49×42 m with 8 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.08492
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: classroom 49×42 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:     ok 36 - classroom 49×42 m with 20 people: desks inside the glass, clear of rooms, one per slot
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.140636
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: spreads a small team across pods instead of crowding one
+packages/city-scene test:     ok 37 - spreads a small team across pods instead of crowding one
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.187675
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: picks the variant from the building kind
+packages/city-scene test:     ok 38 - picks the variant from the building kind
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.060064
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..38
+packages/city-scene test: ok 43 - office floor plan
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 14.624798
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: desks in the city
+packages/city-scene test:     # Subtest: puts every desk inside its building and the desk close-up inside the office
+packages/city-scene test:     ok 1 - puts every desk inside its building and the desk close-up inside the office
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 7.936729
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     # Subtest: keeps human desks anonymous in public views
+packages/city-scene test:     ok 2 - keeps human desks anonymous in public views
+packages/city-scene test:       ---
+packages/city-scene test:       duration_ms: 0.263777
+packages/city-scene test:       type: 'test'
+packages/city-scene test:       ...
+packages/city-scene test:     1..2
+packages/city-scene test: ok 44 - desks in the city
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 8.339158
+packages/city-scene test:   type: 'suite'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: is generated from the legacy city and up to date
+packages/city-scene test: ok 45 - is generated from the legacy city and up to date
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 2.546802
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: keeps the exact inventory: 15 buildings, 183 floors, 303 desks
+packages/city-scene test: ok 46 - keeps the exact inventory: 15 buildings, 183 floors, 303 desks
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.164187
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: # Subtest: never names a real person in the public layout
+packages/city-scene test: ok 47 - never names a real person in the public layout
+packages/city-scene test:   ---
+packages/city-scene test:   duration_ms: 0.548593
+packages/city-scene test:   type: 'test'
+packages/city-scene test:   ...
+packages/city-scene test: 1..47
+packages/city-scene test: # tests 120
+packages/city-scene test: # suites 18
+packages/city-scene test: # pass 120
+packages/city-scene test: # fail 0
+packages/city-scene test: # cancelled 0
+packages/city-scene test: # skipped 0
+packages/city-scene test: # todo 0
+packages/city-scene test: # duration_ms 5697.787396
+packages/city-scene test: Done
+apps/web test$ node --test test/*.test.ts
+apps/web test: TAP version 13
+apps/web test: # Subtest: a complete form has no errors; only name, email and company are required
+apps/web test: ok 1 - a complete form has no errors; only name, email and company are required
+apps/web test:   ---
+apps/web test:   duration_ms: 1.149676
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: email format and length
+apps/web test: ok 2 - email format and length
+apps/web test:   ---
+apps/web test:   duration_ms: 0.280094
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: lengths, control characters and whitespace are checked after trimming
+apps/web test: ok 3 - lengths, control characters and whitespace are checked after trimming
+apps/web test:   ---
+apps/web test:   duration_ms: 0.144645
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: optional fields: industry from the list, phone digits, website URL
+apps/web test: ok 4 - optional fields: industry from the list, phone digits, website URL
+apps/web test:   ---
+apps/web test:   duration_ms: 0.478981
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: server validation issues map onto fields; others are kept
+apps/web test: ok 5 - server validation issues map onto fields; others are kept
+apps/web test:   ---
+apps/web test:   duration_ms: 0.321995
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: first name
+apps/web test: ok 6 - first name
+apps/web test:   ---
+apps/web test:   duration_ms: 0.166045
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: the proof is a compact JWS with the header and claims DESIGN.md specifies
+apps/web test: ok 7 - the proof is a compact JWS with the header and claims DESIGN.md specifies
+apps/web test:   ---
+apps/web test:   duration_ms: 8.052735
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: defaults: iat is now in seconds and every proof gets a different jti
+apps/web test: ok 8 - defaults: iat is now in seconds and every proof gets a different jti
+apps/web test:   ---
+apps/web test:   duration_ms: 1.419562
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: the ES256 signature verifies with crypto.subtle.verify against the JWK in the header
+apps/web test: ok 9 - the ES256 signature verifies with crypto.subtle.verify against the JWK in the header
+apps/web test:   ---
+apps/web test:   duration_ms: 2.445328
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: RFC 7638 thumbprint: canonical JSON of crv, kty, x, y hashed with SHA-256
+apps/web test: ok 10 - RFC 7638 thumbprint: canonical JSON of crv, kty, x, y hashed with SHA-256
+apps/web test:   ---
+apps/web test:   duration_ms: 0.825908
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: RFC 7638 section 3.1 vector reproduced with the same canonicalisation code path
+apps/web test: ok 11 - RFC 7638 section 3.1 vector reproduced with the same canonicalisation code path
+apps/web test:   ---
+apps/web test:   duration_ms: 0.488898
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: htu is origin + path: the query string and fragment are dropped
+apps/web test: ok 12 - htu is origin + path: the query string and fragment are dropped
+apps/web test:   ---
+apps/web test:   duration_ms: 0.174941
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: # Subtest: toPublicJwk refuses anything but a P-256 public key
+apps/web test: ok 13 - toPublicJwk refuses anything but a P-256 public key
+apps/web test:   ---
+apps/web test:   duration_ms: 0.263388
+apps/web test:   type: 'test'
+apps/web test:   ...
+apps/web test: 1..13
+apps/web test: # tests 13
+apps/web test: # suites 0
+apps/web test: # pass 13
+apps/web test: # fail 0
+apps/web test: # cancelled 0
+apps/web test: # skipped 0
+apps/web test: # todo 0
+apps/web test: # duration_ms 93.182299
+apps/web test: Done

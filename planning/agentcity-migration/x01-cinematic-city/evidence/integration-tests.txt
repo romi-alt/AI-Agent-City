@@ -1,0 +1,1169 @@
+
+> agentcity@ db:test /home/user/sales-city
+> pnpm --filter @agentcity/db --filter @agentcity/legacy-import --filter @agentcity/api run test:integration
+
+Scope: 3 of 10 workspace projects
+packages/db test:integration$ node --env-file-if-exists=../../infra/local-dev.env --import tsx --test --test-concurrency=1 test/*.test.ts
+packages/db test:integration: TAP version 13
+packages/db test:integration: # Subtest: access: invitations, roles, removals, assignments (app role)
+packages/db test:integration:     # Subtest: keeps membership writes out of the app role’s reach; only the definer functions can make them
+packages/db test:integration:     ok 1 - keeps membership writes out of the app role’s reach; only the definer functions can make them
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 40.831513
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: create_invitation: allow/deny matrix and escalation attempts
+packages/db test:integration:     ok 2 - create_invitation: allow/deny matrix and escalation attempts
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 428.11423
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: accept_invitation: happy path creates exactly the invited membership
+packages/db test:integration:     ok 3 - accept_invitation: happy path creates exactly the invited membership
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 16.001845
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: accept_invitation: replayed, expired, replaced, unknown tokens; unverified or mismatched email
+packages/db test:integration:     ok 4 - accept_invitation: replayed, expired, replaced, unknown tokens; unverified or mismatched email
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 89.655011
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: accept_invitation: of two concurrent accepts of one token, exactly one wins
+packages/db test:integration:     ok 5 - accept_invitation: of two concurrent accepts of one token, exactly one wins
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 136.399717
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: agency invitations grant only the agency membership; staff assignment is a separate owner decision
+packages/db test:integration:     ok 6 - agency invitations grant only the agency membership; staff assignment is a separate owner decision
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 77.658452
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: issue_invitation_token: owners only, for pending invitations (e.g. from the legacy import)
+packages/db test:integration:     ok 7 - issue_invitation_token: owners only, for pending invitations (e.g. from the legacy import)
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 84.075024
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: set_member_role: allow/deny matrix; the change is visible to enter_scope immediately
+packages/db test:integration:     ok 8 - set_member_role: allow/deny matrix; the change is visible to enter_scope immediately
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 204.532225
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: protects the last tenant-wide client admin (and the last agency owner), even under concurrency
+packages/db test:integration:     ok 9 - protects the last tenant-wide client admin (and the last agency owner), even under concurrency
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 189.604963
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: remove_member: allow/deny; the removed member loses enter_scope; queued work re-checks and fails; re-invitation restores
+packages/db test:integration:     ok 10 - remove_member: allow/deny; the removed member loses enter_scope; queued work re-checks and fails; re-invitation restores
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 111.644088
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: tenant switching: only into a tenant the person can enter (proved with enter_scope)
+packages/db test:integration:     ok 11 - tenant switching: only into a tenant the person can enter (proved with enter_scope)
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 12.658009
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: list_memberships: tenants and workspaces with the role enter_scope would give
+packages/db test:integration:     ok 12 - list_memberships: tenants and workspaces with the role enter_scope would give
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 12.483782
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     1..12
+packages/db test:integration: ok 1 - access: invitations, roles, removals, assignments (app role)
+packages/db test:integration:   ---
+packages/db test:integration:   duration_ms: 1765.241111
+packages/db test:integration:   type: 'suite'
+packages/db test:integration:   ...
+packages/db test:integration: # Subtest: demo funnel (app role)
+packages/db test:integration:     # Subtest: keeps marketing.* away from the app role; writes only through owned definer functions
+packages/db test:integration:     ok 1 - keeps marketing.* away from the app role; writes only through owned definer functions
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 45.196386
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: provisions a demo tenant with an office, a simulated team, safe sample data and a pending invitation
+packages/db test:integration:     ok 2 - provisions a demo tenant with an office, a simulated team, safe sample data and a pending invitation
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 36.004474
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: reuses the lead and the demo tenant for the same email, and replays a double submit
+packages/db test:integration:     ok 3 - reuses the lead and the demo tenant for the same email, and replays a double submit
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 10.462646
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: isolates the demo tenant (RLS, composite keys) and refuses dispatches and money facts
+packages/db test:integration:     ok 4 - isolates the demo tenant (RLS, composite keys) and refuses dispatches and money facts
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 23.345404
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: claims only for the verified, matching email; once; and hides known addresses afterwards
+packages/db test:integration:     ok 5 - claims only for the verified, matching email; once; and hides known addresses afterwards
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 56.386779
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: lists leads only for an owner of the platform demo agency, newest first, in pages
+packages/db test:integration:     ok 6 - lists leads only for an owner of the platform demo agency, newest first, in pages
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 46.76948
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: expires demos: access ends, sessions are cleared, demo data is removed, the lead is kept as expired
+packages/db test:integration:     ok 7 - expires demos: access ends, sessions are cleared, demo data is removed, the lead is kept as expired
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 83.999204
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: stores no secrets, passwords or credentials, and no raw invitation tokens
+packages/db test:integration:     ok 8 - stores no secrets, passwords or credentials, and no raw invitation tokens
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 6.815735
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: refuses malformed submissions
+packages/db test:integration:     ok 9 - refuses malformed submissions
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 44.441654
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     1..9
+packages/db test:integration: ok 2 - demo funnel (app role)
+packages/db test:integration:   ---
+packages/db test:integration:   duration_ms: 741.765657
+packages/db test:integration:   type: 'suite'
+packages/db test:integration:   ...
+packages/db test:integration: # Subtest: identity schema
+packages/db test:integration:     # Subtest: classifies every identity table
+packages/db test:integration:     ok 1 - classifies every identity table
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 3.543418
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: lets the app role create people, devices and sessions, but never delete them
+packages/db test:integration:     ok 2 - lets the app role create people, devices and sessions, but never delete them
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 11.171935
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: stores only hashes of cookie tokens and states, and lower-case emails
+packages/db test:integration:     ok 3 - stores only hashes of cookie tokens and states, and lower-case emails
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 4.114863
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: accepts only same-origin paths as returnTo, and step-ups only for a session with a reason
+packages/db test:integration:     ok 4 - accepts only same-origin paths as returnTo, and step-ups only for a session with a reason
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 9.191006
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: keeps the security log append-only
+packages/db test:integration:     ok 5 - keeps the security log append-only
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 4.335227
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: rolls back and re-applies cleanly
+packages/db test:integration:     ok 6 - rolls back and re-applies cleanly
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 77.377071
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     1..6
+packages/db test:integration: ok 3 - identity schema
+packages/db test:integration:   ---
+packages/db test:integration:   duration_ms: 430.274953
+packages/db test:integration:   type: 'suite'
+packages/db test:integration:   ...
+packages/db test:integration: # Subtest: migrations
+packages/db test:integration:     # Subtest: applies cleanly to an empty database
+packages/db test:integration:     ok 1 - applies cleanly to an empty database
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 0.934789
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: lets the app role record heartbeats, once per step
+packages/db test:integration:     ok 2 - lets the app role record heartbeats, once per step
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 14.077454
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: does not let the app role change the schema or bypass grants
+packages/db test:integration:     ok 3 - does not let the app role change the schema or bypass grants
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 12.142694
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: rolls back and re-applies (reversible)
+packages/db test:integration:     ok 4 - rolls back and re-applies (reversible)
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 264.550195
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     1..4
+packages/db test:integration: ok 4 - migrations
+packages/db test:integration:   ---
+packages/db test:integration:   duration_ms: 599.39602
+packages/db test:integration:   type: 'suite'
+packages/db test:integration:   ...
+packages/db test:integration: # Subtest: tenant isolation (row-level security, app role)
+packages/db test:integration:     # Subtest: connects as a role that cannot bypass row-level security
+packages/db test:integration:     ok 1 - connects as a role that cannot bypass row-level security
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 8.787639
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: sees nothing in any tenant table without a scope (fails closed)
+packages/db test:integration:     ok 2 - sees nothing in any tenant table without a scope (fails closed)
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 27.536047
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: SELECT and joins return only the scoped tenant
+packages/db test:integration:     ok 3 - SELECT and joins return only the scoped tenant
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 10.753631
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: BM25 search returns only the scoped tenant’s rows, ranked
+packages/db test:integration:     ok 4 - BM25 search returns only the scoped tenant’s rows, ranked
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 4875.368112
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: INSERT into another tenant is refused
+packages/db test:integration:     ok 5 - INSERT into another tenant is refused
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 6.637751
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: UPDATE and DELETE cannot reach another tenant, and cannot move a row out of the tenant
+packages/db test:integration:     ok 6 - UPDATE and DELETE cannot reach another tenant, and cannot move a row out of the tenant
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 10.81821
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: a client on rental L1 cannot reach the client on L2 of the same building
+packages/db test:integration:     ok 7 - a client on rental L1 cannot reach the client on L2 of the same building
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 8.525687
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: a member limited to one workspace cannot see the tenant’s other floor
+packages/db test:integration:     ok 8 - a member limited to one workspace cannot see the tenant’s other floor
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 41.991712
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: a pooled connection never carries scope into the next transaction
+packages/db test:integration:     ok 9 - a pooled connection never carries scope into the next transaction
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 9.246865
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: rejects forged, tampered and replayed scope values
+packages/db test:integration:     ok 10 - rejects forged, tampered and replayed scope values
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 9.498799
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: checks who may enter a scope: unknown people, staff assignments, viewers and support
+packages/db test:integration:     ok 11 - checks who may enter a scope: unknown people, staff assignments, viewers and support
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 39.641828
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: foreign keys reject cross-tenant references, even for a role that bypasses RLS
+packages/db test:integration:     ok 12 - foreign keys reject cross-tenant references, even for a role that bypasses RLS
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 5.322911
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: keeps unique keys per tenant: the same external id can exist in two tenants, never twice in one
+packages/db test:integration:     ok 13 - keeps unique keys per tenant: the same external id can exist in two tenants, never twice in one
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 121.670026
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: keeps facts immutable and approvals bound to one revision
+packages/db test:integration:     ok 14 - keeps facts immutable and approvals bound to one revision
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 18.484995
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: gives the demo tenant no provider authority and never records an unverified payment
+packages/db test:integration:     ok 15 - gives the demo tenant no provider authority and never records an unverified payment
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 2.351728
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: places one occupant per floor and installs agents only on occupied floors and AI desks
+packages/db test:integration:     ok 16 - places one occupant per floor and installs agents only on occupied floors and AI desks
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 7.26197
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: classifies every table, and protects every tenant table with forced RLS
+packages/db test:integration:     ok 17 - classifies every table, and protects every tenant table with forced RLS
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 4.597669
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     # Subtest: seeds the catalog with the exact legacy inventory
+packages/db test:integration:     ok 18 - seeds the catalog with the exact legacy inventory
+packages/db test:integration:       ---
+packages/db test:integration:       duration_ms: 2.534257
+packages/db test:integration:       type: 'test'
+packages/db test:integration:       ...
+packages/db test:integration:     1..18
+packages/db test:integration: ok 5 - tenant isolation (row-level security, app role)
+packages/db test:integration:   ---
+packages/db test:integration:   duration_ms: 5567.617641
+packages/db test:integration:   type: 'suite'
+packages/db test:integration:   ...
+packages/db test:integration: 1..5
+packages/db test:integration: # tests 49
+packages/db test:integration: # suites 5
+packages/db test:integration: # pass 49
+packages/db test:integration: # fail 0
+packages/db test:integration: # cancelled 0
+packages/db test:integration: # skipped 0
+packages/db test:integration: # todo 0
+packages/db test:integration: # duration_ms 10155.453245
+packages/db test:integration: Done
+packages/legacy-import test:integration$ node --env-file-if-exists=../../infra/local-dev.env --import tsx --test --test-concurrency=1 test/import.test.ts
+apps/api test:integration$ node --env-file-if-exists=../../infra/local-dev.env --import tsx --test --test-concurrency=1 test/auth*.test.ts test/access*.test.ts test/realtime*.test.ts test/demo*.test.ts
+packages/legacy-import test:integration: TAP version 13
+apps/api test:integration: TAP version 13
+packages/legacy-import test:integration: # Subtest: legacy import (version 2)
+packages/legacy-import test:integration:     # Subtest: dry run reports everything and writes nothing (it runs as the app role)
+packages/legacy-import test:integration:     ok 1 - dry run reports everything and writes nothing (it runs as the app role)
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 179.263232
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: refuses unknown or corrupt input before writing anything
+packages/legacy-import test:integration:     ok 2 - refuses unknown or corrupt input before writing anything
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 132.07078
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+apps/api test:integration: # Subtest: access API
+apps/api test:integration:     # Subtest: GET /api/access/memberships lists the tenants and workspaces the person can enter
+apps/api test:integration:     ok 1 - GET /api/access/memberships lists the tenants and workspaces the person can enter
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 44.899697
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: POST /api/session/tenant switches only into a tenant the person can enter, and persists it
+apps/api test:integration:     ok 2 - POST /api/session/tenant switches only into a tenant the person can enter, and persists it
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 79.615984
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: POST /api/invitations: needs a tenant, step-up and authority; returns the link once and never logs it
+apps/api test:integration:     ok 3 - POST /api/invitations: needs a tenant, step-up and authority; returns the link once and never logs it
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 60.504268
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: POST /api/invitations/accept: verified matching email only; replayed and expired links answer 410
+apps/api test:integration:     ok 4 - POST /api/invitations/accept: verified matching email only; replayed and expired links answer 410
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 100.364956
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: POST /api/invitations/:id/token: agency owners only, for existing pending invitations
+apps/api test:integration:     ok 5 - POST /api/invitations/:id/token: agency owners only, for existing pending invitations
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 49.111106
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: PUT /api/tenants/:tenantId/members/:subject changes roles and publishes a membership revocation
+apps/api test:integration:     ok 6 - PUT /api/tenants/:tenantId/members/:subject changes roles and publishes a membership revocation
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 76.209189
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: DELETE /api/tenants/:tenantId/members/:subject removes access, publishes a revocation; re-invitation restores
+apps/api test:integration:     ok 7 - DELETE /api/tenants/:tenantId/members/:subject removes access, publishes a revocation; re-invitation restores
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 94.969465
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: PUT/DELETE /api/agency/assignments/:tenantId/:subject: owners assign staff; unassigning revokes
+apps/api test:integration:     ok 8 - PUT/DELETE /api/agency/assignments/:tenantId/:subject: owners assign staff; unassigning revokes
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 70.34062
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: never wrote an invitation token to the logs or console
+apps/api test:integration:     ok 9 - never wrote an invitation token to the logs or console
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 0.374999
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..9
+apps/api test:integration: ok 1 - access API
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 1248.503113
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+packages/legacy-import test:integration:     # Subtest: imports, and a second run with the same input changes nothing
+packages/legacy-import test:integration:     ok 3 - imports, and a second run with the same input changes nothing
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 2476.805616
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: refuses a record that changed since it was imported, instead of overwriting
+packages/legacy-import test:integration:     ok 4 - refuses a record that changed since it was imported, instead of overwriting
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 80.629227
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: never imports credentials, sessions or remembered devices
+packages/legacy-import test:integration:     ok 5 - never imports credentials, sessions or remembered devices
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 39.128258
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: derives no sends, payments, consent or pending approvals from legacy state
+packages/legacy-import test:integration:     ok 6 - derives no sends, payments, consent or pending approvals from legacy state
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 6.616417
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: keeps simulated data in the marked demo tenant and real data with its mapped owner only
+packages/legacy-import test:integration:     ok 7 - keeps simulated data in the marked demo tenant and real data with its mapped owner only
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 2.377121
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: gives imported records provenance, a reversible map and deterministic ids
+packages/legacy-import test:integration:     ok 8 - gives imported records provenance, a reversible map and deterministic ids
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 2.343945
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+packages/legacy-import test:integration:     # Subtest: enforces tenant isolation on imported data: the L1 client cannot see the L2 client in the same building
+packages/legacy-import test:integration:     ok 9 - enforces tenant isolation on imported data: the L1 client cannot see the L2 client in the same building
+packages/legacy-import test:integration:       ---
+packages/legacy-import test:integration:       duration_ms: 23.312264
+packages/legacy-import test:integration:       type: 'test'
+packages/legacy-import test:integration:       ...
+apps/api test:integration: # Subtest: auth: SessionGuard on every non-public route
+apps/api test:integration:     # Subtest: lets @Public() routes through with nothing
+apps/api test:integration:     ok 1 - lets @Public() routes through with nothing
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 16.248537
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: accepts a valid session and proof, and attaches req.session
+apps/api test:integration:     ok 2 - accepts a valid session and proof, and attaches req.session
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 76.018334
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses without a cookie, or with an unknown one
+apps/api test:integration:     ok 3 - refuses without a cookie, or with an unknown one
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 7.888802
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a revoked session and tells the browser to drop the cookie
+apps/api test:integration:     ok 4 - refuses a revoked session and tells the browser to drop the cookie
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 54.801201
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an idle-expired session
+apps/api test:integration:     ok 5 - refuses an idle-expired session
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 34.365214
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an absolute-expired session even if recently active
+apps/api test:integration:     ok 6 - refuses an absolute-expired session even if recently active
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 34.945218
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses when the person is disabled
+apps/api test:integration:     ok 7 - refuses when the person is disabled
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 32.730168
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses when the device is revoked
+apps/api test:integration:     ok 8 - refuses when the device is revoked
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 41.541975
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a missing proof: the cookie alone is useless
+apps/api test:integration:     ok 9 - refuses a missing proof: the cookie alone is useless
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 28.795562
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a proof with a bad signature
+apps/api test:integration:     ok 10 - refuses a proof with a bad signature
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 25.543755
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a valid proof from a different device key (stolen cookie)
+apps/api test:integration:     ok 11 - refuses a valid proof from a different device key (stolen cookie)
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 26.037759
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a proof embedding another key than the one that signed it
+apps/api test:integration:     ok 12 - refuses a proof embedding another key than the one that signed it
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 26.752164
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a proof for another method or URL
+apps/api test:integration:     ok 13 - refuses a proof for another method or URL
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 35.869582
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a stale or future iat
+apps/api test:integration:     ok 14 - refuses a stale or future iat
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 30.927078
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a replayed proof (jti is single use)
+apps/api test:integration:     ok 15 - refuses a replayed proof (jti is single use)
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 32.701636
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a proof with the wrong typ
+apps/api test:integration:     ok 16 - refuses a proof with the wrong typ
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 29.738239
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a write without our Origin (CSRF), but not a read
+apps/api test:integration:     ok 17 - refuses a write without our Origin (CSRF), but not a read
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 33.676395
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: extends the idle expiry on use, never past the absolute expiry
+apps/api test:integration:     ok 18 - extends the idle expiry on use, never past the absolute expiry
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 34.242131
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+packages/legacy-import test:integration:     1..9
+packages/legacy-import test:integration: ok 1 - legacy import (version 2)
+packages/legacy-import test:integration:   ---
+packages/legacy-import test:integration:   duration_ms: 3943.863723
+packages/legacy-import test:integration:   type: 'suite'
+packages/legacy-import test:integration:   ...
+packages/legacy-import test:integration: 1..1
+packages/legacy-import test:integration: # tests 9
+packages/legacy-import test:integration: # suites 1
+packages/legacy-import test:integration: # pass 9
+packages/legacy-import test:integration: # fail 0
+packages/legacy-import test:integration: # cancelled 0
+packages/legacy-import test:integration: # skipped 0
+packages/legacy-import test:integration: # todo 0
+packages/legacy-import test:integration: # duration_ms 4257.935365
+packages/legacy-import test:integration: Done
+apps/api test:integration:     1..18
+apps/api test:integration: ok 2 - auth: SessionGuard on every non-public route
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 1657.408004
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: auth: session lifecycle
+apps/api test:integration:     # Subtest: logout
+apps/api test:integration:         # Subtest: revokes the session, clears the cookie, publishes, and returns the end-session URL with id_token_hint
+apps/api test:integration:         ok 1 - revokes the session, clears the cookie, publishes, and returns the end-session URL with id_token_hint
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 100.691785
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: needs Origin and a proof like any other write
+apps/api test:integration:         ok 2 - needs Origin and a proof like any other write
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 35.354873
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         1..2
+apps/api test:integration:     ok 1 - logout
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 136.514523
+apps/api test:integration:       type: 'suite'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: sessions and devices
+apps/api test:integration:         # Subtest: lists the person’s sessions and devices, marking the current ones
+apps/api test:integration:         ok 1 - lists the person’s sessions and devices, marking the current ones
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 49.653879
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: revokes one session (only the person’s own) and publishes it
+apps/api test:integration:         ok 2 - revokes one session (only the person’s own) and publishes it
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 91.384444
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: revoking a device needs a fresh step-up, then ends every session on it
+apps/api test:integration:         ok 3 - revoking a device needs a fresh step-up, then ends every session on it
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 116.863668
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         1..3
+apps/api test:integration:     ok 2 - sessions and devices
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 258.195838
+apps/api test:integration:       type: 'suite'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: step-up
+apps/api test:integration:         # Subtest: asks for acr 2, prompt=login and max_age=0, and only for an existing session on the same device
+apps/api test:integration:         ok 1 - asks for acr 2, prompt=login and max_age=0, and only for an existing session on the same device
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 40.578001
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: denies a step-up route without a step-up, then grants it after one
+apps/api test:integration:         ok 2 - denies a step-up route without a step-up, then grants it after one
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 58.661996
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: does not grant a step-up with acr 1
+apps/api test:integration:         ok 3 - does not grant a step-up with acr 1
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 44.328919
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: does not grant a step-up whose authentication is not fresh
+apps/api test:integration:         ok 4 - does not grant a step-up whose authentication is not fresh
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 53.752112
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: expires: a step-up older than STEP_UP_MAX_AGE_SECONDS no longer counts
+apps/api test:integration:         ok 5 - expires: a step-up older than STEP_UP_MAX_AGE_SECONDS no longer counts
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 51.561844
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: refuses a level-2 step-up that did not use a passkey
+apps/api test:integration:         ok 6 - refuses a level-2 step-up that did not use a passkey
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 44.686522
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: refuses a step-up callback for a different person
+apps/api test:integration:         ok 7 - refuses a step-up callback for a different person
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 55.624827
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: refuses a step-up callback arriving in a browser without that session
+apps/api test:integration:         ok 8 - refuses a step-up callback arriving in a browser without that session
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 40.057654
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         1..8
+apps/api test:integration:     ok 3 - step-up
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 389.946147
+apps/api test:integration:       type: 'suite'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: revalidation with the refresh token
+apps/api test:integration:         # Subtest: refreshes at most every few minutes and keeps an active session
+apps/api test:integration:         ok 1 - refreshes at most every few minutes and keeps an active session
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 39.78115
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: revokes the session when the IdP refuses (user disabled)
+apps/api test:integration:         ok 2 - revokes the session when the IdP refuses (user disabled)
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 39.202015
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         1..2
+apps/api test:integration:     ok 4 - revalidation with the refresh token
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 79.122006
+apps/api test:integration:       type: 'suite'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: back-channel logout
+apps/api test:integration:         # Subtest: revokes the sessions of the IdP session (sid) and refuses a replay
+apps/api test:integration:         ok 1 - revokes the sessions of the IdP session (sid) and refuses a replay
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 65.831155
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: revokes every session of the subject when only sub is given
+apps/api test:integration:         ok 2 - revokes every session of the subject when only sub is given
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 52.943471
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: refuses invalid logout tokens
+apps/api test:integration:         ok 3 - refuses invalid logout tokens
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 51.584581
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         1..3
+apps/api test:integration:     ok 5 - back-channel logout
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 170.552823
+apps/api test:integration:       type: 'suite'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: SESSION_RESOLVER (Socket.IO handshakes)
+apps/api test:integration:         # Subtest: resolves a valid handshake and re-reads the session
+apps/api test:integration:         ok 1 - resolves a valid handshake and re-reads the session
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 36.445395
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         # Subtest: refuses bad handshakes
+apps/api test:integration:         ok 2 - refuses bad handshakes
+apps/api test:integration:           ---
+apps/api test:integration:           duration_ms: 34.378468
+apps/api test:integration:           type: 'test'
+apps/api test:integration:           ...
+apps/api test:integration:         1..2
+apps/api test:integration:     ok 6 - SESSION_RESOLVER (Socket.IO handshakes)
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 70.969801
+apps/api test:integration:       type: 'suite'
+apps/api test:integration:       ...
+apps/api test:integration:     1..6
+apps/api test:integration: ok 3 - auth: session lifecycle
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 1719.028102
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: auth: sign-in (login/start → IdP → callback → session)
+apps/api test:integration:     # Subtest: signs in: start → callback → httpOnly cookie → /me
+apps/api test:integration:     ok 1 - signs in: start → callback → httpOnly cookie → /me
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 82.414742
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses login/start from another origin, without a proof, or with a proof from another key
+apps/api test:integration:     ok 2 - refuses login/start from another origin, without a proof, or with a proof from another key
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 15.510006
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an unsafe returnTo "//evil.example/x"
+apps/api test:integration:     ok 3 - refuses an unsafe returnTo "//evil.example/x"
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 3.225132
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an unsafe returnTo "https://evil.example/"
+apps/api test:integration:     ok 4 - refuses an unsafe returnTo "https://evil.example/"
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 2.949438
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an unsafe returnTo "/\\\\evil.example"
+apps/api test:integration:     ok 5 - refuses an unsafe returnTo "/\\\\evil.example"
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 3.827109
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an unsafe returnTo "javascript:alert(1)"
+apps/api test:integration:     ok 6 - refuses an unsafe returnTo "javascript:alert(1)"
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 3.358274
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an unsafe returnTo "/a\\r\\nb"
+apps/api test:integration:     ok 7 - refuses an unsafe returnTo "/a\\r\\nb"
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 3.120927
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an unsafe returnTo "workspace"
+apps/api test:integration:     ok 8 - refuses an unsafe returnTo "workspace"
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 2.812649
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an unsafe returnTo ""
+apps/api test:integration:     ok 9 - refuses an unsafe returnTo ""
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 2.921831
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an ID token from the wrong issuer
+apps/api test:integration:     ok 10 - refuses an ID token from the wrong issuer
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 17.779334
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an ID token for another audience
+apps/api test:integration:     ok 11 - refuses an ID token for another audience
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 14.450856
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an ID token whose azp is another client
+apps/api test:integration:     ok 12 - refuses an ID token whose azp is another client
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 22.007458
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an ID token without azp
+apps/api test:integration:     ok 13 - refuses an ID token without azp
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 15.421652
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an expired ID token
+apps/api test:integration:     ok 14 - refuses an expired ID token
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 20.34485
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an ID token issued in the future
+apps/api test:integration:     ok 15 - refuses an ID token issued in the future
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 15.074415
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an ID token signed with a key not in the JWKS
+apps/api test:integration:     ok 16 - refuses an ID token signed with a key not in the JWKS
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 18.392974
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a nonce mismatch
+apps/api test:integration:     ok 17 - refuses a nonce mismatch
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 14.421965
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an ID token without a nonce
+apps/api test:integration:     ok 18 - refuses an ID token without a nonce
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 13.833322
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses when the PKCE verifier does not match the challenge
+apps/api test:integration:     ok 19 - refuses when the PKCE verifier does not match the challenge
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 14.365741
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a callback whose state does not match the login cookie, or without the cookie
+apps/api test:integration:     ok 20 - refuses a callback whose state does not match the login cookie, or without the cookie
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 25.169718
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a replayed state (the attempt is single use)
+apps/api test:integration:     ok 21 - refuses a replayed state (the attempt is single use)
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 16.787341
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an expired attempt
+apps/api test:integration:     ok 22 - refuses an expired attempt
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 10.828018
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses an IdP error response and records the failure
+apps/api test:integration:     ok 23 - refuses an IdP error response and records the failure
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 21.168302
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses sign-in for a disabled person
+apps/api test:integration:     ok 24 - refuses sign-in for a disabled person
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 39.42181
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a sign-in at an authentication level the realm does not define (e.g. a silent acr "0")
+apps/api test:integration:     ok 25 - refuses a sign-in at an authentication level the realm does not define (e.g. a silent acr "0")
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 28.330515
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: maps known methods and drops unknown ones
+apps/api test:integration:     ok 26 - maps known methods and drops unknown ones
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 20.046998
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..26
+apps/api test:integration: ok 4 - auth: sign-in (login/start → IdP → callback → session)
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 1057.188927
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: auth: login/start loginHint (X01)
+apps/api test:integration:     # Subtest: passes a valid address to the IdP as login_hint
+apps/api test:integration:     ok 1 - passes a valid address to the IdP as login_hint
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 49.471994
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: sends no login_hint without one
+apps/api test:integration:     ok 2 - sends no login_hint without one
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 10.2693
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a hint that is not an email address
+apps/api test:integration:     ok 3 - refuses a hint that is not an email address
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 19.676452
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..3
+apps/api test:integration: ok 5 - auth: login/start loginHint (X01)
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 754.860613
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: demo API
+apps/api test:integration:     # Subtest: gives a form token to anyone, with a request id and no caching
+apps/api test:integration:     ok 1 - gives a form token to anyone, with a request id and no caching
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 6.74061
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: answers validation errors per field, without echoing what was sent
+apps/api test:integration:     ok 2 - answers validation errors per field, without echoing what was sent
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 21.536457
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses the honeypot, a too-fast form, a forged token and posts from other origins, storing nothing
+apps/api test:integration:     ok 3 - refuses the honeypot, a too-fast form, a forged token and posts from other origins, storing nothing
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 22.971875
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: provisions a new visitor in Keycloak with exactly the expected payload: no password, verify-email only
+apps/api test:integration:     ok 4 - provisions a new visitor in Keycloak with exactly the expected payload: no password, verify-email only
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 43.8871
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: answers a known (verified) address exactly like a new one, and sends it nothing
+apps/api test:integration:     ok 5 - answers a known (verified) address exactly like a new one, and sends it nothing
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 1137.121178
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: rate-limits per email address and per client address (Redis), with Retry-After
+apps/api test:integration:     ok 6 - rate-limits per email address and per client address (Redis), with Retry-After
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 285.560686
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: replays a double-submitted form instead of creating a second request
+apps/api test:integration:     ok 7 - replays a double-submitted form instead of creating a second request
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 15.554507
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: claims the demo after sign-in with the verified address, switches the session, and shows the office
+apps/api test:integration:     ok 8 - claims the demo after sign-in with the verified address, switches the session, and shows the office
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 191.817963
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: serves workspace data only to a session in a demo tenant
+apps/api test:integration:     ok 9 - serves workspace data only to a session in a demo tenant
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 45.665851
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: shows leads (JSON pages and CSV) only to platform owners after a fresh strong sign-in
+apps/api test:integration:     ok 10 - shows leads (JSON pages and CSV) only to platform owners after a fresh strong sign-in
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 76.072162
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: never writes personal data to logs or console output
+apps/api test:integration:     ok 11 - never writes personal data to logs or console output
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 0.356111
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..11
+apps/api test:integration: ok 6 - demo API
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 3664.751581
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: demo API without a provisioner client
+apps/api test:integration:     # Subtest: answers 503 demo_unavailable, stores nothing, and logs a setup hint without personal data
+apps/api test:integration:     ok 1 - answers 503 demo_unavailable, stores nothing, and logs a setup hint without personal data
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 1109.572662
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..1
+apps/api test:integration: ok 7 - demo API without a provisioner client
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 1748.554675
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: handshake
+apps/api test:integration:     # Subtest: refuses a handshake without a session cookie
+apps/api test:integration:     ok 1 - refuses a handshake without a session cookie
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 13.674726
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a valid cookie with a missing or wrong device proof, with the same generic error
+apps/api test:integration:     ok 2 - refuses a valid cookie with a missing or wrong device proof, with the same generic error
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 8.010625
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: refuses a handshake from another Origin, or with no Origin, before the session is looked at
+apps/api test:integration:     ok 3 - refuses a handshake from another Origin, or with no Origin, before the session is looked at
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 8.886185
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: accepts a valid session and joins only its tenant and workspace rooms
+apps/api test:integration:     ok 4 - accepts a valid session and joins only its tenant and workspace rooms
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 4.089663
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: accepts a polling handshake from PUBLIC_ORIGIN with credentialed CORS headers
+apps/api test:integration:     ok 5 - accepts a polling handshake from PUBLIC_ORIGIN with credentialed CORS headers
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 21.260703
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..5
+apps/api test:integration: ok 8 - handshake
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 228.654178
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: tenant rooms
+apps/api test:integration:     # Subtest: delivers a tenant event only to that tenant, and nothing to a session without a tenant
+apps/api test:integration:     ok 1 - delivers a tenant event only to that tenant, and nothing to a session without a tenant
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 207.925925
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..1
+apps/api test:integration: ok 9 - tenant rooms
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 208.137575
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: revocation
+apps/api test:integration:     # Subtest: session revocation disconnects that socket within a second and leaves another session connected
+apps/api test:integration:     ok 1 - session revocation disconnects that socket within a second and leaves another session connected
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 159.364315
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: reconnecting after revocation is refused
+apps/api test:integration:     ok 2 - reconnecting after revocation is refused
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 6.486388
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: device revocation disconnects every session on that device only
+apps/api test:integration:     ok 3 - device revocation disconnects every session on that device only
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 157.04867
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: person revocation disconnects all of that person’s sockets and nobody else’s
+apps/api test:integration:     ok 4 - person revocation disconnects all of that person’s sockets and nobody else’s
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 156.055783
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: membership revocation ends the person’s sockets in that tenant only
+apps/api test:integration:     ok 5 - membership revocation ends the person’s sockets in that tenant only
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 205.944081
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..5
+apps/api test:integration: ok 10 - revocation
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 685.478381
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: revocation racing a handshake
+apps/api test:integration:     # Subtest: a revocation published while the handshake was being checked still ends the new socket
+apps/api test:integration:     ok 1 - a revocation published while the handshake was being checked still ends the new socket
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 113.517092
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..1
+apps/api test:integration: ok 11 - revocation racing a handshake
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 113.646046
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: # Subtest: backstop re-check
+apps/api test:integration:     # Subtest: disconnects a socket whose session stops resolving, without any bus event
+apps/api test:integration:     ok 1 - disconnects a socket whose session stops resolving, without any bus event
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 135.361362
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     # Subtest: disconnects a socket whose session switched tenant, so it rejoins the right room
+apps/api test:integration:     ok 2 - disconnects a socket whose session switched tenant, so it rejoins the right room
+apps/api test:integration:       ---
+apps/api test:integration:       duration_ms: 300.689341
+apps/api test:integration:       type: 'test'
+apps/api test:integration:       ...
+apps/api test:integration:     1..2
+apps/api test:integration: ok 12 - backstop re-check
+apps/api test:integration:   ---
+apps/api test:integration:   duration_ms: 436.241594
+apps/api test:integration:   type: 'suite'
+apps/api test:integration:   ...
+apps/api test:integration: 1..12
+apps/api test:integration: # tests 102
+apps/api test:integration: # suites 18
+apps/api test:integration: # pass 102
+apps/api test:integration: # fail 0
+apps/api test:integration: # cancelled 0
+apps/api test:integration: # skipped 0
+apps/api test:integration: # todo 0
+apps/api test:integration: # duration_ms 19321.310984
+apps/api test:integration: Done
