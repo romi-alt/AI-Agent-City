@@ -13,17 +13,49 @@ export interface LandscapePlan {
   flags: { x: number; z: number; h: number; color: string }[];
 }
 
+/** Park bench at real-world size: 1.8 m long, seat 0.45 m high (0.4 world units per metre, as the characters). */
+const M = 0.4;
 function bench(parts: Part[], x: number, z: number, ry: number) {
   const c = Math.cos(ry);
   const s = Math.sin(ry);
   const at = (lx: number, lz: number): [number, number] => [x + lx * c + lz * s, z - lx * s + lz * c];
   const [sx, sz] = at(0, 0);
-  parts.push({ shape: 'box', mat: 'wood', x: sx, y: CURB_H + 0.42, z: sz, sx: 1.6, sy: 0.07, sz: 0.44, ry });
-  const [bx, bz] = at(0, -0.21);
-  parts.push({ shape: 'box', mat: 'wood', x: bx, y: CURB_H + 0.68, z: bz, sx: 1.6, sy: 0.3, sz: 0.06, ry });
-  for (const lx of [-0.66, 0.66]) {
+  parts.push({
+    shape: 'box',
+    mat: 'wood',
+    x: sx,
+    y: CURB_H + 0.45 * M,
+    z: sz,
+    sx: 1.8 * M,
+    sy: 0.05 * M,
+    sz: 0.45 * M,
+    ry,
+  });
+  const [bx, bz] = at(0, -0.21 * M);
+  parts.push({
+    shape: 'box',
+    mat: 'wood',
+    x: bx,
+    y: CURB_H + 0.68 * M,
+    z: bz,
+    sx: 1.8 * M,
+    sy: 0.35 * M,
+    sz: 0.05 * M,
+    ry,
+  });
+  for (const lx of [-0.75 * M, 0.75 * M]) {
     const [lx2, lz2] = at(lx, 0);
-    parts.push({ shape: 'box', mat: 'iron', x: lx2, y: CURB_H + 0.21, z: lz2, sx: 0.06, sy: 0.42, sz: 0.42, ry });
+    parts.push({
+      shape: 'box',
+      mat: 'iron',
+      x: lx2,
+      y: CURB_H + 0.225 * M,
+      z: lz2,
+      sx: 0.05 * M,
+      sy: 0.45 * M,
+      sz: 0.45 * M,
+      ry,
+    });
   }
 }
 
