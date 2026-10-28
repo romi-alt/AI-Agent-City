@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('.', import.meta.url));
 export default {
   root,
+  // Serve apps/web's public files (the character model) as the web app does.
+  publicDir: fileURLToPath(new URL('../../../../apps/web/public', import.meta.url)),
   server: {
     port: 3202,
     strictPort: true,

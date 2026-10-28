@@ -7,14 +7,17 @@ import { SIDEWALK_Y } from '../geometry.ts';
 import { instanceAttr, PartBuilder, Placer } from '../mesh-utils.ts';
 import { createRng } from '../rng.ts';
 import type { StreetSim } from '../street-sim.ts';
+import { useCharacterAsset } from '../characters/asset.ts';
+import { bakeCrowd, CrowdMesh, STREET_CLIPS } from '../characters/crowd.ts';
+import { characterLook, CITY_SCALE, type CharacterClip } from '../characters/zones.ts';
 import { BODY, personGeometry, personLook, personMaterials } from './body.ts';
 import { PERSON_SCALE } from './proportions.ts';
 import { MODE } from './sim.ts';
 
-/** Seat height of the benches (above the sidewalk): a seated person's lower leg reaches the ground. */
-const SEAT = (BODY.knee - 0.02) * PERSON_SCALE;
-/** Benches are sized for the people on them. */
-const BS = PERSON_SCALE / 0.85;
+/** Seat height of the benches above the sidewalk: a chair-height seat (0.45 m) at the city's character scale. */
+const SEAT = 0.45 * CITY_SCALE;
+/** Benches are sized for the people on them (1.6 m long). */
+const BS = 0.73;
 
 function benchGeometry(benches: { x: number; z: number; yaw: number }[]) {
   const b = new PartBuilder();
@@ -50,7 +53,19 @@ interface Props {
 
 /** Everyone on foot: one instanced draw for all bodies (posed in the vertex shader) and one for the benches. */
 export function People({ sim, env, shadows, animate }: Props) {
+  const asset = useCharacterAsset();
   const poses = sim.people.poses;
+  const crowd = useMemo(() => {
+    if (!asset) return null;
+    try {
+      return skeletalCrowd(asset, poses, shadows);
+    } catch (err) {
+      // Keep the city running with the simple figures rather than losing the scene.
+      console.warn('Skeletal crowd unavailable; using simple figures.', err);
+      return null;
+    }
+  }, [asset, poses, shadows]);
+  useEffect(() => () => crowd?.dispose(), [crowd]);
   const built = useMemo(() => {
     const uTime = { value: 0 };
     const uNight = { value: 0 };
@@ -111,7 +126,14 @@ export function People({ sim, env, shadows, animate }: Props) {
   );
 
   const placer = useMemo(() => new Placer(), []);
-  useFrame(state => {
+  const clock = useMemo(() => ({ t: 0 }), []);
+  useFrame((state, dt) => {
+    if (animate) clock.t += Math.min(dt, 0.25);
+    built.mesh.visible = !crowd;
+    if (crowd) {
+      crowd.update(poses, clock.t, animate, env.nightFactor, placer);
+      return;
+    }
     built.uNight.value = env.nightFactor;
     if (animate) built.uTime.value = state.clock.elapsedTime;
     const { mesh, anim } = built;
@@ -132,7 +154,118 @@ export function People({ sim, env, shadows, animate }: Props) {
   return (
     <group name="life-people">
       <primitive object={built.mesh} />
+      {crowd?.meshes.map(m => (
+        <primitive key={m.uuid} object={m} />
+      ))}
       {built.benches && <primitive object={built.benches} />}
     </group>
   );
+}
+
+interface Persona {
+  mesh: CrowdMesh;
+  index: number;
+  walk: CharacterClip;
+  idle: CharacterClip;
+  talk: CharacterClip;
+  sit: CharacterClip;
+  offset: number;
+}
+
+/**
+ * Skeletal people (Quaternius characters, baked and instanced): each person gets a body, hairstyle and outfit, a
+ * walking style and idle habits. Walk clips are timed from the distance walked; idles from the life clock with a
+ * personal offset; walk and idle cross-fade with the walker's pace.
+ */
+function skeletalCrowd(
+  asset: NonNullable<ReturnType<typeof useCharacterAsset>>,
+  poses: StreetSim['people']['poses'],
+  shadows: boolean,
+) {
+  const rng = createRng(4711);
+  const looks = poses.map(p => {
+    const l = characterLook(rng);
+    // Rooftop workers wear high-visibility orange.
+    if (p.y > 2) l.look = { ...l.look, top: '#ff7a1a', bottom: '#2b3240' };
+    return l;
+  });
+  const bakes = { male: bakeCrowd(asset, 'male', STREET_CLIPS), female: bakeCrowd(asset, 'female', STREET_CLIPS) };
+  const meshes = {
+    male: new CrowdMesh(bakes.male, looks.filter(l => l.body === 'male').length),
+    female: new CrowdMesh(bakes.female, looks.filter(l => l.body === 'female').length),
+  };
+  const counters = { male: 0, female: 0 };
+  const personas: Persona[] = looks.map(l => {
+    const mesh = meshes[l.body];
+    const index = counters[l.body]++;
+    mesh.setLook(index, l.look, l.hair);
+    const r = rng();
+    return {
+      mesh,
+      index,
+      walk: r < 0.45 ? 'walkFormal' : 'walk',
+      idle: r < 0.2 ? 'phone' : r < 0.32 ? 'foldArms' : 'idle',
+      talk: rng() < 0.75 ? 'talk' : 'idle',
+      sit: rng() < 0.4 ? 'sitTalk' : 'sit',
+      offset: rng() * 20,
+    };
+  });
+  for (const m of Object.values(meshes)) {
+    m.mesh.castShadow = shadows;
+    m.mesh.name = `life-people-${m.bake.body}`;
+  }
+  const strideOf = (p: Persona) => (p.mesh.bake.stride[p.walk] ?? 1.4) * CITY_SCALE;
+  return {
+    meshes: [meshes.male.mesh, meshes.female.mesh],
+    update(list: StreetSim['people']['poses'], t: number, animate: boolean, night: number, placer: Placer) {
+      list.forEach((p, i) => {
+        const who = personas[i]!;
+        const k = p.scale * CITY_SCALE;
+        if (p.scale === 0) {
+          who.mesh.mesh.setMatrixAt(who.index, placer.set(0, -100, 0, 0, 0));
+          return;
+        }
+        const seated = p.mode === MODE.seated;
+        // Characters face +z; city yaw is measured for a model facing +x.
+        const back = seated ? -0.08 : 0;
+        who.mesh.mesh.setMatrixAt(
+          who.index,
+          placer.set(
+            p.x + Math.cos(p.yaw) * back,
+            seated ? SIDEWALK_Y : p.y,
+            p.z - Math.sin(p.yaw) * back,
+            p.yaw + Math.PI / 2,
+            k,
+          ),
+        );
+        const own = t + who.offset;
+        if (seated) who.mesh.setAnim(who.index, { clip: who.sit, time: own });
+        else if (p.mode === MODE.talk) who.mesh.setAnim(who.index, { clip: who.talk, time: own });
+        else {
+          const walkClip = who.mesh.bake.clips[who.walk];
+          const walkTime = (p.dist / (strideOf(who) * p.scale)) * walkClip.duration;
+          const gait = animate ? Math.max(0, Math.min(1, p.gait)) : 0;
+          who.mesh.setAnim(who.index, {
+            clip: who.walk,
+            time: walkTime,
+            next: who.idle,
+            nextTime: own,
+            blend: 1 - gait,
+          });
+        }
+      });
+      for (const m of [meshes.male, meshes.female]) {
+        m.uniforms.uNight.value = night;
+        m.commit();
+      }
+    },
+    dispose() {
+      meshes.male.dispose();
+      meshes.female.dispose();
+      for (const b of Object.values(bakes)) {
+        b.texture.dispose();
+        b.geometry.dispose();
+      }
+    },
+  };
 }
