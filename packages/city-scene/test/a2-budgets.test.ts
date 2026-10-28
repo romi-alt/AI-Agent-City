@@ -4,7 +4,10 @@ import { Birds } from '../src/life/birds/flock.ts';
 import { detailPlan } from '../src/life/details/placement.ts';
 import { buildingBoxes, buildingDoors, roofHeight } from '../src/life/geometry.ts';
 import { createRng } from '../src/life/rng.ts';
+import { personGeometry } from '../src/life/people/body.ts';
 import { StreetSim } from '../src/life/street-sim.ts';
+import { VEHICLE_KINDS } from '../src/life/traffic/sim.ts';
+import { vehicleGeometry } from '../src/life/traffic/vehicles.ts';
 import { QUALITY } from '../src/quality/quality.ts';
 import { layout } from './a2-helpers.ts';
 
@@ -67,4 +70,19 @@ it('places a lobby door on a facade of every building, facing a street', () => {
     for (const d of own) assert.equal(Math.abs(d.z - b.z), b.d / 2);
   }
   assert.ok(roofHeight(layout.buildings[0]!) > 0);
+});
+
+it('keeps model triangle counts within budget (full detail on ultra/balanced, cheaper on low)', () => {
+  const tris = (g: { index: { count: number } | null; getAttribute(n: string): { count: number } }) =>
+    (g.index ? g.index.count : g.getAttribute('position').count) / 3;
+  for (const kind of VEHICLE_KINDS) {
+    const full = tris(vehicleGeometry(kind, 'full'));
+    const low = tris(vehicleGeometry(kind, 'low'));
+    assert.ok(full <= 950, `${kind}: ${full} triangles`);
+    assert.ok(low <= 450 && low < full * 0.6, `${kind} low: ${low} triangles`);
+  }
+  assert.ok(tris(personGeometry()) <= 700);
+  // A full ultra street (all vehicles and people, main pass) stays well under 200k triangles.
+  const q = QUALITY.ultra;
+  assert.ok(q.vehicles * 950 + q.pedestrians * 700 < 200_000);
 });

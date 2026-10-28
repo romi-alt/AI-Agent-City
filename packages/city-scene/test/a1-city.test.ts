@@ -54,7 +54,9 @@ describe('background skyline', () => {
     const all = new Set(full.masses.map(key));
     for (const m of [...minimal.masses, ...reduced.masses]) assert.ok(all.has(key(m)));
     assert.ok(minimal.masses.length < reduced.masses.length && reduced.masses.length <= full.masses.length);
-    assert.equal(minimal.parts.length, 0);
+    // 'minimal' keeps only the signature tops that make the silhouette (spires, pyramids, slanted crowns).
+    for (const p of minimal.parts) assert.ok(['steel', 'copper', 'darkGlass'].includes(p.mat), p.mat);
+    assert.ok(minimal.parts.length < reduced.parts.length);
     assert.ok(reduced.parts.length < full.parts.length);
   });
 
@@ -86,7 +88,16 @@ describe('background skyline', () => {
       }
   });
 
-  it('has varied silhouettes: several styles, setbacks and a range of heights', () => {
+  it('has varied silhouettes: several styles, setbacks, signature tops and a range of heights', () => {
+    for (const shape of ['pyramid', 'wedge', 'cone'] as const)
+      assert.ok(
+        full.parts.some(p => p.shape === shape),
+        shape,
+      );
+    assert.ok(
+      full.masses.some(m => m.style === 'crown'),
+      'lantern crowns',
+    );
     const styles = new Set(full.masses.map(m => m.style));
     for (const s of ['glass', 'stone', 'brick', 'ribbon', 'fins', 'louvre'] as const) assert.ok(styles.has(s), s);
     const heights = full.masses.map(m => m.y1);

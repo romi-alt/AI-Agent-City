@@ -22,7 +22,10 @@ export const QUALITY: Record<QualityLevel, QualityBudget> = {
     dpr: [1, 2],
     shadows: true,
     shadowMapSize: 2048,
-    postprocessing: true,
+    // Off: three applies fog after tone mapping in its own shaders, but a postprocessing chain tone-maps at the
+    // end, after fog, so the haze (and the whole city) read brighter and flatter on ultra than on balanced.
+    // MSAA (antialias) covers edges. Turn on only together with a fog-before-tone-mapping fix for every material.
+    postprocessing: false,
     vehicles: 90,
     pedestrians: 160,
     birds: 60,

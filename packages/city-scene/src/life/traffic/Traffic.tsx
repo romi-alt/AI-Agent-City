@@ -8,7 +8,14 @@ import { hideInstance, instanceAttr, Placer } from '../mesh-utils.ts';
 import { createRng } from '../rng.ts';
 import type { StreetSim } from '../street-sim.ts';
 import { VEHICLE_KINDS, type VehicleKind } from './sim.ts';
-import { PAINTS, VEHICLE_EMISSIVE, VEHICLE_FRAGMENT_HEAD, VEHICLE_VERTEX_HEAD, vehicleGeometry } from './vehicles.ts';
+import {
+  PAINTS,
+  type VehicleDetail,
+  VEHICLE_EMISSIVE,
+  VEHICLE_FRAGMENT_HEAD,
+  VEHICLE_VERTEX_HEAD,
+  vehicleGeometry,
+} from './vehicles.ts';
 
 interface Props {
   sim: StreetSim;
@@ -18,10 +25,12 @@ interface Props {
   pools: boolean;
   /** Flashing beacons and brake-light changes stop with reduced motion. */
   animate: boolean;
+  /** Model detail: `low` drops bevels and rims. */
+  detail: VehicleDetail;
 }
 
 function vehicleMaterial(uniforms: { uNight: THREE.IUniform<number>; uTime: THREE.IUniform<number> }) {
-  const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.42, metalness: 0.3 });
+  const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.2 });
   m.onBeforeCompile = shader => {
     shader.uniforms.uNight = uniforms.uNight;
     shader.uniforms.uTime = uniforms.uTime;
@@ -32,6 +41,7 @@ function vehicleMaterial(uniforms: { uNight: THREE.IUniform<number>; uTime: THRE
         `vColor = vec4(color, 1.0);
 #ifdef USE_INSTANCING_COLOR
       if (aSlot < 0.5) vColor.rgb *= instanceColor.rgb;
+      else if (aSlot > 7.5) vColor.rgb = min(vec3(1.0), instanceColor.rgb * 1.35 + 0.08);
 #endif
       vSlot = aSlot;
       vState = iState;`,
@@ -64,7 +74,7 @@ function poolTexture() {
 }
 
 /** Vehicles: one instanced mesh per kind (per-instance paint), plus additive headlight pools at night. */
-export function Traffic({ sim, env, shadows, pools, animate }: Props) {
+export function Traffic({ sim, env, shadows, pools, animate, detail }: Props) {
   const vehicles = sim.traffic.vehicles;
   const built = useMemo(() => {
     const uniforms = { uNight: { value: 0 }, uTime: { value: 0 } };
@@ -76,7 +86,7 @@ export function Traffic({ sim, env, shadows, pools, animate }: Props) {
     for (const kind of VEHICLE_KINDS) {
       const ofKind = vehicles.filter(v => v.kind === kind);
       if (!ofKind.length) continue;
-      const mesh = new THREE.InstancedMesh(vehicleGeometry(kind), material, ofKind.length);
+      const mesh = new THREE.InstancedMesh(vehicleGeometry(kind, detail), material, ofKind.length);
       mesh.name = `life-vehicles-${kind}`;
       mesh.frustumCulled = false;
       mesh.castShadow = shadows;
@@ -105,7 +115,7 @@ export function Traffic({ sim, env, shadows, pools, animate }: Props) {
     poolMesh.frustumCulled = false;
     poolMesh.renderOrder = 2;
     return { meshes, slot, uniforms, material, poolMesh, poolMat };
-  }, [vehicles, shadows]);
+  }, [vehicles, shadows, detail]);
 
   useEffect(
     () => () => {

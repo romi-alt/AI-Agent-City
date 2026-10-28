@@ -14,6 +14,7 @@ export function usePartMaterials(): Record<string, Material> {
       steel: std({ color: '#5a6066', roughness: 0.55, metalness: 0.6 }),
       darkMetal: std({ color: '#25292e', roughness: 0.45, metalness: 0.6 }),
       gold: std({ color: '#d9a531', roughness: 0.3, metalness: 1 }),
+      darkGlass: std({ color: '#3a4350', roughness: 0.12, metalness: 0.9 }),
       copper: std({ color: '#5f8f7e', roughness: 0.6, metalness: 0.4 }),
       tank: std({ color: '#7a5a3e', roughness: 0.9 }),
       tankRoof: std({ color: '#3f3a36', roughness: 0.8 }),

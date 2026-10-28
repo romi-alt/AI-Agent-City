@@ -8,12 +8,12 @@ export const VEHICLE_KINDS: readonly VehicleKind[] = ['sedan', 'suv', 'taxi', 'v
 
 /** Sizes in world units (legacy scale), cruising speed range in units/s. */
 export const VEHICLE_SPEC: Record<VehicleKind, { len: number; width: number; v0: [number, number] }> = {
-  sedan: { len: 1.8, width: 0.9, v0: [6, 8] },
-  suv: { len: 1.95, width: 0.94, v0: [5.8, 7.6] },
-  taxi: { len: 1.8, width: 0.9, v0: [6.5, 8.4] },
-  van: { len: 2.2, width: 0.96, v0: [5.2, 6.8] },
-  bus: { len: 4.6, width: 1.02, v0: [4.2, 5] },
-  emergency: { len: 2.3, width: 0.98, v0: [7, 8.5] },
+  sedan: { len: 1.8, width: 0.76, v0: [6, 8] },
+  suv: { len: 1.95, width: 0.82, v0: [5.8, 7.6] },
+  taxi: { len: 1.8, width: 0.76, v0: [6.5, 8.4] },
+  van: { len: 2.2, width: 0.86, v0: [5.2, 6.8] },
+  bus: { len: 4.6, width: 0.98, v0: [4.2, 5] },
+  emergency: { len: 2.3, width: 0.88, v0: [7, 8.5] },
 };
 
 /** How a budget of N vehicles is split between kinds (a city of yellow cabs; one emergency vehicle at most). */
