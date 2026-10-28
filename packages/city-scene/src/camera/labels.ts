@@ -148,9 +148,34 @@ export function LabelProjector({ store }: { store: CityStore }) {
       else
         el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) ${a.align === 'right' ? 'translate(0, -50%)' : 'translate(-50%, -100%)'}`;
     }
-    placeDeskTags(desks);
+    placeDeskTags(desks, chromeBoxes(desks[0]?.el.parentElement ?? null));
   });
   return null;
+}
+
+/** Parts of the HUD that sit over the scene and would hide a tag (or swallow its taps) if it were placed under them. */
+const CHROME = '.ac-legend, .ac-office-title, .ac-brandbar, .ac-tools, .ac-cam, .ac-panel';
+const CHROME_REFRESH_FRAMES = 20;
+let chromeFrame = 0;
+let chromeCache: Box[] = [];
+
+type Box = { l: number; t: number; r: number; b: number };
+
+/**
+ * The HUD's boxes in the labels layer's own coordinates. Reading layout every frame would force reflows, and the HUD
+ * only moves on a resize or a mode change, so they are re-read every few frames.
+ */
+function chromeBoxes(layer: HTMLElement | null): Box[] {
+  if (!layer) return [];
+  if (chromeFrame++ % CHROME_REFRESH_FRAMES !== 0) return chromeCache;
+  const origin = layer.getBoundingClientRect();
+  const hud = layer.closest('.ac-hud')?.parentElement ?? document;
+  chromeCache = [...hud.querySelectorAll(CHROME)].flatMap(el => {
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return [];
+    return [{ l: r.left - origin.left, t: r.top - origin.top, r: r.right - origin.left, b: r.bottom - origin.top }];
+  });
+  return chromeCache;
 }
 
 /** Measured once per tag (reading layout every frame would force a reflow each time). */
@@ -161,9 +186,10 @@ const tagSize = new WeakMap<HTMLElement, { w: number; h: number }>();
  * first; a tag that would overlap one already placed moves up a step or two (or just below its desk), and the
  * least-crowded spot wins when every candidate is taken.
  */
-function placeDeskTags(tags: { el: HTMLElement; x: number; y: number; selected: boolean }[]) {
+function placeDeskTags(tags: { el: HTMLElement; x: number; y: number; selected: boolean }[], chrome: Box[]) {
   tags.sort((a, b) => Number(b.selected) - Number(a.selected) || b.y - a.y);
-  const placed: { l: number; t: number; r: number; b: number }[] = [];
+  // The HUD counts as already placed, so a tag moves clear of it instead of hiding underneath.
+  const placed: Box[] = [...chrome];
   const GAP = 3;
   for (const tag of tags) {
     let dims = tagSize.get(tag.el);
@@ -172,7 +198,7 @@ function placeDeskTags(tags: { el: HTMLElement; x: number; y: number; selected: 
     const h = dims.h || 28;
     const step = h + GAP;
     let best = { dy: 0, overlap: Infinity };
-    for (const dy of [0, -step, step + 6, -2 * step, 2 * step + 6, -3 * step]) {
+    for (const dy of [0, -step, step + 6, -2 * step, 2 * step + 6, -3 * step, 3 * step + 6, 4 * step + 6]) {
       const box = { l: tag.x - w / 2, t: tag.y - h + dy, r: tag.x + w / 2, b: tag.y + dy };
       let overlap = 0;
       for (const p of placed) {

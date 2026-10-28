@@ -5,6 +5,7 @@ import { type Camera, Vector3 } from 'three';
 import { useCityContext } from '../context.tsx';
 import { explodeRuntime, floorOffset } from './explode.ts';
 import { simulatedActivity } from './activity.ts';
+import { type LabelCandidate, placeLabels } from './labelLayout.ts';
 
 export interface LabelItem {
   key: string;
@@ -19,6 +20,36 @@ export interface LabelItem {
   /** AI desks in the building (the "y" of "x/y working"), and rentable floors (rentals). */
   desks: number;
   forRent: number;
+}
+
+interface Live {
+  i: number;
+  it: LabelItem;
+  px: number;
+  py: number;
+  depth: number;
+  needsYou: boolean;
+  pinned: boolean;
+}
+interface TagNodes {
+  el: HTMLButtonElement;
+  sub: HTMLElement;
+  sim: HTMLElement;
+  wFull: number;
+  wBrief: number;
+  h: number;
+}
+
+/** Measure the tag in both forms once per text change (offsetWidth forces layout, so never every frame). */
+function measure(n: TagNodes, noSim: boolean, compact: boolean) {
+  n.el.style.display = 'inline-flex';
+  n.sub.style.display = compact ? 'none' : '';
+  n.sim.style.display = compact || noSim ? 'none' : '';
+  n.wFull = n.el.offsetWidth;
+  n.h = n.el.offsetHeight;
+  n.sub.style.display = 'none';
+  n.sim.style.display = 'none';
+  n.wBrief = n.el.offsetWidth;
 }
 
 const PILL =
@@ -71,7 +102,7 @@ export function BuildingLabels({ items }: { items: LabelItem[] }) {
       el.addEventListener('pointerenter', () => store.get().hovered !== it.key && store.set({ hovered: it.key }));
       el.addEventListener('pointerleave', () => store.get().hovered === it.key && store.set({ hovered: null }));
       layer.append(el);
-      return { el, badge, sub, sim, last: '' };
+      return { el, badge, sub, sim, last: '', wFull: 0, wBrief: 0, h: 0 };
     });
     return { layer, els };
   }, [items, store]);
@@ -90,6 +121,7 @@ export function BuildingLabels({ items }: { items: LabelItem[] }) {
     const focus = kind === 'building' ? st.mode.building : null;
     const compact = size.width < 600;
     const t = st.reducedMotion ? 0 : clock.elapsedTime;
+    const live: Live[] = [];
     items.forEach((it, i) => {
       const n = nodes.els[i]!;
       const visible = kind === 'explore' || kind === 'arrival' || it.key === focus;
@@ -112,8 +144,6 @@ export function BuildingLabels({ items }: { items: LabelItem[] }) {
       if (key !== n.last) {
         n.last = key;
         n.sub.textContent = text;
-        n.sub.style.display = compact ? 'none' : '';
-        n.sim.style.display = compact || it.desks === 0 ? 'none' : '';
         n.badge.textContent = String(act.needs);
         n.badge.style.display = act.needs > 0 ? 'inline-block' : 'none';
         n.el.setAttribute(
@@ -124,12 +154,48 @@ export function BuildingLabels({ items }: { items: LabelItem[] }) {
           st.hovered === it.key
             ? '0 0 0 2px #f5b335,0 6px 18px rgba(12,12,13,0.18)'
             : '0 1px 2px rgba(12,12,13,0.10),0 6px 18px rgba(12,12,13,0.14)';
+        measure(n, it.desks === 0, compact);
       }
       const px = ((v.x + 1) / 2) * size.width;
       const py = Math.max(28, ((1 - v.y) / 2) * size.height);
+      live.push({
+        i,
+        it,
+        px,
+        py,
+        depth: dir.length(),
+        needsYou: act.needs > 0,
+        pinned: st.hovered === it.key || it.key === focus,
+      });
+    });
+    // A building's own focused tag is alone on screen, so it needs no avoidance.
+    const cands: LabelCandidate[] = live.map(l => {
+      const n = nodes.els[l.i]!;
+      return {
+        x: l.px,
+        y: l.py,
+        fullWidth: n.wFull,
+        briefWidth: n.wBrief,
+        height: n.h,
+        pinned: l.pinned,
+        needsYou: l.needsYou,
+        depth: l.depth,
+      };
+    });
+    const placed = placeLabels(cands);
+    live.forEach((l, k) => {
+      const n = nodes.els[l.i]!;
+      const p = placed[k]!;
+      if (p.form === 'hidden') {
+        n.el.style.display = 'none';
+        return;
+      }
+      const brief = p.form === 'brief' || compact;
+      n.sub.style.display = brief ? 'none' : '';
+      n.sim.style.display = brief || l.it.desks === 0 ? 'none' : '';
       // Nearer tags draw on top of farther ones.
-      n.el.style.zIndex = String(1000 - Math.round(dir.length()));
-      n.el.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) translate(-50%, -100%)`;
+      n.el.style.zIndex = String(1000 - Math.round(l.depth));
+      n.el.style.transform = `translate(${l.px.toFixed(1)}px, ${(l.py + p.dy).toFixed(1)}px) translate(-50%, -100%)`;
       n.el.style.display = 'inline-flex';
     });
   });
