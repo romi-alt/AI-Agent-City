@@ -4,6 +4,7 @@ import { useContext, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useCityContext } from '../context.tsx';
 import { OfficeOccupantsContext } from '../interior/occupants.ts';
+import { roomLayout } from '../interior/room/layout.ts';
 import { deskWorld, occupantsFromLayout, referenceDeskWorld, referencePlanFor } from '../interior/placement.ts';
 import type { CityMode, CityState, LayoutBuilding } from '../types.ts';
 import { ARRIVAL_FADE_SECONDS, ARRIVAL_SECONDS, markArrivalPlayed } from './arrival.ts';
@@ -213,8 +214,21 @@ export function CameraRig() {
       return f ? occupantsFromLayout(f.desks) : [];
     };
     /** The office room as the reference plan lays it out (its feature wall's height). */
-    const roomOf = (b: LayoutBuilding, mode: { building: string; level: number }) =>
-      officeRoom(b, mode.level, referencePlanFor(b, peopleIn(mode)));
+    const roomOf = (b: LayoutBuilding, mode: { building: string; level: number }) => {
+      const plan = referencePlanFor(b, peopleIn(mode));
+      const r = roomLayout(plan);
+      const m = r.meeting;
+      const f = r.featureWall;
+      const zones = [
+        r.leadRug,
+        r.teamRug,
+        r.loungeRug,
+        { x: m.x, z: m.z, w: m.radius * 2, d: m.radius * 2 },
+        { x: f.x, z: f.z, w: f.w, d: 0.5 },
+        { x: r.liveScreen.x, z: r.liveScreen.z, w: 1.5, d: 1.5 },
+      ];
+      return officeRoom(b, mode.level, plan, zones);
+    };
 
     /** A selected agent's desk on a floor seen in the cut-away (the public city: look, don't enter). */
     const deskOfAgent = (mode: Extract<CityMode, { kind: 'floor' }>, id: string) => {
@@ -630,13 +644,16 @@ export function CameraRig() {
   useFrame((_, rawDt) => {
     const r = rig.current;
     const dt = Math.min(rawDt, 0.1);
+    // Camera moves run on wall-clock time (up to half a second a frame): on a slow device a 4 s flight still lands
+    // in about 4 s instead of crawling for minutes at a tenth of a second per frame.
+    const moveDt = Math.min(rawDt, 0.5);
     const reduced = store.get().reducedMotion;
     const m = r.motion;
     // Whether a camera move is under way, for tests and tooling (the canvas carries it as data-city-motion).
     const moving = m ? m.kind : '';
     if (gl.domElement.dataset.cityMotion !== moving) gl.domElement.dataset.cityMotion = moving;
     if (m?.kind === 'flight') {
-      m.t += dt;
+      m.t += moveDt;
       const p = sampleFlight(m.flight, m.t);
       const o = orbitFromPose(p.pos, p.target);
       r.cur = o;
@@ -653,7 +670,7 @@ export function CameraRig() {
     if (m?.kind === 'flight') {
       // Sampled above, before the pending collision boxes are applied.
     } else if (m?.kind === 'glide') {
-      m.t += dt;
+      m.t += moveDt;
       // Fade in from the night-blue curtain over the first second.
       r.fade = clamp(1 - m.t / 1.2, 0, 1);
       const p = sampleGlide(m.glide, m.t);
@@ -671,7 +688,7 @@ export function CameraRig() {
       }
     } else if (m?.kind === 'fade') {
       const before = m.t;
-      m.t += dt;
+      m.t += moveDt;
       if (m.t < m.out) r.fade = m.t / m.out;
       else if (m.t < m.out + m.hold) {
         r.fade = 1;

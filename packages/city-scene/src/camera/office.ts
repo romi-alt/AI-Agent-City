@@ -21,6 +21,19 @@ export interface OfficeRoom {
   feature: RoomSide;
   /** West and east edges of the team (desks and feature wall), for narrow views that can't fit the whole width. */
   team?: { minX: number; maxX: number };
+  /**
+   * The furnished part of the floor (rugs, meeting ring, feature wall, live screen), from the back glass forward.
+   * Deep buildings leave the camera end of the floor bare; framing this crops it, as the reference frame does.
+   */
+  content?: { minX: number; maxX: number; minZ: number; maxZ: number };
+}
+
+/** A floor rectangle in office-local metres (centre and size), as the room layout gives its zones. */
+export interface ZoneRect {
+  x: number;
+  z: number;
+  w: number;
+  d: number;
 }
 
 /** Storey-height walls (metres), when no plan says how tall the feature wall is. */
@@ -43,6 +56,7 @@ export function officeRoom(
   b: LayoutBuilding,
   level: number,
   plan?: { featureWall: FeatureWall; desks: readonly { x: number }[] },
+  zones: readonly ZoneRect[] = [],
   lift = 0,
 ): OfficeRoom {
   const floor = floorBase(level) + lift;
@@ -58,6 +72,7 @@ export function officeRoom(
     floor,
     wallTop: floor + Math.max(WALL_M, wall?.h ?? 0) / METRES_PER_UNIT,
     feature: '-z',
+    ...(zones.length ? { content: contentBox(b, zones) } : {}),
     ...(xs.length
       ? {
           team: {
@@ -66,6 +81,21 @@ export function officeRoom(
           },
         }
       : {}),
+  };
+}
+
+/** The zones' extent in world units, with a little floor round them, inside the footprint and from the back glass. */
+function contentBox(b: LayoutBuilding, zones: readonly ZoneRect[]): NonNullable<OfficeRoom['content']> {
+  const pad = 1.2;
+  const u = (m: number) => m / METRES_PER_UNIT;
+  const x0 = Math.min(...zones.map(r => r.x - r.w / 2)) - pad;
+  const x1 = Math.max(...zones.map(r => r.x + r.w / 2)) + pad;
+  const z1 = Math.max(...zones.map(r => r.z + r.d / 2)) + pad;
+  return {
+    minX: Math.max(b.x - b.w / 2, b.x + u(x0)),
+    maxX: Math.min(b.x + b.w / 2, b.x + u(x1)),
+    minZ: b.z - b.d / 2,
+    maxZ: Math.min(b.z + b.d / 2, b.z + u(z1)),
   };
 }
 
@@ -87,8 +117,9 @@ export function officeOverviewOrbit(room: OfficeRoom, vp: Viewport = DEFAULT_VIE
   // A portrait view (a phone above its bottom sheet) fitting the whole width would shrink the room to a strip:
   // there the team's width is framed instead, the room's depth still in full.
   const portrait = (vp.width - vp.right) / Math.max(1, vp.height - vp.bottom) < 1;
-  const span = portrait && room.team && room.feature.endsWith('z') ? room.team : room;
-  const floor = boxCorners(span.minX, span.maxX, room.floor, room.floor, room.minZ, room.maxZ);
+  const area = room.content ?? room;
+  const span = portrait && room.team && room.feature.endsWith('z') ? room.team : area;
+  const floor = boxCorners(span.minX, span.maxX, room.floor, room.floor, area.minZ, area.maxZ);
   const wall = featureWallTop(room).map(([x, y, z]): V3 => [clamp(x, span.minX, span.maxX), y, z]);
   return fitPoints([...floor, ...wall], officeHeading(room), OFFICE_PHI, vp, 0.02);
 }

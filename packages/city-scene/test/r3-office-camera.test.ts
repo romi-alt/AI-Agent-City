@@ -13,6 +13,7 @@ import {
 import { orbitFromPose } from '../src/camera/orbit.ts';
 import layoutJson from '../src/data/city-layout.json' with { type: 'json' };
 import { referenceDeskWorld, referencePlanFor } from '../src/interior/placement.ts';
+import { roomLayout } from '../src/interior/room/layout.ts';
 import type { CityLayout } from '../src/types.ts';
 
 const layout = layoutJson as CityLayout;
@@ -62,6 +63,17 @@ describe('office camera (R3)', () => {
     const lim = officeLimits(officeOverviewOrbit(room, DESKTOP));
     assert.ok(lim.maxPhi < Math.PI / 2 - 0.3, 'never down at the floor’s level');
     assert.ok(lim.maxRadius > officeOverviewOrbit(room, DESKTOP).radius);
+  });
+
+  it('crops the bare front of a deep floor: the furnished part fills the frame', () => {
+    const deep = layout.buildings.reduce((a, x) => (x.d > a.d ? x : a));
+    const plan = referencePlanFor(deep, people);
+    const r = roomLayout(plan);
+    const cropped = officeRoom(deep, 2, plan, [r.leadRug, r.teamRug, r.loungeRug]);
+    const whole = officeRoom(deep, 2, plan);
+    assert.ok(cropped.content && cropped.content.maxZ < whole.maxZ, 'front of the floor left out');
+    assert.equal(cropped.content.minZ, whole.minZ, 'the back glass stays in');
+    assert.ok(officeOverviewOrbit(cropped, DESKTOP).radius < officeOverviewOrbit(whole, DESKTOP).radius);
   });
 
   it('keeps pans over the room', () => {
