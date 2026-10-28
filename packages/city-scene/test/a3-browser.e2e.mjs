@@ -259,6 +259,9 @@ await check('city-no-webgl', async () => {
   await close();
 });
 
+/** An agent's name tag in the office view. */
+const OFFICE_TAG = '.ac-agent-pill, .ac-desk-tag';
+
 // ── 3D harness (stand-in buildings; A1's architecture is not on this branch) ──
 const cam = page => page.evaluate(() => window.three.camera.position.toArray());
 const mode = page => page.evaluate(() => window.cityStore.get().mode);
@@ -362,8 +365,8 @@ await check('harness-building-floor-office-desk', async () => {
   await settle(page);
   await shot(page, 'office');
   // Select a desk by clicking its name tag (a real button), then the whole office again.
-  log("await page.locator('.ac-desk-tag', { hasText: 'Atl");
-  await page.locator('.ac-desk-tag', { hasText: 'Kai' }).click();
+  // Office name pills (the reference look) or, before the room adopts them, the desk tags.
+  await page.locator(OFFICE_TAG, { hasText: 'Kai' }).click();
   await page.waitForFunction(() => window.cityStore.get().mode.desk === 2);
   assert.equal(await page.evaluate(() => window.selected), 'a3', 'onSelectAgent got the agent id');
   await settle(page);
@@ -399,8 +402,8 @@ await check('harness-arrival', async () => {
 
 await check('harness-demo-office-scene', async () => {
   const { page, errors, close } = await open(`${harness}?real=1`);
-  await page.locator('.ac-desk-tag').first().waitFor({ timeout: 120_000 });
-  assert.equal(await page.locator('.ac-desk-tag').count(), 8, 'the eight demo agents all have a desk');
+  await page.locator(OFFICE_TAG).first().waitFor({ timeout: 120_000 });
+  assert.equal(await page.locator(OFFICE_TAG).count(), 8, 'the eight demo agents all have a desk');
   assert.equal(await page.getByTestId('office-desk-a3').count(), 1, 'desk test ids for the host');
   await page.getByTestId('office-desk-a3').click();
   await page.waitForFunction(() => window.selected === 'a3');
