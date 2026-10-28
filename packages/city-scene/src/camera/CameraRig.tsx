@@ -168,7 +168,10 @@ export function CameraRig() {
 
   /** D4: explore limits narrowed so the edge of the generated city never shows (cached in presets.ts). */
   const presetLimits = (base: OrbitLimits, vp: Viewport) =>
-    exploreLimits(base, presetFrame, rig.current.boxes, vp, scene.fog, boundsRef.current.targetExtent);
+    exploreLimits(base, presetFrame, rig.current.boxes, vp, scene.fog, boundsRef.current.targetExtent, {
+      y: camera.position.y,
+      dirY: -camera.matrixWorld.elements[9]!, // the view direction is the camera's -z axis
+    });
 
   const clockRef = useRef(0);
   const touched = useRef(false);

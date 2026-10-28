@@ -9,6 +9,8 @@ import {
   cityFrame,
   edgeHidden,
   exploreLimits,
+  fogAt,
+  fogFarLift,
   fogHides,
   framedHeroes,
   groundReach,
@@ -38,6 +40,8 @@ const PHONE_SHEET: Viewport = { ...PHONE, bottom: 300 };
 const VIEWPORTS = [DESK, PANEL, PHONE, PHONE_SHEET];
 /** D1's linear fog at its thinnest (clear day; evening, night and weather only hide more). */
 const FOG = { far: Math.max(...TIMES.map(t => presetFor(t, 'clear').fogFar)) };
+/** A camera looking level (no fog lift), so the fog passed in is the base distance. */
+const LEVEL = { y: 0, dirY: 0 };
 const pitchOf = (phi: number) => 90 - (phi * 180) / Math.PI;
 
 function inView(o: ReturnType<typeof overviewPreset>, vp: Viewport, keys: Set<string>) {
@@ -104,7 +108,7 @@ describe('city presets', () => {
     assert.ok(dist(a.target, b.target) > 0.5 || Math.abs(a.radius - b.radius) > 0.5);
   });
   it('moves between presets in about a second, ending exactly on the preset', () => {
-    const lim = exploreLimits(EXPLORE_LIMITS, frame, boxes, DESK, FOG, bounds.targetExtent);
+    const lim = exploreLimits(EXPLORE_LIMITS, frame, boxes, DESK, FOG, bounds.targetExtent, LEVEL);
     const views = ['overview', 'top', 'orbit'] as const;
     for (const from of views) {
       for (const to of views) {
@@ -124,16 +128,20 @@ describe('edge of the generated city', () => {
     assert.ok(groundReach(topPreset(boxes, DESK), DESK, Infinity) < 120, 'straight down sees only the district');
     assert.ok(Math.abs(fogHides({ far: 300 }) - 300) < 1e-9);
     assert.ok(fogHides({ density: 0.01 }) > 200 && fogHides(null) === Infinity);
+    // D1's fog lift: only when looking down from above 40, growing with height.
+    assert.equal(fogFarLift(30, -1), 0);
+    assert.equal(fogFarLift(100, 0), 0);
+    assert.ok(fogFarLift(140, -1) > fogFarLift(90, -1) && fogAt(topPreset(boxes, DESK), 300) > 300);
   });
   it('the presets, the farthest zoom and the lowest tilt never show the edge, in any viewport', () => {
     for (const vp of VIEWPORTS) {
-      const lim = exploreLimits(EXPLORE_LIMITS, frame, boxes, vp, FOG, bounds.targetExtent);
+      const lim = exploreLimits(EXPLORE_LIMITS, frame, boxes, vp, FOG, bounds.targetExtent, LEVEL);
       const fog = fogHides(FOG);
       for (const view of ['overview', 'top', 'orbit'] as const) {
         const p = presetPose(view, boxes, frame, vp, lim);
         const o = orbitFromPose(p.pos, p.target);
         assert.ok(o.radius <= lim.maxRadius + 1e-6 && o.phi <= lim.maxPhi + 1e-6, `${view} inside the limits`);
-        assert.ok(groundReach(o, vp, fog) < frame.extent, `${view} shows the edge`);
+        assert.ok(groundReach(o, vp, fogAt(o, fog)) < frame.extent, `${view} shows the edge`);
       }
       // Every zoom and tilt the limits allow, with the target panned to the corners of the district.
       for (let phi = lim.minPhi; phi <= lim.maxPhi + 1e-9; phi += 0.04) {

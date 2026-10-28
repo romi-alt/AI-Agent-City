@@ -170,6 +170,25 @@ export function fogHides(fog: unknown): number {
 }
 
 /**
+ * D1's fog follows the camera (environment/Environment.tsx): looking down from above `FOG_LIFT_FROM` it is pushed out
+ * by the height times the squared downward look, the far plane by `FOG_FAR_LIFT` times that. Mirrored here so the
+ * limits judge each candidate view with the fog it would really have; keep the two in step.
+ */
+export const FOG_LIFT_FROM = 40;
+export const FOG_FAR_LIFT = 1.15;
+
+/** How much D1 pushes the fog's far plane out for a camera at height `y` whose view direction has y-component `dirY`. */
+export function fogFarLift(y: number, dirY: number): number {
+  return Math.max(0, y - FOG_LIFT_FROM) * Math.max(0, -dirY) ** 2 * FOG_FAR_LIFT;
+}
+
+/** The fog's hiding depth for an orbit, from the base distance (the time of day and weather alone). */
+export function fogAt(o: Orbit, baseDepth: number): number {
+  const y = o.target[1] + o.radius * Math.cos(o.phi);
+  return baseDepth + fogFarLift(y, -Math.cos(o.phi));
+}
+
+/**
  * How far from the centre (the larger of |x| and |z|) the ground the camera can see reaches, counting only ground
  * nearer than the fog's hiding depth. The visible ground is the frustum cut by the ground and the fog depth, a convex
  * shape whose corners lie on the frustum's border rays, so sampling the border (and the fog line's ends) finds it.
@@ -241,14 +260,15 @@ const SEARCH_MARGIN = 15;
 
 /**
  * Whether a camera orbit keeps the edge out of sight from the worst place the visitor can take it: the target at
- * any corner of the area it may pan over, facing any of eight headings.
+ * any corner of the area it may pan over, facing any of eight headings. `fogBase` is the fog's hiding depth before
+ * the camera's own lift (see `fogAt`).
  */
 export function edgeHidden(
   phi: number,
   radius: number,
   frame: CityFrame,
   vp: Viewport,
-  fogDepth: number,
+  fogBase: number,
   targetExtent: number,
   margin = EDGE_MARGIN,
 ): boolean {
@@ -261,7 +281,7 @@ export function edgeHidden(
   ] as const) {
     for (let k = 0; k < 8; k++) {
       const o: Orbit = { target: [sx * targetExtent, 0, sz * targetExtent], theta: (k * Math.PI) / 4, phi, radius };
-      if (groundReach(o, vp, fogDepth) > limit) return false;
+      if (groundReach(o, vp, fogAt(o, fogBase)) > limit) return false;
     }
   }
   return true;
@@ -311,17 +331,17 @@ export function edgeLimits(
   base: OrbitLimits,
   frame: CityFrame,
   vp: Viewport,
-  fogDepth: number,
+  fogBase: number,
   targetExtent: number,
   presetRadius: number,
 ): OrbitLimits {
   const key = [base.minRadius, base.maxRadius, base.minPhi, base.maxPhi, frame.extent, vp.width, vp.height, vp.right]
-    .concat([vp.bottom, vp.fov, Math.round(fogDepth), targetExtent, Math.round(presetRadius)])
+    .concat([vp.bottom, vp.fov, Math.round(fogBase), targetExtent, Math.round(presetRadius)])
     .join(',');
   const hit = cache.get(key);
   if (hit) return hit;
   // A wider margin than the check's: the search samples tilts and distances, the margin covers what lies between.
-  const ok = (phi: number, radius: number) => edgeHidden(phi, radius, frame, vp, fogDepth, targetExtent, SEARCH_MARGIN);
+  const ok = (phi: number, radius: number) => edgeHidden(phi, radius, frame, vp, fogBase, targetExtent, SEARCH_MARGIN);
   const presetPhi = Math.min(phiOfPitch(OVERVIEW_PITCH), base.maxPhi);
   const want = Math.min(base.maxRadius, Math.max(presetRadius * 1.35, base.minRadius));
   const preset = Math.min(want, Math.max(base.minRadius, presetRadius));
@@ -353,7 +373,12 @@ export function exploreLimits(
   vp: Viewport,
   fog: unknown,
   targetExtent: number,
+  camera: { y: number; dirY: number },
 ): OrbitLimits {
   const widest = Math.max(overviewPreset(boxes, frame, vp).radius, orbitPreset(boxes, vp).radius);
-  return edgeLimits(base, frame, vp, fogHides(fog), targetExtent, widest);
+  // Undo the camera's own fog lift to get the base distance, rounded up (more fog depth hides less, so rounding up
+  // is the safe side) so the cached limits survive small changes and the 3 s time-of-day transitions.
+  const depth = fogHides(fog) - fogFarLift(camera.y, camera.dirY);
+  const baseDepth = Number.isFinite(depth) ? Math.ceil(depth / 20) * 20 : depth;
+  return edgeLimits(base, frame, vp, baseDepth, targetExtent, widest);
 }
