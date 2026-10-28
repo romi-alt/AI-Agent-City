@@ -311,3 +311,51 @@ export function GlassWall({
 export function screenMaterial(tex: THREE.Texture) {
   return new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
 }
+
+// ── Reference office: individual desks and chairs (legacy units; the caller scales the group) ─────────────────
+
+const refMats = new Map<string, THREE.MeshStandardMaterial>();
+/**
+ * One matte material per colour for the reference office, shared by every desk, chair and figure (so the static
+ * batch merges them into a few meshes). Module-level: a handful of flat colours, never disposed.
+ */
+export function refMat(color: string): THREE.MeshStandardMaterial {
+  let mat = refMats.get(color);
+  if (!mat) refMats.set(color, (mat = new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0 })));
+  return mat;
+}
+
+export const REF_DESK = { top: '#d4955a', cabinet: '#cfd4d9', leg: '#555a60', monitor: '#22262b', chair: '#2f3640' };
+
+/**
+ * An individual desk: warm wood top, a light grey drawer cabinet, one dark monitor turned to the sitter, who sits on
+ * the +z side. `screen` is the monitor's face (a canvas screen, or the plain dark bezel when the desk is free).
+ */
+export function RefDeskTop({ screen }: { screen: THREE.Material }) {
+  const mat = refMat;
+  return (
+    <group>
+      <Box mat={mat(REF_DESK.top)} position={[0, 0.95, 0]} scale={[2.6, 0.12, 1.3]} castShadow receiveShadow />
+      <Box mat={mat(REF_DESK.cabinet)} position={[0.9, 0.45, 0]} scale={[0.6, 0.9, 1.1]} castShadow />
+      <Box mat={mat(REF_DESK.leg)} position={[-1.2, 0.45, 0]} scale={[0.08, 0.9, 1.1]} />
+      {/* Monitor and stand, a little left of centre with the keyboard space in front. */}
+      <Box mat={mat(REF_DESK.monitor)} position={[-0.2, 1.15, -0.35]} scale={[0.1, 0.4, 0.1]} />
+      <Box mat={mat(REF_DESK.monitor)} position={[-0.2, 1.6, -0.39]} scale={[1.5, 0.9, 0.08]} castShadow />
+      <Plane mat={screen} position={[-0.2, 1.6, -0.345]} scale={[1.38, 0.8, 1]} />
+      <Box mat={mat('#e8e4dc')} position={[-0.2, 1.02, 0.15]} scale={[0.9, 0.03, 0.3]} />
+    </group>
+  );
+}
+
+/** A plain dark office chair, seat on the +z side of the desk. */
+export function RefChair() {
+  const c = refMat(REF_DESK.chair);
+  return (
+    <group position={[-0.2, 0, 1.05]}>
+      <Box mat={c} position={[0, 0.55, 0]} scale={[0.8, 0.12, 0.8]} castShadow />
+      <Box mat={c} position={[0, 1.0, 0.4]} scale={[0.8, 0.9, 0.1]} castShadow />
+      <Cyl mat={refMat(REF_DESK.leg)} position={[0, 0.27, 0]} scale={[0.08, 0.5, 0.08]} />
+      <Cyl mat={refMat(REF_DESK.leg)} position={[0, 0.03, 0]} scale={[0.7, 0.05, 0.7]} />
+    </group>
+  );
+}

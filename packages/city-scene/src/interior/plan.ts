@@ -176,3 +176,117 @@ export function officeSize(b: LayoutBuilding): { width: number; depth: number } 
 export function rectsOverlap(a: Rect, b: Rect): boolean {
   return Math.abs(a.x - b.x) * 2 < a.w + b.w && Math.abs(a.z - b.z) * 2 < a.d + b.d;
 }
+
+// ── Reference office (the Office view's toy-diorama look) ─────────────────────────────────────────────────────
+//
+// The legacy office scene this look comes from was built in its own units on a 30 × 22 room. Positions here are
+// those coordinates scaled uniformly to the floor (one factor, so desks and people keep their toy proportions),
+// with the back wall on the floor's back glass: any spare depth opens up in front, on the camera side.
+
+/** Who sits at a desk, as far as placement cares: people and leadership sit on the corner rug. */
+export interface SeatKind {
+  kind: 'ai' | 'human';
+  lead: boolean;
+}
+
+export interface RefRug extends Rect {
+  /** Border colour; the inside is cream. */
+  border: string;
+}
+
+export interface RefDesk {
+  /** Index into the occupants. */
+  slot: number;
+  x: number;
+  z: number;
+  /** The sitter faces the back wall (north), with the chair on the camera side. */
+  facing: number;
+  zone: 'lead' | 'team';
+}
+
+export interface ReferencePlan {
+  width: number;
+  depth: number;
+  /** Metres per legacy unit: every desk, chair and person is drawn at this scale. */
+  scale: number;
+  leadRug: RefRug;
+  teamRug: RefRug;
+  loungeRug: RefRug;
+  /** The teal ring round the meeting table. */
+  meeting: { x: number; z: number; inner: number; outer: number; table: number };
+  /** The slatted feature wall at the back, centred on x. */
+  featureWall: { x: number; z: number; w: number; h: number };
+  liveScreen: { x: number; z: number; yaw: number };
+  plants: { x: number; z: number }[];
+  desks: RefDesk[];
+}
+
+/** Desk spacing in legacy units: along a row, between rows, and between lead desks. */
+const REF_COL = 4.6;
+const REF_ROW = 5;
+const REF_LEAD_COL = 4.2;
+const REF_LEAD_ROW = 3.4;
+const REF_PER_ROW = 4;
+const REF_LEAD_PER_ROW = 2;
+
+/** Leadership roles sit with the people on the corner rug. */
+export function isLeadRole(role: string): boolean {
+  return /\b(ceo|coo|cfo|founder|owner|director|head|lead|manager|gm)\b/i.test(role);
+}
+
+export function planReferenceOffice(widthM: number, depthM: number, seats: readonly SeatKind[]): ReferencePlan {
+  const s = Math.min(widthM / 30, depthM / 22);
+  // Legacy (x, z) to floor metres: centred on x, the legacy back wall (z = -11) on the floor's back glass.
+  const at = (x: number, z: number): [number, number] => [x * s, -depthM / 2 + (z + 11) * s];
+  const rect = (x: number, z: number, w: number, d: number, border: string): RefRug => {
+    const [cx, cz] = at(x, z);
+    return { x: cx, z: cz, w: w * s, d: d * s, border };
+  };
+  const lead = seats.map((k, slot) => ({ k, slot })).filter(e => e.k.kind === 'human' || e.k.lead);
+  const team = seats.map((k, slot) => ({ k, slot })).filter(e => !(e.k.kind === 'human' || e.k.lead));
+  // Room in front of the back wall for the team rows, however deep the floor is.
+  const frontLimit = (depthM / 2 / s) * 2 - 11 - 3;
+  const teamRows = Math.max(1, Math.ceil(team.length / REF_PER_ROW));
+  const rowGap = Math.min(REF_ROW, teamRows > 1 ? (frontLimit - -2) / (teamRows - 1) : REF_ROW);
+  const desks: RefDesk[] = [];
+  lead.forEach(({ slot }, i) => {
+    const row = Math.floor(i / REF_LEAD_PER_ROW);
+    const col = i % REF_LEAD_PER_ROW;
+    const [x, z] = at(-11.5 + col * REF_LEAD_COL, -5.6 + row * REF_LEAD_ROW);
+    desks.push({ slot, x, z, facing: Math.PI, zone: 'lead' });
+  });
+  team.forEach(({ slot }, i) => {
+    const row = Math.floor(i / REF_PER_ROW);
+    const col = i % REF_PER_ROW;
+    const inRow = Math.min(REF_PER_ROW, team.length - row * REF_PER_ROW);
+    const [x, z] = at(4 + (col - (inRow - 1) / 2) * REF_COL, -2 + row * rowGap);
+    desks.push({ slot, x, z, facing: Math.PI, zone: 'team' });
+  });
+  const leadRows = Math.max(1, Math.ceil(lead.length / REF_LEAD_PER_ROW));
+  const leadDepth = Math.max(6.5, 3.2 + leadRows * REF_LEAD_ROW);
+  const teamDepth = Math.max(11, 2.5 + (teamRows - 1) * rowGap + 4);
+  const roomFront = depthM / s - 11;
+  // The meeting table sits in front of the team rug where the floor is deep enough (on a shallow floor its ring
+  // tucks under the rug's corner, as in the legacy room).
+  const [mx, mz] = at(11, Math.min(Math.max(7, -4.5 + teamDepth + 3.5), roomFront - 3.4));
+  const [wx, wz] = at(1, -11 + 0.3);
+  const [sx, sz] = at(12.2, -5.5);
+  return {
+    width: widthM,
+    depth: depthM,
+    scale: s,
+    leadRug: rect(-9.5, -7.75 + leadDepth / 2, 9, leadDepth, '#e3a868'),
+    teamRug: rect(4, -4.5 + teamDepth / 2, 19, teamDepth, '#e3a868'),
+    loungeRug: rect(-10, Math.min(7.5, roomFront - 3), 8, 5, '#e9806b'),
+    meeting: { x: mx, z: mz, inner: 2.6 * s, outer: 3.2 * s, table: 1.6 * s },
+    featureWall: { x: wx, z: wz, w: 11 * s, h: 5.5 * s },
+    liveScreen: { x: sx, z: sz, yaw: -0.6 },
+    plants: [at(-13.5, -9.5), at(13.5, -9.5), at(-13.5, 9.5)].map(([x, z]) => ({ x, z })),
+    desks,
+  };
+}
+
+/** Where the person at a reference desk sits (metres, office-local): on the camera side, 1.05 legacy units out. */
+export function refSeatPosition(d: RefDesk, scale: number): [number, number] {
+  return [d.x - 0.2 * scale, d.z + 1.0 * scale];
+}

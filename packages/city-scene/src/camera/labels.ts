@@ -11,7 +11,10 @@ import type { CityStore } from '../store.ts';
  */
 export interface SceneLabel {
   id: string;
-  kind: 'desk' | 'floor' | 'callout';
+  /** 'agent' is the Office view's name pill (the reference look); 'desk' the tag used elsewhere. */
+  kind: 'desk' | 'agent' | 'floor' | 'callout';
+  /** Agent pills: whose legend colour the role takes. */
+  tone?: 'ai' | 'human';
   text: string;
   sub?: string;
   kicker?: string;
@@ -91,6 +94,7 @@ function shallowEqual(a: SceneLabel, b: SceneLabel): boolean {
     a.ariaLabel === b.ariaLabel &&
     a.testId === b.testId &&
     a.kind === b.kind &&
+    a.tone === b.tone &&
     !!a.onSelect === !!b.onSelect
   );
 }
@@ -139,7 +143,7 @@ export function LabelProjector({ store }: { store: CityStore }) {
       const onScreen = ahead && x > -80 && x < size.width + 80 && y > -40 && y < size.height + 40;
       el.style.visibility = onScreen ? 'visible' : 'hidden';
       if (!onScreen) continue;
-      if (el.classList.contains('ac-desk-tag'))
+      if (el.classList.contains('ac-desk-tag') || el.classList.contains('ac-agent-pill'))
         desks.push({ el, x, y, selected: el.classList.contains('is-selected') });
       else
         el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) ${a.align === 'right' ? 'translate(0, -50%)' : 'translate(-50%, -100%)'}`;
