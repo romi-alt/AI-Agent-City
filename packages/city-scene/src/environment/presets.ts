@@ -54,32 +54,31 @@ export function hex(h: string): Rgb {
 const TIME: Record<TimeOfDay, EnvState> = {
   // Architectural-visualisation daylight: crisp warm-white sun, cool sky fill, clear blue gradient, light haze.
   day: {
-    sunElevation: 46,
-    sunAzimuth: 122,
-    sunColor: hex('#fff4e4'),
-    sunIntensity: 3.4,
+    sunElevation: 48,
+    sunAzimuth: 132,
+    sunColor: hex('#fff3e3'),
+    sunIntensity: 3.0,
     sunDisk: 1,
     moon: 0,
-    hemiSky: hex('#c4d8ee'),
-    hemiGround: hex('#bfae94'),
-    hemiIntensity: 0.4,
-    zenith: hex('#2f78d0'),
-    horizon: hex('#cfe3f4'),
+    hemiSky: hex('#b9d3f0'),
+    hemiGround: hex('#b6a891'),
+    hemiIntensity: 0.42,
+    zenith: hex('#2869c8'),
+    horizon: hex('#d2e4f3'),
     sunGlow: hex('#fff3d8'),
-    fogColor: hex('#cddff0'),
-    fogDensity: 0.0011,
+    fogColor: hex('#d7e6f3'),
+    fogDensity: 0.0006,
     nightFactor: 0,
     stars: 0,
     cloudCover: 0.2,
     cloudLit: hex('#ffffff'),
-    cloudShade: hex('#c3d2e2'),
+    cloudShade: hex('#c6d5e5'),
     rain: 0,
     wetness: 0,
-    envIntensity: 0.7,
+    envIntensity: 0.8,
     bloom: 0.1,
-    exposure: 1.05,
+    exposure: 1.0,
   },
-  // A clear, warm low sun from behind the usual camera, a blue-to-gold sky.
   golden: {
     sunElevation: 14,
     sunAzimuth: 92,
@@ -94,7 +93,7 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#f8d0a4'),
     sunGlow: hex('#ffb257'),
     fogColor: hex('#f0d0ae'),
-    fogDensity: 0.0009,
+    fogDensity: 0.0007,
     nightFactor: 0.08,
     stars: 0,
     cloudCover: 0.2,
@@ -121,7 +120,7 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#e7a07c'),
     sunGlow: hex('#ff9a66'),
     fogColor: hex('#6c6f98'),
-    fogDensity: 0.0016,
+    fogDensity: 0.0009,
     nightFactor: 0.6,
     stars: 0.2,
     cloudCover: 0.2,
@@ -148,7 +147,7 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#24365e'),
     sunGlow: hex('#3a5290'),
     fogColor: hex('#1a2744'),
-    fogDensity: 0.0018,
+    fogDensity: 0.0009,
     nightFactor: 1,
     stars: 1,
     cloudCover: 0.2,
@@ -173,7 +172,8 @@ function grey(c: Rgb, k: number, scale = 1): Rgb {
 export function presetFor(time: TimeOfDay, weather: Weather): EnvState {
   const s: EnvState = { ...TIME[time] };
   if (weather === 'clear') {
-    s.cloudCover = 0.05;
+    // A few fair-weather cumulus even on a clear day: depth in the sky and slow soft shadows.
+    s.cloudCover = 0.16;
   } else if (weather === 'partly-cloudy') {
     s.cloudCover = 0.42;
     s.sunIntensity *= 0.92;

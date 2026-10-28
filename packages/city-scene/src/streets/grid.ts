@@ -1,61 +1,68 @@
 import type { CityLayout } from '../types.ts';
 
 /**
- * Street geometry shared by roads, sidewalks, furniture and the skyline. Same constants as the legacy `street.ts`,
- * so A2's traffic (lane offset 1) and pedestrians (2.7 from the road centre) line up with the drawn roads.
+ * The district plan (X02): the layout's 5 × 3 street grid closed by a perimeter parkway, its 15 building lots,
+ * landscaped edge blocks with a central plaza, and a waterfront to the north and west. Street geometry matches
+ * the legacy `street.ts` so A2's traffic (lanes at ±1) and pedestrians (2.7 from the road centre) line up.
  */
 export const ROAD_HALF = 2;
 export const LANE = 1;
 export const SIDEWALK = 2.7;
 /** Height of the curb / sidewalk slabs; buildings stand on it. */
 export const CURB_H = 0.15;
-/** Half-size of the area covered by street blocks (the core plus the decorative ring). */
-export const CITY_HALF = 190;
-/** Lots sit on a 16 x 16 slab between roads 20 apart. */
+/** Water lies beyond the parkway by this margin (embankment promenade in between), north and west. */
+export const PROMENADE = 8;
 
 export type StreetGrid = CityLayout['streets'];
 
-export interface Block {
-  x: number;
-  z: number;
-  /** Half-size of the block slab (curb to curb). */
-  half: number;
-  /** One of the 15 layout lots (inside the core roads). */
-  core: boolean;
+export type CellKind = 'lot' | 'plaza' | 'park' | 'strip';
+
+/** A block between roads, curb to curb. */
+export interface Cell {
+  x0: number;
+  x1: number;
+  z0: number;
+  z1: number;
+  cx: number;
+  cz: number;
+  kind: CellKind;
 }
 
-export interface ExtendedGrid {
-  spacing: number;
-  /** Road centre lines along z (at each x) and along x (at each z), core and decorative ring. */
+export interface District {
+  /** Road centre lines: along z at each x, along x at each z (the layout roads plus the parkway). */
   xs: number[];
   zs: number[];
-  blocks: Block[];
+  /** Half-size of the parkway ring (= the traffic extent). */
+  ring: number;
+  cells: Cell[];
+  /** Waterline: water at z < waterZ and x < waterX. */
+  waterZ: number;
+  waterX: number;
 }
 
-function extend(core: number[], spacing: number, half: number): number[] {
-  const out = [...core];
-  for (let v = core[0]! - spacing; v >= -half; v -= spacing) out.unshift(v);
-  for (let v = core[core.length - 1]! + spacing; v <= half; v += spacing) out.push(v);
-  return out;
-}
-
-/** The layout's street grid continued outward at the same spacing, with every block between roads. */
-export function extendedGrid(streets: StreetGrid, half = CITY_HALF): ExtendedGrid {
-  const spacing = streets.roadsX.length > 1 ? streets.roadsX[1]! - streets.roadsX[0]! : 20;
-  const xs = extend(streets.roadsX, spacing, half);
-  const zs = extend(streets.roadsZ, spacing, half);
-  const coreX = [streets.roadsX[0]!, streets.roadsX[streets.roadsX.length - 1]!];
-  const coreZ = [streets.roadsZ[0]!, streets.roadsZ[streets.roadsZ.length - 1]!];
-  const blocks: Block[] = [];
-  const bh = spacing / 2 - ROAD_HALF;
+export function districtPlan(streets: StreetGrid): District {
+  const ring = streets.extent;
+  const xs = [...new Set([-ring, ...streets.roadsX, ring])].sort((a, b) => a - b);
+  const zs = [...new Set([-ring, ...streets.roadsZ, ring])].sort((a, b) => a - b);
+  const cx0 = Math.min(...streets.roadsX);
+  const cx1 = Math.max(...streets.roadsX);
+  const cz0 = Math.min(...streets.roadsZ);
+  const cz1 = Math.max(...streets.roadsZ);
+  const cells: Cell[] = [];
   for (let i = 0; i < xs.length - 1; i++)
     for (let j = 0; j < zs.length - 1; j++) {
-      const x = (xs[i]! + xs[i + 1]!) / 2;
-      const z = (zs[j]! + zs[j + 1]!) / 2;
-      const core = x > coreX[0]! && x < coreX[1]! && z > coreZ[0]! && z < coreZ[1]!;
-      blocks.push({ x, z, half: bh, core });
+      const x0 = xs[i]! + ROAD_HALF;
+      const x1 = xs[i + 1]! - ROAD_HALF;
+      const z0 = zs[j]! + ROAD_HALF;
+      const z1 = zs[j + 1]! - ROAD_HALF;
+      const cx = (x0 + x1) / 2;
+      const cz = (z0 + z1) / 2;
+      const core = cx > cx0 && cx < cx1 && cz > cz0 && cz < cz1;
+      const narrow = Math.min(x1 - x0, z1 - z0) < 9;
+      const plaza = !core && Math.abs(cx) < 1 && cz > cz1;
+      cells.push({ x0, x1, z0, z1, cx, cz, kind: core ? 'lot' : plaza ? 'plaza' : narrow ? 'strip' : 'park' });
     }
-  return { spacing, xs, zs, blocks };
+  return { xs, zs, ring, cells, waterZ: -(ring + PROMENADE), waterX: -(ring + PROMENADE) };
 }
 
 /** Seeded PRNG (mulberry32): the same seed always builds the same city. */
@@ -69,10 +76,3 @@ export function rng(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
-/** Blocks given over to plazas and parks instead of buildings (centre coordinates). */
-export const PLAZAS: { x: number; z: number; kind: 'plaza' | 'park' }[] = [
-  { x: 0, z: 40, kind: 'plaza' },
-  { x: -60, z: 0, kind: 'park' },
-  { x: 60, z: -40, kind: 'park' },
-];

@@ -1,5 +1,7 @@
 /** Small GLSL helpers shared by A1's shaders (hashes and value noise; no textures needed). */
 export const GLSL_NOISE = /* glsl */ `
+#ifndef A1_NOISE
+#define A1_NOISE
 float a1hash12(vec2 p) {
   vec3 p3 = fract(vec3(p.xyx) * 0.1031);
   p3 += dot(p3, p3.yzx + 33.33);
@@ -30,4 +32,5 @@ float a1fbm(vec2 p) {
   }
   return s;
 }
+#endif
 `;

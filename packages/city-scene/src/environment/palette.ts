@@ -41,6 +41,8 @@ export interface SharedUniforms {
   uMotion: { value: number };
   uSunDir: { value: Vector3 };
   uFogColor: { value: Color };
+  /** Cloud cover 0..1: drives the soft moving cloud shadows on the ground and buildings. */
+  uCloud: { value: number };
 }
 
 export interface EnvRuntime {
@@ -72,6 +74,7 @@ export function envRuntime(store: CityStore): EnvRuntime {
         uMotion: { value: 1 },
         uSunDir: { value: new Vector3(0.5, 0.7, 0.5).normalize() },
         uFogColor: { value: new Color() },
+        uCloud: { value: 0 },
       },
       state: presetFor(s.timeOfDay, s.weather),
     };

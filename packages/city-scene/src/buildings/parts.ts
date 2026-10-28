@@ -1,3 +1,4 @@
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {
   BoxGeometry,
   type BufferGeometry,
@@ -15,7 +16,7 @@ import {
 } from 'three';
 
 /** Simple shapes placed by centre and size; instanced per (shape, material) so hundreds of details cost a few draws. */
-export type Shape = 'box' | 'cyl' | 'cone' | 'pyramid' | 'sphere' | 'octa' | 'wedge';
+export type Shape = 'box' | 'cyl' | 'cone' | 'pyramid' | 'sphere' | 'octa' | 'wedge' | 'fan';
 
 export interface Part {
   shape: Shape;
@@ -36,7 +37,7 @@ export interface Part {
   color?: string;
 }
 
-const UNIT: Record<Shape, () => BufferGeometry> = {
+export const UNIT: Record<Shape, () => BufferGeometry> = {
   box: () => new BoxGeometry(1, 1, 1),
   cyl: () => new CylinderGeometry(0.5, 0.5, 1, 10),
   cone: () => new ConeGeometry(0.5, 1, 16),
@@ -50,6 +51,11 @@ const UNIT: Record<Shape, () => BufferGeometry> = {
     for (let i = 0; i < p.count; i++) if (p.getY(i) > 0 && p.getX(i) < 0) p.setY(i, -0.5);
     g.computeVertexNormals();
     return g;
+  },
+  fan: () => {
+    // Four blades in the xz plane (unit diameter), spun in the vertex shader.
+    const blades = [0, 1].map(i => new BoxGeometry(1, 1, 0.16).rotateY((i * Math.PI) / 2).toNonIndexed());
+    return mergeGeometries(blades);
   },
 };
 

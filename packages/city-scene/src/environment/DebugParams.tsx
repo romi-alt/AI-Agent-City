@@ -13,6 +13,7 @@ export function DebugParams() {
   const { store } = useCityContext();
   const camera = useThree(s => s.camera);
   const gl = useThree(s => s.gl);
+  const scene = useThree(s => s.scene);
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     const patch: Partial<CityState> = {};
@@ -30,13 +31,17 @@ export function DebugParams() {
     const restore = setTimeout(() => store.set({ reducedMotion: wantRm }), 300);
     const cam = q.get('cam')?.split(',').map(Number);
     if (cam && cam.length === 6 && cam.every(Number.isFinite)) {
-      camera.position.set(cam[0]!, cam[1]!, cam[2]!);
-      camera.lookAt(cam[3]!, cam[4]!, cam[5]!);
-      camera.updateMatrixWorld();
+      // Applied right before every render, after the camera rig has run, so screenshots can pin a view.
+      scene.onBeforeRender = () => {
+        camera.position.set(cam[0]!, cam[1]!, cam[2]!);
+        camera.lookAt(cam[3]!, cam[4]!, cam[5]!);
+        camera.updateMatrixWorld();
+      };
     }
-    (window as unknown as { __city: unknown }).__city = { store, gl, camera };
+    if (q.get('explode')) store.set({ explode: true, mode: { kind: 'building', building: q.get('explode')! } });
+    (window as unknown as { __city: unknown }).__city = { store, gl, camera, scene };
     return () => clearTimeout(restore);
-  }, [store, camera, gl]);
+  }, [store, camera, gl, scene]);
   // Per-frame renderer totals (shadow, main and postprocessing passes together) for performance notes.
   useFrame(() => {
     const info = gl.info;
