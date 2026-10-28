@@ -108,6 +108,11 @@ const JACKETS = ['#1e2635', '#232a38', '#2f3238', '#18191c', '#3a3d43', '#4b4f56
 const SHIRTS = ['#f1efe9', '#e9edf2', '#c9d6e6', '#f3f0e6', '#dfe4e9'];
 const SHOES = ['#17181a', '#231c18', '#3a2a20', '#1d1f24', '#e6e3dc', '#5b4636'];
 
+function colorDistance(a: string, b: string): number {
+  const ch = (h: string, i: number) => parseInt(h.slice(1 + i * 2, 3 + i * 2), 16) / 255;
+  return Math.hypot(ch(a, 0) - ch(b, 0), ch(a, 1) - ch(b, 1), ch(a, 2) - ch(b, 2));
+}
+
 /** A deterministic look, body and hairstyle from a random source in [0, 1). */
 export function characterLook(rng: () => number): { body: CharacterBody; hair: CharacterHair; look: CharacterLook } {
   const pick = <T>(xs: readonly T[]) => xs[Math.floor(rng() * xs.length) % xs.length]!;
@@ -116,11 +121,16 @@ export function characterLook(rng: () => number): { body: CharacterBody; hair: C
   const jacket = rng() < 0.45;
   const look: CharacterLook = {
     skin: pick(SKIN),
-    top: jacket ? pick(JACKETS) : pick(TOPS),
+    top: '',
     bottom: pick(BOTTOMS),
     shoes: pick(SHOES),
     hair: pick(HAIR),
   };
+  // A top close to the skin tone reads as bare skin at street distance, so step to the next colour.
+  const tops = jacket ? JACKETS : TOPS;
+  let k = Math.floor(rng() * tops.length) % tops.length;
+  for (let n = 0; n < tops.length && colorDistance(tops[k]!, look.skin) < 0.22; n++) k = (k + 1) % tops.length;
+  look.top = tops[k]!;
   if (jacket) look.shirt = pick(SHIRTS);
   return { body, hair: pick(HAIRS[body]), look };
 }

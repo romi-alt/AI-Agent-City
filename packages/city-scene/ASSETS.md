@@ -29,7 +29,6 @@ Still no downloaded assets. New procedural pieces:
 | Leaf texture for tree canopies | Drawn at runtime with canvas ellipses; no image files | `src/streets/Trees.tsx` |
 | Fountain water, jets, veils; flag cloth; ponds; bay water; plaza paving | Shaders | `src/streets/{PlazaFeatures.tsx,ground.ts}` |
 | Ambient occlusion | N8AO through @react-three/postprocessing (already a dependency) | `src/environment/PostFX.tsx` |
-
 ## A2 — city life (X02)
 
 Traffic, aircraft, birds and rooftop details are generated in code (`src/life/**`). The people use one downloaded,

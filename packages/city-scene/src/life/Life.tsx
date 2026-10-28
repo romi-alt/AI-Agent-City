@@ -1,6 +1,6 @@
 'use client';
-import { useFrame } from '@react-three/fiber';
-import { useMemo } from 'react';
+import { useFrame, useStore, useThree } from '@react-three/fiber';
+import { useEffect, useMemo } from 'react';
 import { useCity, useCityContext } from '../context.tsx';
 import { useSharedUniforms } from '../environment/palette.ts';
 import { QUALITY } from '../quality/quality.ts';
@@ -32,6 +32,31 @@ function Stepper({ sim, clock, animate }: { sim: StreetSim; clock: LifeClock; an
 }
 
 /**
+ * Development only: exposes the scene on `window.__life`, and runs `window.__life.frame(scene, camera)` (if a
+ * screenshot script sets it) after the camera rig each frame, so scripts can frame flocks and aircraft.
+ */
+function LifeDebug() {
+  const store = useStore();
+  const scene = useThree(s => s.scene);
+  useEffect(() => {
+    const debug: { scene: unknown; frame?: (scene: unknown, camera: unknown) => void } = { scene };
+    (window as unknown as { __life?: unknown }).__life = debug;
+    let unsubscribe: (() => void) | undefined;
+    // Subscribe late, so this runs after the camera rig's frame callback.
+    const timer = setTimeout(() => {
+      unsubscribe = store
+        .getState()
+        .internal.subscribe({ current: state => debug.frame?.(state.scene, state.camera) }, 0, store);
+    }, 1500);
+    return () => {
+      clearTimeout(timer);
+      unsubscribe?.();
+    };
+  }, [scene, store]);
+  return null;
+}
+
+/**
  * City life (workstream A2): traffic, pedestrians, aircraft, helicopters, birds and rooftop details. Every system
  * sizes itself from `QUALITY[store.quality]`; `paused` freezes everything; `reducedMotion` shows a calm, still but
  * populated city (vehicles and people hold their places, only resting birds, no aircraft, fans and screens still).
@@ -54,6 +79,7 @@ export function Life() {
   return (
     <group name="life">
       <Stepper sim={sim} clock={clock} animate={animate} />
+      {process.env.NODE_ENV !== 'production' && <LifeDebug />}
       <Traffic
         sim={sim}
         env={env}
