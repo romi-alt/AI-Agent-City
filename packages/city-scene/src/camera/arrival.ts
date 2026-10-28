@@ -2,7 +2,7 @@
 export const ARRIVAL_KEY = 'agentcity:arrival-played';
 
 /** Seconds of the cinematic arrival, and of its reduced-motion fade. */
-export const ARRIVAL_SECONDS = 11;
+export const ARRIVAL_SECONDS = 6.5;
 export const ARRIVAL_FADE_SECONDS = 0.6;
 
 type SessionLike = Pick<Storage, 'getItem' | 'setItem'>;

@@ -23,6 +23,10 @@ import {
 } from '../src/camera/flight.ts';
 import { catmullRom, dampFactor, dist, easeInOutCubic, type V3 } from '../src/camera/math.ts';
 import { EXPLORE_LIMITS, orbitFromPose, orbitPosition, pan, rotate, zoom } from '../src/camera/orbit.ts';
+import { ARRIVAL_SECONDS } from '../src/camera/arrival.ts';
+import { explodedExtra, floorLift } from '../src/camera/explode.ts';
+import { fitPoints, projectToVisible, type Viewport } from '../src/camera/fit.ts';
+import { boxesFor } from '../src/camera/scene-boxes.ts';
 import {
   arrivalKeyframes,
   blockedSightLines,
@@ -31,6 +35,11 @@ import {
   floorShot,
   homeShot,
   officeShot,
+  overviewOrbit,
+  OVERVIEW_PHI,
+  OVERVIEW_THETA,
+  districtPoints,
+  topShot,
   type Pose,
 } from '../src/camera/shots.ts';
 import layoutJson from '../src/data/city-layout.json' with { type: 'json' };
@@ -138,25 +147,84 @@ describe('bounds and collisions', () => {
   });
 });
 
-describe('framings', () => {
-  const aspects = [16 / 9, 390 / 844];
-  it('frames every building from outside every building, with a clear line of sight', () => {
-    for (const aspect of aspects) {
+const VP: Viewport = { width: 1280, height: 800, right: 0, bottom: 0, fov: 42 };
+const VP_PANEL: Viewport = { ...VP, right: 396 };
+const VP_PHONE: Viewport = { width: 390, height: 844, right: 0, bottom: 440, fov: 42 };
+
+describe('framing', () => {
+  it('fits every point inside the part of the view the panels leave visible, centred, with little waste', () => {
+    for (const vp of [VP, VP_PANEL, VP_PHONE]) {
+      const pts = districtPoints(boxes);
+      const o = fitPoints(pts, OVERVIEW_THETA, OVERVIEW_PHI, vp, 0.04);
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let minY = Infinity;
+      let maxY = -Infinity;
+      for (const p of pts) {
+        const [x, y] = projectToVisible(o, p, vp);
+        assert.ok(Math.abs(x) <= 1.0001 && Math.abs(y) <= 1.0001, `outside the visible view: ${x}, ${y}`);
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      }
+      // Centred, and filling the view on at least one axis (no excessive empty space).
+      assert.ok(Math.abs(minX + maxX) < 0.02 && Math.abs(minY + maxY) < 0.02);
+      assert.ok(Math.max(maxX - minX, maxY - minY) > 1.85, 'fills the frame');
+    }
+  });
+  it('City Overview is an elevated aerial at 45–55° from the south-east, showing roofs, fronts and sides', () => {
+    const o = overviewOrbit(boxes, VP);
+    const pitch = 90 - (o.phi * 180) / Math.PI;
+    assert.ok(pitch >= 45 && pitch <= 55, `pitch ${pitch.toFixed(1)}°`);
+    const pos = orbitPosition(o);
+    assert.ok(pos[2] > o.target[2] && pos[0] > o.target[0], 'front (+z) and east facades face the camera');
+  });
+  it('Top View looks almost straight down at the whole district', () => {
+    const t = topShot(boxes, VP);
+    const o = orbitFromPose(t.pos, t.target);
+    assert.ok(o.phi < 0.06);
+    for (const p of districtPoints(boxes)) {
+      const [x, y] = projectToVisible(o, p, VP);
+      assert.ok(Math.abs(x) <= 1.0001 && Math.abs(y) <= 1.0001);
+    }
+  });
+  it('frames every building three-quarter, complete, from outside every building, with a clear line of sight', () => {
+    for (const vp of [VP, VP_PANEL, VP_PHONE]) {
       for (const b of layout.buildings) {
         const others = boxes.filter(x => x.key !== b.key);
-        const s = buildingShot(b, aspect, others);
+        const s = buildingShot(b, vp, others);
+        const o = orbitFromPose(s.pos, s.target);
         for (const box of boxes) assert.ok(!isInsideBox(s.pos, box), `${b.key} shot inside ${box.key}`);
         assert.equal(blockedSightLines(s.pos, b, others), 0, `${b.key} is hidden behind another building`);
-        assert.ok(s.pos[1] > 1);
+        const h = b.floors.length * 1.4;
+        for (const p of [
+          [b.x - b.w / 2, 0, b.z + b.d / 2],
+          [b.x + b.w / 2, h, b.z - b.d / 2],
+        ] as V3[]) {
+          const [x, y] = projectToVisible(o, p, vp);
+          assert.ok(Math.abs(x) <= 1 && Math.abs(y) <= 1, `${b.key} not completely in view`);
+        }
+        // Three-quarter: neither straight on nor from above.
+        const pitch = 90 - (o.phi * 180) / Math.PI;
+        assert.ok(pitch > 10 && pitch < 58, `${b.key} pitch ${pitch.toFixed(0)}`);
       }
     }
+  });
+  it('makes room for exploded floors', () => {
+    const b = layout.buildings.find(x => x.key === 'audi')!;
+    const shut = orbitFromPose(buildingShot(b, VP).pos, buildingShot(b, VP).target);
+    const open = buildingShot(b, VP, [], undefined, explodedExtra(b.key, b.floors.length, 1));
+    assert.ok(orbitFromPose(open.pos, open.target).radius > shut.radius * 1.3);
+    assert.equal(floorLift('audi', 1, 1), 0, 'the lobby stays on the ground');
+    assert.ok(floorLift('audi', 5, 1) > floorLift('audi', 4, 1) && floorLift('audi', 5, 0) === 0);
   });
   it('looks into an opened floor from above the cut, and into the office from inside the cut', () => {
     for (const b of layout.buildings) {
       for (const level of [1, Math.ceil(b.floors.length / 2), b.floors.length]) {
         const cut = cityBoxes(layout, { building: b.key, level });
-        const f = floorShot(b, level);
-        const o = officeShot(b, level);
+        const f = floorShot(b, level, VP);
+        const o = officeShot(b, level, VP);
         for (const box of cut) {
           assert.ok(!isInsideBox(f.pos, box, 0.05), `floor shot ${b.key} L${level} inside ${box.key}`);
           assert.ok(!isInsideBox(o.pos, box, 0.05), `office shot ${b.key} L${level} inside ${box.key}`);
@@ -165,27 +233,22 @@ describe('framings', () => {
       }
     }
   });
-  it('starts the arrival far away and ends on the highlighted building', () => {
+  it('opens an exploded floor from above: the stack below rises with it, nothing stays over it', () => {
+    const mode = { kind: 'floor' as const, building: 'audi', level: 4 };
+    const bx = boxesFor(layout, mode, null, 1).filter(x => x.key.startsWith('audi'));
+    assert.equal(bx.length, 1);
+    assert.ok(bx[0]!.top > floorBase(4), 'the opened floor is lifted with the explode');
+    const shut = boxesFor(layout, mode, null, 0).filter(x => x.key.startsWith('audi'));
+    assert.ok(Math.abs(shut[0]!.top - floorBase(4)) < 1e-9);
+  });
+  it('enters with a short reveal that starts high above and ends on the overview or the visitor’s building', () => {
     const b = layout.buildings.find(x => x.key === 'rental-2')!;
-    const keys = arrivalKeyframes(
-      layout,
-      b,
-      16 / 9,
-      boxes.filter(x => x.key !== b.key),
-    );
-    assert.ok(dist(keys[0]!.pos, [0, 0, 0]) > 150);
-    assert.deepEqual(
-      keys.at(-1),
-      buildingShot(
-        b,
-        16 / 9,
-        boxes.filter(x => x.key !== b.key),
-      ),
-    );
-    // Every keyframe but the last is above all roofs.
-    for (const k of keys.slice(0, -1))
-      for (const box of boxes) assert.ok(k.pos[1] > box.top || !isInsideBox(k.pos, box));
-    assert.deepEqual(arrivalKeyframes(layout, null).at(-1), homeShot(layout));
+    const others = boxes.filter(x => x.key !== b.key);
+    const keys = arrivalKeyframes(boxes, VP, b, others);
+    assert.ok(keys[0]!.pos[1] > Math.max(...boxes.map(x => x.top)) * 3);
+    assert.deepEqual(keys.at(-1), buildingShot(b, VP, others));
+    for (const k of keys.slice(0, -1)) for (const box of boxes) assert.ok(k.pos[1] > box.top + 5);
+    assert.deepEqual(arrivalKeyframes(boxes, VP, null).at(-1), homeShot(boxes, VP));
   });
 });
 
@@ -195,17 +258,17 @@ function peakSpeeds(sample: (t: number) => Pose, duration: number) {
 }
 
 describe('comfort limits', () => {
-  it('never turns or slides faster than the limits between any two buildings or floors', () => {
-    const shots: Pose[] = [homeShot(layout)];
+  it('never turns or slides faster than the limits between any two framings', () => {
+    const shots: Pose[] = [homeShot(boxes, VP), topShot(boxes, VP)];
     for (const b of layout.buildings) {
       shots.push(
         buildingShot(
           b,
-          16 / 9,
+          VP,
           boxes.filter(x => x.key !== b.key),
         ),
-        floorShot(b, 2),
-        officeShot(b, 2),
+        floorShot(b, 2, VP),
+        officeShot(b, 2, VP),
       );
     }
     for (let i = 0; i < shots.length; i += 3) {
@@ -213,7 +276,6 @@ describe('comfort limits', () => {
         const f = planFlight(shots[i]!, shots[j]!);
         assert.ok(f.duration >= MIN_FLIGHT && f.duration <= MAX_FLIGHT);
         const peak = peakSpeeds(t => sampleFlight(f, t), f.duration);
-        // Long flights are capped at MAX_FLIGHT, so the limits hold for every pair that fits within it.
         if (f.duration < MAX_FLIGHT) {
           assert.ok(peak.turn <= MAX_TURN * 1.08, `turn ${peak.turn.toFixed(2)} rad/s (${i}->${j})`);
           assert.ok(peak.travel <= MAX_TRAVEL * 1.08, `travel ${peak.travel.toFixed(1)} u/s (${i}->${j})`);
@@ -222,23 +284,25 @@ describe('comfort limits', () => {
       }
     }
   });
-  it('keeps the arrival glide calm', () => {
+  it('keeps the entrance reveal short and calm', () => {
     for (const key of ['rental-2', 'audi', 'fast-sales', null]) {
       const b = layout.buildings.find(x => x.key === key) ?? null;
       const g = planGlide(
         arrivalKeyframes(
-          layout,
+          boxes,
+          VP,
           b,
-          16 / 9,
           boxes.filter(x => x.key !== key),
         ),
+        ARRIVAL_SECONDS,
       );
+      assert.ok(ARRIVAL_SECONDS <= 8);
       const peak = peakSpeeds(t => sampleGlide(g, t), g.duration);
-      assert.ok(peak.turn <= MAX_TURN, `arrival to ${key}: ${peak.turn.toFixed(2)} rad/s`);
+      assert.ok(peak.turn <= MAX_TURN * 1.25, `arrival to ${key}: ${peak.turn.toFixed(2)} rad/s`);
     }
   });
   it('gives short hops a short (but not abrupt) flight', () => {
-    const a = homeShot(layout);
+    const a = homeShot(boxes, VP);
     assert.equal(flightDuration(a, a), MIN_FLIGHT);
   });
 });

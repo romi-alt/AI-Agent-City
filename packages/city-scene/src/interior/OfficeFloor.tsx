@@ -13,7 +13,6 @@ import {
   FloorLamp,
   GlassWall,
   MeetingTable,
-  Person,
   Plant,
   Rug,
   screenMaterial,
@@ -21,6 +20,8 @@ import {
   Sofa,
 } from './furniture.tsx';
 import { StaticBatch } from './batch.tsx';
+import { OfficeAgent } from './agent.tsx';
+import type { Activity } from './figure.tsx';
 import { createKit, KitContext, useKit } from './kit.ts';
 import type { DeskOccupant } from './occupants.ts';
 import { OfficeOccupantsContext, statusColor, statusLabel } from './occupants.ts';
@@ -93,7 +94,8 @@ function Shell({ plan, night }: { plan: OfficePlan; night: number }) {
   const W = plan.width;
   const D = plan.depth;
   const H = plan.ceiling;
-  const floorMat = plan.variant === 'showroom' ? m.stone : m.wood;
+  // Oak throughout (the showroom's display car stands on its own stone plinth); carpet marks the team area.
+  const floorMat = m.wood;
   const sides: { from: [number, number]; to: [number, number] }[] = [
     { from: [-W / 2, -D / 2], to: [W / 2, -D / 2] },
     { from: [W / 2, -D / 2], to: [W / 2, D / 2] },
@@ -105,7 +107,7 @@ function Shell({ plan, night }: { plan: OfficePlan; night: number }) {
     <group>
       <Box mat={m.concrete} position={[0, -0.16, 0]} scale={[W, 0.3, D]} receiveShadow />
       <Plane mat={floorMat} position={[0, 0.002, 0]} rotation-x={-Math.PI / 2} scale={[W, D, 1]} receiveShadow />
-      {plan.variant === 'office' && plan.workstations.length > 0 && <TeamCarpet plan={plan} />}
+      {plan.workstations.length > 0 && <TeamCarpet plan={plan} />}
       {/* Floor-to-ceiling glass with slim mullions; a dark spandrel band hides the slab and services above. */}
       {sides.map((s, i) => {
         const len = Math.hypot(s.to[0] - s.from[0], s.to[1] - s.from[1]);
@@ -277,7 +279,7 @@ function Core({ plan, building, floor }: { plan: OfficePlan; building: LayoutBui
       {/* Lit reveal and the building's name on the reception wall. */}
       <Box mat={m.warmLight} position={[0, plan.ceiling - 0.25, c.d / 2 + 0.01]} scale={[c.w * 0.92, 0.04, 0.02]} />
       <mesh material={asMat(signMat)} position={[0, 2.05, c.d / 2 + 0.02]}>
-        <planeGeometry args={[Math.min(c.w * 0.85, 6.4), Math.min(c.w * 0.85, 6.4) * 0.375]} />
+        <planeGeometry args={[Math.min(c.w * 0.7, 4.8), Math.min(c.w * 0.7, 4.8) * 0.375]} />
       </mesh>
       {/* Lift doors on the far side. */}
       {[-1, 1].map(s => (
@@ -445,6 +447,48 @@ function ClassroomFront({ plan, building, floor }: { plan: OfficePlan; building:
   );
 }
 
+function activityOf(status: string): Activity {
+  return status === 'working' ? 'working' : status === 'needs-you' ? 'needs-you' : 'idle';
+}
+
+/**
+ * Walking routes for agents in the front row (seated on the room side of their desk): out to the aisle in front of
+ * the team, along it to the coffee point, and back. Desk-local coordinates, so each figure can follow its own.
+ */
+function walkRoutes(plan: OfficePlan): Map<number, [number, number][]> {
+  const out = new Map<number, [number, number][]>();
+  if (plan.variant === 'classroom' || !plan.workstations.length) return out;
+  const xs = plan.workstations.map(w => w.x);
+  const coffeeX = Math.max(...xs) + 4.2;
+  if (coffeeX + 1.6 > plan.work.x + plan.work.w / 2 + 1.5) return out;
+  const frontZ = Math.max(...plan.workstations.map(w => w.z)) + 1.9;
+  for (const w of plan.workstations) {
+    if (Math.abs(w.facing - Math.PI) > 0.01) continue;
+    if (w.z < frontZ - 2.5) continue; // only the front row has a clear way out
+    const toLocal = ([x, z]: [number, number]): [number, number] => {
+      const dx = x - w.x;
+      const dz = z - w.z;
+      const c = Math.cos(w.facing);
+      const sn = Math.sin(w.facing);
+      return [dx * c - dz * sn, dx * sn + dz * c];
+    };
+    const seatX = w.x;
+    const seatZ = w.z + 0.78;
+    out.set(
+      w.slot,
+      [
+        [seatX, frontZ],
+        [coffeeX - 1.3, frontZ],
+        [coffeeX - 1.3, plan.work.z + 0.4],
+      ]
+        .map(p => toLocal(p as [number, number]))
+        .map(([x, z]) => [x, z] as [number, number]),
+    );
+    void seatZ;
+  }
+  return out;
+}
+
 function Desks(props: OfficeFloorProps & { plan: OfficePlan }) {
   const { plan, occupants, detail, selected, onSelectDesk, animate } = props;
   const screens = useMemo(() => plan.workstations.map((_, i) => new DeskScreen(i + 1)), [plan.workstations]);
@@ -456,7 +500,7 @@ function Desks(props: OfficeFloorProps & { plan: OfficePlan }) {
     },
     [screens, screenMats],
   );
-  const bodies = useRef<(THREE.Group | null)[]>([]);
+  const routes = useMemo(() => walkRoutes(plan), [plan]);
   const nextDraw = useRef<number[]>([]);
   // First paint of every screen, then a slow, staggered refresh while animating.
   useEffect(() => {
@@ -472,8 +516,6 @@ function Desks(props: OfficeFloorProps & { plan: OfficePlan }) {
         screens[i]!.draw(o, t);
         nextDraw.current[i] = t + 0.9 + ((i * 0.37) % 0.6);
       }
-      const body = bodies.current[i];
-      if (body && o.status === 'working') body.rotation.x = Math.sin(t * 1.3 + i * 1.7) * 0.025;
     });
   });
   return (
@@ -489,9 +531,8 @@ function Desks(props: OfficeFloorProps & { plan: OfficePlan }) {
           classroom={plan.variant === 'classroom'}
           showLabel={detail === 'full'}
           onSelect={onSelectDesk}
-          bodyRef={el => {
-            bodies.current[i] = el;
-          }}
+          route={routes.get(w.slot)}
+          animate={animate}
         />
       ))}
     </group>
@@ -507,7 +548,8 @@ function Desk({
   classroom,
   showLabel,
   onSelect,
-  bodyRef,
+  route,
+  animate,
 }: {
   ws: Workstation;
   index: number;
@@ -517,7 +559,8 @@ function Desk({
   classroom: boolean;
   showLabel: boolean;
   onSelect?: (slot: number) => void;
-  bodyRef: (el: THREE.Group | null) => void;
+  route: [number, number][] | undefined;
+  animate: boolean;
 }) {
   const { m } = useKit();
   const { store } = useCityContext();
@@ -590,15 +633,23 @@ function Desk({
           </mesh>
         </group>
       )}
-      <Box mat={m.white} position={[0, top + 0.01, -0.13]} scale={[0.42, 0.015, 0.13]} />
-      <Box mat={m.white} position={[0.3, top + 0.012, -0.12]} scale={[0.06, 0.02, 0.1]} />
+      <Box mat={m.white} position={[0, top + 0.01, -0.23]} scale={[0.42, 0.015, 0.13]} />
+      <Box mat={m.white} position={[0.3, top + 0.012, -0.22]} scale={[0.06, 0.02, 0.1]} />
       {index % 3 === 1 && <Cyl mat={m.fabricCoral} position={[-0.55, top + 0.05, 0.05]} scale={[0.08, 0.1, 0.08]} />}
       {index % 4 === 2 && <Plant position={[-0.6, top, 0.18]} size={0.25} seed={index + 50} />}
       <Chair position={[0, 0, occupant ? -0.72 : -0.5]} rotation={occupant ? 0 : 0.25 * ((index % 3) - 1)} />
       {occupant && (
         <>
           <group userData={{ dynamic: true }}>
-            <Person ref={bodyRef} kind={occupant.kind} seed={index} position={[0, 0, -0.74]} />
+            <OfficeAgent
+              kind={occupant.kind}
+              seed={index}
+              activity={activityOf(occupant.status)}
+              seat={[0, -0.74]}
+              route={route}
+              animate={animate}
+              pinned={selected}
+            />
           </group>
           {/* Status light on the desk, and a soft ring on the floor when selected. */}
           <Sphere

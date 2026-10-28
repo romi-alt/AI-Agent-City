@@ -284,6 +284,54 @@ function BuildingBody({
   );
 }
 
+/** The people on a floor (the host's team on its own floor, else the public layout) and agent selection. */
+function useFloorPeople(b: LayoutBuilding, f: LayoutFloor) {
+  const nav = useNav();
+  const host = useContext(OfficeOccupantsContext);
+  const own = host && host.building === b.key && host.level === f.level ? host : null;
+  const people = own ? own.agents : occupantsFromLayout(f.desks, { building: b.key, level: f.level });
+  const selectedId = useCity(s => s.selectedAgent);
+  const index = selectedId ? people.findIndex(p => p.id === selectedId) : -1;
+  const select = (i: number) => {
+    const p = people[i];
+    if (!p) return;
+    const same = index === i;
+    nav({ type: 'select-agent', id: same ? null : p.id, desk: same ? null : i });
+    if (!same) own?.onSelect?.(p.id);
+  };
+  return { people, selected: index >= 0 ? index : null, sel: index >= 0 ? people[index] : undefined, select };
+}
+
+/** The selected agent: who they are, their role and status, and what they are doing. */
+function AgentCard({ who, onClose, closeLabel }: { who: DeskOccupant; onClose: () => void; closeLabel: string }) {
+  return (
+    <div className="ac-agent" aria-live="polite" data-agent={who.id}>
+      <span className="ac-kicker">{who.kind === 'ai' ? 'AI agent' : 'Team member'}</span>
+      <h3>{who.name ?? (who.kind === 'human' ? 'Team member' : 'AI agent')}</h3>
+      <p>
+        {who.role} ·{' '}
+        <span
+          className="ac-dot"
+          style={{ background: statusColor(who.status), verticalAlign: 'middle' }}
+          aria-hidden="true"
+        />{' '}
+        {statusLabel(who.status)}
+      </p>
+      <p>
+        {who.summary ??
+          (who.kind === 'ai'
+            ? `Works on ${who.role} for this team. This is a public preview; a demo shows the agent's work as it happens.`
+            : 'A member of the team. People are not shown by name in the public city.')}
+      </p>
+      <div className="ac-actions">
+        <button type="button" className="ac-btn" onClick={onClose}>
+          {closeLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function FloorBody({
   b,
   f,
@@ -297,10 +345,9 @@ function FloorBody({
 }) {
   const nav = useNav();
   const enterable = useCity(s => canEnter(s, b.key));
-  const host = useContext(OfficeOccupantsContext);
   const [offer, setOffer] = useState(false);
   const offerId = useId();
-  const people = host && host.building === b.key && host.level === f.level ? host.agents : occupantsFromLayout(f.desks);
+  const { people, selected, sel, select } = useFloorPeople(b, f);
   const levels = b.floors.map(x => x.level).sort((x, y) => x - y);
   const i = levels.indexOf(f.level);
   const up = levels[i + 1];
@@ -309,6 +356,9 @@ function FloorBody({
   return (
     <>
       <Head kicker={`${b.shortName} · Floor ${f.level}`} title={f.name} headingRef={headingRef} />
+      {sel && (
+        <AgentCard who={sel} onClose={() => nav({ type: 'select-agent', id: null })} closeLabel="Back to the floor" />
+      )}
       {f.info && <p>{f.info}</p>}
       <ul className="ac-chips" aria-label="About this floor">
         <li>{floorSummary(f)}</li>
@@ -366,7 +416,7 @@ function FloorBody({
           <IconDown /> Floor below
         </button>
       </div>
-      <People people={people} />
+      <People people={people} selected={selected} onSelect={select} />
     </>
   );
 }
@@ -428,43 +478,21 @@ function OfficeBody({
   headingRef: HeadingRef;
 }) {
   const nav = useNav();
-  const host = useContext(OfficeOccupantsContext);
-  const own = host && host.building === b.key && host.level === f.level ? host : null;
-  const people = own ? own.agents : occupantsFromLayout(f.desks);
-  const sel = desk !== null ? people[desk] : undefined;
-  const select = (i: number) => {
-    const next = desk === i ? null : i;
-    nav({ type: 'select-desk', desk: next });
-    const p = people[i];
-    if (p && next !== null) own?.onSelect?.(p.id);
-  };
+  void desk;
+  const { people, selected, sel, select } = useFloorPeople(b, f);
   return (
     <>
       <Head kicker={`${b.shortName} · Floor ${f.level}`} title={`${f.name} office`} headingRef={headingRef} />
       {sel ? (
-        <div className="ac-agent" aria-live="polite">
-          <span className="ac-kicker">{sel.kind === 'ai' ? 'AI agent' : 'Team member'}</span>
-          <h3>{sel.name ?? (sel.kind === 'human' ? 'Team member' : 'AI agent')}</h3>
-          <p>
-            {sel.role} ·{' '}
-            <span
-              className="ac-dot"
-              style={{ background: statusColor(sel.status), verticalAlign: 'middle' }}
-              aria-hidden="true"
-            />{' '}
-            {statusLabel(sel.status)}
-          </p>
-          {sel.summary && <p>{sel.summary}</p>}
-          <div className="ac-actions">
-            <button type="button" className="ac-btn" onClick={() => nav({ type: 'select-desk', desk: null })}>
-              Look around the whole office
-            </button>
-          </div>
-        </div>
+        <AgentCard
+          who={sel}
+          onClose={() => nav({ type: 'select-agent', id: null })}
+          closeLabel="Look around the whole office"
+        />
       ) : (
         <p>Choose a desk to see who works there and what they are doing.</p>
       )}
-      <People people={people} selected={desk} onSelect={select} />
+      <People people={people} selected={selected} onSelect={select} />
       <div className="ac-actions">
         <button type="button" className="ac-btn" onClick={() => nav({ type: 'select-floor', level: f.level })}>
           <IconBack /> Back to the floor

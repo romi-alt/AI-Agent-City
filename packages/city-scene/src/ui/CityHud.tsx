@@ -1,10 +1,12 @@
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { sceneBus } from '../camera/bus.ts';
 import { KEY_HELP } from '../camera/keyboard.ts';
 import { breadcrumbs, findBuilding } from '../camera/modes.ts';
 import { useNav } from '../camera/useNav.ts';
 import { useCity, useCityContext } from '../context.tsx';
+import { type OfficeOccupants, OfficeOccupantsContext } from '../interior/occupants.ts';
+import type { CityLayout, CityView } from '../types.ts';
 import {
   IconBuildings,
   IconClose,
@@ -52,7 +54,9 @@ export function CityHud({
   const popRef = useRef<HTMLDivElement>(null);
   const popButton = useRef<HTMLButtonElement | null>(null);
   const arriving = mode.kind === 'arrival';
-  const crumbs = breadcrumbs(mode, layout);
+  const agentId = useCity(s => s.selectedAgent);
+  const host = useContext(OfficeOccupantsContext);
+  const crumbs = breadcrumbs(mode, layout, agentName(layout, host, agentId));
   const sheetOpen = mode.kind !== 'explore' && mode.kind !== 'arrival' ? true : directory;
 
   useEffect(() => {
@@ -139,6 +143,7 @@ export function CityHud({
                 </button>
               )}
             </nav>
+            <ModeBar />
             <div style={{ position: 'relative' }}>
               <div className="ac-tools ac-glass" role="toolbar" aria-label="View">
                 {settings && (
@@ -268,6 +273,66 @@ export function CityHud({
       )}
     </div>
   );
+}
+
+/** A selected agent's display name: the host's team, or a public desk id ("audi/12/0"). */
+function agentName(layout: CityLayout, host: OfficeOccupants | null, id: string | null): string | null {
+  if (!id) return null;
+  const own = host?.agents.find(a => a.id === id);
+  if (own) return own.name ?? own.role;
+  const [key, level, slot] = id.split('/');
+  const d = layout.buildings.find(b => b.key === key)?.floors.find(f => String(f.level) === level)?.desks[Number(slot)];
+  if (!d) return null;
+  return d.name ?? (d.kind === 'human' ? 'Team member' : d.role);
+}
+
+/**
+ * The compact view control: in the city, Overview / Top / Orbit; on a building or floor, Explode floors.
+ * Radio buttons and a switch, so they read correctly to assistive technology.
+ */
+function ModeBar() {
+  const { store } = useCityContext();
+  const mode = useCity(s => s.mode);
+  const view = useCity(s => s.view);
+  const explode = useCity(s => s.explode);
+  const name = useId();
+  if (mode.kind === 'explore') {
+    const views: [CityView, string][] = [
+      ['overview', 'Overview'],
+      ['top', 'Top'],
+      ['orbit', 'Orbit'],
+    ];
+    return (
+      <fieldset className="ac-modebar ac-glass">
+        <legend className="ac-live">Camera view</legend>
+        <div className="ac-seg">
+          {views.map(([v, label]) => (
+            <label key={v}>
+              <input type="radio" name={name} value={v} checked={view === v} onChange={() => store.set({ view: v })} />
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    );
+  }
+  if (mode.kind === 'building' || mode.kind === 'floor') {
+    return (
+      <div className="ac-modebar ac-glass">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={explode}
+          className={`ac-switch${explode ? ' is-on' : ''}`}
+          onClick={() => store.set({ explode: !explode })}
+        >
+          <i aria-hidden="true" />
+          Explode floors
+        </button>
+      </div>
+    );
+  }
+  return null;
 }
 
 function Arrival({

@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { measureBuildings } from '../camera/measure.ts';
 import { dampFactor } from '../camera/math.ts';
+import { floorLift, liveExplode } from '../camera/explode.ts';
+import { useCityContext } from '../context.tsx';
 import type { CityLayout } from '../types.ts';
 
 /**
@@ -13,8 +15,15 @@ import type { CityLayout } from '../types.ts';
  * the building's lot (measured, so canopies and crowns are included). The planes go on the materials of the
  * architecture near that lot; nothing else in the city occupies that volume. The cut slides down from the roof.
  */
-export function useBuildingCut(layout: CityLayout, key: string | null, cutY: number | null, instant: boolean) {
+export function useBuildingCut(
+  layout: CityLayout,
+  key: string | null,
+  cutY: number | null,
+  instant: boolean,
+  level = 1,
+) {
   const { scene: sceneR3f, gl } = useThree();
+  const { store } = useCityContext();
   const scene = sceneR3f as unknown as THREE.Scene;
   const planes = useMemo(
     () => [
@@ -23,6 +32,9 @@ export function useBuildingCut(layout: CityLayout, key: string | null, cutY: num
       new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
       new THREE.Plane(new THREE.Vector3(0, 0, -1), 0),
       new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
+      // Top of the cut region: open (far above). With exploded floors the opened floor rides on top of the
+      // separated stack below it, so everything above it stays removed and the room can be seen from above.
+      new THREE.Plane(new THREE.Vector3(0, 1, 0), -1e4),
     ],
     [],
   );
@@ -49,33 +61,39 @@ export function useBuildingCut(layout: CityLayout, key: string | null, cutY: num
 
   /** Put the planes on every architecture material whose mesh reaches into the cut region. */
   const apply = (region: THREE.Box3) => {
-    const root = scene.getObjectByName('a1-buildings') ?? scene;
+    // A1's architecture, plus A2's rooftop details (fans, beacon masts, billboards) standing on the opened roof.
+    const roots = [scene.getObjectByName('a1-buildings') ?? scene, scene.getObjectByName('life-details')].filter(
+      (o): o is THREE.Object3D => !!o,
+    );
     const box = new THREE.Box3();
-    root.traverse(o => {
-      const mesh = o as THREE.Mesh;
-      if (!mesh.isMesh || mesh.userData.interior || mesh.userData.noPick || !mesh.geometry) return;
-      const inst = mesh as THREE.InstancedMesh;
-      if (inst.isInstancedMesh) {
-        if (!inst.boundingBox) inst.computeBoundingBox();
-        box.copy(inst.boundingBox!).applyMatrix4(mesh.matrixWorld);
-      } else {
-        if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
-        box.copy(mesh.geometry.boundingBox!).applyMatrix4(mesh.matrixWorld);
-      }
-      if (!box.intersectsBox(region)) return;
-      for (const mat of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
-        if (patched.current.has(mat)) continue;
-        patched.current.set(mat, {
-          planes: mat.clippingPlanes,
-          intersect: mat.clipIntersection,
-          shadows: mat.clipShadows,
-        });
-        mat.clippingPlanes = planes;
-        mat.clipIntersection = true;
-        mat.clipShadows = true;
-        mat.needsUpdate = true;
-      }
-    });
+    for (const root of roots)
+      root.traverse(o => {
+        const mesh = o as THREE.Mesh;
+        // Meshes, and line work too (A1's gold hover outline would otherwise stand above the opened floor).
+        const drawn = mesh.isMesh || (o as THREE.LineSegments).isLineSegments;
+        if (!drawn || mesh.userData.interior || mesh.userData.noPick || !mesh.geometry) return;
+        const inst = mesh as THREE.InstancedMesh;
+        if (inst.isInstancedMesh) {
+          if (!inst.boundingBox) inst.computeBoundingBox();
+          box.copy(inst.boundingBox!).applyMatrix4(mesh.matrixWorld);
+        } else {
+          if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+          box.copy(mesh.geometry.boundingBox!).applyMatrix4(mesh.matrixWorld);
+        }
+        if (!box.intersectsBox(region)) return;
+        for (const mat of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+          if (patched.current.has(mat)) continue;
+          patched.current.set(mat, {
+            planes: mat.clippingPlanes,
+            intersect: mat.clipIntersection,
+            shadows: mat.clipShadows,
+          });
+          mat.clippingPlanes = planes;
+          mat.clipIntersection = true;
+          mat.clipShadows = true;
+          mat.needsUpdate = true;
+        }
+      });
   };
 
   const region = useRef<THREE.Box3 | null>(null);
@@ -112,9 +130,11 @@ export function useBuildingCut(layout: CityLayout, key: string | null, cutY: num
     // Architecture that mounts after the cut started (quality change, streamed detail) is picked up too.
     since.current += dt;
     if (since.current > 1.5 && since.current - dt <= 1.5) apply(region.current);
-    region.current.min.y = cutY;
+    const t = key ? liveExplode(store, key) : 0;
+    const bottom = cutY + (key ? floorLift(key, level, t) : 0);
+    region.current.min.y = bottom;
     const k = instant ? 1 : dampFactor(3.2, dt);
-    height.current += (cutY - height.current) * k;
+    height.current += (bottom - height.current) * k;
     planes[0]!.constant = height.current;
   });
 }

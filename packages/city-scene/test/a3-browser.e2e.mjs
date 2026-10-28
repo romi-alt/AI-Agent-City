@@ -16,7 +16,11 @@ const { chromium } = createRequire(join(globalRoot, 'noop.js'))('playwright');
 
 const base = process.argv.find(a => a.startsWith('http')) ?? 'http://127.0.0.1:3203';
 const only = (process.argv.find(a => a.startsWith('--only=')) ?? '').slice(7).split(',').filter(Boolean);
-const harness = `file://${join(here, 'harness/dist/index.html')}`;
+// The harness opens from file:// by default; pass --harness=<url> to serve it over HTTP (with /city/ assets, so
+// A2's character model loads), e.g. a static server on the dist folder with `city` linked to apps/web/public/city.
+const harness =
+  (process.argv.find(a => a.startsWith('--harness=')) ?? '').slice(10) ||
+  `file://${join(here, 'harness/dist/index.html')}`;
 const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
 const results = [];
 
@@ -39,9 +43,15 @@ async function open(url, opts = {}) {
     ...opts.context,
   });
   const page = await context.newPage();
+  // Software GL renders a frame of the full city in seconds; actions wait for stable frames, so give them room.
+  page.setDefaultTimeout(120_000);
   const errors = [];
-  page.on('pageerror', e => errors.push(e.message));
-  page.on('console', m => m.type() === 'error' && errors.push(m.text()));
+  // The file:// harness cannot fetch A2's character model; the office then shows its stand-in figures (the
+  // Next app serves the model, and those checks keep the strict no-errors rule).
+  const known = url.startsWith('file:') ? /Fetch API cannot load file:\/\/\/city\/models\// : null;
+  const keep = msg => !(known && known.test(msg)) && errors.push(msg);
+  page.on('pageerror', e => keep(e.message));
+  page.on('console', m => m.type() === 'error' && keep(m.text()));
   if (opts.reducedMotion) await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(url);
   return { browser, page, errors, close: () => browser.close() };
@@ -71,6 +81,11 @@ await check('city-arrival-skip-and-navigate', async () => {
   await page.getByRole('button', { name: 'Skip intro' }).click();
   await page.locator('.ac-crumbs').waitFor({ timeout: 150_000 });
   assert.equal(await crumb(page), 'City');
+  // View modes: Overview / Top / Orbit.
+  for (const v of ['Top', 'Orbit', 'Overview']) {
+    await page.getByRole('radio', { name: v }).check();
+    assert.ok(await page.getByRole('radio', { name: v }).isChecked());
+  }
   // Directory → building.
   await page.getByRole('button', { name: 'Show a list of buildings' }).click();
   await page.getByRole('heading', { name: 'Find a building' }).waitFor();
@@ -81,7 +96,17 @@ await check('city-arrival-skip-and-navigate', async () => {
   assert.equal(await page.getByRole('button', { name: 'Enter building' }).count(), 0, 'public: nothing enterable');
   await shot(page, 'city-building-panel');
   // Floor → "Enter office" offers the demo.
-  await page.getByRole('button', { name: /^Floor 12, Sales Dept\./ }).click();
+  // Exploded floors: a switch in building mode.
+  const explode = page.getByRole('switch', { name: 'Explode floors' });
+  await explode.click();
+  assert.equal(await explode.getAttribute('aria-checked'), 'true');
+  await shot(page, 'city-building-exploded');
+  // 3D floor labels beside the building: real buttons that open their floor.
+  assert.ok((await page.locator('.ac-floor-tag').count()) >= 10, 'floor labels in 3D');
+  await page
+    .locator('.ac-panel')
+    .getByRole('button', { name: /^Floor 12, Sales Dept\./ })
+    .click();
   await page.getByRole('heading', { name: 'Sales Dept.' }).waitFor();
   assert.equal(await crumb(page), 'Floor 12');
   await page.getByRole('button', { name: 'Enter office' }).click();
@@ -89,6 +114,16 @@ await check('city-arrival-skip-and-navigate', async () => {
   assert.equal(await cta.getAttribute('href'), '/#get-demo');
   assert.match(await page.locator('.ac-panel').innerText(), /Ava/);
   await shot(page, 'city-floor-cta');
+  // Agent selection in the cut-away: the panel shows the agent, the breadcrumb names them, Esc goes back.
+  await page.locator('.ac-desk-tag', { hasText: 'Ava' }).click();
+  await page.locator('.ac-agent[data-agent="audi/12/0"]').waitFor();
+  assert.equal(await crumb(page), 'Ava');
+  await shot(page, 'city-agent');
+  await page.locator('[data-city-focus]').focus();
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(
+    () => document.querySelector('.ac-crumbs [aria-current="page"]')?.textContent === 'Floor 12',
+  );
   // Esc goes back one step at a time; closing the panel returns focus.
   await page.locator('[data-city-focus]').focus();
   await page.keyboard.press('Escape');
@@ -178,7 +213,10 @@ await check('city-mobile', async () => {
     if (r) assert.ok(r.height >= 40, 'touch targets at least 40px tall');
   }
   await shot(page, 'city-mobile-building');
-  await page.getByRole('button', { name: /^Floor 12,/ }).tap();
+  await page
+    .locator('.ac-panel')
+    .getByRole('button', { name: /^Floor 12,/ })
+    .tap();
   await page.getByRole('heading', { name: 'Admin / CEO / Accounting' }).waitFor();
   await page.getByRole('button', { name: 'Enter office' }).tap();
   await page.getByRole('link', { name: 'Request a demo' }).waitFor();
@@ -206,7 +244,10 @@ await check('city-no-webgl', async () => {
   assert.match(await page.locator('.ac-map2d header').innerText(), /cannot show the 3D city/);
   await page.getByRole('button', { name: /^Maserati Dealership/ }).click();
   await page.getByRole('heading', { name: 'Maserati Dealership' }).waitFor();
-  await page.getByRole('button', { name: /^Floor 9,/ }).click();
+  await page
+    .locator('.ac-panel')
+    .getByRole('button', { name: /^Floor 9,/ })
+    .click();
   await page.getByRole('heading', { name: 'Social Media Dept.' }).waitFor();
   await page.getByRole('button', { name: 'Enter office' }).click();
   await page.getByRole('link', { name: 'Request a demo' }).waitFor();
@@ -223,17 +264,19 @@ const cam = page => page.evaluate(() => window.three.camera.position.toArray());
 const mode = page => page.evaluate(() => window.cityStore.get().mode);
 const waitMode = (page, kind, timeout = 120_000) =>
   page.waitForFunction(k => window.cityStore.get().mode.kind === k, kind, { timeout });
-const settle = async (page, ms = 150_000) => {
+const settle = async (page, ms = 300_000) => {
   log('settle');
-  // Wait until the camera has stopped moving for two readings in a row (SwiftShader frames are slow here, so a
-  // flight may not have started at the first reading).
+  // Wait for a frame (so a move just asked for has begun), then until no camera move is under way (the canvas
+  // carries data-city-motion) and the camera has stopped for two readings in a row. SwiftShader frames are slow.
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
   let prev = await cam(page);
   let still = 0;
   const t0 = Date.now();
   while (still < 2 && Date.now() - t0 < ms) {
     await page.waitForTimeout(2500);
     const now = await cam(page);
-    still = Math.hypot(now[0] - prev[0], now[1] - prev[1], now[2] - prev[2]) < 0.02 ? still + 1 : 0;
+    const busy = await page.evaluate(() => [...document.querySelectorAll('canvas')].some(c => c.dataset.cityMotion));
+    still = !busy && Math.hypot(now[0] - prev[0], now[1] - prev[1], now[2] - prev[2]) < 0.02 ? still + 1 : 0;
     prev = now;
   }
   return prev;

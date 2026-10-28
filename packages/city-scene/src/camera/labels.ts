@@ -11,7 +11,7 @@ import type { CityStore } from '../store.ts';
  */
 export interface SceneLabel {
   id: string;
-  kind: 'desk' | 'callout';
+  kind: 'desk' | 'floor' | 'callout';
   text: string;
   sub?: string;
   kicker?: string;
@@ -26,6 +26,8 @@ export interface SceneLabel {
 interface Anchor {
   object: THREE.Object3D;
   offset: THREE.Vector3;
+  /** 'above' centres the label over its anchor (desks); 'right' starts it at the anchor (floor labels). */
+  align?: 'above' | 'right';
 }
 
 export interface LabelRegistry {
@@ -123,6 +125,7 @@ export function LabelProjector({ store }: { store: CityStore }) {
   useFrame(() => {
     const cam = camera as unknown as THREE.PerspectiveCamera;
     cam.getWorldDirection(dir);
+    const desks: { el: HTMLElement; x: number; y: number; selected: boolean }[] = [];
     for (const [id, a] of reg.anchors) {
       const el = reg.elements.get(id);
       if (!el) continue;
@@ -135,8 +138,49 @@ export function LabelProjector({ store }: { store: CityStore }) {
       const y = (-v.y * 0.5 + 0.5) * size.height;
       const onScreen = ahead && x > -80 && x < size.width + 80 && y > -40 && y < size.height + 40;
       el.style.visibility = onScreen ? 'visible' : 'hidden';
-      if (onScreen) el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
+      if (!onScreen) continue;
+      if (el.classList.contains('ac-desk-tag'))
+        desks.push({ el, x, y, selected: el.classList.contains('is-selected') });
+      else
+        el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) ${a.align === 'right' ? 'translate(0, -50%)' : 'translate(-50%, -100%)'}`;
     }
+    placeDeskTags(desks);
   });
   return null;
+}
+
+/** Measured once per tag (reading layout every frame would force a reflow each time). */
+const tagSize = new WeakMap<HTMLElement, { w: number; h: number }>();
+
+/**
+ * Desk tags never sit on top of each other: the selected one keeps its place, then the nearest (lowest on screen)
+ * first; a tag that would overlap one already placed moves up a step or two (or just below its desk), and the
+ * least-crowded spot wins when every candidate is taken.
+ */
+function placeDeskTags(tags: { el: HTMLElement; x: number; y: number; selected: boolean }[]) {
+  tags.sort((a, b) => Number(b.selected) - Number(a.selected) || b.y - a.y);
+  const placed: { l: number; t: number; r: number; b: number }[] = [];
+  const GAP = 3;
+  for (const tag of tags) {
+    let dims = tagSize.get(tag.el);
+    if (!dims || !dims.w) tagSize.set(tag.el, (dims = { w: tag.el.offsetWidth, h: tag.el.offsetHeight }));
+    const w = dims.w || 120;
+    const h = dims.h || 28;
+    const step = h + GAP;
+    let best = { dy: 0, overlap: Infinity };
+    for (const dy of [0, -step, step + 6, -2 * step, 2 * step + 6, -3 * step]) {
+      const box = { l: tag.x - w / 2, t: tag.y - h + dy, r: tag.x + w / 2, b: tag.y + dy };
+      let overlap = 0;
+      for (const p of placed) {
+        const ox = Math.min(box.r, p.r) - Math.max(box.l, p.l);
+        const oy = Math.min(box.b, p.b) - Math.max(box.t, p.t);
+        if (ox > -GAP && oy > -GAP) overlap += Math.max(ox, 1) * Math.max(oy, 1);
+      }
+      if (overlap < best.overlap) best = { dy, overlap };
+      if (overlap === 0) break;
+    }
+    const t = tag.y - h + best.dy;
+    placed.push({ l: tag.x - w / 2, t, r: tag.x + w / 2, b: t + h });
+    tag.el.style.transform = `translate(${tag.x.toFixed(1)}px, ${(tag.y + best.dy).toFixed(1)}px) translate(-50%, -100%)`;
+  }
 }

@@ -83,7 +83,9 @@ export function DemoOfficeScene(props: DemoOfficeSceneProps) {
     const i = selectedAgentId ? agents.findIndex(a => a.id === selectedAgentId) : -1;
     const m = store.get().mode;
     const desk = i >= 0 ? i : null;
-    if (m.kind === 'office' && m.desk !== desk) store.set({ mode: officeMode(desk) });
+    const id = desk === null ? null : (selectedAgentId ?? null);
+    if (m.kind === 'office' && (m.desk !== desk || store.get().selectedAgent !== id))
+      store.set({ mode: officeMode(desk), selectedAgent: id });
   }, [store, selectedAgentId, agents]);
 
   const occupants = useMemo<OfficeOccupants>(
