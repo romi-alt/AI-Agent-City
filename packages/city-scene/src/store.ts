@@ -14,10 +14,13 @@ export interface CityStore {
 
 export const DEFAULT_STATE: CityState = {
   mode: { kind: 'explore' },
+  view: 'overview',
+  explode: false,
+  selectedAgent: null,
   quality: 'balanced',
   qualityAuto: true,
   timeOfDay: 'day',
-  weather: 'partly-cloudy',
+  weather: 'clear',
   reducedMotion: false,
   paused: false,
   hovered: null,

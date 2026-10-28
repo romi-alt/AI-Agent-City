@@ -58,8 +58,17 @@ export type CityMode =
   | { kind: 'floor'; building: string; level: number }
   | { kind: 'office'; building: string; level: number; desk: number | null };
 
+/** How the city overview is shown (only while `mode` is explore). Building/floor/office framing follows `mode`. */
+export type CityView = 'overview' | 'top' | 'orbit';
+
 export interface CityState {
   mode: CityMode;
+  /** Overview camera style: the elevated aerial view, a straight-down plan, or a slow automatic orbit. */
+  view: CityView;
+  /** Floors of the focused building separate vertically ("explode floors"), in building and floor modes. */
+  explode: boolean;
+  /** The agent selected in the office (desk focus and the agent panel), by agent id. */
+  selectedAgent: string | null;
   quality: QualityLevel;
   /** True when the quality was picked automatically (the user has not overridden it). */
   qualityAuto: boolean;
