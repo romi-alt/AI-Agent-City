@@ -1,7 +1,17 @@
 import type { V3 } from '../camera/math.ts';
 import type { LayoutBuilding, LayoutDesk } from '../types.ts';
 import type { DeskOccupant } from './occupants.ts';
-import { officeSize, officeToWorld, planOffice, variantFor } from './plan.ts';
+import {
+  isLeadRole,
+  officeSize,
+  officeToWorld,
+  planOffice,
+  planReferenceOffice,
+  type ReferencePlan,
+  refSeatPosition,
+  type SeatKind,
+  variantFor,
+} from './plan.ts';
 
 /** Desk top height (metres). */
 export const DESK_HEIGHT = 0.74;
@@ -63,4 +73,42 @@ export function furnishedPoints(b: LayoutBuilding, level: number, occupants: num
         out.push([p[0], p[1] + lift, p[2]]);
       }
   return out;
+}
+
+/** How an occupant is seated in the reference office: people and leadership on the corner rug. */
+export function seatKindOf(o: Pick<DeskOccupant, 'kind' | 'role'>): SeatKind {
+  return { kind: o.kind, lead: isLeadRole(o.role) };
+}
+
+/** The reference office plan for a building's floor and its occupants. */
+export function referencePlanFor(
+  b: LayoutBuilding,
+  occupants: readonly Pick<DeskOccupant, 'kind' | 'role'>[],
+): ReferencePlan {
+  const { width, depth } = officeSize(b);
+  return planReferenceOffice(width, depth, occupants.map(seatKindOf));
+}
+
+/** Desk top height in the reference office, in legacy units (times the plan's scale for metres). */
+export const REF_DESK_TOP = 0.95;
+
+/**
+ * World positions for the camera at a reference desk: the desk top's centre, the sitter's head, and the yaw the
+ * sitter faces (towards the back wall). Null when nobody sits in that slot.
+ */
+export function referenceDeskWorld(
+  b: LayoutBuilding,
+  level: number,
+  slot: number,
+  occupants: readonly Pick<DeskOccupant, 'kind' | 'role'>[],
+): { pos: V3; head: V3; facing: number } | null {
+  const plan = referencePlanFor(b, occupants);
+  const d = plan.desks.find(x => x.slot === slot);
+  if (!d) return null;
+  const [sx, sz] = refSeatPosition(d, plan.scale);
+  return {
+    pos: officeToWorld(b, level, d.x, REF_DESK_TOP * plan.scale, d.z),
+    head: officeToWorld(b, level, sx, 1.7 * plan.scale, sz),
+    facing: d.facing,
+  };
 }

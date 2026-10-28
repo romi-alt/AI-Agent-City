@@ -42,3 +42,15 @@ export function statusLabel(status: string): string {
   if (status === 'needs-you') return 'Needs you';
   return 'Idle';
 }
+
+// ── Reference office look ──────────────────────────────────────────────────────────────────────────────────────
+
+/** The office legend: people in a warm shirt, AI agents in a cool one. */
+export const REF_SHIRT = { human: '#f2b33d', ai: '#4aa8d8' } as const;
+/** Status rings under the chairs (the legend's colours). */
+export const REF_STATUS: Record<string, string> = { working: '#2ecc71', 'needs-you': '#ef4444', idle: '#9aa5b1' };
+export function refStatusColor(status: string): string {
+  return REF_STATUS[status] ?? REF_STATUS.idle!;
+}
+/** Role text on the name pills: the legend hues, darkened enough to read on white. */
+export const REF_ROLE_TEXT = { human: '#b7791f', ai: '#2f86b8' } as const;
