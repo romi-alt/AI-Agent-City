@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { DemoRequestForm } from '../../components/demo/DemoRequestForm';
+import { LiteDemoForm } from '../../components/demo/LiteDemoForm';
+import { LITE_DEMO } from '../../lib/preview';
 
 export const metadata: Metadata = {
   title: 'Get your demo office — AgentCity',
@@ -9,7 +11,7 @@ export const metadata: Metadata = {
 const STEPS = [
   'Tell us about your business.',
   'Confirm your email with the one-time link.',
-  'Sign in with a code. No password.',
+  LITE_DEMO ? 'Your office opens straight away. No password.' : 'Sign in with a code. No password.',
   'Meet your sample office in Rental Building 2.',
 ];
 
@@ -37,7 +39,7 @@ export default function DemoRequestPage() {
           </p>
         </div>
         <div className="mk-demo-form">
-          <DemoRequestForm headingId="demo-intro-title" />
+          {LITE_DEMO ? <LiteDemoForm headingId="demo-intro-title" /> : <DemoRequestForm headingId="demo-intro-title" />}
         </div>
       </div>
     </main>

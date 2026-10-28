@@ -1019,3 +1019,89 @@ html[data-tour-target='ctas'] [data-tour='ctas'] {
   white-space: normal;
   line-height: 1.3;
 }
+
+/* ---------- Lite demo office: the city and the team side by side (stacked on phones) ---------- */
+.dm-lite-head {
+  display: grid;
+  gap: var(--s-2);
+}
+.dm-lite-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--rule);
+  background: var(--c-white);
+  font-size: var(--fs-sm);
+  color: var(--c-ink);
+}
+.dm-lite-title {
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.1rem);
+}
+.dm-lite-grid {
+  display: grid;
+  gap: var(--s-3);
+  align-items: start;
+}
+.dm-lite-scene {
+  position: relative;
+  height: clamp(540px, 78vh, 760px);
+  /* The city's phone layout pins its bar and sheet with position: fixed. A transform makes this box their
+     reference, so they stay inside the city instead of sticking to the browser window. */
+  transform: translateZ(0);
+}
+/* The city takes the full width (its panels need the room); the team sits beneath it. */
+.dm-lite-side {
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .dm-lite-side {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+/* The tour card sits in the page flow above the city and stays in view while scrolling, so it never covers the
+   city's own panels or camera buttons (the floating card of the signed-in office would on a phone). */
+.dm-lite-office .dm-tour {
+  position: sticky;
+  top: 8px;
+  left: auto;
+  bottom: auto;
+  transform: none;
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  padding: 16px var(--s-3);
+}
+@media (min-width: 768px) {
+  /* Wide screens: the card is a slim strip (text left, buttons right) so the city stays in view below it. */
+  .dm-lite-office .dm-tour {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'progress foot'
+      'title foot'
+      'body foot';
+    column-gap: var(--s-4);
+    row-gap: 4px;
+    padding: 12px var(--s-3);
+    align-items: center;
+  }
+  .dm-lite-office .dm-tour > :nth-child(1) {
+    grid-area: progress;
+  }
+  .dm-lite-office .dm-tour > h2 {
+    grid-area: title;
+  }
+  .dm-lite-office .dm-tour > p {
+    grid-area: body;
+  }
+  .dm-lite-office .dm-tour > .dm-tour-foot {
+    grid-area: foot;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--s-3);
+  }
+}

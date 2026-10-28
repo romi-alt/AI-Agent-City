@@ -1,6 +1,7 @@
 // Small pieces shared by the demo pages, built from the landing page's primitives (components/marketing): the
 // "Simulated"/"Sample" tag, agent avatars, status chips, the demo page header and footer, and the conversion cards.
 import { Icon, Mark } from '../marketing/Primitives';
+import { PUBLIC_PREVIEW } from '../../lib/preview';
 import { describeAgentStatus } from './demo-api';
 import '../marketing/marketing.css';
 import './demo.css';
@@ -59,9 +60,11 @@ export function DemoHeader() {
           <a className="mk-header-link" href="/city">
             Explore the city
           </a>
-          <a className="mk-header-link" href="/signin">
-            Sign in
-          </a>
+          {!PUBLIC_PREVIEW && (
+            <a className="mk-header-link" href="/signin">
+              Sign in
+            </a>
+          )}
         </div>
       </div>
     </header>

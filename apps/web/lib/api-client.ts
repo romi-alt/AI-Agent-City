@@ -171,3 +171,197 @@ export function describeError(err: unknown): string {
   if (err instanceof TypeError) return 'Could not reach AgentCity. Check your connection and try again.';
   return 'Something went wrong. Try again.';
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// Lite demo client (/api/lite/demo/*). The public demo is cookie-based (ac_demo), so these calls carry no device
+// proof and never redirect to a sign-in page. Every response is checked before the pages see it.
+
+export type LiteErrorCode =
+  | 'validation_failed'
+  | 'rate_limited'
+  | 'bad_request'
+  | 'demo_unavailable'
+  | 'unauthorized'
+  | 'expired'
+  | 'network'
+  | 'bad_response';
+
+export class LiteError extends Error {
+  readonly status: number;
+  readonly code: LiteErrorCode;
+  constructor(status: number, code: LiteErrorCode, message: string) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
+
+export interface LiteDemoRequest {
+  name: string;
+  email: string;
+  company: string;
+  industry?: string;
+  phone?: string;
+  website?: string;
+  marketingConsent: boolean;
+  formToken: string;
+  /** Honeypot: people never see this field, so a filled value marks a bot. */
+  website2: string;
+  referrerHost?: string;
+  attribution?: Record<string, string>;
+}
+
+export type LiteStatus = 'verification-sent' | 'ready' | 'expired';
+export type LiteAgentStatus = 'working' | 'idle' | 'needs-you';
+
+export interface LiteMe {
+  firstName: string;
+  company: string;
+  building: { key: string; name: string };
+  office: { level: number; name: string };
+  expiresAt: string;
+}
+
+export interface LiteAgent {
+  id: string;
+  name: string;
+  role: string;
+  status: LiteAgentStatus;
+  currentTask: string | null;
+  summary: string | null;
+  updatedAt: string | null;
+}
+
+export interface LiteTask {
+  id: string;
+  title: string;
+  agentId: string | null;
+  status: string | null;
+}
+
+export interface LiteOffice {
+  agents: LiteAgent[];
+  tasks: LiteTask[];
+  daySummary: string | null;
+  simulated: true;
+}
+
+type Rec = Record<string, unknown>;
+const bad = (what: string) => new LiteError(502, 'bad_response', `Unexpected answer from the demo service (${what}).`);
+const isRec = (v: unknown): v is Rec => typeof v === 'object' && v !== null && !Array.isArray(v);
+const text = (v: unknown, what: string): string => {
+  if (typeof v !== 'string') throw bad(what);
+  return v;
+};
+const textOrNull = (v: unknown): string | null => (typeof v === 'string' && v ? v : null);
+const rec = (v: unknown, what: string): Rec => {
+  if (!isRec(v)) throw bad(what);
+  return v;
+};
+
+const KNOWN_CODES: LiteErrorCode[] = ['validation_failed', 'rate_limited', 'bad_request', 'demo_unavailable'];
+
+function errorFrom(status: number, body: unknown): LiteError {
+  const inner = isRec(body) && isRec(body.error) ? body.error : {};
+  const raw = typeof inner.code === 'string' ? inner.code : '';
+  const message = typeof inner.message === 'string' ? inner.message : `Request failed (HTTP ${status}).`;
+  const known = KNOWN_CODES.find(c => c === raw);
+  if (known) return new LiteError(status, known, message);
+  if (status === 401) return new LiteError(status, 'unauthorized', message);
+  if (status === 410) return new LiteError(status, 'expired', message);
+  return new LiteError(
+    status,
+    status === 429 ? 'rate_limited' : status === 503 ? 'demo_unavailable' : 'bad_request',
+    message,
+  );
+}
+
+async function liteFetch(method: 'GET' | 'POST', path: string, body?: unknown): Promise<unknown> {
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      method,
+      headers: { Accept: 'application/json', ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
+      credentials: 'same-origin',
+      cache: 'no-store',
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch {
+    throw new LiteError(0, 'network', 'Could not reach AgentCity. Check your connection and try again.');
+  }
+  const parsed: unknown = await res.json().catch(() => null);
+  if (!res.ok) throw errorFrom(res.status, parsed);
+  return parsed;
+}
+
+export async function liteFormToken(): Promise<string> {
+  return text(rec(await liteFetch('GET', '/api/lite/demo/form-token'), 'form token').token, 'form token');
+}
+
+export async function liteRequestDemo(input: LiteDemoRequest): Promise<{ requestId: string }> {
+  const out = rec(await liteFetch('POST', '/api/lite/demo', input), 'request');
+  return { requestId: text(out.requestId, 'request id') };
+}
+
+export async function liteStatus(requestId: string): Promise<LiteStatus> {
+  const path = `/api/lite/demo/status?request=${encodeURIComponent(requestId)}`;
+  const status = rec(await liteFetch('GET', path), 'status').status;
+  if (status === 'verification-sent' || status === 'ready' || status === 'expired') return status;
+  throw bad('status');
+}
+
+export async function liteMe(): Promise<LiteMe> {
+  const b = rec(await liteFetch('GET', '/api/lite/demo/me'), 'me');
+  const building = rec(b.building, 'building');
+  const office = rec(b.office, 'office');
+  const level = office.level;
+  if (typeof level !== 'number') throw bad('office level');
+  return {
+    firstName: textOrNull(b.firstName) ?? '',
+    company: textOrNull(b.company) ?? '',
+    building: { key: text(building.key, 'building key'), name: text(building.name, 'building name') },
+    office: { level, name: text(office.name, 'office name') },
+    expiresAt: text(b.expiresAt, 'expiry'),
+  };
+}
+
+const AGENT_STATUS: LiteAgentStatus[] = ['working', 'idle', 'needs-you'];
+
+function parseAgent(v: unknown): LiteAgent {
+  const a = rec(v, 'agent');
+  const status = AGENT_STATUS.find(s => s === a.status) ?? 'idle';
+  return {
+    id: text(a.id, 'agent id'),
+    name: text(a.name, 'agent name'),
+    role: text(a.role, 'agent role'),
+    status,
+    currentTask: textOrNull(a.currentTask),
+    summary: textOrNull(a.summary),
+    updatedAt: textOrNull(a.updatedAt),
+  };
+}
+
+function parseTask(v: unknown, i: number): LiteTask {
+  const t = rec(v, 'task');
+  return {
+    id: textOrNull(t.id) ?? `task-${i}`,
+    title: textOrNull(t.title) ?? textOrNull(t.name) ?? textOrNull(t.description) ?? 'Task',
+    agentId: textOrNull(t.agentId),
+    status: textOrNull(t.status),
+  };
+}
+
+export async function liteOffice(): Promise<LiteOffice> {
+  const b = rec(await liteFetch('GET', '/api/lite/demo/office'), 'office');
+  if (!Array.isArray(b.agents)) throw bad('agents');
+  return {
+    agents: b.agents.map(parseAgent),
+    tasks: Array.isArray(b.tasks) ? b.tasks.map(parseTask) : [],
+    daySummary: textOrNull(b.daySummary),
+    simulated: true,
+  };
+}
+
+export async function liteSignOut(): Promise<void> {
+  await liteFetch('POST', '/api/lite/demo/signout', {});
+}

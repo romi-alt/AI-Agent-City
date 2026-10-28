@@ -14,6 +14,8 @@ import {
   shouldPlayArrival,
 } from '@agentcity/city-scene';
 import { useEffect, useState } from 'react';
+import { liteMe } from '../../lib/api-client';
+import { LITE_DEMO } from '../../lib/preview';
 
 type View = 'webgl' | 'map' | 'failed';
 
@@ -39,6 +41,36 @@ function initialState(): Partial<CityState> {
   };
 }
 
+const OWN_DEMO_CTA = {
+  href: '/demo/office',
+  label: 'Open my demo office',
+  note: 'Your own simulated office is ready. It is the building picked out in the city.',
+};
+
+/**
+ * A visitor who already has a demo office (lite demo only) sees their building picked out here, and the office
+ * prompt takes them to it. Anyone else, or any failure, leaves the public city exactly as it was.
+ */
+function useOwnDemo(store: CityStore) {
+  const [has, setHas] = useState(false);
+  useEffect(() => {
+    if (!LITE_DEMO) return;
+    let live = true;
+    liteMe().then(
+      me => {
+        if (!live) return;
+        store.set({ highlight: me.building.key });
+        setHas(true);
+      },
+      () => undefined,
+    );
+    return () => {
+      live = false;
+    };
+  }, [store]);
+  return has ? OWN_DEMO_CTA : null;
+}
+
 export function CityClient() {
   const [store] = useState<CityStore>(() => createCityStore(initialState()));
   const [view, setView] = useState<View>(() => (detectWebGL() ? 'webgl' : 'map'));
@@ -51,7 +83,8 @@ export function CityClient() {
     return () => mq.removeEventListener('change', on);
   }, [store]);
 
-  const panel = { officeCta: DEFAULT_OFFICE_CTA };
+  const mine = useOwnDemo(store);
+  const panel = { officeCta: mine ?? DEFAULT_OFFICE_CTA };
 
   return (
     <main className="ac-city-page">
