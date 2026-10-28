@@ -1,5 +1,7 @@
 import { DEMO_BUILDING } from './cityFacts';
+import { CtaLink } from './Primitives';
 import { DemoRequestForm } from '../demo/DemoRequestForm';
+import { PUBLIC_PREVIEW } from '../../lib/preview';
 
 // The demo invitation, with the demo walkthrough beside the form.
 export function GetDemo({ ttlDays }: { ttlDays: number }) {
@@ -33,10 +35,27 @@ export function GetDemo({ ttlDays }: { ttlDays: number }) {
             </p>
           </div>
           <div className="mk-demo-form">
-            <DemoRequestForm headingId="get-demo-title" />
+            {PUBLIC_PREVIEW ? <ComingSoon /> : <DemoRequestForm headingId="get-demo-title" />}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+// The preview has no backend to store a request, so it collects nothing and says so plainly.
+function ComingSoon() {
+  return (
+    <div className="mk-coming-soon" data-testid="demo-coming-soon">
+      <p className="mk-eyebrow">Opening soon</p>
+      <p className="mk-h3">Demo offices open here shortly.</p>
+      <p className="mk-coming-soon-text">
+        This is a public preview of AgentCity. Explore the live city now; requesting a demo office is switched off until
+        sign-up opens, so nothing you do here is stored.
+      </p>
+      <CtaLink href="/city" variant="secondary" testId="demo-coming-soon-city">
+        Explore the city
+      </CtaLink>
+    </div>
   );
 }

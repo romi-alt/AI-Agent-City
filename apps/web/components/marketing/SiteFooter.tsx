@@ -1,4 +1,5 @@
 import { CtaLink, Mark } from './Primitives';
+import { PUBLIC_PREVIEW } from '../../lib/preview';
 
 export function SiteFooter({ contactEmail }: { contactEmail?: string }) {
   return (
@@ -32,12 +33,16 @@ export function SiteFooter({ contactEmail }: { contactEmail?: string }) {
               <li>
                 <a href="/city">Explore the city</a>
               </li>
-              <li>
-                <a href="/signin">Sign in</a>
-              </li>
-              <li>
-                <a href="/status">Status</a>
-              </li>
+              {!PUBLIC_PREVIEW && (
+                <>
+                  <li>
+                    <a href="/signin">Sign in</a>
+                  </li>
+                  <li>
+                    <a href="/status">Status</a>
+                  </li>
+                </>
+              )}
             </ul>
           </nav>
           <p className="mk-footer-note">Public city activity is simulated. Agent names are AI personas.</p>

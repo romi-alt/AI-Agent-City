@@ -1109,3 +1109,17 @@ html:has(.mk) {
       transform 600ms var(--ease);
   }
 }
+
+/* Public preview: the demo card's right side when sign-up is switched off. */
+.mk-coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-2);
+  height: 100%;
+  justify-content: center;
+}
+.mk-coming-soon-text {
+  margin: 0 0 var(--s-1);
+  color: var(--text-muted);
+}
