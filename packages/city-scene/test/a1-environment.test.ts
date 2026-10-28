@@ -38,7 +38,7 @@ describe('environment presets', () => {
     assert.equal(clear.wetness, 0);
     assert.ok(rain.cloudCover > 0.9);
     assert.ok(rain.sunIntensity < clear.sunIntensity * 0.3);
-    assert.ok(rain.fogDensity > clear.fogDensity);
+    assert.ok(rain.fogFar < clear.fogFar && rain.fogNear < clear.fogNear);
     assert.ok(rain.nightFactor > 0 && rain.nightFactor < 0.5);
   });
 

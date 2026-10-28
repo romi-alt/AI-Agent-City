@@ -12,6 +12,8 @@
  */
 import type { CityLayout } from '../types.ts';
 
+type Streets = CityLayout['streets'];
+
 export interface Rect {
   minX: number;
   maxX: number;
@@ -52,7 +54,12 @@ function extend(core: number[], step: number, half: number): number[] {
 }
 
 export function cityRoads(layout: CityLayout, extent = CITY_EXTENT): CityRoads {
-  const { roadsX, roadsZ } = layout.streets;
+  return cityRoadsFor(layout.streets, extent);
+}
+
+/** As `cityRoads`, from the street grid alone. */
+export function cityRoadsFor(streets: Streets, extent = CITY_EXTENT): CityRoads {
+  const { roadsX, roadsZ } = streets;
   return {
     roadsX: extend(roadsX, spacing(roadsX), extent),
     roadsZ: extend(roadsZ, spacing(roadsZ), extent),
@@ -62,7 +69,12 @@ export function cityRoads(layout: CityLayout, extent = CITY_EXTENT): CityRoads {
 
 /** The district: the 15 lots plus one block on every side, measured between road centre lines. */
 export function districtBounds(layout: CityLayout): Rect {
-  const { roadsX, roadsZ } = layout.streets;
+  return districtRect(layout.streets);
+}
+
+/** As `districtBounds`, from the street grid alone. */
+export function districtRect(streets: Streets): Rect {
+  const { roadsX, roadsZ } = streets;
   const sx = spacing(roadsX) * DISTRICT_MARGIN_BLOCKS;
   const sz = spacing(roadsZ) * DISTRICT_MARGIN_BLOCKS;
   return {
