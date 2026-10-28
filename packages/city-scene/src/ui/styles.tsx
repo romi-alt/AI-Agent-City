@@ -58,6 +58,20 @@ export const HUD_CSS = `
 .ac-crumbs [aria-current="page"] { color: var(--ac-ink); font-weight: 600; padding: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
 .ac-tools { display: flex; gap: 2px; padding: 4px; border-radius: 14px; }
 
+/* The compact view control (Overview / Top / Orbit, or Explode floors), centred in the top bar. */
+.ac-modebar { position: absolute; left: 50%; transform: translateX(-50%); top: 0; margin: 0; padding: 4px; border-radius: 14px; min-width: 0; }
+.ac-modebar .ac-seg { border: 0; background: transparent; padding: 0; grid-auto-columns: minmax(84px, auto); }
+.ac-modebar .ac-seg label { min-height: 38px; font-size: 13.5px; padding: 4px 14px; }
+.ac-modebar .ac-seg label:has(input:checked) { background: var(--ac-tint); box-shadow: inset 0 0 0 1px var(--ac-line); }
+.ac-switch { display: inline-flex; align-items: center; gap: 10px; min-height: 38px; padding: 0 14px 0 10px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--ac-ink); font-size: 13.5px; font-weight: 500; }
+.ac-switch:hover { background: var(--ac-tint); }
+.ac-switch i { position: relative; width: 30px; height: 18px; border-radius: 999px; background: var(--ac-line-2); transition: background-color 150ms ease; flex: none; }
+.ac-switch i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 2px rgba(12, 12, 13, 0.2); transition: transform 150ms ease; }
+.ac-switch.is-on i { background: var(--ac-ink); }
+.ac-switch.is-on i::after { transform: translateX(12px); }
+
 /* Popovers (view settings, keyboard help). */
 .ac-pop { position: absolute; top: 60px; right: 0; width: min(340px, calc(100vw - 32px)); padding: 20px; display: grid; gap: 18px; z-index: 5;
   background: var(--ac-white); border-radius: 16px; }
@@ -139,6 +153,16 @@ button.ac-row .ac-meta::after { content: " \\203A"; color: var(--ac-faint); }
 .ac-desk-tag:hover { background: #ffffff; }
 .ac-desk-tag.is-selected { background: #0c0c0d; color: #fafaf9; border-color: #0c0c0d; }
 .ac-desk-tag.is-selected span { color: #d4d4d8; }
+.ac-floor-tag { pointer-events: auto; display: inline-flex; align-items: baseline; gap: 8px; padding: 3px 10px 3px 8px; min-height: 24px;
+  border-radius: 7px; border: 1px solid var(--ac-line, #e7e5e4); background: rgba(255, 255, 255, 0.92); color: #0c0c0d;
+  font: 500 12px/1.2 var(--ac-font, system-ui, sans-serif); white-space: nowrap; transform-origin: left center;
+  box-shadow: 0 1px 2px rgba(12, 12, 13, 0.08); transition: background-color 150ms ease; }
+.ac-label.ac-floor-tag { margin-top: 0; }
+.ac-floor-tag b { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 1.4em; color: #3f3f46; }
+.ac-floor-tag span { color: #3f3f46; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+.ac-floor-tag:hover { background: #ffffff; }
+.ac-floor-tag.is-selected { background: #0c0c0d; color: #fafaf9; border-color: #0c0c0d; }
+.ac-floor-tag.is-selected b, .ac-floor-tag.is-selected span { color: #fafaf9; }
 .ac-callout { display: grid; gap: 2px; text-align: center; padding: 8px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.94); color: #0c0c0d;
   border: 1px solid #e7e5e4; white-space: nowrap; font: 600 14px/1.3 system-ui, sans-serif; }
 .ac-callout-kicker { font-size: 11px; color: #5f5f68; font-weight: 500; }
@@ -180,6 +204,8 @@ button.ac-row .ac-meta::after { content: " \\203A"; color: var(--ac-faint); }
   .ac-cam { left: 10px; bottom: 10px; }
   .ac-hud[data-sheet="open"] .ac-cam { display: none; }
   .ac-pop { position: fixed; top: 62px; right: 10px; left: 10px; width: auto; }
+  .ac-modebar { position: fixed; top: 64px; left: 10px; transform: none; }
+  .ac-modebar .ac-seg { grid-auto-columns: minmax(64px, auto); }
   .ac-arrival { bottom: 16px; }
   .ac-map2d { grid-template-columns: 1fr; padding: 16px; }
 }

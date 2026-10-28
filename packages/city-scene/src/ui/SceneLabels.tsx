@@ -16,7 +16,21 @@ export function SceneLabels() {
       role={labels.some(l => l.kind === 'desk') ? 'group' : undefined}
     >
       {labels.map(l =>
-        l.kind === 'desk' ? (
+        l.kind === 'floor' ? (
+          <button
+            key={l.id}
+            ref={el => reg.bindElement(l.id, el)}
+            type="button"
+            className={`ac-label ac-floor-tag${l.selected ? ' is-selected' : ''}`}
+            aria-current={l.selected ? 'true' : undefined}
+            aria-label={l.ariaLabel}
+            onClick={l.onSelect}
+            style={{ visibility: 'hidden' }}
+          >
+            <b>{l.text}</b>
+            <span>{l.sub}</span>
+          </button>
+        ) : l.kind === 'desk' ? (
           <button
             key={l.id}
             ref={el => reg.bindElement(l.id, el)}

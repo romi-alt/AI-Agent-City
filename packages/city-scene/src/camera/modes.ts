@@ -93,8 +93,8 @@ export interface Crumb {
   mode: CityMode | null;
 }
 
-/** City › Building › Floor › Office, for the HUD breadcrumb. */
-export function breadcrumbs(mode: CityMode, layout: CityLayout): Crumb[] {
+/** City › Building › Floor › Office › Agent, for the HUD breadcrumb. */
+export function breadcrumbs(mode: CityMode, layout: CityLayout, agent: string | null = null): Crumb[] {
   const crumbs: Crumb[] = [{ label: 'City', mode: { kind: 'explore' } }];
   if (mode.kind === 'building' || mode.kind === 'floor' || mode.kind === 'office') {
     const b = findBuilding(layout, mode.building);
@@ -104,6 +104,7 @@ export function breadcrumbs(mode: CityMode, layout: CityLayout): Crumb[] {
     crumbs.push({ label: `Floor ${mode.level}`, mode: { kind: 'floor', building: mode.building, level: mode.level } });
   }
   if (mode.kind === 'office') crumbs.push({ label: 'Office', mode: { ...mode, desk: null } });
+  if (agent && (mode.kind === 'floor' || mode.kind === 'office')) crumbs.push({ label: agent, mode: null });
   crumbs[crumbs.length - 1] = { ...crumbs[crumbs.length - 1]!, mode: null };
   return crumbs;
 }

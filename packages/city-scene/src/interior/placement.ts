@@ -21,9 +21,10 @@ export function deskWorld(
 }
 
 /** The public layout's desks as occupants: AI desks keep their persona name, human desks stay anonymous. */
-export function occupantsFromLayout(desks: LayoutDesk[]): DeskOccupant[] {
+export function occupantsFromLayout(desks: LayoutDesk[], place?: { building: string; level: number }): DeskOccupant[] {
   return desks.map(d => ({
-    id: String(d.slot),
+    // Unique across the city ("audi/12/0"), so a selected agent names one desk.
+    id: place ? `${place.building}/${place.level}/${d.slot}` : String(d.slot),
     name: d.kind === 'ai' ? d.name : null,
     role: d.role,
     kind: d.kind,

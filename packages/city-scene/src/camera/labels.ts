@@ -11,7 +11,7 @@ import type { CityStore } from '../store.ts';
  */
 export interface SceneLabel {
   id: string;
-  kind: 'desk' | 'callout';
+  kind: 'desk' | 'floor' | 'callout';
   text: string;
   sub?: string;
   kicker?: string;
@@ -26,6 +26,8 @@ export interface SceneLabel {
 interface Anchor {
   object: THREE.Object3D;
   offset: THREE.Vector3;
+  /** 'above' centres the label over its anchor (desks); 'right' starts it at the anchor (floor labels). */
+  align?: 'above' | 'right';
 }
 
 export interface LabelRegistry {
@@ -135,7 +137,8 @@ export function LabelProjector({ store }: { store: CityStore }) {
       const y = (-v.y * 0.5 + 0.5) * size.height;
       const onScreen = ahead && x > -80 && x < size.width + 80 && y > -40 && y < size.height + 40;
       el.style.visibility = onScreen ? 'visible' : 'hidden';
-      if (onScreen) el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
+      if (onScreen)
+        el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) ${a.align === 'right' ? 'translate(0, -50%)' : 'translate(-50%, -100%)'}`;
     }
   });
   return null;

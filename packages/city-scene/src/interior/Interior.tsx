@@ -6,6 +6,8 @@ import { sceneBus } from '../camera/bus.ts';
 import { findBuilding } from '../camera/modes.ts';
 import { floorBase } from '../camera/shots.ts';
 import { navigate } from '../camera/useNav.ts';
+import { explodeState, floorLift } from '../camera/explode.ts';
+import { FloorLabels } from './FloorLabels.tsx';
 import { useCity, useCityContext } from '../context.tsx';
 import { useEnvironmentLight } from '../environment/palette.ts';
 import { FLOOR_HEIGHT } from '../types.ts';
@@ -38,34 +40,51 @@ export function Interior() {
   const occupants = useMemo(() => {
     if (!b || !floor) return [];
     if (host && host.building === b.key && host.level === floor.level) return host.agents;
-    return occupantsFromLayout(floor.desks);
+    return occupantsFromLayout(floor.desks, { building: b.key, level: floor.level });
   }, [b, floor, host]);
+  const selectedAgent = useCity(s => s.selectedAgent);
 
-  useBuildingCut(layout, b?.key ?? null, floor ? floorBase(floor.level) - 0.02 : null, reduced);
+  useBuildingCut(layout, b?.key ?? null, floor ? floorBase(floor.level) - 0.02 : null, reduced, floor?.level ?? 1);
 
+  // Agents can be chosen in the floor cut-away (look only) and inside the office; the camera follows the choice.
+  const selectedSlot =
+    mode.kind === 'office' && mode.desk !== null
+      ? mode.desk
+      : selectedAgent
+        ? occupants.findIndex(o => o.id === selectedAgent)
+        : -1;
   const selectDesk = (slot: number) => {
-    if (mode.kind !== 'office') return;
-    const next = mode.desk === slot ? null : slot;
-    navigate(store, layout, { type: 'select-desk', desk: next });
+    if (mode.kind !== 'office' && mode.kind !== 'floor') return;
     const o = occupants[slot];
-    if (o && next !== null) host?.onSelect?.(o.id);
+    if (!o) return;
+    const same = selectedSlot === slot;
+    navigate(store, layout, { type: 'select-agent', id: same ? null : o.id, desk: same ? null : slot });
+    if (!same) host?.onSelect?.(o.id);
   };
+  const lift = useRef<THREE.Group>(null);
+  const level = floor?.level ?? 1;
+  useFrame(() => {
+    if (lift.current) lift.current.position.y = floorLift(level, explodeState(store).t);
+  });
 
   return (
     <>
       {b && floor && (
-        <OfficeFloor
-          building={b}
-          floor={floor}
-          occupants={occupants}
-          detail={mode.kind === 'office' ? 'full' : 'preview'}
-          selected={mode.kind === 'office' ? mode.desk : null}
-          onSelectDesk={mode.kind === 'office' ? selectDesk : undefined}
-          night={night}
-          animate={!reduced && !paused}
-        />
+        <group ref={lift as never}>
+          <OfficeFloor
+            building={b}
+            floor={floor}
+            occupants={occupants}
+            detail="full"
+            selected={selectedSlot >= 0 ? selectedSlot : null}
+            onSelectDesk={selectDesk}
+            night={night}
+            animate={!reduced && !paused}
+          />
+        </group>
       )}
       <FloorPreviewBand />
+      <FloorLabels />
     </>
   );
 }
@@ -92,7 +111,7 @@ function FloorPreviewBand() {
     <mesh
       ref={mesh}
       material={asMat(mat)}
-      position={[b.x, floorBase(level) + FLOOR_HEIGHT / 2, b.z]}
+      position={[b.x, floorBase(level) + floorLift(level, explodeState(store).t) + FLOOR_HEIGHT / 2, b.z]}
       scale={[b.w + 0.35, FLOOR_HEIGHT * 0.92, b.d + 0.35]}
       raycast={() => null}
     >

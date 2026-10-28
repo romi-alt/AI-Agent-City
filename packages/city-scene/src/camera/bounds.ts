@@ -13,6 +13,8 @@ export interface Box {
   top: number;
   /** The building is cut open at `top` (an opened floor): the camera may come close to the cut from above. */
   cut?: boolean;
+  /** Bottom of the box when it does not stand on the ground (exploded floors lifted above an opened one). */
+  bottom?: number;
 }
 
 export interface CityBounds {
@@ -84,13 +86,15 @@ export function clampPosition(p: V3, boxes: Box[], bounds: CityBounds, margin = 
       const maxZ = b.maxZ + margin;
       const top = b.top + (b.cut ? CUT_MARGIN : margin);
       if (b.top <= 0) continue;
-      if (x <= minX || x >= maxX || z <= minZ || z >= maxZ || y >= top) continue;
+      const bottom = b.bottom === undefined ? -Infinity : b.bottom - margin;
+      if (x <= minX || x >= maxX || z <= minZ || z >= maxZ || y >= top || y <= bottom) continue;
       const exits = [
         { d: x - minX, apply: () => (x = minX) },
         { d: maxX - x, apply: () => (x = maxX) },
         { d: z - minZ, apply: () => (z = minZ) },
         { d: maxZ - z, apply: () => (z = maxZ) },
         { d: top - y, apply: () => (y = top) },
+        ...(b.bottom === undefined ? [] : [{ d: y - bottom, apply: () => (y = bottom) }]),
       ];
       exits.sort((a, c) => a.d - c.d);
       exits[0]!.apply();
