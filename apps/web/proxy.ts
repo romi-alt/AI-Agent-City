@@ -7,6 +7,8 @@ const BACKEND_ONLY = ['/demo', '/office', '/admin', '/signin', '/signed-out', '/
 export function proxy(request: NextRequest) {
   if (process.env.NEXT_PUBLIC_PUBLIC_PREVIEW !== 'true') return NextResponse.next();
   const { pathname } = request.nextUrl;
+  // The lite demo backend (leads, email verification, simulated office) is the only API in the preview build.
+  if (pathname.startsWith('/api/lite/')) return NextResponse.next();
   if (pathname.startsWith('/api/')) return new NextResponse(null, { status: 404 });
   if (BACKEND_ONLY.some(p => pathname === p || pathname.startsWith(`${p}/`))) {
     return NextResponse.redirect(new URL('/', request.url));
