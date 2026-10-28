@@ -28,15 +28,28 @@ export function plazaSpots(): PlazaSpots {
     plan.flags.every(f => Math.hypot(x - f.x, z - f.z) > 0.8);
   for (const p of PLAZAS) {
     if (p.kind !== 'plaza') continue;
-    // Open paving inside the plaza square, on a loose grid, every other free spot (groups need room around them).
-    let k = 0;
-    for (let dz = -6.6; dz <= 6.6; dz += 1.2)
-      for (let dx = -6.6; dx <= 6.6; dx += 1.2) {
-        const x = p.x + dx + (Math.round(dz / 1.2) % 2) * 0.6;
-        const z = p.z + dz;
-        if (!clear(x, z)) continue;
-        if (k++ % 3 === 0) out.groups.push({ x, z });
-      }
+    // Free spots on the open paving inside the plaza square, then spread out: each next group goes where it is
+    // farthest from the groups already placed (so they scatter over the plaza instead of lining up).
+    const free: { x: number; z: number }[] = [];
+    for (let dz = -6.4; dz <= 6.4; dz += 0.8)
+      for (let dx = -6.4; dx <= 6.4; dx += 0.8) if (clear(p.x + dx, p.z + dz)) free.push({ x: p.x + dx, z: p.z + dz });
+    const chosen: { x: number; z: number }[] = [];
+    while (free.length && chosen.length < 12) {
+      let best = 0;
+      let bestD = -1;
+      free.forEach((f, i) => {
+        const d = chosen.length
+          ? Math.min(...chosen.map(c => Math.hypot(c.x - f.x, c.z - f.z)))
+          : -Math.hypot(f.x - p.x, f.z - p.z - 4);
+        if (d > bestD) {
+          bestD = d;
+          best = i;
+        }
+      });
+      if (chosen.length && bestD < 1.6) break;
+      chosen.push(free.splice(best, 1)[0]!);
+    }
+    out.groups.push(...chosen);
   }
   return out;
 }
