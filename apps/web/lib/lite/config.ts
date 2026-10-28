@@ -1,5 +1,6 @@
 // Settings of the lite backend, read from the environment on every call so tests can change them.
 // Nothing here is logged: several values are secrets.
+import { deriveKey, hmacB64 } from './crypto.ts';
 
 export interface LiteLimits {
   ipPerTenMinutes: number;
@@ -23,6 +24,8 @@ export interface LiteConfig {
   /** How many reverse proxies in front of the app append to X-Forwarded-For (the client address is that far from the end). */
   proxyHops: number;
   adminToken: string | null;
+  /** A second token that can only run the expiry job, so a scheduled task never holds the lead-reading admin token. */
+  cronToken: string | null;
 }
 
 export const CONSENT_NOTICE_VERSION = '2026-10-x01';
@@ -53,5 +56,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): LiteConfig {
     limits: DEFAULT_LIMITS,
     proxyHops: intFrom(env.LITE_PROXY_HOPS, 1, 0, 5),
     adminToken: env.ADMIN_TOKEN && env.ADMIN_TOKEN.length >= 16 ? env.ADMIN_TOKEN : null,
+    // CRON_TOKEN if set, otherwise derived from the session secret, so scheduling needs no new setting.
+    cronToken:
+      env.CRON_TOKEN && env.CRON_TOKEN.length >= 16
+        ? env.CRON_TOKEN
+        : secret
+          ? hmacB64(deriveKey(secret, 'cron-expire'), 'expire')
+          : null,
   };
 }

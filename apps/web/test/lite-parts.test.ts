@@ -152,3 +152,23 @@ test('accepts the visitor name as `name` too (the form field)', () => {
   });
   assert.equal(v.fullName, 'Ada Lovelace');
 });
+
+test('the expiry route accepts the cron token, which cannot read leads', async () => {
+  const { adminGate } = await import('../lib/lite/http.ts');
+  const env = process.env;
+  const saved = { a: env.ADMIN_TOKEN, c: env.CRON_TOKEN, s: env.LITE_SECRET };
+  env.ADMIN_TOKEN = 'a'.repeat(24);
+  env.CRON_TOKEN = 'c'.repeat(24);
+  env.LITE_SECRET = 'x'.repeat(32);
+  const req = (t: string) => new Request('https://x.test/', { headers: { authorization: `Bearer ${t}` } });
+  try {
+    assert.equal(adminGate(req('c'.repeat(24)), { allowCron: true }), null);
+    assert.equal(adminGate(req('a'.repeat(24)), { allowCron: true }), null);
+    assert.equal(adminGate(req('c'.repeat(24)))?.status, 401, 'the cron token is not an admin token');
+    assert.equal(adminGate(req('wrong'.repeat(5)), { allowCron: true })?.status, 401);
+  } finally {
+    env.ADMIN_TOKEN = saved.a;
+    env.CRON_TOKEN = saved.c;
+    env.LITE_SECRET = saved.s;
+  }
+});

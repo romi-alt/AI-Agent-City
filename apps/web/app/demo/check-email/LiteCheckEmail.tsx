@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { liteStatus, type LiteStatus } from '../../../lib/api-client';
+import { liteStatusDetail, type LiteStatus } from '../../../lib/api-client';
 import { CheckIcon, MailIcon } from '../../../components/demo/DemoBits';
 import { loadDraft } from '../../../components/demo/lite-draft';
 import { explainSubmitError, submitDemoRequest } from '../../../components/demo/lite-submit';
@@ -18,8 +18,9 @@ const RESEND_COOLDOWN_S = 60;
  * Waits for the email link to be used. It asks the status endpoint gently (4 s, then slower, never while the tab
  * is hidden) and, once the address is confirmed, takes the visitor on to the welcome page.
  */
-function useRequestStatus(requestId: string | null): View {
+function useRequestStatus(requestId: string | null): { view: View; deliveryFailed: boolean } {
   const [view, setView] = useState<View>(requestId ? 'verification-sent' : 'unknown');
+  const [deliveryFailed, setDeliveryFailed] = useState(false);
   const delay = useRef(FIRST_DELAY_MS);
 
   useEffect(() => {
@@ -29,9 +30,10 @@ function useRequestStatus(requestId: string | null): View {
     const tick = async () => {
       if (document.visibilityState !== 'hidden') {
         try {
-          const status = await liteStatus(requestId);
+          const { status, deliveryFailed: failed } = await liteStatusDetail(requestId);
           if (stopped) return;
           setView(status);
+          setDeliveryFailed(failed);
           if (status !== 'verification-sent') return;
         } catch {
           // passing trouble (network, a busy server): keep waiting
@@ -42,6 +44,7 @@ function useRequestStatus(requestId: string | null): View {
     };
     delay.current = FIRST_DELAY_MS;
     setView('verification-sent');
+    setDeliveryFailed(false);
     timer = setTimeout(() => void tick(), delay.current);
     return () => {
       stopped = true;
@@ -49,7 +52,7 @@ function useRequestStatus(requestId: string | null): View {
     };
   }, [requestId]);
 
-  return view;
+  return { view, deliveryFailed };
 }
 
 function useCooldown() {
@@ -64,7 +67,7 @@ function useCooldown() {
 
 export function LiteCheckEmail({ requestId }: { requestId: string | null }) {
   const router = useRouter();
-  const view = useRequestStatus(requestId);
+  const { view, deliveryFailed } = useRequestStatus(requestId);
   const cooldown = useCooldown();
   const [sending, setSending] = useState(false);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
@@ -125,6 +128,16 @@ export function LiteCheckEmail({ requestId }: { requestId: string | null }) {
         {view === 'unknown' && 'Look for the email from AgentCity.'}
       </div>
 
+      {deliveryFailed && view === 'verification-sent' && (
+        <div className="dm-error-summary" role="alert" data-testid="check-delivery-failed">
+          <h3>We could not send the email</h3>
+          <p>
+            Our email provider did not accept the message, so no link is on its way. Press &ldquo;Send the email
+            again&rdquo; below, or check that the address is correct.
+          </p>
+        </div>
+      )}
+
       {view === 'ready' && (
         <div className="dm-actions">
           <Link className="mk-btn mk-btn-primary" href="/demo/welcome" data-testid="check-continue">
@@ -143,10 +156,14 @@ export function LiteCheckEmail({ requestId }: { requestId: string | null }) {
               type="button"
               className="mk-btn mk-btn-secondary"
               onClick={() => void resend()}
-              disabled={sending || cooldown.left > 0}
+              disabled={sending || (cooldown.left > 0 && !deliveryFailed)}
               data-testid="check-resend-button"
             >
-              {sending ? 'Sending…' : cooldown.left > 0 ? `Send again in ${cooldown.left}s` : 'Send the email again'}
+              {sending
+                ? 'Sending…'
+                : cooldown.left > 0 && !deliveryFailed
+                  ? `Send again in ${cooldown.left}s`
+                  : 'Send the email again'}
             </button>
             <Link className="dm-link" href="/demo?edit=1" data-testid="check-wrong-address">
               Wrong address? Go back

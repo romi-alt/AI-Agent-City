@@ -303,11 +303,18 @@ export async function liteRequestDemo(input: LiteDemoRequest): Promise<{ request
   return { requestId: text(out.requestId, 'request id') };
 }
 
-export async function liteStatus(requestId: string): Promise<LiteStatus> {
+/** The request's status, and whether the email provider refused to send the confirmation link. */
+export async function liteStatusDetail(requestId: string): Promise<{ status: LiteStatus; deliveryFailed: boolean }> {
   const path = `/api/lite/demo/status?request=${encodeURIComponent(requestId)}`;
-  const status = rec(await liteFetch('GET', path), 'status').status;
-  if (status === 'verification-sent' || status === 'ready' || status === 'expired') return status;
+  const b = rec(await liteFetch('GET', path), 'status');
+  const status = b.status;
+  if (status === 'verification-sent' || status === 'ready' || status === 'expired')
+    return { status, deliveryFailed: b.delivery === 'failed' };
   throw bad('status');
+}
+
+export async function liteStatus(requestId: string): Promise<LiteStatus> {
+  return (await liteStatusDetail(requestId)).status;
 }
 
 export async function liteMe(): Promise<LiteMe> {

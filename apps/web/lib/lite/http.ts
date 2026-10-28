@@ -100,13 +100,15 @@ export function redirect(path: string, setCookie?: string): Response {
   return new Response(null, { status: 303, headers });
 }
 
-/** Admin routes: 404 when ADMIN_TOKEN is unset (the route does not exist), 401 on a wrong or missing bearer. */
-export function adminGate(req: Request): Response | null {
-  const token = loadConfig().adminToken;
-  if (!token) return json({ error: { code: 'not_found', message: 'Not found.' } }, 404);
+/** Admin routes (the expiry route also takes CRON_TOKEN): 404 when no token is set (the route does not exist), 401 on a wrong or missing bearer. */
+export function adminGate(req: Request, opts: { allowCron?: boolean } = {}): Response | null {
+  const { adminToken, cronToken } = loadConfig();
+  const tokens = [adminToken, opts.allowCron ? cronToken : null].filter((t): t is string => !!t);
+  if (tokens.length === 0) return json({ error: { code: 'not_found', message: 'Not found.' } }, 404);
   const given = /^Bearer (.+)$/.exec(req.headers.get('authorization') ?? '')?.[1] ?? '';
   const a = Buffer.from(sha256Hex(given), 'hex');
-  const b = Buffer.from(sha256Hex(token), 'hex');
-  if (!timingSafeEqual(a, b)) return json({ error: { code: 'unauthorized', message: 'Unauthorized.' } }, 401);
+  // Every candidate is compared (no early exit), so timing does not reveal which token matched.
+  const ok = tokens.map(t => timingSafeEqual(a, Buffer.from(sha256Hex(t), 'hex'))).some(Boolean);
+  if (!ok) return json({ error: { code: 'unauthorized', message: 'Unauthorized.' } }, 401);
   return null;
 }

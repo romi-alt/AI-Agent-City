@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 // Ends demos past their expiry and removes stale rate-limit rows and links. Safe to call from a daily cron.
 export const POST = handler(async (req: Request) => {
-  const denied = adminGate(req);
+  const denied = adminGate(req, { allowCron: true });
   if (denied) return denied;
   const service = await getService();
   if (!service) throw demoUnavailable();

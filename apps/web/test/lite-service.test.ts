@@ -346,3 +346,32 @@ test('sign-in sends nothing to an address whose demo has expired, and refuses ba
   );
   assert.equal(await code(ctx.service.signIn({ email: 'a@b.test', formToken: 'bad' }, '3.3.3.3')), 'bad_request');
 });
+
+test('status says so when the email provider refused the confirmation link', async () => {
+  const ctx = await setup();
+  const failing: Mailer = {
+    name: 'failing',
+    async sendVerification() {
+      const err = new Error('rejected');
+      err.name = 'ResendHttp422';
+      throw err;
+    },
+  };
+  const service = createService({
+    store: ctx.store,
+    mailer: failing,
+    config: loadConfig(ENV as NodeJS.ProcessEnv),
+    now: () => ctx.clock.t,
+    log: l => ctx.logs.push(l),
+  });
+  const { token } = await service.formToken('1.1.1.1');
+  ctx.clock.t += 5000;
+  const { requestId } = await service.submit(
+    { fullName: 'Ada Lovelace', email: 'ada@acme.test', company: 'Acme', marketingConsent: false, formToken: token },
+    '1.1.1.1',
+  );
+  await service.whenIdle();
+  assert.deepEqual(await service.status(requestId, '1.1.1.1'), { status: 'verification-sent', delivery: 'failed' });
+  assert.ok(ctx.logs.some(l => l.includes('verify link not sent (ResendHttp422)')));
+  assert.ok(!ctx.logs.some(l => l.includes('ada@acme.test')), 'no address in the logs');
+});

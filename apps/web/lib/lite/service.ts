@@ -81,6 +81,8 @@ export function createService(deps: ServiceDeps) {
   const sessionKey = secret ? deriveKey(secret, 'session') : null;
   /** Sending runs after the response, so a known and a new address take the same time. */
   const pending = new Set<Promise<void>>();
+  /** Requests whose confirmation email the provider refused, so the check-email page can say so (kept for an hour). */
+  const sendFailed = new Map<string, number>();
 
   const available = () => !!(secret && mailer);
 
@@ -111,7 +113,10 @@ export function createService(deps: ServiceDeps) {
     const p = mailer!
       .sendVerification({ email: lead.email, firstName }, link, kind)
       .then(() => log(`lite: request ${requestId} (lead ${lead.id}): ${kind} link sent via ${mailer!.name}`))
-      .catch(e => log(`lite: request ${requestId} (lead ${lead.id}): ${kind} link not sent (${(e as Error).name})`))
+      .catch(e => {
+        if (kind === 'verify') sendFailed.set(requestId, now());
+        log(`lite: request ${requestId} (lead ${lead.id}): ${kind} link not sent (${(e as Error).name})`);
+      })
       .finally(() => pending.delete(p));
     pending.add(p);
   }
@@ -281,13 +286,17 @@ export function createService(deps: ServiceDeps) {
     return lead.verifiedAt ? 'ready' : 'verification-sent';
   }
 
-  async function status(requestId: string, ip: string): Promise<{ status: DemoStatus }> {
+  async function status(requestId: string, ip: string): Promise<{ status: DemoStatus; delivery?: 'failed' }> {
     if (!secret) throw demoUnavailable();
     await limit('public', ip, config.limits.publicPerMinute, 60, true);
     if (!isUuid(requestId)) throw new LiteError('not_found', 'That demo request was not found.');
     const req = await store.findRequest(requestId);
     if (!req) throw new LiteError('not_found', 'That demo request was not found.');
-    return { status: statusOf(req, await store.findLead(req.leadId)) };
+    const current = statusOf(req, await store.findLead(req.leadId));
+    for (const [id, at] of sendFailed) if (now() - at > 3_600_000) sendFailed.delete(id);
+    return sendFailed.has(requestId) && current === 'verification-sent'
+      ? { status: current, delivery: 'failed' }
+      : { status: current };
   }
 
   /** Spends the one-time link. Null for an unknown, used or expired link, or a demo that has ended. */
