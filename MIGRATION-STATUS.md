@@ -124,6 +124,8 @@ Prompt: `planning/agentcity-migration/prompts/M03-oidc-access-and-session-cutove
 
 ## X05 Public preview and lite demo (owner-directed)
 
+Full documentation of the live build: `planning/agentcity-migration/x05-live-build/LIVE-BUILD.md`.
+
 ### X05.1 What was built
 | Area | State |
 |---|---|
