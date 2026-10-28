@@ -146,9 +146,12 @@ export class PeopleSim {
   }
 
   private buildGraph(layout: CityLayout) {
-    const { roadsX, roadsZ } = layout.streets;
-    const xs = [...roadsX].sort((a, b) => a - b);
-    const zs = [...roadsZ].sort((a, b) => a - b);
+    // The same junctions as the traffic network (which may include A1's ring road).
+    const xs = [...new Set(this.net.junctions.map(j => j.x))].sort((a, b) => a - b);
+    const zs = [...new Set(this.net.junctions.map(j => j.z))].sort((a, b) => a - b);
+    const ring = this.net.extent;
+    // Pedestrians stay inside the district: no corners beyond the outermost road.
+    const inside = (c: { x: number; z: number }) => Math.abs(c.x) < ring && Math.abs(c.z) < ring;
     const sx = [1, -1, -1, 1];
     const sz = [1, 1, -1, -1];
     for (const J of this.net.junctions)
@@ -157,6 +160,7 @@ export class PeopleSim {
     const add = (a: number, b: number, kind: Edge['kind'], cw = -1) => {
       const A = this.corners[a]!;
       const B = this.corners[b]!;
+      if (!inside(A) || !inside(B)) return null;
       const e: Edge = { id: this.edges.length, a, b, kind, cw, length: Math.hypot(B.x - A.x, B.z - A.z), doors: [] };
       this.edges.push(e);
       A.edges.push(e.id);
@@ -280,7 +284,7 @@ export class PeopleSim {
     let left = n;
     let k = 0;
     // About a third of the people out and about are in the plaza, talking in small groups.
-    const plaza = plazaSpots();
+    const plaza = plazaSpots(layout);
     let plazaLeft = Math.round(n * 0.35);
     for (let round = 0; plazaLeft > 0 && plaza.groups.length > 0 && round < 2; round++) {
       for (const g of plaza.groups) {

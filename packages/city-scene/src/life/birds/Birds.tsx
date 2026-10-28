@@ -18,7 +18,10 @@ interface Props {
   still: boolean;
 }
 
-const PIGEONS = ['#8d939b', '#7a8088', '#9ea3a8', '#5f646b', '#b4b0a8', '#6d6a66', '#83878c'];
+/** Tints over the painted plumage: most birds grey, a few browner or darker. */
+const PIGEONS = ['#ffffff', '#f2f2f0', '#e6e7e9', '#d9dbde', '#efe4d6', '#b9bdc3', '#ffffff'];
+/** Model-to-world scale: a 0.66-unit model wingspan becomes about 0.26 units (a real 0.65 m pigeon). */
+const BIRD_SCALE = 0.4;
 /** Simulated seconds run before the first frame, so flocks are spread over their routines. */
 const WARM_UP = 30;
 
@@ -88,7 +91,10 @@ export function Birds({ layout, clock, count, still }: Props) {
           k++;
           return;
         }
-        mesh.setMatrixAt(k, tmp.placer.set(s.x, s.y + 0.03 * s.scale, s.z, s.yaw, s.scale * 1.1, s.bank, s.pitch));
+        mesh.setMatrixAt(
+          k,
+          tmp.placer.set(s.x, s.y + 0.012 * s.scale, s.z, s.yaw, s.scale * BIRD_SCALE, s.bank, s.pitch),
+        );
         const phase = attr.getX(k) + (still ? 0 : clock.dt * s.rate * Math.PI * 2);
         attr.setXYZW(k, phase % (Math.PI * 2000), still ? 0 : s.flap, 0, s.perched);
         k++;

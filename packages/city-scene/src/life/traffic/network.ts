@@ -39,7 +39,7 @@ export interface Link {
   toJ: number;
   /** Junction at the start (−1: the road enters the city here). */
   fromJ: number;
-  /** Connectors leaving this link, indexed like MOVES (empty for an exit link). */
+  /** Connectors leaving this link, indexed like MOVES (−1 where that movement does not exist, e.g. at a corner). */
   out: number[];
 }
 
@@ -94,6 +94,8 @@ export interface Network {
   /** conflicts[a][b]: connectors with local indices a and b may not be used at once. */
   conflicts: boolean[][];
   extent: number;
+  /** True when a ring road closes the grid (no entries or exits). */
+  closed: boolean;
 }
 
 const SAMPLES = 24;
@@ -159,6 +161,13 @@ export function buildNetwork(streets: CityLayout['streets']): Network {
   const incoming = junctions.map(() => [-1, -1, -1, -1]);
   const outgoing = junctions.map(() => [-1, -1, -1, -1]);
   const sources: number[] = [];
+  // A district closed by a ring road (A1's parkway at the extent): lanes start and end at the ring junctions, so
+  // traffic loops inside the district and never drives off into the void.
+  const closed =
+    roadsX[0] === -extent &&
+    roadsX[roadsX.length - 1] === extent &&
+    roadsZ[0] === -extent &&
+    roadsZ[roadsZ.length - 1] === extent;
 
   const addLane = (heading: number, laneAt: number, stops: { at: number; j: number }[]) => {
     // stops are junction centres along the travel axis, in travel order.
@@ -167,6 +176,12 @@ export function buildNetwork(streets: CityLayout['streets']): Network {
     let fromJ = -1;
     for (let k = 0; k <= stops.length; k++) {
       const stop = stops[k];
+      if (closed && k === 0) {
+        from = stop!.at + dir * STOP_FRONT;
+        fromJ = stop!.j;
+        continue;
+      }
+      if (closed && !stop) break;
       const end = stop ? stop.at - dir * STOP_FRONT : dir * extent;
       const link: Link = {
         kind: 'link',
@@ -177,7 +192,7 @@ export function buildNetwork(streets: CityLayout['streets']): Network {
         length: Math.abs(end - from),
         toJ: stop ? stop.j : -1,
         fromJ,
-        out: [],
+        out: [-1, -1, -1],
       };
       links.push(link);
       if (fromJ < 0) sources.push(link.id);
@@ -210,6 +225,7 @@ export function buildNetwork(streets: CityLayout['streets']): Network {
         const move = MOVES[m]!;
         const s = connectorShape(h, move);
         const to = outgoing[J.id]![s.out]!;
+        if (from < 0 || to < 0) continue;
         const p0: [number, number] = [J.x + s.p0[0], J.z + s.p0[1]];
         const c: [number, number] = [J.x + s.c[0], J.z + s.c[1]];
         const p2: [number, number] = [J.x + s.p2[0], J.z + s.p2[1]];
@@ -244,7 +260,7 @@ export function buildNetwork(streets: CityLayout['streets']): Network {
   for (const c of conns) {
     c.id = pieces.length;
     pieces.push(c);
-    links[c.from]!.out.push(c.id);
+    links[c.from]!.out[MOVES.indexOf(c.move)] = c.id;
   }
   const crosswalks: Crosswalk[] = [];
   for (const J of junctions)
@@ -259,7 +275,7 @@ export function buildNetwork(streets: CityLayout['streets']): Network {
         walkAxis: leg % 2 === 0 ? 'z' : 'x',
       });
     }
-  return { junctions, links, conns, pieces, crosswalks, sources, conflicts: conflictTable(), extent };
+  return { junctions, links, conns, pieces, crosswalks, sources, conflicts: conflictTable(), extent, closed };
 }
 
 /** Position and heading at distance `s` along a piece. */

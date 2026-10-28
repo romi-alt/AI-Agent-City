@@ -26,18 +26,37 @@ function wing(side: 1 | -1, inner: boolean) {
   return g;
 }
 
-/** A small bird facing +x, about 0.3 units long and 0.66 units across the wings. */
+/**
+ * A pigeon facing +x, about 0.3 units long and 0.66 across the wings in model units (drawn at about 0.4, so a real
+ * 0.65 m wingspan). Plumage is painted per vertex: slate head, grey back and wings with dark wing tips and tail, a
+ * pale belly and pale wing undersides. The per-instance colour only tints it.
+ */
 export function birdGeometry() {
   const b = new PartBuilder();
-  b.add(new THREE.SphereGeometry(0.06, 6, 4), { at: [0, 0, 0], scale: [2.2, 0.9, 0.9], color: '#ffffff' });
-  b.add(new THREE.SphereGeometry(0.04, 6, 4), { at: [0.13, 0.03, 0], color: '#ffffff' });
-  b.add(new THREE.ConeGeometry(0.012, 0.04, 4), { at: [0.18, 0.025, 0], rot: [0, 0, -Math.PI / 2], color: '#e0a040' });
-  b.add(new THREE.BoxGeometry(0.1, 0.01, 0.07), { at: [-0.15, 0.0, 0], color: '#ffffff' });
+  b.add(new THREE.SphereGeometry(0.06, 8, 6), { at: [0, 0, 0], scale: [2.2, 0.9, 0.9], color: '#8d939a' });
+  b.add(new THREE.SphereGeometry(0.04, 8, 6), { at: [0.13, 0.03, 0], color: '#5a6068', part: 3 });
+  b.add(new THREE.ConeGeometry(0.012, 0.04, 4), { at: [0.18, 0.025, 0], rot: [0, 0, -Math.PI / 2], color: '#2b2b2b' });
+  b.add(new THREE.BoxGeometry(0.1, 0.01, 0.07), { at: [-0.15, 0.0, 0], color: '#43474d' });
   for (const side of [1, -1] as const) {
-    b.add(wing(side, true), { part: WING.inner, color: '#ffffff' });
-    b.add(wing(side, false), { part: WING.outer, color: '#ffffff' });
+    b.add(wing(side, true), { part: WING.inner, color: '#979ca3' });
+    b.add(wing(side, false), { part: WING.outer, color: '#3d4147' });
   }
-  return b.build();
+  const g = b.build();
+  // Pale belly and wing undersides; keep the part tag 3 (head) as body for the flap shader.
+  const pos = g.getAttribute('position');
+  const nor = g.getAttribute('normal');
+  const col = g.getAttribute('color');
+  const part = g.getAttribute('aPart');
+  const pale = new THREE.Color('#dedcd7');
+  for (let i = 0; i < pos.count; i++) {
+    const p = part.getX(i);
+    if (p === 3) part.setX(i, WING.body);
+    const underside = nor.getY(i) < -0.25;
+    if ((p === WING.body && underside && pos.getY(i) < 0.0) || (p === WING.inner && underside))
+      col.setXYZ(i, pale.r, pale.g, pale.b);
+    if (p === WING.outer && underside) col.setXYZ(i, 0.55, 0.57, 0.6);
+  }
+  return g;
 }
 
 export const BIRD_VERTEX_HEAD = /* glsl */ `

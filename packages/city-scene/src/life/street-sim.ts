@@ -1,3 +1,4 @@
+import { districtPlan } from '../streets/grid.ts';
 import type { CityLayout } from '../types.ts';
 import { PeopleSim } from './people/sim.ts';
 import { TrafficSim } from './traffic/sim.ts';
@@ -11,7 +12,7 @@ export class StreetSim {
 
   constructor(layout: CityLayout, opts: { vehicles: number; pedestrians: number; roofWorkers: number; seed?: number }) {
     const seed = opts.seed ?? 1;
-    this.traffic = new TrafficSim(layout.streets, { count: opts.vehicles, seed: seed * 7 + 1 });
+    this.traffic = new TrafficSim(districtStreets(layout), { count: opts.vehicles, seed: seed * 7 + 1 });
     this.people = new PeopleSim(this.traffic.net, layout, this.traffic.pedsOnCrosswalk, this.traffic.carsOnCrosswalk, {
       count: opts.pedestrians,
       roofWorkers: opts.roofWorkers,
@@ -35,4 +36,13 @@ export class StreetSim {
   warmUp(seconds: number, t0 = 0) {
     for (let t = 0; t < seconds; t += 1 / 15) this.step(1 / 15, t0 - seconds + t);
   }
+}
+
+/**
+ * The roads traffic drives on: the layout's grid plus A1's parkway ring at the district edge (read-only from
+ * streets/grid.ts), which closes the network so vehicles circulate inside the district.
+ */
+export function districtStreets(layout: CityLayout): CityLayout['streets'] {
+  const d = districtPlan(layout.streets);
+  return { roadsX: d.xs, roadsZ: d.zs, extent: d.ring };
 }
