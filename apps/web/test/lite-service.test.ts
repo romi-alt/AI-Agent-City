@@ -301,3 +301,48 @@ test('logs never contain email addresses or names', async () => {
   assert.ok(all.length > 0);
   assert.equal(/ada|lovelace|acme|@/i.test(all), false);
 });
+
+test('sign-in: a verified visitor gets a fresh link into the same demo; unknown addresses get the same answer and no mail', async () => {
+  const ctx = await setup();
+  await ctx.service.submit(await body(ctx), '1.1.1.1');
+  await ctx.service.whenIdle();
+  const first = await ctx.service.verify(tokenOf(ctx.sent[0]!.link), '1.1.1.1');
+  assert.ok(first);
+  const before = await ctx.service.me(first.cookie);
+
+  const ask = async (email: string) => {
+    const { token } = await ctx.service.formToken('2.2.2.2');
+    ctx.clock.t += 5000;
+    return ctx.service.signIn({ email, formToken: token }, '2.2.2.2');
+  };
+  assert.deepEqual(await ask('ada@acme.test'), { status: 'sent' });
+  assert.deepEqual(await ask('nobody@acme.test'), { status: 'sent' });
+  await ctx.service.whenIdle();
+  assert.equal(ctx.sent.length, 2, 'one verification and one sign-in; nothing for the unknown address');
+  assert.equal(ctx.sent[1]!.email, 'ada@acme.test');
+
+  const again = await ctx.service.verify(tokenOf(ctx.sent[1]!.link), '1.1.1.1');
+  assert.ok(again);
+  assert.deepEqual(await ctx.service.me(again.cookie), before, 'the same demo, not a new one');
+  assert.equal(await ctx.service.verify(tokenOf(ctx.sent[1]!.link), '1.1.1.1'), null, 'single use');
+});
+
+test('sign-in sends nothing to an address whose demo has expired, and refuses bad input', async () => {
+  const ctx = await setup();
+  await ctx.service.submit(await body(ctx), '1.1.1.1');
+  await ctx.service.whenIdle();
+  await ctx.service.verify(tokenOf(ctx.sent[0]!.link), '1.1.1.1');
+  ctx.clock.t += 8 * 86_400_000;
+  const { token } = await ctx.service.formToken('3.3.3.3');
+  ctx.clock.t += 5000;
+  assert.deepEqual(await ctx.service.signIn({ email: 'ada@acme.test', formToken: token }, '3.3.3.3'), {
+    status: 'sent',
+  });
+  await ctx.service.whenIdle();
+  assert.equal(ctx.sent.length, 1);
+  assert.equal(
+    await code(ctx.service.signIn({ email: 'not-an-email', formToken: token }, '3.3.3.3')),
+    'validation_failed',
+  );
+  assert.equal(await code(ctx.service.signIn({ email: 'a@b.test', formToken: 'bad' }, '3.3.3.3')), 'bad_request');
+});

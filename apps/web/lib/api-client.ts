@@ -362,6 +362,11 @@ export async function liteOffice(): Promise<LiteOffice> {
   };
 }
 
+/** Asks for a fresh one-time link. The answer is the same whether or not the address has a demo. */
+export async function liteSignIn(input: { email: string; formToken: string; website2?: string }): Promise<void> {
+  await liteFetch('POST', '/api/lite/demo/signin', input);
+}
+
 export async function liteSignOut(): Promise<void> {
   await liteFetch('POST', '/api/lite/demo/signout', {});
 }

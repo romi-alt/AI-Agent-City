@@ -283,6 +283,9 @@ export function LiteDemoForm({ headingId }: { headingId?: string }) {
         We use your details to send your confirmation link, set up your demo and follow up about it. The demo expires
         automatically.
       </p>
+      <p className="dm-privacy">
+        Already have a demo office? <a href="/demo/signin">Sign in with your email</a>.
+      </p>
     </form>
   );
 }

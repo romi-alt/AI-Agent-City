@@ -12,8 +12,8 @@ export function LiteVerified({ error }: { error: string | undefined }) {
       title={expired ? 'This link has expired or was already used' : 'We could not open your demo office'}
       actions={
         <>
-          <Link className="mk-btn mk-btn-primary" href="/demo?edit=1" data-testid="verified-new-link">
-            Get a new link
+          <Link className="mk-btn mk-btn-primary" href="/demo/signin" data-testid="verified-new-link">
+            Email me a sign-in link
           </Link>
           <a className="dm-link" href={talkToUsHref('Demo link problem')}>
             Talk to us

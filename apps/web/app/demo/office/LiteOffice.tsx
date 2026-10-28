@@ -107,9 +107,9 @@ function Problem({ state, retry }: { state: Exclude<State, { kind: 'loading' | '
           )}
           <Link
             className={`mk-btn ${state.kind === 'error' ? 'mk-btn-secondary' : 'mk-btn-primary'}`}
-            href={expired ? '/#get-demo' : '/demo?edit=1'}
+            href={expired ? '/#get-demo' : '/demo/signin'}
           >
-            {expired ? 'Request a new demo office' : 'Get a new link'}
+            {expired ? 'Request a new demo office' : 'Email me a sign-in link'}
           </Link>
         </>
       }

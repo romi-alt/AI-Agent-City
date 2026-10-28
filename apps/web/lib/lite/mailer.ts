@@ -1,17 +1,22 @@
 // The one email this backend sends: the address-confirmation link, to the person who just typed the address into
 // the demo form. Nothing else is ever sent, and nothing is sent to anyone a visitor's demo "contacts".
 
+/** `verify` confirms a new address; `signin` lets a verified visitor back into the demo they already have. */
+export type MailKind = 'verify' | 'signin';
+
 export interface Mailer {
   readonly name: string;
-  sendVerification(to: { email: string; firstName: string }, link: string): Promise<void>;
+  sendVerification(to: { email: string; firstName: string }, link: string, kind?: MailKind): Promise<void>;
 }
 
 export const VERIFICATION_SUBJECT = 'Confirm your email to open your AgentCity demo office';
+export const SIGNIN_SUBJECT = 'Your link back into your AgentCity demo office';
 
 const esc = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-export function verificationText(firstName: string, link: string): string {
+export function verificationText(firstName: string, link: string, kind: MailKind = 'verify'): string {
+  if (kind === 'signin') return signinText(firstName, link);
   return [
     `Hi ${firstName},`,
     '',
@@ -28,7 +33,8 @@ export function verificationText(firstName: string, link: string): string {
   ].join('\n');
 }
 
-export function verificationHtml(firstName: string, link: string): string {
+export function verificationHtml(firstName: string, link: string, kind: MailKind = 'verify'): string {
+  if (kind === 'signin') return signinHtml(firstName, link);
   const url = esc(link);
   return `<!doctype html><html><body style="font-family:system-ui,sans-serif;line-height:1.5;color:#1a1a1a">
 <p>Hi ${esc(firstName)},</p>
@@ -41,20 +47,47 @@ export function verificationHtml(firstName: string, link: string): string {
 </body></html>`;
 }
 
+function signinText(firstName: string, link: string): string {
+  return [
+    `Hi ${firstName},`,
+    '',
+    'You asked to get back into your AgentCity demo office. Use this link to open it:',
+    '',
+    link,
+    '',
+    'The link works once and expires in 24 hours. It opens the demo you already have, until that demo ends.',
+    'There is no password to set, and we will never ask you for one.',
+    '',
+    'If you did not ask for this, ignore this email and nothing happens.',
+  ].join('\n');
+}
+
+function signinHtml(firstName: string, link: string): string {
+  const url = esc(link);
+  return `<!doctype html><html><body style="font-family:system-ui,sans-serif;line-height:1.5;color:#1a1a1a">
+<p>Hi ${esc(firstName)},</p>
+<p>You asked to get back into your AgentCity demo office. Use this link to open it:</p>
+<p><a href="${url}" style="display:inline-block;padding:12px 20px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:6px">Open my demo office</a></p>
+<p style="font-size:13px;color:#555">If the button does not work, paste this address into your browser:<br>${url}</p>
+<p>The link works once and expires in 24 hours. It opens the demo you already have, until that demo ends. There is no password to set, and we will never ask you for one.</p>
+<p style="font-size:13px;color:#555">If you did not ask for this, ignore this email and nothing happens.</p>
+</body></html>`;
+}
+
 /** Resend over HTTPS. Failures throw an Error whose name carries the HTTP status, never the address or the body. */
 export function createResendMailer(apiKey: string, from: string, fetchFn: typeof fetch = fetch): Mailer {
   return {
     name: 'resend',
-    async sendVerification(to, link) {
+    async sendVerification(to, link, kind = 'verify') {
       const res = await fetchFn('https://api.resend.com/emails', {
         method: 'POST',
         headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
         body: JSON.stringify({
           from,
           to: [to.email],
-          subject: VERIFICATION_SUBJECT,
-          text: verificationText(to.firstName, link),
-          html: verificationHtml(to.firstName, link),
+          subject: kind === 'signin' ? SIGNIN_SUBJECT : VERIFICATION_SUBJECT,
+          text: verificationText(to.firstName, link, kind),
+          html: verificationHtml(to.firstName, link, kind),
         }),
       });
       if (!res.ok) {
@@ -70,8 +103,8 @@ export function createResendMailer(apiKey: string, from: string, fetchFn: typeof
 export function createConsoleMailer(print: (line: string) => void = line => console.log(line)): Mailer {
   return {
     name: 'console',
-    async sendVerification(_to, link) {
-      print(`[lite-mailer] verification link: ${link}`);
+    async sendVerification(_to, link, kind = 'verify') {
+      print(`[lite-mailer] ${kind === 'signin' ? 'sign-in' : 'verification'} link: ${link}`);
     },
   };
 }

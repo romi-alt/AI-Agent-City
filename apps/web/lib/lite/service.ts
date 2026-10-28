@@ -3,7 +3,7 @@ import type { LiteConfig } from './config.ts';
 import { deriveKey, hmacB64, newToken, sha256Hex } from './crypto.ts';
 import { demoUnavailable, LiteError, refused } from './errors.ts';
 import { checkFormToken, issueFormToken } from './form-token.ts';
-import type { Mailer } from './mailer.ts';
+import type { MailKind, Mailer } from './mailer.ts';
 import { buildOffice, type SimOffice } from './office.ts';
 import { readSession, signSession } from './session.ts';
 import type { DemoRequestRow, Lead, LeadStatus, Store } from './store.ts';
@@ -106,12 +106,12 @@ export function createService(deps: ServiceDeps) {
     return { token: issueFormToken(formKey!, now()) };
   }
 
-  function sendLater(lead: Lead, requestId: string, firstName: string, token: string) {
+  function sendLater(lead: Lead, requestId: string, firstName: string, token: string, kind: MailKind = 'verify') {
     const link = `${config.publicOrigin}/api/lite/demo/verify?t=${encodeURIComponent(token)}`;
     const p = mailer!
-      .sendVerification({ email: lead.email, firstName }, link)
-      .then(() => log(`lite: request ${requestId} (lead ${lead.id}): verification sent via ${mailer!.name}`))
-      .catch(e => log(`lite: request ${requestId} (lead ${lead.id}): verification not sent (${(e as Error).name})`))
+      .sendVerification({ email: lead.email, firstName }, link, kind)
+      .then(() => log(`lite: request ${requestId} (lead ${lead.id}): ${kind} link sent via ${mailer!.name}`))
+      .catch(e => log(`lite: request ${requestId} (lead ${lead.id}): ${kind} link not sent (${(e as Error).name})`))
       .finally(() => pending.delete(p));
     pending.add(p);
   }
@@ -233,6 +233,46 @@ export function createService(deps: ServiceDeps) {
     }
   }
 
+  /**
+   * Returning visitors: sends a fresh one-time link to an address that already has an active, verified demo. The
+   * answer is the same whether or not the address has one, so this cannot be used to find out who signed up.
+   */
+  async function signIn(body: unknown, ip: string): Promise<{ status: 'sent' }> {
+    if (!available()) throw demoUnavailable();
+    const { limits } = config;
+    await limit('ip10', ip, limits.ipPerTenMinutes, 600, false);
+    await limit('ipday', ip, limits.ipPerDay, 86_400, false);
+    const src = typeof body === 'object' && body !== null ? (body as Record<string, unknown>) : {};
+    const email = typeof src.email === 'string' ? src.email.trim().toLowerCase() : '';
+    if (!email || email.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      throw new LiteError('validation_failed', 'Enter a valid email address.', {
+        fields: { email: 'Enter a valid email address.' },
+      });
+    if (typeof src.website2 === 'string' && src.website2) throw refused(); // honeypot
+    const token = typeof src.formToken === 'string' ? src.formToken : '';
+    if (checkFormToken(formKey!, token, config.formMinSeconds, config.formMaxSeconds, now()) !== 'ok') throw refused();
+    await limit('signin-email', email, limits.emailPerHour, 3600, false);
+    try {
+      const lead = await store.findLeadByEmail(email);
+      const active = !!lead && !!lead.verifiedAt && lead.status !== 'expired' && lead.expiresAt.getTime() > now();
+      if (lead && active) {
+        const { token: link, hash } = newToken();
+        await store.replaceLink({
+          tokenHash: hash,
+          leadId: lead.id,
+          generation: lead.generation,
+          expiresAt: new Date(now() + config.linkTtlSeconds * 1000),
+        });
+        sendLater(lead, randomUUID(), firstNameOf(lead.fullName), link, 'signin');
+      }
+    } catch (e) {
+      if (e instanceof LiteError) throw e;
+      log(`lite: sign-in failed (${(e as Error).name})`);
+      throw demoUnavailable();
+    }
+    return { status: 'sent' };
+  }
+
   function statusOf(req: DemoRequestRow, lead: Lead | null): DemoStatus {
     if (req.shadow)
       return req.shadowExpiresAt && req.shadowExpiresAt.getTime() <= now() ? 'expired' : 'verification-sent';
@@ -343,6 +383,7 @@ export function createService(deps: ServiceDeps) {
     available,
     formToken,
     submit,
+    signIn,
     status,
     verify,
     me,

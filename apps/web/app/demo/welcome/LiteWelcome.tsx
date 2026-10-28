@@ -114,8 +114,8 @@ function SignedOut() {
       title="Open your confirmation link first"
       actions={
         <>
-          <Link className="mk-btn mk-btn-primary" href="/demo?edit=1">
-            Get a new link
+          <Link className="mk-btn mk-btn-primary" href="/demo/signin">
+            Email me a sign-in link
           </Link>
           <Link className="dm-link" href="/city">
             Explore the city

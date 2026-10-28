@@ -1,5 +1,5 @@
 import { HeaderScroll } from './HeaderScroll';
-import { PUBLIC_PREVIEW } from '../../lib/preview';
+import { LITE_DEMO, PUBLIC_PREVIEW } from '../../lib/preview';
 import { CtaLink, Mark } from './Primitives';
 
 const NAV = [
@@ -33,6 +33,11 @@ export function SiteHeader() {
         <div className="mk-header-actions">
           {!PUBLIC_PREVIEW && (
             <a className="mk-header-link" href="/signin">
+              Sign in
+            </a>
+          )}
+          {LITE_DEMO && (
+            <a className="mk-header-link" href="/demo/signin" data-testid="header-signin">
               Sign in
             </a>
           )}

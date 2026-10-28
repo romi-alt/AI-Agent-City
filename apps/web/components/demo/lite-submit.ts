@@ -1,5 +1,5 @@
 // Sends the demo request to the lite API from validated form values. Shared by the form and by "send it again".
-import { liteFormToken, liteRequestDemo, LiteError } from '../../lib/api-client';
+import { liteFormToken, liteRequestDemo, liteSignIn, LiteError } from '../../lib/api-client';
 import { readAttribution } from './demo-api';
 import { normaliseDemoForm, type DemoFormValues } from './demo-validation';
 
@@ -47,6 +47,13 @@ export async function submitDemoRequest(values: DemoFormValues, honeypot = ''): 
     ...(Object.keys(utm).length > 0 ? { attribution: utm } : {}),
   });
   return requestId;
+}
+
+/** Asks for a fresh sign-in link for a visitor who already has a demo office. */
+export async function requestSignInLink(email: string, honeypot = ''): Promise<void> {
+  const formToken = await takeFormToken();
+  prefetchFormToken();
+  await liteSignIn({ email: email.trim(), formToken, website2: honeypot });
 }
 
 /** The sentence shown for a refused or failed request. */
