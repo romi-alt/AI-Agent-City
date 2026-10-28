@@ -1,5 +1,5 @@
 import { SectionHead } from './Primitives';
-import { LITE_DEMO } from '../../lib/preview';
+import { CONTACT_EMAIL, LITE_DEMO } from '../../lib/preview';
 
 export function Faq({ ttlDays }: { ttlDays: number }) {
   const items = [
@@ -14,7 +14,7 @@ export function Faq({ ttlDays }: { ttlDays: number }) {
     ['Will an agent contact my customers?', 'No. Demo agents cannot send messages or contact anyone.'],
     [
       'Can I connect my CRM or business accounts?',
-      'The demo is a sample environment. Live connections depend on the integrations currently available. Tell us which tools you use so we can confirm what is supported.',
+      `The demo is a sample environment. Live connections depend on the integrations currently available. Tell us which tools you use so we can confirm what is supported: write to ${CONTACT_EMAIL}.`,
     ],
     [
       'Can agents publish content or book appointments?',
@@ -28,11 +28,11 @@ export function Faq({ ttlDays }: { ttlDays: number }) {
     ],
     [
       'What happens after the demo?',
-      'Use the demo to identify the workflows you would like to support. Contact the team through the existing inquiry process to discuss available capabilities and next steps.',
+      `Use the demo to identify the workflows you would like to support. Write to ${CONTACT_EMAIL} to discuss available capabilities and next steps.`,
     ],
     [
       'What does a live setup cost?',
-      'The demo is free. Request current pricing for the capabilities and scope you need.',
+      `The demo is free. Write to ${CONTACT_EMAIL} to request current pricing for the capabilities and scope you need.`,
     ],
     [
       'Why don’t I need a password?',

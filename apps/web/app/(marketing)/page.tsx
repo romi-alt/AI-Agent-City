@@ -7,6 +7,7 @@ import { HowItWorks } from '../../components/marketing/HowItWorks';
 import { Product } from '../../components/marketing/Product';
 import { Security } from '../../components/marketing/Security';
 import { SiteFooter } from '../../components/marketing/SiteFooter';
+import { CONTACT_EMAIL } from '../../lib/preview';
 
 // Owner: workstream B. The public landing page: static, rendered at build time.
 
@@ -42,7 +43,7 @@ function demoDays(): number {
 
 export default function LandingPage() {
   const ttlDays = demoDays();
-  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || undefined;
+  const contactEmail = CONTACT_EMAIL;
   return (
     <>
       <main id="main" className="mk-main" tabIndex={-1}>
