@@ -1,5 +1,5 @@
 import { CURB_H } from '../streets/grid.ts';
-import { FLOOR_HEIGHT, type LayoutBuilding } from '../types.ts';
+import { type CityLayout, FLOOR_HEIGHT, type LayoutBuilding } from '../types.ts';
 import type { FacadeStyle, Mass } from './facade.ts';
 import type { Part } from './parts.ts';
 
@@ -37,6 +37,8 @@ export interface BuildingDesign {
   top: number;
   /** Height of the roof of the last floor. */
   roof: number;
+  /** Side of the main entrance. */
+  entrance: '+x' | '-x' | '+z' | '-z';
 }
 
 const FH = FLOOR_HEIGHT;
@@ -66,7 +68,16 @@ const DEALER_STYLES: FacadeStyle[] = [
 
 export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: number): BuildingDesign {
   const n = b.floors.length;
-  const d: BuildingDesign = { key: b.key, masses: [], parts: [], signs: [], trees: [], top: at(n), roof: at(n) };
+  const d: BuildingDesign = {
+    key: b.key,
+    masses: [],
+    parts: [],
+    signs: [],
+    trees: [],
+    top: at(n),
+    roof: at(n),
+    entrance: '+z',
+  };
   const base = { seed, lit: 0.32, baseY: BUILDING_BASE_Y, ground: 1 };
   const mass = (m: Omit<Mass, 'seed' | 'lit' | 'baseY' | 'ground'> & Partial<Mass>) =>
     d.masses.push({ ...base, ...m, x: b.x + m.x, z: b.z + m.z });
@@ -390,4 +401,13 @@ export function designBuilding(b: LayoutBuilding, kindIndex: number, seed: numbe
   });
   d.top = at(n) + 1.6;
   return d;
+}
+
+/** Every layout building with its design (kind index counts buildings of the same kind, for variants). */
+export function designAll(layout: CityLayout): { building: LayoutBuilding; design: BuildingDesign }[] {
+  const count: Record<string, number> = {};
+  return layout.buildings.map((b, i) => {
+    const k = (count[b.kind] = (count[b.kind] ?? -1) + 1);
+    return { building: b, design: designBuilding(b, k, 101 + i * 37) };
+  });
 }
