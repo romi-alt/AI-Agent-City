@@ -21,9 +21,18 @@ import { Clouds } from './Clouds.tsx';
 import { DebugParams } from './DebugParams.tsx';
 import { envRuntime } from './palette.ts';
 import { PostFX } from './PostFX.tsx';
-import { presetFor, startTransition, stepTransition, sunVector, type Transition, transitionDone } from './presets.ts';
+import {
+  presetFor,
+  type Rgb,
+  startTransition,
+  stepTransition,
+  sunVector,
+  type Transition,
+  transitionDone,
+} from './presets.ts';
 import { Rain } from './Rain.tsx';
 import { createSkyMaterial, createSkyUniforms } from './sky.ts';
+import { invAcesFilmic } from './tonemap.ts';
 
 /** Half-size of the sun's shadow map: the district and its parkway, so shadows stay crisp. */
 const SHADOW_HALF = 82;
@@ -54,7 +63,8 @@ export function Environment() {
   const skyUniforms = useMemo(() => createSkyUniforms(), []);
   const { sky, envScene, envSkyGround } = useMemo(() => {
     const sky = new Mesh(new SphereGeometry(1500, 48, 24), createSkyMaterial(skyUniforms));
-    sky.renderOrder = -10;
+    // After the opaque scene (the dome is pinned to the far plane), so it is only shaded where the sky shows.
+    sky.renderOrder = 1000;
     sky.frustumCulled = false;
     // The reflection sky shares the uniforms but has its own darker "ground" below the horizon.
     const envUniforms = { ...skyUniforms, uGround: { value: new Color() } };
@@ -72,7 +82,7 @@ export function Environment() {
     sun.shadow.camera.far = 800;
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = 0.12;
-    return { hemi, sun, fog: new Fog('#d6ecfa', 110, 330) };
+    return { hemi, sun, fog: new Fog('#d6ecfa', 95, 240) };
   }, []);
 
   useEffect(() => {
@@ -119,6 +129,8 @@ export function Environment() {
     }
     const s = rt.state;
     if (!st.paused) u.uTime.value += dt;
+    // The clouds' own clock: it stops with pause and with reduced motion (the clouds freeze where they are).
+    if (!st.paused && !st.reducedMotion) u.uCloudT.value += dt;
     u.uMotion.value = st.reducedMotion ? 0 : 1;
     u.uNight.value = s.nightFactor;
     u.uWet.value = s.wetness;
@@ -156,8 +168,11 @@ export function Environment() {
     fog.far = s.fogFar + lift * 1.15;
     u.uFogColor.value.setRGB(...s.fogColor);
 
-    skyUniforms.uZenith.value.setRGB(...s.zenith);
-    skyUniforms.uHorizon.value.setRGB(...s.horizon);
+    // Under a composer the sky and clouds are pre-compensated for its tone mapping (the fog is not: it must stay what
+    // the buildings fade into, and the sky's own horizon is the fog, see sky.ts).
+    const tone = budget.postprocessing ? invAcesFilmic : (c: Rgb): Rgb => c;
+    skyUniforms.uZenith.value.setRGB(...tone(s.zenith));
+    skyUniforms.uHorizon.value.setRGB(...tone(s.horizon));
     skyUniforms.uSunGlow.value.setRGB(...s.sunGlow);
     skyUniforms.uSunColor.value.setRGB(...s.sunColor);
     skyUniforms.uGround.value.setRGB(...s.fogColor);
@@ -167,6 +182,9 @@ export function Environment() {
     skyUniforms.uStars.value = s.stars;
     skyUniforms.uCover.value = s.cloudCover;
     skyUniforms.uTime.value = u.uTime.value;
+    skyUniforms.uDrift.value = u.uCloudT.value;
+    skyUniforms.uDeckLit.value.setRGB(...tone(s.cloudLit));
+    skyUniforms.uDeckShade.value.setRGB(...tone(s.cloudShade));
     // What glass sees below the horizon: the sunlit city and street, not a black void.
     envSkyGround
       .setRGB(...s.hemiGround)
@@ -195,7 +213,7 @@ export function Environment() {
       <primitive object={hemi} />
       <primitive object={sun} />
       <primitive object={sun.target} />
-      <Clouds layers={budget.cloudLayers} rt={rt} />
+      <Clouds layers={budget.cloudLayers} rt={rt} compensate={budget.postprocessing} />
       {!reducedMotion && <Rain drops={budget.rainDrops} rt={rt} />}
       {budget.postprocessing && <PostFX ultra={quality === 'ultra'} />}
       {process.env.NODE_ENV !== 'production' && <DebugParams />}
