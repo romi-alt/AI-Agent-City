@@ -279,15 +279,15 @@ export class PeopleSim {
     const { roadsZ } = layout.streets;
     let left = n;
     let k = 0;
-    // About a third of the people out and about are in the plaza: talking in small groups, on the benches.
+    // About a third of the people out and about are in the plaza, talking in small groups.
     const plaza = plazaSpots();
     let plazaLeft = Math.round(n * 0.35);
-    for (let round = 0; plazaLeft > 0 && round < 2; round++) {
+    for (let round = 0; plazaLeft > 0 && plaza.groups.length > 0 && round < 2; round++) {
       for (const g of plaza.groups) {
         if (plazaLeft <= 0) break;
         const size = Math.min(plazaLeft, 2 + Math.floor(this.rng() * 3));
-        const gx = g.x + round * 1.1;
-        const gz = g.z - round * 0.9;
+        const gx = g.x + round * 0.55;
+        const gz = g.z - round * 0.45;
         for (let i = 0; i < size; i++) {
           const a = (i / size) * Math.PI * 2 + this.rng() * 0.5;
           const r = size === 2 ? 0.22 : 0.3;
@@ -295,26 +295,7 @@ export class PeopleSim {
           p.x = gx + Math.cos(a) * r;
           p.z = gz + Math.sin(a) * r * 0.8;
           p.yaw = Math.atan2(-(gz - p.z), gx - p.x);
-          p.mode = this.rng() < 0.8 ? MODE.talk : MODE.wait;
-          plazaLeft--;
-          left--;
-        }
-      }
-      if (round > 0) continue;
-      for (const bench of plaza.benches) {
-        if (plazaLeft <= 0) break;
-        this.benches.push(bench);
-        const seats = Math.min(plazaLeft, this.rng() < 0.6 ? 2 : 1);
-        const tx = -Math.sin(bench.yaw + Math.PI / 2);
-        const tz = -Math.cos(bench.yaw + Math.PI / 2);
-        for (let i = 0; i < seats; i++) {
-          const p = this.newPose();
-          const off = seats === 1 ? (this.rng() - 0.5) * 0.4 : i === 0 ? -0.27 : 0.27;
-          p.x = bench.x + tx * off;
-          p.z = bench.z + tz * off;
-          p.yaw = bench.yaw;
-          p.mode = MODE.seated;
-          p.scale = 1;
+          p.mode = this.rng() < 0.75 ? MODE.talk : MODE.wait;
           plazaLeft--;
           left--;
         }

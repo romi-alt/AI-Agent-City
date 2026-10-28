@@ -1,4 +1,5 @@
 import { designsForLayout } from '../buildings/info.ts';
+import { CURB_H } from '../streets/grid.ts';
 import { FLOOR_HEIGHT, type CityLayout, type LayoutBuilding } from '../types.ts';
 
 /**
@@ -16,8 +17,8 @@ export const CROSSWALK_HALF_WIDTH = 0.55;
 export const STOP_FRONT = SIDEWALK + 0.7;
 /** Road surface height (cars sit on it). */
 export const ROAD_Y = 0.03;
-/** Sidewalk surface height (people stand on it). A1's kerb height; adjust here only. */
-export const SIDEWALK_Y = 0.12;
+/** Sidewalk surface height (people stand on it): A1's kerb height. */
+export const SIDEWALK_Y = CURB_H;
 
 export interface Box {
   key: string;

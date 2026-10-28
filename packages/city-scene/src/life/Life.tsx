@@ -1,5 +1,5 @@
 'use client';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useStore, useThree } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import { useCity, useCityContext } from '../context.tsx';
 import { useSharedUniforms } from '../environment/palette.ts';
@@ -31,12 +31,28 @@ function Stepper({ sim, clock, animate }: { sim: StreetSim; clock: LifeClock; an
   return null;
 }
 
-/** Development only: exposes the scene on `window.__life` so screenshot scripts can frame flocks and aircraft. */
+/**
+ * Development only: exposes the scene on `window.__life`, and runs `window.__life.frame(scene, camera)` (if a
+ * screenshot script sets it) after the camera rig each frame, so scripts can frame flocks and aircraft.
+ */
 function LifeDebug() {
+  const store = useStore();
   const scene = useThree(s => s.scene);
   useEffect(() => {
-    (window as unknown as { __life?: unknown }).__life = { scene };
-  }, [scene]);
+    const debug: { scene: unknown; frame?: (scene: unknown, camera: unknown) => void } = { scene };
+    (window as unknown as { __life?: unknown }).__life = debug;
+    let unsubscribe: (() => void) | undefined;
+    // Subscribe late, so this runs after the camera rig's frame callback.
+    const timer = setTimeout(() => {
+      unsubscribe = store
+        .getState()
+        .internal.subscribe({ current: state => debug.frame?.(state.scene, state.camera) }, 0, store);
+    }, 1500);
+    return () => {
+      clearTimeout(timer);
+      unsubscribe?.();
+    };
+  }, [scene, store]);
   return null;
 }
 
