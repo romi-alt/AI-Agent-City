@@ -1,62 +1,33 @@
 // @ts-nocheck
-// The living city around the office: streets, shops, traffic, tram, pedestrians, sky.
-// Ported unchanged from the AutoSalesCity design file (three r160 code, runs on the app's three). Everything is
-// generated in code: no model, texture or image downloads.
+// The living city around the office, dressed as Midtown Manhattan: avenues and cross streets, brick and limestone shop
+// fronts with fire escapes and rooftop water towers, taxis and buses, subway entrances, steam, hot-dog carts, hydrants,
+// pedestrians, sky. The design file's illustrated look (canvas awnings and signs, rounded cars, soft colours) is kept;
+// the palette is New York. Everything is generated in code: no model, texture or image downloads.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { P3 } from './people';
+import { N3 } from './nyc';
 
 export const C3 = (() => {
   const { makePerson, SKIN, HAIR } = P3;
-  // Fast Sales virtual office: the living city around the office (cars, tram, people, shops, lights).
-  // Everything is generated in code (no downloads): colourful illustrated style, day / evening / night.
+  const { STREET_Y } = N3;
 
-  const STREET_Y = -6; // street level (office floor is y = 0)
-  const PALETTE = [
-    '#f29c38',
-    '#e8604c',
-    '#7cc36b',
-    '#3fb6a8',
-    '#f6c445',
-    '#e98aa8',
-    '#5aa6e0',
-    '#f3e2c0',
-    '#9b7fd1',
-    '#c8553d',
-    '#ef8f6b',
-    '#63c1d8',
-  ];
-  const SHOPS = [
-    'BOOKS',
-    'CAFE',
-    'BAKERY',
-    'FLOWERS',
-    'PIZZA',
-    'DINER',
-    'MARKET',
-    'GYM',
-    'BANK',
-    'PHARMACY',
-    'SHOES',
-    'TACOS',
-    'BARBER',
-    'DELI',
-    'ICE CREAM',
-    'MUSIC',
-    'SUSHI',
-    'TOYS',
-  ];
-  const CAR_COLORS = [
-    '#e8604c',
-    '#f6c445',
-    '#3fb6a8',
-    '#5aa6e0',
+  const PALETTE = [...N3.BRICKS, ...N3.STONES, ...N3.BROWNSTONES, '#a89c86', '#8d6e5a', '#b9a58a'];
+  const SHOPS = N3.SHOPS;
+  // New York traffic is mostly yellow cabs
+  const CAB = '#f2b807';
+  const CAR_COLORS = ['#1c1f26', '#f3f1ec', '#8b919b', '#2c4a6e', '#8a2b2b', '#4a4f57', '#d9dde3', '#2d3b34'];
+  const TOPS = [
+    '#1f2430',
+    '#3a3f4b',
+    '#e8e2d4',
+    '#2c3e66',
+    '#8a6a4a',
+    '#b5483a',
+    '#5a6b7a',
     '#ffffff',
-    '#2d3142',
-    '#9b7fd1',
-    '#7cc36b',
-    '#ef8f6b',
-    '#d9dde3',
+    '#4a5a40',
+    '#d9a441',
   ];
 
   let seed = 20101;
@@ -87,6 +58,8 @@ export const C3 = (() => {
     return '#' + c.getHexString();
   }
 
+  const GROUND = { day: '#bdb8ae', evening: '#8f8480', night: '#3a3d48' };
+
   class City {
     constructor(scene, { quality = 'high', demo = false } = {}) {
       this.scene = scene;
@@ -99,26 +72,47 @@ export const C3 = (() => {
       this.walkers = [];
       this.birds = [];
       this.clouds = [];
+      this.steam = [];
       this.tod = 'day';
       seed = 20101;
+      this.X = { cornice: [], awn: [], ac: [], tank: [], fe: [], stoop: [] };
       this._ground();
       this._streets();
       this._officeBuilding();
       this._blocks();
-      this._skyline();
+      this._flushRoofs();
+      if (!demo) this._skyline();
       this._lamps();
+      this._props();
       this._trees();
       this._traffic();
-      this._tram();
       this._people();
       this._sky();
+    }
+
+    inst(geo, mat, list, colors) {
+      if (!list.length) return null;
+      const im = new THREE.InstancedMesh(geo, mat, list.length);
+      const d = new THREE.Object3D(),
+        c = new THREE.Color();
+      list.forEach((o, i) => {
+        d.position.set(o.x, o.y, o.z);
+        d.rotation.set(o.rx || 0, o.ry || 0, 0);
+        d.scale.set(o.sx ?? o.s ?? 1, o.sy ?? o.s ?? 1, o.sz ?? o.s ?? 1);
+        d.updateMatrix();
+        im.setMatrixAt(i, d.matrix);
+        if (colors) im.setColorAt(i, c.set(o.c));
+      });
+      im.frustumCulled = false;
+      this.root.add(im);
+      return im;
     }
 
     /* ---------------- ground, roads, sidewalks ---------------- */
     _ground() {
       const g = new THREE.Mesh(
-        new THREE.PlaneGeometry(400, 400),
-        new THREE.MeshStandardMaterial({ color: '#cfc6b4', roughness: 1 }),
+        new THREE.PlaneGeometry(330, 330),
+        new THREE.MeshStandardMaterial({ color: GROUND.day, roughness: 1 }),
       );
       g.rotation.x = -Math.PI / 2;
       g.position.y = STREET_Y - 0.05;
@@ -127,18 +121,22 @@ export const C3 = (() => {
     }
     _road(x0, x1, z0, z1, axis) {
       const [c, g] = canvas(256, 256);
-      g.fillStyle = '#5b6170';
+      g.fillStyle = '#4a4f5a';
       g.fillRect(0, 0, 256, 256);
-      for (let i = 0; i < 400; i++) {
-        g.fillStyle = `rgba(255,255,255,${rnd() * 0.04})`;
+      for (let i = 0; i < 500; i++) {
+        g.fillStyle = `rgba(255,255,255,${rnd() * 0.05})`;
         g.fillRect(rnd() * 256, rnd() * 256, 2, 2);
       }
-      g.fillStyle = '#f3d36b';
+      for (let i = 0; i < 6; i++) {
+        g.fillStyle = 'rgba(0,0,0,.12)'; // patched asphalt
+        g.fillRect(rnd() * 220, rnd() * 240, 30 + rnd() * 20, 10 + rnd() * 10);
+      }
+      g.fillStyle = '#e9bf3c';
       g.fillRect(0, 124, 256, 4);
       g.fillRect(0, 130, 256, 4); // double yellow centre line
-      g.fillStyle = 'rgba(255,255,255,.9)';
-      g.fillRect(0, 6, 256, 4);
-      g.fillRect(0, 246, 256, 4);
+      g.fillStyle = 'rgba(255,255,255,.85)';
+      g.fillRect(0, 6, 256, 3);
+      g.fillRect(0, 247, 256, 3);
       const w = x1 - x0,
         d = z1 - z0;
       const t = tex(c, axis === 'x' ? [w / 8, 1] : [d / 8, 1]);
@@ -154,9 +152,9 @@ export const C3 = (() => {
     }
     _walk(x0, x1, z0, z1) {
       const [c, g] = canvas(128, 128);
-      g.fillStyle = '#e7dccb';
+      g.fillStyle = '#cfcac0';
       g.fillRect(0, 0, 128, 128);
-      g.strokeStyle = 'rgba(150,130,100,.35)';
+      g.strokeStyle = 'rgba(90,86,80,.35)';
       g.lineWidth = 2;
       for (let i = 0; i <= 128; i += 32) {
         g.beginPath();
@@ -178,22 +176,19 @@ export const C3 = (() => {
       this.root.add(m);
       const curb = new THREE.Mesh(
         new THREE.BoxGeometry(w + 0.1, 0.26, d + 0.1),
-        new THREE.MeshStandardMaterial({ color: '#bfb3a0', roughness: 1 }),
+        new THREE.MeshStandardMaterial({ color: '#a9a398', roughness: 1 }),
       );
       curb.position.copy(m.position);
       curb.position.y -= 0.01;
-      curb.scale.set(1, 1, 1);
       this.root.add(curb);
     }
     _streets() {
       const L = 160;
-      // main street behind the office (tram line) and the street in front
+      // the street behind the office and the one in front (both cross streets), and the two avenues beside it
       this._road(-L, L, -23, -15, 'x');
       this._road(-L, L, 14.5, 21.5, 'x');
-      // side streets
       this._road(-24.5, -19.5, -L, L, 'z');
       this._road(19.5, 24.5, -L, L, 'z');
-      // sidewalks
       this._walk(-L, L, -15, -12);
       this._walk(-L, L, -26, -23);
       this._walk(-L, L, 12, 14.5);
@@ -208,42 +203,50 @@ export const C3 = (() => {
         this._walk(a, b, 24, 60);
         this._walk(a, b, -60, -26);
       });
-      // crosswalks
-      const zebra = new THREE.MeshStandardMaterial({ color: '#f4f1ea', roughness: 0.9 });
+      // crosswalks: New York's "ladder" bars
+      const zebra = new THREE.MeshStandardMaterial({ color: '#f1eee6', roughness: 0.9 });
+      const bar = new THREE.PlaneGeometry(0.5, 4.4);
+      const bars = [];
       const stripes = (x, z, along) => {
-        for (let i = -3; i <= 3; i++) {
-          const s = new THREE.Mesh(
-            new THREE.PlaneGeometry(along === 'x' ? 0.5 : 4.4, along === 'x' ? 4.4 : 0.5),
-            zebra,
-          );
-          s.rotation.x = -Math.PI / 2;
-          s.position.set(x + (along === 'x' ? i * 0.9 : 0), STREET_Y + 0.01, z + (along === 'z' ? i * 0.9 : 0));
-          this.root.add(s);
-        }
+        for (let i = -3; i <= 3; i++)
+          bars.push({
+            x: x + (along === 'x' ? i * 0.9 : 0),
+            y: STREET_Y + 0.02,
+            z: z + (along === 'z' ? i * 0.9 : 0),
+            ry: along === 'x' ? 0 : Math.PI / 2,
+          });
       };
-      [-22, 22].forEach(x => {
-        stripes(x, -13.5 + 0, 'z');
-      }); // small hint at corners
+      [-22, 22].forEach(x => stripes(x, -13.5, 'z'));
       [
         [-22, -19],
         [22, -19],
         [-22, 18],
         [22, 18],
-      ].forEach(([x, z]) => {
-        stripes(x + (x < 0 ? 4 : -4), z, 'x');
-      });
-      // tram tracks
-      const rail = new THREE.MeshStandardMaterial({ color: '#9aa1ab', metalness: 0.7, roughness: 0.3 });
-      [-19.6, -18.4].forEach(z => {
-        const r = new THREE.Mesh(new THREE.BoxGeometry(2 * L, 0.06, 0.08), rail);
-        r.position.set(0, STREET_Y + 0.03, z);
-        this.root.add(r);
-      });
+      ].forEach(([x, z]) => stripes(x + (x < 0 ? 4 : -4), z, 'x'));
+      const zi = this.inst(bar, zebra, bars);
+      if (zi) {
+        // lay the bars flat
+        const d = new THREE.Object3D();
+        bars.forEach((b, i) => {
+          d.position.set(b.x, b.y, b.z);
+          d.rotation.set(-Math.PI / 2, 0, b.ry);
+          d.updateMatrix();
+          zi.setMatrixAt(i, d.matrix);
+        });
+      }
+      // a red bus lane along the north cross street
+      const lane = new THREE.Mesh(
+        new THREE.PlaneGeometry(2 * L, 2.1),
+        new THREE.MeshStandardMaterial({ color: '#8f3b36', roughness: 0.95 }),
+      );
+      lane.rotation.x = -Math.PI / 2;
+      lane.position.set(0, STREET_Y + 0.012, -16.8);
+      this.root.add(lane);
     }
 
     /* ---------------- buildings ---------------- */
     _facade(w, h, base, shop, isOffice = false) {
-      const PX = 30,
+      const PX = this.q === 'low' ? 22 : 30,
         W = Math.min(1024, Math.round(w * PX)),
         H = Math.min(1024, Math.round(h * PX));
       const sx = W / w,
@@ -253,12 +256,12 @@ export const C3 = (() => {
       ge.fillStyle = '#000';
       ge.fillRect(0, 0, W, H);
       const grd = g.createLinearGradient(0, 0, 0, H);
-      grd.addColorStop(0, shade(base, 0.06));
-      grd.addColorStop(1, shade(base, -0.06));
+      grd.addColorStop(0, shade(base, 0.05));
+      grd.addColorStop(1, shade(base, -0.07));
       g.fillStyle = grd;
       g.fillRect(0, 0, W, H);
-      // brick / plaster texture
-      g.fillStyle = 'rgba(0,0,0,.035)';
+      // brick courses
+      g.fillStyle = 'rgba(0,0,0,.06)';
       for (let y = 0; y < H; y += 6) for (let x = (y / 6) % 2 ? 0 : 8; x < W; x += 16) g.fillRect(x, y, 14, 1);
       // cornice
       g.fillStyle = shade(base, -0.18);
@@ -269,43 +272,44 @@ export const C3 = (() => {
         floorH = 3.0;
       const cols = Math.max(2, Math.floor(w / 2.4)),
         cw = w / cols;
-      const glass = isOffice ? '#a9d8ee' : pick(['#7fc7d9', '#8fd0c6', '#9cc7e8', '#86b7d6']);
+      const glass = isOffice ? '#a9d8ee' : pick(['#5d7487', '#4f6678', '#6b8396', '#7f8f9c']);
+      const trim = shade(base, 0.28);
       for (let fy = groundH; fy < h - 1; fy += floorH) {
         const y = H - (fy + floorH - 0.6) * sy;
         for (let i = 0; i < cols; i++) {
           const x = (i * cw + cw * 0.22) * sx,
             ww = cw * 0.56 * sx,
             wh = 1.7 * sy;
-          g.fillStyle = '#f7f1e3';
-          g.fillRect(x - 3, y - 3, ww + 6, wh + 6); // frame
+          g.fillStyle = trim;
+          g.fillRect(x - 3, y - 4, ww + 6, wh + 7); // frame and lintel
           const gg = g.createLinearGradient(0, y, 0, y + wh);
-          gg.addColorStop(0, shade(glass, 0.12));
-          gg.addColorStop(1, shade(glass, -0.1));
+          gg.addColorStop(0, shade(glass, 0.1));
+          gg.addColorStop(1, shade(glass, -0.12));
           g.fillStyle = gg;
           g.fillRect(x, y, ww, wh);
-          g.fillStyle = 'rgba(255,255,255,.45)';
+          g.fillStyle = 'rgba(255,255,255,.3)';
           g.beginPath();
           g.moveTo(x + ww * 0.15, y + wh);
           g.lineTo(x + ww * 0.45, y);
           g.lineTo(x + ww * 0.6, y);
           g.lineTo(x + ww * 0.3, y + wh);
           g.fill();
-          if (rnd() < 0.35) {
-            g.fillStyle = pick(['#ffffff', '#f6e0b5', '#f4c6c0']);
+          if (rnd() < 0.3) {
+            g.fillStyle = pick(['#e8e2d4', '#d9c9a8', '#c9a89c']);
             g.fillRect(x, y, ww * 0.28, wh);
             g.fillRect(x + ww * 0.72, y, ww * 0.28, wh);
           }
-          g.fillStyle = '#ffffff';
+          g.fillStyle = trim;
           g.fillRect(x - 5, y + wh + 2, ww + 10, 0.12 * sy); // sill
-          if (rnd() < 0.15) {
-            g.fillStyle = '#4f9d5a';
+          if (rnd() < 0.12) {
+            g.fillStyle = '#4f7a4a';
             for (let k = 0; k < 5; k++) {
               g.beginPath();
               g.arc(x + rnd() * ww, y + wh - 2, 4 + rnd() * 4, 0, 7);
               g.fill();
             }
           }
-          g.fillStyle = '#3d3d48';
+          g.fillStyle = '#2f3138';
           g.fillRect(x + ww / 2 - 1, y, 2, wh); // mullion
           if (rnd() < (isOffice ? 0.9 : 0.55)) {
             ge.fillStyle = pick(['#ffd88a', '#ffe7b0', '#ffc66b', '#cfe6ff']);
@@ -317,26 +321,26 @@ export const C3 = (() => {
       const gy = H - groundH * sy;
       g.fillStyle = shade(base, -0.25);
       g.fillRect(0, gy, W, groundH * sy);
-      const awn = isOffice ? '#f5b83d' : pick(['#e8604c', '#3fb6a8', '#f6c445', '#5aa6e0', '#2f7a55', '#c8553d']);
+      const awn = isOffice ? '#f5b83d' : pick(N3.AWNINGS);
       const swg = g.createLinearGradient(0, gy + 1.1 * sy, 0, H);
-      swg.addColorStop(0, '#bfe4f2');
-      swg.addColorStop(1, '#8fc0d6');
+      swg.addColorStop(0, '#b9d2dc');
+      swg.addColorStop(1, '#7f9fb0');
       g.fillStyle = swg;
       g.fillRect(0.4 * sx, gy + 1.3 * sy, W - 0.8 * sx, groundH * sy - 1.3 * sy);
       ge.fillStyle = '#ffdca0';
       ge.fillRect(0.4 * sx, gy + 1.3 * sy, W - 0.8 * sx, groundH * sy - 1.3 * sy);
-      g.fillStyle = 'rgba(40,40,50,.55)';
+      g.fillStyle = 'rgba(30,30,38,.55)';
       for (let x = 0.4 * sx; x < W; x += 2.2 * sx) g.fillRect(x, gy + 1.3 * sy, 3, groundH * sy);
       // awning stripes
       for (let x = 0; x < W; x += 0.5 * sx) {
-        g.fillStyle = Math.round(x / (0.5 * sx)) % 2 ? awn : '#ffffff';
+        g.fillStyle = Math.round(x / (0.5 * sx)) % 2 ? awn : '#efe9da';
         g.fillRect(x, gy + 0.55 * sy, 0.5 * sx + 1, 0.6 * sy);
       }
       g.fillStyle = shade(awn, -0.2);
       g.fillRect(0, gy + 1.12 * sy, W, 4);
       // sign board
       const label = isOffice ? 'FAST SALES TRAINING CENTER' : shop;
-      g.fillStyle = isOffice ? '#1c2230' : '#2c3a4a';
+      g.fillStyle = isOffice ? '#1c2230' : '#26313d';
       const sw = Math.min(W * 0.8, label.length * 0.42 * sx + 1 * sx);
       g.fillRect((W - sw) / 2, gy + 0.05 * sy, sw, 0.45 * sy);
       g.fillStyle = isOffice ? '#f5b83d' : '#ffe6a6';
@@ -362,58 +366,100 @@ export const C3 = (() => {
         emissiveIntensity: 0,
         roughness: 0.85,
       });
-      const roof = new THREE.MeshStandardMaterial({ color: shade(base, -0.28), roughness: 1 });
+      const roof = new THREE.MeshStandardMaterial({ color: shade(base, -0.3), roughness: 1 });
       const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [side, side, roof, roof, side, side]);
       m.position.set(x, STREET_Y + h / 2, z);
       this.root.add(m);
       this.lit.push({ m: side, day: 0, evening: 0.55, night: 1.0 });
       if (!opts.office) {
-        // roof details: parapet, water tank / AC units
-        const par = new THREE.Mesh(
-          new THREE.BoxGeometry(w + 0.3, 0.5, d + 0.3),
-          new THREE.MeshStandardMaterial({ color: shade(base, -0.12), roughness: 1 }),
-        );
-        par.position.set(x, STREET_Y + h + 0.05, z);
-        this.root.add(par);
-        const inner = new THREE.Mesh(new THREE.BoxGeometry(w - 0.4, 0.52, d - 0.4), roof);
-        inner.position.set(x, STREET_Y + h + 0.07, z);
-        this.root.add(inner);
-        if (rnd() < 0.5) {
-          const tank = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.8, 0.8, 1.4, 12),
-            new THREE.MeshStandardMaterial({ color: '#8b6a4f', roughness: 0.9 }),
-          );
-          tank.position.set(x + (rnd() - 0.5) * (w - 2), STREET_Y + h + 1.4, z + (rnd() - 0.5) * (d - 2));
-          this.root.add(tank);
-        } else {
-          const ac = new THREE.Mesh(
-            new THREE.BoxGeometry(1.4, 0.8, 1),
-            new THREE.MeshStandardMaterial({ color: '#d7dbe0', roughness: 0.6 }),
-          );
-          ac.position.set(x + (rnd() - 0.5) * (w - 2), STREET_Y + h + 0.7, z + (rnd() - 0.5) * (d - 2));
-          this.root.add(ac);
-        }
-        // 3D awning in front of the shop
+        const X = this.X;
+        X.cornice.push({ x, y: STREET_Y + h - 0.1, z, sx: w + 0.9, sy: 0.7, sz: d + 0.9, c: shade(base, 0.12) });
+        if (rnd() < 0.55 && h > 8)
+          X.tank.push({
+            x: x + (rnd() - 0.5) * (w - 3),
+            y: STREET_Y + h,
+            z: z + (rnd() - 0.5) * (d - 3),
+            ry: rnd() * 6,
+            s: 1,
+          });
+        else
+          X.ac.push({
+            x: x + (rnd() - 0.5) * (w - 2),
+            y: STREET_Y + h + 0.4,
+            z: z + (rnd() - 0.5) * (d - 2),
+            c: '#cfd3d8',
+          });
         if (opts.facing) {
-          const aw = new THREE.Mesh(
-            new THREE.BoxGeometry(w * 0.92, 0.08, 1.3),
-            new THREE.MeshStandardMaterial({
-              color: pick(['#e8604c', '#3fb6a8', '#f6c445', '#5aa6e0']),
-              roughness: 0.8,
-            }),
-          );
-          aw.position.set(x, STREET_Y + 2.7, z + opts.facing * (d / 2 + 0.6));
-          aw.rotation.x = opts.facing * 0.25;
-          this.root.add(aw);
+          const zf = z + opts.facing * (d / 2);
+          // shop awning over the entrance
+          X.awn.push({
+            x,
+            y: STREET_Y + 2.7,
+            z: zf + opts.facing * 0.6,
+            rx: opts.facing * 0.25,
+            sx: w * 0.92,
+            c: pick(N3.AWNINGS),
+          });
+          // a fire escape on most of the tall fronts, a stoop on the low brownstones
+          if (h > 11 && rnd() < 0.7) {
+            const cols = Math.max(2, Math.floor(w / 2.4)),
+              cw = w / cols,
+              ci = Math.floor(rnd() * cols);
+            const fx = x - w / 2 + (ci + 0.5) * cw;
+            for (let fy = 3.4 + 3.0 - 0.9; fy < h - 3; fy += 3.0)
+              X.fe.push({ x: fx, y: STREET_Y + fy, z: zf + opts.facing * 0.5, ry: opts.facing > 0 ? 0 : Math.PI });
+          } else if (h <= 11) {
+            X.stoop.push({
+              x: x + (rnd() - 0.5) * (w - 3),
+              y: STREET_Y + 0.6,
+              z: zf + opts.facing * 1.0,
+              ry: opts.facing > 0 ? 0 : Math.PI,
+            });
+          }
         }
       }
       return m;
     }
 
+    // shared rooftop and facade extras, one draw call each
+    _flushRoofs() {
+      const X = this.X;
+      const flat = new THREE.MeshStandardMaterial({ roughness: 0.9 });
+      const bx = new THREE.BoxGeometry(1, 1, 1);
+      this.inst(bx, flat, X.cornice, true);
+      const acG = new THREE.BoxGeometry(1.4, 0.8, 1);
+      this.inst(acG, new THREE.MeshStandardMaterial({ roughness: 0.6 }), X.ac, true);
+      const awG = new THREE.BoxGeometry(1, 0.08, 1.3);
+      this.inst(awG, new THREE.MeshStandardMaterial({ roughness: 0.8 }), X.awn, true);
+      this.inst(N3.waterTowerGeo(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 }), X.tank);
+      // fire escape: platform, rails and a stair, one floor of it
+      const steel = '#23262d';
+      const fe = N3.merge([
+        N3.part(N3.box(1.9, 0.08, 0.95), steel, 0, 0, 0),
+        N3.part(N3.box(1.9, 0.06, 0.04), steel, 0, 0.7, 0.46),
+        N3.part(N3.box(0.04, 0.7, 0.95), steel, -0.93, 0.35, 0),
+        N3.part(N3.box(0.04, 0.7, 0.95), steel, 0.93, 0.35, 0),
+        N3.part(N3.box(1.9, 0.04, 0.04), steel, 0, 0.35, 0.46),
+        N3.part(N3.box(0.5, 0.05, 3.3), steel, 0.5, 1.5, 0.15, 0.95, 0, 0),
+        N3.part(N3.box(0.04, 1.3, 0.04), steel, -0.9, 0.7, 0.45),
+        N3.part(N3.box(0.04, 1.3, 0.04), steel, 0.9, 0.7, 0.45),
+      ]);
+      this.inst(fe, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0.4 }), X.fe);
+      // brownstone stoop: a few steps up to the door
+      const stoop = N3.merge([
+        N3.part(N3.box(1.7, 0.4, 2.2), '#8f8576', 0, -0.4, 0),
+        N3.part(N3.box(1.7, 0.4, 1.5), '#8f8576', 0, -0.1, -0.35),
+        N3.part(N3.box(1.7, 0.4, 0.8), '#8f8576', 0, 0.3, -0.7),
+        N3.part(N3.box(0.08, 0.8, 2.0), '#23262d', -0.86, 0, 0),
+        N3.part(N3.box(0.08, 0.8, 2.0), '#23262d', 0.86, 0, 0),
+      ]);
+      this.inst(stoop, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 }), X.stoop);
+    }
+
     _officeBuilding() {
       // the building the office sits in: shop floor + facade under the office floor
       const h = -STREET_Y - 0.25;
-      this._building(0, 0, 34, 24, h, { office: true, color: '#e9d8bf', shop: 'FAST SALES' });
+      this._building(0, 0, 34, 24, h, { office: true, color: '#e3d6bd', shop: 'FAST SALES' });
       const slab = new THREE.Mesh(
         new THREE.BoxGeometry(34.4, 0.3, 24.4),
         new THREE.MeshStandardMaterial({ color: '#f4efe6', roughness: 0.8 }),
@@ -425,8 +471,18 @@ export const C3 = (() => {
     _row(z0, z1, x0, x1, facing, hmin, hmax) {
       let x = x0;
       while (x < x1) {
-        const w = 7 + rnd() * 6,
+        const w = 6.5 + rnd() * 6,
           d = Math.abs(z1 - z0);
+        if (x + w > x1) break;
+        // keep the avenues open: they run straight out to the far city
+        const band = [
+          [-27, -17],
+          [17, 27],
+        ].find(([a, b]) => x + w > a && x < b);
+        if (band) {
+          x = band[1];
+          continue;
+        }
         if (x + w > -20 && x < 20 && Math.abs(z0) < 13) {
           x += w;
           continue;
@@ -440,9 +496,9 @@ export const C3 = (() => {
       }
     }
     _blocks() {
-      const far = this.q === 'low' ? 70 : 110;
-      this._row(-36, -26, -far, far, 1, 9, 24); // behind the main street (seen through the windows)
-      this._row(24, 31, -far, far, -1, 6, 9); // low shops in front (keeps the camera view open)
+      const far = this.q === 'low' ? 66 : 90;
+      this._row(-52, -26, -far, far, 1, 10, 22); // the block behind the main street (seen through the windows)
+      this._row(24, 31, -far, far, -1, 6, 9); // low brownstone shops in front (keeps the camera view open)
       // side blocks (next to the office building)
       if (!this.demo)
         [
@@ -452,124 +508,284 @@ export const C3 = (() => {
           let z = -12;
           while (z < 12) {
             const d = 6 + rnd() * 4;
-            this._buildingSide((a + b) / 2, z + d / 2, b - a, d - 0.2, 8 + rnd() * 10, f);
+            this._building((a + b) / 2, z + d / 2, b - a, d - 0.2, 8 + rnd() * 10, {});
             z += d;
           }
         });
     }
-    _buildingSide(x, z, w, d, h, f) {
-      return this._building(x, z, w, d, h, {});
-    }
 
+    // a ring of setback towers when the city is used on its own (the demo builds the big city instead)
     _skyline() {
-      const [c, g] = canvas(128, 256);
-      g.fillStyle = '#ffffff';
-      g.fillRect(0, 0, 128, 256);
-      g.fillStyle = 'rgba(70,90,120,.35)';
-      for (let y = 8; y < 256; y += 12) for (let x = 6; x < 128; x += 14) g.fillRect(x, y, 8, 7);
-      const [ce, ge] = canvas(128, 256);
-      ge.fillStyle = '#000';
-      ge.fillRect(0, 0, 128, 256);
-      for (let y = 8; y < 256; y += 12)
-        for (let x = 6; x < 128; x += 14)
-          if (rnd() < 0.4) {
-            ge.fillStyle = rnd() < 0.8 ? '#ffd88a' : '#bcdcff';
-            ge.fillRect(x, y, 8, 7);
-          }
-      const map = tex(c, [1, 1]),
-        em = tex(ce, [1, 1]);
-      const n = this.q === 'low' ? 18 : 34;
+      const b = new N3.Batch(),
+        r = N3.rngOf(77);
+      const n = this.q === 'low' ? 14 : 30;
       for (let i = 0; i < n; i++) {
-        const w = 6 + rnd() * 10,
-          h = 22 + rnd() * 50;
         const ang = -Math.PI * 0.95 + (i / n) * Math.PI * 0.9,
-          r = 85 + rnd() * 40;
-        const x = Math.cos(ang) * r * 1.3,
-          z = Math.sin(ang) * r - 20;
-        const col = pick(['#b9c8e6', '#c9b8e6', '#a8d4e0', '#d9c6b3', '#c2d6c0']);
-        const m = new THREE.MeshStandardMaterial({
-          color: col,
-          map,
-          emissiveMap: em,
-          emissive: '#ffffff',
-          emissiveIntensity: 0,
-          roughness: 0.9,
-        });
-        const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), m);
-        b.position.set(x, STREET_Y + h / 2, z);
-        this.root.add(b);
-        this.lit.push({ m, day: 0, evening: 0.6, night: 1.1 });
-        if (rnd() < 0.25) {
-          // spire
-          const sp = new THREE.Mesh(new THREE.ConeGeometry(w * 0.3, 8, 8), m);
-          sp.position.set(x, STREET_Y + h + 4, z);
-          this.root.add(sp);
-        }
+          rad = 110 + r() * 40;
+        const kind = ['deco', 'lime', 'glass'][i % 3];
+        const t = N3.setback(
+          b,
+          kind,
+          Math.cos(ang) * rad * 1.3,
+          Math.sin(ang) * rad - 20,
+          12 + r() * 10,
+          12 + r() * 8,
+          14 + r() * 24,
+          pick(N3.TOWER_TONES),
+          r(),
+          3,
+          r,
+        );
+        if (r() < 0.4)
+          b.spires.push({ x: Math.cos(ang) * rad * 1.3, y: t.top, z: Math.sin(ang) * rad - 20, h: 14, r: 1 });
       }
+      b.baseY = STREET_Y;
+      b.build(this.root);
+      const mats = Object.values(b.items).length ? Object.keys(b.items).map(k => N3.facadeMaterial(k)) : [];
+      mats.forEach(m => this.lit.push({ m, day: 0, evening: 0.6, night: 1.1 }));
     }
 
     /* ---------------- street furniture ---------------- */
     _lamps() {
-      const post = new THREE.MeshStandardMaterial({ color: '#3c4452', roughness: 0.5, metalness: 0.4 });
+      const post = new THREE.MeshStandardMaterial({ color: '#2f343c', roughness: 0.5, metalness: 0.4 });
       const bulb = new THREE.MeshStandardMaterial({ color: '#fff6dc', emissive: '#ffd58a', emissiveIntensity: 0.2 });
       this.lit.push({ m: bulb, day: 0.2, evening: 2.2, night: 3.2 });
-      const postG = new THREE.CylinderGeometry(0.08, 0.12, 4.2, 8),
-        headG = new THREE.SphereGeometry(0.28, 12, 10),
-        capG = new THREE.ConeGeometry(0.34, 0.3, 10);
-      const lamp = (x, z) => {
-        const p = new THREE.Mesh(postG, post);
-        p.position.set(x, STREET_Y + 2.1, z);
-        this.root.add(p);
-        const h = new THREE.Mesh(headG, bulb);
-        h.position.set(x, STREET_Y + 4.35, z);
-        this.root.add(h);
-        const c = new THREE.Mesh(capG, post);
-        c.position.set(x, STREET_Y + 4.65, z);
-        this.root.add(c);
+      // New York "cobra head": a tall post with an arm that reaches over the road
+      const postG = N3.merge([
+        N3.part(N3.cyl(0.08, 0.13, 6.2, 8), '#fff', 0, 3.1, 0),
+        N3.part(N3.box(1.7, 0.1, 0.1), '#fff', 0.8, 6.15, 0),
+      ]);
+      const headG = new THREE.CapsuleGeometry(0.2, 0.7, 4, 8);
+      headG.rotateZ(Math.PI / 2);
+      const lampsP = [],
+        headsP = [];
+      const lamp = (x, z, toward) => {
+        // the arm points toward the road (toward = +1 / -1 along the facing axis)
+        lampsP.push({ x, y: STREET_Y, z, ry: toward.ry });
+        const a = toward.ry;
+        headsP.push({ x: x + Math.cos(a) * 1.5, y: STREET_Y + 6.05, z: z - Math.sin(a) * 1.5, ry: a });
       };
-      for (let x = -70; x <= 70; x += 14) {
-        lamp(x, -14.6);
-        lamp(x + 7, -23.4);
-        lamp(x, 14.1);
+      for (let x = -150; x <= 150; x += 14) {
+        lamp(x, -14.6, { ry: Math.PI / 2 }); // arms reach over the road
+        lamp(x + 7, -24.4, { ry: -Math.PI / 2 });
+        lamp(x, 14.1, { ry: -Math.PI / 2 });
       }
-      for (let z = -8; z <= 8; z += 8) {
-        lamp(-19.1, z);
-        lamp(19.1, z);
+      for (let z = -150; z <= 150; z += 16) {
+        if (Math.abs(z) < 14) continue;
+        lamp(-19.1, z, { ry: Math.PI });
+        lamp(19.1, z, { ry: 0 });
       }
+      this.inst(postG, post, lampsP);
+      this.inst(headG, bulb, headsP);
+    }
+    _props() {
+      const C = (name, geo, mat, list, colors) => this.inst(geo, mat, list, colors);
+      const vc = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7 });
+      // hydrants at the corners
+      const hyd = N3.merge([
+        N3.part(N3.cyl(0.17, 0.2, 0.7, 8), '#c0392b', 0, 0.35, 0),
+        N3.part(new THREE.SphereGeometry(0.19, 8, 6), '#c0392b', 0, 0.75, 0),
+        N3.part(N3.cyl(0.07, 0.07, 0.5, 6), '#e6c64a', 0, 0.45, 0, 0, 0, Math.PI / 2),
+      ]);
+      const hydP = [];
+      for (let x = -140; x <= 140; x += 28) {
+        hydP.push({ x: x + 3, y: STREET_Y + 0.24, z: -14.2 });
+        hydP.push({ x: x - 5, y: STREET_Y + 0.24, z: 13.2 });
+      }
+      C('hyd', hyd, vc, hydP);
+      // trash cans
+      const can = N3.merge([
+        N3.part(N3.cyl(0.28, 0.24, 0.8, 8), '#2c3a33', 0, 0.4, 0),
+        N3.part(N3.cyl(0.3, 0.3, 0.06, 8), '#1d2622', 0, 0.82, 0),
+      ]);
+      const canP = [];
+      for (let x = -120; x <= 120; x += 18) canP.push({ x: x + 6, y: STREET_Y + 0.24, z: 23.0 });
+      C('can', can, vc, canP);
+      // subway entrances with green globe lamps
+      const stairs = N3.merge([
+        N3.part(N3.box(2.6, 0.5, 3.4), '#7d7f84', 0, 0.25, 0),
+        N3.part(N3.box(0.08, 1.1, 3.4), '#25402f', -1.3, 0.75, 0),
+        N3.part(N3.box(0.08, 1.1, 3.4), '#25402f', 1.3, 0.75, 0),
+        N3.part(N3.box(2.6, 0.9, 0.5), '#3a3c40', 0, 0.45, -1.5),
+        N3.part(N3.cyl(0.05, 0.05, 2.1, 6), '#25402f', -1.3, 1.5, 1.6),
+        N3.part(N3.cyl(0.05, 0.05, 2.1, 6), '#25402f', 1.3, 1.5, 1.6),
+      ]);
+      const subs = [
+        [-27, -6.2, 0],
+        [27, 6.2, 0],
+        [-72, 13.0, Math.PI / 2],
+        [72, -13.2, -Math.PI / 2],
+        [-27, 40, 0],
+        [27, -40, 0],
+      ].map(([x, z, ry]) => ({ x, y: STREET_Y + 0.24, z, ry }));
+      subs.forEach(s => {
+        s.x = Math.max(-150, Math.min(150, s.x));
+      });
+      // keep them on the sidewalk strips beside the avenues
+      subs[0].x = -26;
+      subs[0].z = -8;
+      subs[1].x = 26;
+      subs[1].z = 8;
+      subs[4].x = -26;
+      subs[4].z = 40;
+      subs[5].x = 26;
+      subs[5].z = -40;
+      subs[2].x = -72;
+      subs[2].z = 13.3;
+      subs[3].x = 72;
+      subs[3].z = -13.4;
+      C('stairs', stairs, vc, subs);
+      const globe = new THREE.MeshStandardMaterial({ color: '#7fe09a', emissive: '#3fe070', emissiveIntensity: 0.6 });
+      this.lit.push({ m: globe, day: 0.5, evening: 2.2, night: 3 });
+      const gl = [];
+      subs.forEach(s => {
+        const c = Math.cos(s.ry),
+          sn = Math.sin(s.ry);
+        [-1.3, 1.3].forEach(dx =>
+          gl.push({ x: s.x + c * dx + sn * 1.6, y: STREET_Y + 0.24 + 2.6, z: s.z - sn * dx + c * 1.6 }),
+        );
+      });
+      C('globe', new THREE.SphereGeometry(0.22, 10, 8), globe, gl);
+      // hot-dog carts: a steel cart with a striped umbrella
+      const cart = N3.merge([
+        N3.part(N3.box(1.6, 0.9, 0.8), '#c9ccd2', 0, 0.8, 0),
+        N3.part(N3.box(1.7, 0.1, 0.9), '#8b9099', 0, 1.3, 0),
+        N3.part(N3.cyl(0.04, 0.04, 2.3, 6), '#555', 0.6, 1.9, 0.2),
+        N3.part(new THREE.ConeGeometry(1.5, 0.5, 8), '#e8b523', 0.6, 3.1, 0.2),
+        N3.part(new THREE.ConeGeometry(1.0, 0.45, 8), '#d6402f', 0.6, 3.15, 0.2),
+        N3.part(N3.cyl(0.3, 0.3, 0.1, 10), '#222', -0.6, 0.3, 0.45, Math.PI / 2, 0, 0),
+        N3.part(N3.cyl(0.3, 0.3, 0.1, 10), '#222', -0.6, 0.3, -0.45, Math.PI / 2, 0, 0),
+      ]);
+      C('cart', cart, vc, [
+        { x: -30, y: STREET_Y + 0.24, z: -13.2, ry: 0.3 },
+        { x: 31, y: STREET_Y + 0.24, z: 13.2, ry: -0.2 },
+        { x: -75, y: STREET_Y + 0.24, z: 13.2, ry: 0.1 },
+        { x: 68, y: STREET_Y + 0.24, z: -13.0, ry: 0.4 },
+        { x: 6, y: STREET_Y + 0.24, z: 22.6, ry: 0.0 },
+      ]);
+      // newsstands
+      const news = N3.merge([
+        N3.part(N3.box(2.2, 2.2, 1.4), '#2f4b3a', 0, 1.1, 0),
+        N3.part(N3.box(2.5, 0.12, 1.7), '#1f3326', 0, 2.3, 0),
+        N3.part(N3.box(1.8, 0.5, 0.06), '#e8c07a', 0, 1.3, 0.72),
+      ]);
+      C('news', news, vc, [
+        { x: -40, y: STREET_Y + 0.24, z: 23.0, ry: Math.PI },
+        { x: 50, y: STREET_Y + 0.24, z: -24.8, ry: 0 },
+        { x: -12, y: STREET_Y + 0.24, z: -13.4, ry: 0 },
+      ]);
+      // bus shelters
+      const shelter = N3.merge([
+        N3.part(N3.box(3.2, 0.1, 1.3), '#2b2f36', 0, 2.5, 0),
+        N3.part(N3.box(0.08, 2.5, 1.2), '#2b2f36', -1.55, 1.25, 0),
+        N3.part(N3.box(3.0, 1.9, 0.04), '#9fc3d6', 0, 1.4, -0.6),
+        N3.part(N3.box(2.2, 0.08, 0.5), '#6b4a2f', 0, 0.55, -0.3),
+      ]);
+      C('shelter', shelter, vc, [
+        { x: -10, y: STREET_Y + 0.24, z: -13.4, ry: 0 },
+        { x: 14, y: STREET_Y + 0.24, z: 13.4, ry: Math.PI },
+      ]);
+      // traffic lights on mast arms at the four crossings
+      const tl = N3.merge([
+        N3.part(N3.cyl(0.1, 0.12, 5.5, 8), '#2f343c', 0, 2.75, 0),
+        N3.part(N3.box(3.4, 0.1, 0.1), '#2f343c', 1.7, 5.4, 0),
+        N3.part(N3.box(0.4, 1.1, 0.35), '#1d2026', 3.1, 5.0, 0),
+      ]);
+      const tlP = [];
+      [-1, 1].forEach(sx =>
+        [
+          [-12.2, 1],
+          [12.2, -1],
+        ].forEach(([z, f]) =>
+          tlP.push({ x: sx * 18.5, y: STREET_Y + 0.24, z: z + (z < 0 ? 0.2 : -0.2), ry: sx > 0 ? Math.PI : 0 }),
+        ),
+      );
+      C('tl', tl, vc, tlP);
+      const green = new THREE.MeshStandardMaterial({ color: '#58ff9a', emissive: '#29e070', emissiveIntensity: 0.8 });
+      this.lit.push({ m: green, day: 0.8, evening: 2.5, night: 3 });
+      C(
+        'tlg',
+        new THREE.SphereGeometry(0.12, 8, 6),
+        green,
+        tlP.map(p => ({
+          x: p.x + Math.cos(p.ry) * 3.1,
+          y: STREET_Y + 0.24 + 4.7,
+          z: p.z - Math.sin(p.ry) * 3.1 + 0.2,
+        })),
+      );
+      // steam vents: striped stack and a rising plume
+      const vent = N3.merge([
+        N3.part(new THREE.ConeGeometry(0.28, 1.5, 10), '#e56a1a', 0, 0.75, 0),
+        N3.part(N3.cyl(0.22, 0.3, 0.3, 10), '#f0ece4', 0, 0.9, 0),
+      ]);
+      const vents = [
+        [-24, -2],
+        [24, 3],
+        [-60, -18.4],
+        [40, 18.4],
+        [-95, -18.4],
+        [20, -18.4],
+      ];
+      C(
+        'vent',
+        vent,
+        vc,
+        vents.map(([x, z]) => ({ x, y: STREET_Y + 0.02, z })),
+      );
+      const puff = (() => {
+        const [c, g] = canvas(64, 64);
+        const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+        r.addColorStop(0, 'rgba(255,255,255,.9)');
+        r.addColorStop(0.5, 'rgba(255,255,255,.35)');
+        r.addColorStop(1, 'rgba(255,255,255,0)');
+        g.fillStyle = r;
+        g.fillRect(0, 0, 64, 64);
+        return tex(c);
+      })();
+      this.steamMat = new THREE.SpriteMaterial({
+        map: puff,
+        transparent: true,
+        depthWrite: false,
+        opacity: 0.6,
+        color: '#ffffff',
+      });
+      const per = this.q === 'low' ? 2 : 4;
+      vents.forEach(([x, z]) => {
+        for (let k = 0; k < per; k++) {
+          const sp = new THREE.Sprite(this.steamMat.clone());
+          sp.position.set(x, STREET_Y + 1.6, z);
+          this.root.add(sp);
+          this.steam.push({ sp, x, z, k: k / per, y0: STREET_Y + 1.5 });
+        }
+      });
     }
     _trees() {
-      const trunk = new THREE.MeshStandardMaterial({ color: '#8a5a3b', roughness: 1 });
-      const leaves = ['#5fb760', '#4ea457', '#7cc36b', '#3f9a5c'].map(
-        c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.9, flatShading: true }),
-      );
-      const tG = new THREE.CylinderGeometry(0.15, 0.22, 2.2, 7),
-        cG = new THREE.IcosahedronGeometry(1.2, 1);
+      const trunk = new THREE.MeshStandardMaterial({ color: '#6b5a48', roughness: 1 });
+      const leaf = new THREE.MeshStandardMaterial({ roughness: 0.9, flatShading: true });
+      const tG = new THREE.CylinderGeometry(0.15, 0.24, 2.6, 7),
+        cG = new THREE.IcosahedronGeometry(1.35, 1);
+      const cols = ['#5f8f52', '#527f4c', '#6b9a58', '#4a7a50', '#7b9a4c'];
+      const T = [],
+        Cr = [];
       const tree = (x, z) => {
-        const t = new THREE.Mesh(tG, trunk);
-        t.position.set(x, STREET_Y + 1.2, z);
-        this.root.add(t);
-        const c = new THREE.Mesh(cG, pick(leaves));
-        c.position.set(x, STREET_Y + 3.1, z);
-        c.scale.set(1, 1.15, 1);
-        this.root.add(c);
-        const c2 = new THREE.Mesh(cG, pick(leaves));
-        c2.position.set(x + 0.5, STREET_Y + 2.6, z + 0.3);
-        c2.scale.setScalar(0.65);
-        this.root.add(c2);
+        T.push({ x, y: STREET_Y + 1.4, z });
+        Cr.push({ x, y: STREET_Y + 3.6, z, sx: 1, sy: 1.1, sz: 1, c: pick(cols) });
+        Cr.push({ x: x + 0.5, y: STREET_Y + 3.0, z: z + 0.3, s: 0.65, c: pick(cols) });
       };
-      for (let x = -63; x <= 63; x += 14) {
+      for (let x = -147; x <= 147; x += 14) {
         tree(x, -24.6);
         tree(x + 4, 22.8);
         if (Math.abs(x) > 22) tree(x + 6, -13.4);
       }
-      [
-        [-26, -6],
-        [-26, 6],
-        [26, -6],
-        [26, 6],
-      ].forEach(([x, z]) => tree(x, z));
-      // benches & planters near the office entrance
-      const bench = new THREE.MeshStandardMaterial({ color: '#9b6b43', roughness: 0.8 });
+      for (let z = -150; z <= 150; z += 14) {
+        if (Math.abs(z) < 14) continue;
+        tree(-26, z);
+        tree(26, z);
+      }
+      this.inst(tG, trunk, T);
+      this.inst(cG, leaf, Cr, true);
+      // benches by the office entrance
+      const bench = new THREE.MeshStandardMaterial({ color: '#7a5a3f', roughness: 0.8 });
       [-8, 8].forEach(x => {
         const b = new THREE.Mesh(new RoundedBoxGeometry(2, 0.12, 0.6, 2, 0.04), bench);
         b.position.set(x, STREET_Y + 0.75, 13.6);
@@ -577,166 +793,173 @@ export const C3 = (() => {
       });
     }
 
-    /* ---------------- moving things ---------------- */
-    _car(color) {
-      const g = new THREE.Group();
-      const body = new THREE.Mesh(
-        (this._carG ||= new RoundedBoxGeometry(2.2, 0.62, 1.05, 3, 0.2)),
-        new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.25 }),
-      );
-      body.position.y = 0.55;
-      g.add(body);
-      const cab = new THREE.Mesh(
-        (this._cabG ||= new RoundedBoxGeometry(1.2, 0.5, 0.95, 3, 0.18)),
-        (this._cabM ||= new THREE.MeshStandardMaterial({ color: '#2b3a4f', roughness: 0.15, metalness: 0.5 })),
-      );
-      cab.position.set(-0.12, 1.02, 0);
-      g.add(cab);
-      const roof = new THREE.Mesh((this._roofG ||= new RoundedBoxGeometry(1.0, 0.08, 0.86, 2, 0.04)), body.material);
-      roof.position.set(-0.12, 1.29, 0);
-      g.add(roof);
-      const wheelG = (this._wheelG ||= new THREE.CylinderGeometry(0.27, 0.27, 1.12, 14));
-      const wheelM = (this._wheelM ||= new THREE.MeshStandardMaterial({ color: '#16181d', roughness: 0.8 }));
-      [-0.68, 0.68].forEach(x => {
-        const w = new THREE.Mesh(wheelG, wheelM);
-        w.rotation.x = Math.PI / 2;
-        w.position.set(x, 0.28, 0);
-        g.add(w);
-      });
-      const head = new THREE.Mesh(
-        (this._lightG ||= new THREE.BoxGeometry(0.06, 0.12, 0.85)),
-        (this._headM ||= new THREE.MeshStandardMaterial({
-          color: '#fffbe8',
-          emissive: '#fff2c4',
-          emissiveIntensity: 0.3,
-        })),
-      );
-      head.position.set(1.1, 0.62, 0);
-      g.add(head);
-      const tail = new THREE.Mesh(
-        this._lightG,
-        (this._tailM ||= new THREE.MeshStandardMaterial({
-          color: '#ff5a4a',
-          emissive: '#ff3322',
-          emissiveIntensity: 0.3,
-        })),
-      );
-      tail.position.set(-1.1, 0.62, 0);
-      g.add(tail);
-      if (!this._carLit) {
-        this._carLit = true;
-        this.lit.push({ m: this._headM, day: 0.3, evening: 3, night: 4 });
-        this.lit.push({ m: this._tailM, day: 0.3, evening: 2, night: 2.5 });
-      }
-      const shadow = new THREE.Mesh(
-        (this._shG ||= new THREE.PlaneGeometry(2.4, 1.3)),
-        (this._shM ||= new THREE.MeshBasicMaterial({
-          color: '#000',
-          transparent: true,
-          opacity: 0.18,
-          depthWrite: false,
-        })),
-      );
-      shadow.rotation.x = -Math.PI / 2;
-      shadow.position.y = 0.02;
-      g.add(shadow);
-      return g;
+    /* ---------------- moving things: instanced traffic ---------------- */
+    _vehicleKits() {
+      const dark = '#16181d',
+        glass = '#2b3a4f';
+      const wheels = (xs, wz, r, y) =>
+        xs.flatMap(x => [wz, -wz].map(z => N3.part(N3.cyl(r, r, 0.3, 12), dark, x, y, z, Math.PI / 2, 0, 0)));
+      const bodyGeo = (L, W, H, y) => new RoundedBoxGeometry(L, H, W, 2, 0.18).translate(0, y, 0);
+      const mk = {};
+      // sedan / cab
+      mk.car = {
+        len: 4.4,
+        body: N3.merge([
+          N3.part(bodyGeo(4.4, 1.9, 0.7, 0.55), '#fff'),
+          N3.part(new RoundedBoxGeometry(1.1, 0.1, 0.9, 2, 0.04).translate(-0.15, 1.28, 0), '#fff'),
+        ]),
+        trim: N3.merge([
+          N3.part(new RoundedBoxGeometry(2.3, 0.55, 1.75, 2, 0.2).translate(-0.2, 1.0, 0), glass),
+          ...wheels([-1.4, 1.4], 0.9, 0.38, 0.38),
+        ]),
+      };
+      mk.van = {
+        len: 5.6,
+        body: N3.merge([N3.part(bodyGeo(5.6, 2.0, 1.9, 1.15), '#fff')]),
+        trim: N3.merge([N3.part(N3.box(0.1, 0.7, 1.7), glass, 2.5, 1.45, 0), ...wheels([-1.8, 1.8], 1.0, 0.42, 0.42)]),
+      };
+      mk.bus = {
+        len: 11.5,
+        body: N3.merge([
+          N3.part(bodyGeo(11.5, 2.6, 3.0, 1.85), '#fff'),
+          N3.part(N3.box(11.4, 0.5, 2.62), '#fff', 0, 0.55, 0),
+        ]),
+        trim: N3.merge([
+          N3.part(N3.box(10.2, 0.95, 2.66), glass, -0.2, 2.4, 0),
+          N3.part(N3.box(0.1, 1.2, 2.2), glass, 5.7, 2.3, 0),
+          ...wheels([-3.6, 3.4], 1.2, 0.5, 0.5),
+        ]),
+      };
+      return mk;
     }
     _traffic() {
-      const per = this.q === 'low' ? 3 : 6;
+      const lowQ = this.q === 'low';
+      const mk = this._vehicleKits();
       const lanes = [
-        { axis: 'x', c: -16.8, dir: 1, min: -90, max: 90 },
-        { axis: 'x', c: -21.2, dir: -1, min: -90, max: 90 },
-        { axis: 'x', c: 16.3, dir: -1, min: -90, max: 90 },
-        { axis: 'x', c: 19.7, dir: 1, min: -90, max: 90 },
-        { axis: 'z', c: -21, dir: 1, min: -70, max: 60 },
-        { axis: 'z', c: -23, dir: -1, min: -70, max: 60 },
-        { axis: 'z', c: 21, dir: -1, min: -70, max: 60 },
-        { axis: 'z', c: 23, dir: 1, min: -70, max: 60 },
+        { axis: 'x', c: -16.8, dir: 1, min: -150, max: 150, n: lowQ ? 5 : 9 },
+        { axis: 'x', c: -21.2, dir: -1, min: -150, max: 150, n: lowQ ? 5 : 9 },
+        { axis: 'x', c: 16.3, dir: -1, min: -150, max: 150, n: lowQ ? 5 : 9 },
+        { axis: 'x', c: 19.7, dir: 1, min: -150, max: 150, n: lowQ ? 5 : 9 },
+        { axis: 'z', c: -21, dir: 1, min: -150, max: 150, n: lowQ ? 3 : 6 },
+        { axis: 'z', c: -23, dir: -1, min: -150, max: 150, n: lowQ ? 3 : 6 },
+        { axis: 'z', c: 21, dir: -1, min: -150, max: 150, n: lowQ ? 3 : 6 },
+        { axis: 'z', c: 23, dir: 1, min: -150, max: 150, n: lowQ ? 3 : 6 },
       ];
+      const plan = [];
       lanes.forEach((ln, li) => {
-        const n = ln.axis === 'x' ? per : Math.max(2, Math.round(per / 2));
-        for (let i = 0; i < n; i++) {
-          const car = this._car(pick(CAR_COLORS));
+        ln.list = [];
+        for (let i = 0; i < ln.n; i++) {
+          const r = rnd();
+          const cls = r < 0.06 ? 'bus' : r < 0.16 ? 'van' : 'car';
+          const color =
+            cls === 'car'
+              ? rnd() < 0.62
+                ? CAB
+                : pick(CAR_COLORS)
+              : cls === 'van'
+                ? pick(['#f3f1ec', '#6b4a2f', '#d9dde3'])
+                : '#2f5f8f';
           const span = ln.max - ln.min,
-            s = ln.min + (i / n) * span + rnd() * (span / n) * 0.5;
-          car.rotation.y = ln.axis === 'x' ? (ln.dir > 0 ? 0 : Math.PI) : ln.dir > 0 ? -Math.PI / 2 : Math.PI / 2;
-          this.root.add(car);
-          this.cars.push({ g: car, ln, s, v: 5 + rnd() * 4, vmax: 5 + rnd() * 4 });
+            s = ln.min + (i / ln.n) * span + rnd() * (span / ln.n) * 0.5;
+          const v = { cls, color, ln, s, v: 5 + rnd() * 4, vmax: 5 + rnd() * 4, len: mk[cls].len, taxi: color === CAB };
+          if (li === 0 && i === 0) {
+            v.cls = 'bus';
+            v.color = '#2f5f8f';
+            v.len = mk.bus.len;
+            v.stop = true; // stops in front of the office, like the tram did
+            v.vmax = 4.5;
+            v.v = 4.5;
+            v.taxi = false;
+            this.bus = v;
+          }
+          ln.list.push(v);
+          plan.push(v);
         }
       });
-    }
-    _tram() {
-      const g = new THREE.Group();
-      const cream = new THREE.MeshStandardMaterial({ color: '#f3dca0', roughness: 0.6 });
-      const orange = new THREE.MeshStandardMaterial({ color: '#e8862f', roughness: 0.6 });
-      const [c, x] = canvas(512, 64);
-      x.fillStyle = '#f3dca0';
-      x.fillRect(0, 0, 512, 64);
-      for (let i = 0; i < 8; i++) {
-        x.fillStyle = '#7cc1d6';
-        x.fillRect(14 + i * 62, 8, 50, 46);
-        x.fillStyle = 'rgba(255,255,255,.4)';
-        x.fillRect(18 + i * 62, 10, 12, 42);
+      this.cars = plan;
+      this.lanes = lanes;
+      const body = new THREE.MeshStandardMaterial({ roughness: 0.35, metalness: 0.3 });
+      const trim = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.4 });
+      this.fleet = {};
+      for (const cls of ['car', 'van', 'bus']) {
+        const list = plan.filter(p => p.cls === cls);
+        if (!list.length) continue;
+        const b = new THREE.InstancedMesh(mk[cls].body, body, list.length),
+          t = new THREE.InstancedMesh(mk[cls].trim, trim, list.length);
+        const col = new THREE.Color();
+        list.forEach((p, i) => {
+          p.i = i;
+          b.setColorAt(i, col.set(p.color));
+        });
+        b.frustumCulled = t.frustumCulled = false;
+        this.root.add(b, t);
+        this.fleet[cls] = { b, t, list };
       }
-      const [ce, xe] = canvas(512, 64);
-      xe.fillStyle = '#000';
-      xe.fillRect(0, 0, 512, 64);
-      for (let i = 0; i < 8; i++) {
-        xe.fillStyle = '#ffe0a0';
-        xe.fillRect(14 + i * 62, 8, 50, 46);
-      }
-      const winM = new THREE.MeshStandardMaterial({
-        map: tex(c),
-        emissiveMap: tex(ce),
-        emissive: '#ffffff',
-        emissiveIntensity: 0,
-        roughness: 0.4,
+      // taxi roof lights, headlights, tail lights
+      this.taxis = plan.filter(p => p.taxi);
+      const topM = new THREE.MeshStandardMaterial({ color: '#fff4c4', emissive: '#ffe08a', emissiveIntensity: 0.5 });
+      this.lit.push({ m: topM, day: 0.4, evening: 2, night: 3 });
+      this.taxiTop = new THREE.InstancedMesh(
+        new THREE.BoxGeometry(0.7, 0.2, 0.3),
+        topM,
+        Math.max(1, this.taxis.length),
+      );
+      const headM = new THREE.MeshStandardMaterial({ color: '#fffbe8', emissive: '#fff2c4', emissiveIntensity: 0.3 });
+      const tailM = new THREE.MeshStandardMaterial({ color: '#ff5a4a', emissive: '#ff3322', emissiveIntensity: 0.3 });
+      this.lit.push({ m: headM, day: 0.3, evening: 3, night: 4 });
+      this.lit.push({ m: tailM, day: 0.3, evening: 2, night: 2.5 });
+      const lg = new THREE.BoxGeometry(0.06, 0.14, 0.9);
+      this.heads = new THREE.InstancedMesh(lg, headM, plan.length);
+      this.tails = new THREE.InstancedMesh(lg, tailM, plan.length);
+      [this.taxiTop, this.heads, this.tails].forEach(m => {
+        m.frustumCulled = false;
+        this.root.add(m);
       });
-      this.lit.push({ m: winM, day: 0, evening: 0.9, night: 1.2 });
-      const lower = new THREE.Mesh(new RoundedBoxGeometry(10, 1.1, 2.3, 3, 0.25), orange);
-      lower.position.y = 0.95;
-      g.add(lower);
-      const upper = new THREE.Mesh(new RoundedBoxGeometry(10, 1.4, 2.25, 3, 0.3), [
-        cream,
-        cream,
-        cream,
-        cream,
-        winM,
-        winM,
-      ]);
-      upper.position.y = 2.15;
-      g.add(upper);
-      const sideWin = new THREE.Mesh(new THREE.BoxGeometry(9.6, 1.0, 2.28), [cream, cream, cream, cream, winM, winM]);
-      sideWin.rotation.y = Math.PI / 2;
-      sideWin.visible = false;
-      const winPlane = zs => {
-        const p = new THREE.Mesh(new THREE.PlaneGeometry(9.4, 1.0), winM);
-        p.position.set(0, 2.2, zs * 1.14);
-        if (zs < 0) p.rotation.y = Math.PI;
-        g.add(p);
-      };
-      winPlane(1);
-      winPlane(-1);
-      const roof = new THREE.Mesh(new RoundedBoxGeometry(10.2, 0.25, 2.4, 2, 0.1), orange);
-      roof.position.y = 2.95;
-      g.add(roof);
-      const pole = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.04, 0.04, 2.2, 6),
-        new THREE.MeshStandardMaterial({ color: '#333' }),
-      );
-      pole.position.set(0, 4, 0);
-      pole.rotation.z = 0.5;
-      g.add(pole);
-      const wire = new THREE.Mesh(
-        new THREE.BoxGeometry(320, 0.03, 0.03),
-        new THREE.MeshStandardMaterial({ color: '#2b2b2b' }),
-      );
-      wire.position.set(0, STREET_Y + 4.95, -19);
-      this.root.add(wire);
-      g.position.set(-60, STREET_Y, -19);
-      this.root.add(g);
-      this.tram = { g, x: -60, v: 4.5, stopUntil: 0 };
+      this.taxiTop.count = this.taxis.length;
+      this._dmy = new THREE.Object3D();
+    }
+    _placeVehicles() {
+      const d = this._dmy;
+      const L = [0, 0, 0];
+      this.cars.forEach((c, gi) => {
+        const ln = c.ln;
+        const ry = ln.axis === 'x' ? (ln.dir > 0 ? 0 : Math.PI) : ln.dir > 0 ? -Math.PI / 2 : Math.PI / 2;
+        const px = ln.axis === 'x' ? c.s : ln.c,
+          pz = ln.axis === 'x' ? ln.c : c.s;
+        d.position.set(px, STREET_Y, pz);
+        d.rotation.set(0, ry, 0);
+        d.scale.set(1, 1, 1);
+        d.updateMatrix();
+        const f = this.fleet[c.cls];
+        f.b.setMatrixAt(c.i, d.matrix);
+        f.t.setMatrixAt(c.i, d.matrix);
+        const cos = Math.cos(ry),
+          sin = Math.sin(ry);
+        const at = (x, y, z) => {
+          d.position.set(px + x * cos + z * sin, STREET_Y + y, pz - x * sin + z * cos);
+          d.rotation.set(0, ry, 0);
+          d.updateMatrix();
+        };
+        const h = c.cls === 'car' ? 0.62 : c.cls === 'van' ? 0.9 : 0.9;
+        at(c.len / 2 + 0.01, h, 0);
+        this.heads.setMatrixAt(gi, d.matrix);
+        at(-c.len / 2 - 0.01, h, 0);
+        this.tails.setMatrixAt(gi, d.matrix);
+        if (c.taxi) {
+          const ti = this.taxis.indexOf(c);
+          at(-0.15, 1.5, 0);
+          this.taxiTop.setMatrixAt(ti, d.matrix);
+        }
+      });
+      for (const k of Object.values(this.fleet)) {
+        k.b.instanceMatrix.needsUpdate = true;
+        k.t.instanceMatrix.needsUpdate = true;
+      }
+      this.heads.instanceMatrix.needsUpdate =
+        this.tails.instanceMatrix.needsUpdate =
+        this.taxiTop.instanceMatrix.needsUpdate =
+          true;
+      return L;
     }
     _people() {
       const n = this.q === 'low' ? 16 : 44;
@@ -750,18 +973,6 @@ export const C3 = (() => {
         { axis: 'z', c: -25.8, min: -50, max: 50 },
         { axis: 'z', c: 25.8, min: -50, max: 50 },
       ];
-      const tops = [
-        '#e8604c',
-        '#3fb6a8',
-        '#f6c445',
-        '#5aa6e0',
-        '#9b7fd1',
-        '#ffffff',
-        '#2c3e66',
-        '#7cc36b',
-        '#ef8f6b',
-        '#e98aa8',
-      ];
       for (let i = 0; i < n; i++) {
         const f = rnd() < 0.5;
         const p = makePerson({
@@ -769,11 +980,11 @@ export const C3 = (() => {
           skin: pick(SKIN),
           hair: pick(HAIR),
           hairStyle: f ? pick(['long', 'bob', 'bun', 'pony']) : pick(['side', 'quiff', 'buzz']),
-          top: pick(tops),
-          bottom: pick(['#2b2f3a', '#3a4a6b', '#6b5a48', '#1f2430', '#8a8f99']),
+          top: pick(TOPS),
+          bottom: pick(['#1f2430', '#2b2f3a', '#3a4a6b', '#4a4238', '#6b6f78']),
           skirt: f && rnd() < 0.3,
           detail: false,
-          sleeves: rnd() < 0.4 ? 'short' : '',
+          sleeves: rnd() < 0.3 ? 'short' : '',
         });
         const path = paths[i % paths.length];
         const dir = rnd() < 0.5 ? 1 : -1;
@@ -788,8 +999,12 @@ export const C3 = (() => {
         if (standing) p.g.rotation.y += Math.PI / 2;
         const sh = new THREE.Mesh(
           (this._pshG ||= new THREE.CircleGeometry(0.35, 12)),
-          this._shM ||
-            new THREE.MeshBasicMaterial({ color: '#000', transparent: true, opacity: 0.18, depthWrite: false }),
+          (this._shM ||= new THREE.MeshBasicMaterial({
+            color: '#000',
+            transparent: true,
+            opacity: 0.18,
+            depthWrite: false,
+          })),
         );
         sh.rotation.x = -Math.PI / 2;
         sh.position.y = 0.01;
@@ -797,6 +1012,7 @@ export const C3 = (() => {
         this.root.add(p.g);
         this.walkers.push({ p, path, dir, s, v: 1.1 + rnd() * 0.6, standing, k: rnd() * 10 });
       }
+      this._placeVehicles();
     }
     _sky() {
       const cloudM = (this.cloudM = new THREE.MeshStandardMaterial({
@@ -816,11 +1032,13 @@ export const C3 = (() => {
           b.scale.set(2.4 + rnd() * 1.5, 1.4 + rnd(), 1.8 + rnd());
           g.add(b);
         }
-        g.position.set(-120 + rnd() * 240, 34 + rnd() * 16, -110 + rnd() * 80);
+        g.position.set(-120 + rnd() * 240, 60 + rnd() * 30, -110 + rnd() * 80);
+        g.scale.setScalar(2);
         this.root.add(g);
         this.clouds.push({ g, v: 0.6 + rnd() * 0.8 });
       }
-      const birdM = new THREE.MeshBasicMaterial({ color: '#2d3142', side: THREE.DoubleSide });
+      // pigeons
+      const birdM = new THREE.MeshBasicMaterial({ color: '#4a4f58', side: THREE.DoubleSide });
       const wing = new THREE.PlaneGeometry(0.9, 0.25);
       for (let i = 0; i < 7; i++) {
         const g = new THREE.Group();
@@ -842,50 +1060,46 @@ export const C3 = (() => {
       this.lit.forEach(x => {
         x.m.emissiveIntensity = x[tod] ?? 0;
       });
-      this.groundMat.color.set(tod === 'day' ? '#cfc6b4' : tod === 'evening' ? '#9d8e88' : '#3a3d48');
+      this.groundMat.color.set(GROUND[tod]);
       this.cloudM.color.set(tod === 'day' ? '#ffffff' : tod === 'evening' ? '#ffc9b0' : '#4a5470');
       this.cloudM.emissive.set(tod === 'day' ? '#ffffff' : tod === 'evening' ? '#ff9e80' : '#1e2436');
       this.cloudM.emissiveIntensity = tod === 'night' ? 0.4 : 0.35;
       this.birds.forEach(b => {
         b.g.visible = tod !== 'night';
       });
+      this.steam.forEach(s =>
+        s.sp.material.color.set(tod === 'night' ? '#aab4d0' : tod === 'evening' ? '#ffd9c4' : '#ffffff'),
+      );
     }
 
     /* ---------------- animation ---------------- */
     update(dt, t) {
       dt = Math.min(dt, 0.1);
-      // cars: keep distance from the car ahead, stop for the tram crossing a side street
-      for (const c of this.cars) {
-        const ahead = this.cars
-          .filter(o => o !== c && o.ln === c.ln)
-          .reduce((best, o) => {
-            let d = (o.s - c.s) * c.ln.dir;
-            if (d < 0) d += c.ln.max - c.ln.min;
-            return Math.min(best, d);
-          }, 1e9);
-        const target = ahead < 4.5 ? 0 : ahead < 8 ? c.vmax * 0.4 : c.vmax;
-        c.v += (target - c.v) * Math.min(1, dt * 2.5);
-        c.s += c.v * c.ln.dir * dt;
-        if (c.s > c.ln.max) c.s = c.ln.min;
-        if (c.s < c.ln.min) c.s = c.ln.max;
-        if (c.ln.axis === 'x') c.g.position.set(c.s, STREET_Y, c.ln.c);
-        else c.g.position.set(c.ln.c, STREET_Y, c.s);
-      }
-      // tram with a stop in front of the office
-      const tr = this.tram;
-      if (tr) {
-        const now = t;
-        if (tr.stopUntil > now) {
-          /* waiting at the stop */
-        } else {
-          const prev = tr.x;
-          tr.x += tr.v * dt;
-          if (prev < -6 && tr.x >= -6) tr.stopUntil = now + 4;
-          if (tr.x > 95) tr.x = -95;
+      // cars keep their distance from the car ahead; the bus waits at its stop in front of the office
+      for (const ln of this.lanes) {
+        const span = ln.max - ln.min;
+        for (const c of ln.list) {
+          let ahead = 1e9;
+          for (const o of ln.list) {
+            if (o === c) continue;
+            let d = (o.s - c.s) * ln.dir;
+            if (d < 0) d += span;
+            d -= (o.len + c.len) / 2 - 2.2;
+            if (d < ahead) ahead = d;
+          }
+          let target = ahead < 3 ? 0 : ahead < 7 ? c.vmax * 0.4 : c.vmax;
+          if (c.stop) {
+            if (c.waitUntil > t) target = 0;
+          }
+          c.v += (target - c.v) * Math.min(1, dt * 2.5);
+          c.prev = c.s;
+          c.s += c.v * ln.dir * dt;
+          if (c.stop && c.prev < -6 && c.s >= -6) c.waitUntil = t + 4;
+          if (c.s > ln.max) c.s = ln.min;
+          if (c.s < ln.min) c.s = ln.max;
         }
-        tr.g.position.x = tr.x;
       }
-      // pedestrians
+      this._placeVehicles();
       for (const w of this.walkers) {
         if (w.standing) {
           w.p.animate(t, 'talk', w.k);
@@ -898,9 +1112,16 @@ export const C3 = (() => {
         else w.p.g.position.z = w.s;
         w.p.animate(t * (0.85 + w.v * 0.1), 'walk', w.k);
       }
+      for (const s of this.steam) {
+        s.k = (s.k + dt * 0.18) % 1;
+        const k = s.k;
+        s.sp.position.set(s.x + Math.sin(t * 0.7 + s.z) * k * 1.2, s.y0 + k * 9, s.z);
+        s.sp.scale.setScalar(1.2 + k * 5);
+        s.sp.material.opacity = (1 - k) * Math.min(1, k * 6) * 0.55;
+      }
       for (const c of this.clouds) {
         c.g.position.x += c.v * dt;
-        if (c.g.position.x > 140) c.g.position.x = -140;
+        if (c.g.position.x > 200) c.g.position.x = -200;
       }
       for (const b of this.birds) {
         b.g.position.x += 6 * dt;
