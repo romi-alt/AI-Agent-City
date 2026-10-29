@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import type { NextConfig } from 'next';
 
 // The browser talks only to this site (PUBLIC_ORIGIN); `/api/*` is proxied to the API so the session cookie it sets
@@ -14,7 +15,8 @@ const config: NextConfig = {
   ...(preview
     ? {
         output: 'standalone' as const,
-        outputFileTracingRoot: new URL('../../', import.meta.url).pathname,
+        // fileURLToPath, not URL.pathname: on Windows the pathname is `/D:/...`, which Turbopack cannot open.
+        outputFileTracingRoot: fileURLToPath(new URL('../../', import.meta.url)),
         outputFileTracingExcludes: { '*': ['**/@img/**', '**/sharp@*/**', '**/sharp/**'] },
         images: { unoptimized: true },
       }

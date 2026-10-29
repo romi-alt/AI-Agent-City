@@ -1,9 +1,10 @@
 # AgentCity live build: https://autosalescity.site
 
-Status of this document: first written on 2026-10-28, updated on 2026-10-29 from the code on `main` (`e418fb8`). The live
-site runs a build of exactly that commit (Hostinger build `01a18506-6cd5-702b-997f-f13017d2511b`, zip `agentcity-live11`,
-deployed 2026-10-29 00:19 UTC). It says what the live site does, how it is built and run, and what has and has not been
-verified. It contains no secrets: only the names of settings.
+Status of this document: first written on 2026-10-28, updated on 2026-10-29. The live site runs Hostinger build
+`01a185bf-6a38-739b-aaf6-f30028beb9b5` (zip `agentcity-live12`, deployed 2026-10-29 03:41 UTC). It was built on Windows
+from `main` `d17d8a8` plus the Windows packaging fixes in `chore/windows-dev-setup`. The site behaves exactly as `e418fb8`
+(live11) did. This document says what the live site does, how it is built and run, and what has and has not been verified.
+It contains no secrets: only the names of settings.
 
 ## 1. At a glance
 
@@ -273,8 +274,12 @@ Hosting facts: Hostinger account user `u943531942`; site `autosalescity.site` (t
 2. **Package**: `NEXT_PUBLIC_LITE_DEMO=true scripts/package-preview.sh https://autosalescity.site <out.zip>`. This runs
    `next build` with the preview flag, copies the standalone server, drops the unused image resizer, flattens the
    dependency tree, writes a tiny `package.json` for the host, and refuses to produce a zip if symlinks remain or a
-   development secret is found. Expected size: about 10 MB.
+   development secret is found. Expected size: about 10 MB. It runs in Git Bash on Windows as well as on Linux, because
+   the standalone copy is done in Python, which reads through pnpm's links. It needs `python3` and `zip` on the PATH.
+   Move a local `apps/web/.env.local` aside before packaging.
 3. **Upload**: Hostinger file API "generate upload URL", then a TUS `POST` and `PATCH` of the zip to `public_html`.
+   Alternatively, the Hostinger MCP `hosting_deploy` with `path` = the zip and the settings below uploads and starts the
+   build in one call (used for live12).
 4. **Build**: Hostinger Node.js "start build" from the archive: Node 22, app type `other`, root `.`, build script `build`,
    entry `apps/web/server.js`, package manager `npm`. The host extracts, runs `npm install` and `echo prebuilt`, switches
    the `current` version and restarts. It takes about 30 s.
@@ -371,6 +376,7 @@ Package: `packages/city-scene`. Highlights of the current version:
 | Demo office scenarios (browser, desktop and 390 wide, dev server) | Immersive mode on and off, page chrome back after exit, focus moves to the step heading, `aria-live` text, status changes at review and after approval, day summary counts 1 of 8 then 8 of 8 (4 approved, 2 changed, 2 declined), no cross-origin requests, counters and decisions identical after a reload |
 | Production package, local run | The packaged server answered every page as expected and the city rendered with sky, clouds and tags; the demo API correctly answered 503 without an email key |
 | Live deploy 2026-10-29 | Build `01a18506` completed; `/`, `/city`, `/demo`, `/demo/signin`, `/demo/office`, `/demo/welcome` and the form API return 200; `/api/lite/demo/me` and the leads route return 401; the 4 stored leads were intact; the live `/city` shows the new sky and clouds |
+| Live deploy 2026-10-29 (live12, first Windows-built package) | Build `01a185bf` completed in 31 s; `/`, `/city`, `/demo`, `/demo/signin`, `/demo/check-email` and `/api/lite/demo/form-token` return 200; `/api/lite/demo/me` and the leads route return 401; `/signin` 307 and `/api/foo` 404 as before; static chunks 200; checked in a browser by the maintainer |
 
 Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-city`, `x03-floor-look`,
 `x04-city-dense`, `x05-polish`, `x06-life`, `x06-sky`, `x07-scenarios`, `lite-demo`). `MIGRATION-STATUS.md` lists every stage and what was not run.
