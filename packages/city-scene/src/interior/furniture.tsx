@@ -1,10 +1,11 @@
 'use client';
-import { forwardRef, useMemo } from 'react';
+import { forwardRef, useContext, useMemo } from 'react';
 import * as THREE from 'three';
 import { useKit } from './kit.ts';
 import { Box, Capsule, Cyl, Plane, Sphere } from './parts.tsx';
 import { seeded } from './textures.ts';
 import { asGeo, asMat } from './r3f.ts';
+import { type DetailKit, DetailKitContext } from './room/detailKit.ts';
 
 /** Ergonomic task chair: five-star base on casters, gas lift, contoured seat, curved mesh back, armrests. */
 export function Chair({ position, rotation = 0 }: { position: [number, number, number]; rotation?: number }) {
@@ -330,32 +331,184 @@ export const REF_DESK = { top: '#d4955a', cabinet: '#cfd4d9', leg: '#555a60', mo
 /**
  * An individual desk: warm wood top, a light grey drawer cabinet, one dark monitor turned to the sitter, who sits on
  * the +z side. `screen` is the monitor's face (a canvas screen, or the plain dark bezel when the desk is free).
+ * Inside the detailed office it also carries what a lived-in desk has: a monitor angled a little towards the room on
+ * a foot, keyboard and mouse, an open laptop, a mug and desk lamp in the agent's accent colour, papers, drawer pulls,
+ * and a small plant on a free desk. `plate` is an optional name plate (leadership desks).
  */
-export function RefDeskTop({ screen }: { screen: THREE.Material }) {
+export function RefDeskTop({
+  screen,
+  accent,
+  empty,
+  plate,
+}: {
+  screen: THREE.Material;
+  accent?: string;
+  empty?: boolean;
+  plate?: THREE.Material | null;
+}) {
   const mat = refMat;
+  // Low keeps the plain desk; balanced and ultra dress it.
+  const kit = useContext(DetailKitContext);
+  const d = kit && kit.level !== 'low' ? kit : null;
+  const rich = d?.level === 'rich';
   return (
     <group>
       <Box mat={mat(REF_DESK.top)} position={[0, 0.95, 0]} scale={[2.6, 0.12, 1.3]} castShadow receiveShadow />
       <Box mat={mat(REF_DESK.cabinet)} position={[0.9, 0.45, 0]} scale={[0.6, 0.9, 1.1]} castShadow />
       <Box mat={mat(REF_DESK.leg)} position={[-1.2, 0.45, 0]} scale={[0.08, 0.9, 1.1]} />
       {/* Monitor and stand, a little left of centre with the keyboard space in front. */}
-      <Box mat={mat(REF_DESK.monitor)} position={[-0.2, 1.15, -0.35]} scale={[0.1, 0.4, 0.1]} />
-      <Box mat={mat(REF_DESK.monitor)} position={[-0.2, 1.6, -0.39]} scale={[1.5, 0.9, 0.08]} castShadow />
-      <Plane mat={screen} position={[-0.2, 1.6, -0.345]} scale={[1.38, 0.8, 1]} />
+      <group position={[-0.2, 0, -0.35]} rotation-y={d ? 0.18 : 0}>
+        <Box mat={mat(REF_DESK.monitor)} position={[0, 1.15, 0]} scale={[0.1, 0.4, 0.1]} />
+        <Box mat={mat(REF_DESK.monitor)} position={[0, 1.6, -0.04]} scale={[1.5, 0.9, 0.08]} castShadow />
+        <Plane mat={screen} position={[0, 1.6, 0.005]} scale={[1.38, 0.8, 1]} />
+        {d && <Box mat={mat(REF_DESK.monitor)} position={[0, 1.02, 0]} scale={[0.5, 0.03, 0.3]} />}
+      </group>
       <Box mat={mat('#e8e4dc')} position={[-0.2, 1.02, 0.15]} scale={[0.9, 0.03, 0.3]} />
+      {d && accent && (
+        <>
+          {/* Keys, mouse and pad. */}
+          <Box mat={mat('#c9c4ba')} position={[-0.2, 1.04, 0.15]} scale={[0.82, 0.012, 0.22]} />
+          <Box mat={mat('#3a3f4a')} position={[0.5, 1.02, 0.18]} scale={[0.34, 0.01, 0.3]} />
+          <P g={d.rbox(0.1, 0.04, 0.16, 0.02)} m={mat('#f4eee6')} position={[0.5, 1.045, 0.18]} />
+          {/* Drawer pulls in the accent colour. */}
+          {[0.25, 0.55, 0.8].map(y => (
+            <Box key={y} mat={d.mat(accent, { roughness: 0.4 })} position={[0.9, y, 0.56]} scale={[0.28, 0.04, 0.03]} />
+          ))}
+          {!empty && (
+            <>
+              <group position={[-1.0, 1.01, 0.12]} rotation-y={0.45}>
+                <P g={d.rbox(0.5, 0.03, 0.34, 0.012)} m={d.gloss('#c9ced6')} position={[0, 0.015, 0]} />
+                <group position={[0, 0.03, -0.16]} rotation-x={-0.28}>
+                  <P g={d.rbox(0.5, 0.32, 0.02, 0.01)} m={d.gloss('#c9ced6')} position={[0, 0.16, 0]} />
+                  <Plane
+                    mat={d.mat('#1b2533', { emissive: '#2a4a78', emissiveIntensity: 0.4, key: 'lap' })}
+                    position={[0, 0.16, 0.012]}
+                    scale={[0.45, 0.28, 1]}
+                  />
+                </group>
+              </group>
+              <Cyl mat={d.mat(accent, { roughness: 0.5 })} position={[0.62, 1.1, -0.1]} scale={[0.13, 0.14, 0.13]} />
+              <Box mat={mat('#ffffff')} position={[0.7, 1.025, 0.45]} rotation-y={0.2} scale={[0.36, 0.03, 0.48]} />
+              {rich && (
+                <Box
+                  mat={d.mat('#f5e27a')}
+                  position={[-0.55, 1.03, 0.45]}
+                  rotation-y={-0.2}
+                  scale={[0.14, 0.02, 0.14]}
+                />
+              )}
+            </>
+          )}
+          {empty && <DeskPlant d={d} />}
+          {/* Desk lamp: foot, arm, a shade in the accent colour and a warm bulb. */}
+          <group position={[1.1, 1.01, -0.42]} rotation-y={-0.4}>
+            <Cyl mat={mat(REF_DESK.leg)} position={[0, 0.02, 0]} scale={[0.26, 0.035, 0.26]} />
+            <Cyl mat={mat(REF_DESK.leg)} position={[0, 0.3, 0]} scale={[0.03, 0.56, 0.03]} />
+            <P
+              g={d.geo('lampshade', () => new THREE.SphereGeometry(0.14, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2))}
+              m={d.mat(accent, { roughness: 0.45, side: THREE.DoubleSide, key: 'shade' })}
+              position={[0.06, 0.58, 0.1]}
+              rotation={[0.5, 0, 0]}
+            />
+            <P
+              g={d.geo('lampbulb', () => new THREE.SphereGeometry(0.05, 8, 6))}
+              m={d.mat('#fff4d6', { emissive: '#ffe2a8', emissiveIntensity: 1, key: 'bulb' })}
+              position={[0.06, 0.55, 0.12]}
+            />
+          </group>
+          {plate && (
+            <mesh material={asMat(plate)} position={[0.3, 1.08, 0.58]} rotation={[-0.35, 0, 0]}>
+              <boxGeometry args={[0.56, 0.14, 0.04]} />
+            </mesh>
+          )}
+        </>
+      )}
     </group>
   );
+}
+
+/** A small bush in a terracotta pot for a free desk. */
+function DeskPlant({ d }: { d: DetailKit }) {
+  const green = d.mat('#4ea457', { roughness: 0.7, key: 'deskplant' });
+  return (
+    <group position={[0.2, 1.01, -0.05]} scale={0.34}>
+      <P
+        g={d.geo('pot2', () => new THREE.CylinderGeometry(0.32, 0.24, 0.6, 14))}
+        m={d.mat('#c96f4a')}
+        position={[0, 0.3, 0]}
+      />
+      {[0, 1, 2, 3, 4].map(i => (
+        <P
+          key={i}
+          g={d.geo('ico', () => new THREE.IcosahedronGeometry(0.5, 0))}
+          m={green}
+          position={[Math.sin(i * 1.3) * 0.28, 0.85 + (i % 3) * 0.15, Math.cos(i * 1.3) * 0.28]}
+          scale={0.62}
+        />
+      ))}
+    </group>
+  );
+}
+
+/** A mesh from a kit geometry and material (the desk's rounded parts). */
+function P({
+  g,
+  m,
+  position,
+  rotation,
+  scale,
+}: {
+  g: THREE.BufferGeometry;
+  m: THREE.Material;
+  position?: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: number | [number, number, number];
+}) {
+  return <mesh geometry={asGeo(g)} material={asMat(m)} position={position} rotation={rotation} scale={scale} />;
 }
 
 /** A plain dark office chair, seat on the +z side of the desk. */
 export function RefChair() {
   const c = refMat(REF_DESK.chair);
+  const kit = useContext(DetailKitContext);
+  const d = kit && kit.level !== 'low' ? kit : null;
+  const metal = refMat(REF_DESK.leg);
   return (
     <group position={[-0.2, 0, 1.05]}>
-      <Box mat={c} position={[0, 0.55, 0]} scale={[0.8, 0.12, 0.8]} castShadow />
-      <Box mat={c} position={[0, 1.0, 0.4]} scale={[0.8, 0.9, 0.1]} castShadow />
-      <Cyl mat={refMat(REF_DESK.leg)} position={[0, 0.27, 0]} scale={[0.08, 0.5, 0.08]} />
-      <Cyl mat={refMat(REF_DESK.leg)} position={[0, 0.03, 0]} scale={[0.7, 0.05, 0.7]} />
+      {d ? (
+        <>
+          <P g={d.rbox(0.8, 0.12, 0.8, 0.05)} m={c} position={[0, 0.55, 0]} />
+          <P g={d.rbox(0.8, 0.9, 0.1, 0.05)} m={c} position={[0, 1.0, 0.4]} rotation={[0.08, 0, 0]} />
+          {[-1, 1].map(k => (
+            <P key={k} g={d.rbox(0.08, 0.04, 0.5, 0.02)} m={metal} position={[k * 0.44, 0.78, 0.05]} />
+          ))}
+          {[-1, 1].map(k => (
+            <Box key={k} mat={metal} position={[k * 0.44, 0.67, 0.2]} scale={[0.05, 0.22, 0.05]} />
+          ))}
+          <Cyl mat={metal} position={[0, 0.3, 0]} scale={[0.09, 0.5, 0.09]} />
+          {Array.from({ length: d.level === 'low' ? 3 : 5 }, (_, i) => {
+            const a = (i / (d.level === 'low' ? 3 : 5)) * Math.PI * 2;
+            return (
+              <group key={i}>
+                <Box
+                  mat={metal}
+                  position={[Math.sin(a) * 0.2, 0.07, Math.cos(a) * 0.2]}
+                  rotation-y={a}
+                  scale={[0.07, 0.05, 0.4]}
+                />
+                <Box mat={c} position={[Math.sin(a) * 0.4, 0.035, Math.cos(a) * 0.4]} scale={[0.07, 0.07, 0.07]} />
+              </group>
+            );
+          })}
+        </>
+      ) : (
+        <>
+          <Box mat={c} position={[0, 0.55, 0]} scale={[0.8, 0.12, 0.8]} castShadow />
+          <Box mat={c} position={[0, 1.0, 0.4]} scale={[0.8, 0.9, 0.1]} castShadow />
+          <Cyl mat={metal} position={[0, 0.27, 0]} scale={[0.08, 0.5, 0.08]} />
+          <Cyl mat={metal} position={[0, 0.03, 0]} scale={[0.7, 0.05, 0.7]} />
+        </>
+      )}
     </group>
   );
 }
