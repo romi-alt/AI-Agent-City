@@ -326,8 +326,9 @@ export const O3 = (() => {
     }));
 
   class Bake {
-    constructor(lampMat) {
+    constructor(lampMat, low = false) {
       this.lampMat = lampMat;
+      this.low = low; // phones: fewer segments, plain boxes instead of rounded ones
       this.parts = { matte: [], satin: [], metal: [], leaf: [], lamp: [] };
       this.m4 = new THREE.Matrix4();
       this.q = new THREE.Quaternion();
@@ -357,21 +358,35 @@ export const O3 = (() => {
       this.put(UB(), col, x, y, z, w, h, d, rx, ry, rz, bk);
     }
     cyl(r, h, col, x, y, z, bk = 'matte', seg = 10, rx = 0, rz = 0, ry = 0) {
-      this.put(UC(seg), col, x, y, z, r, h, r, rx, ry, rz, bk);
+      this.put(UC(this.low ? Math.max(6, seg >> 1) : seg), col, x, y, z, r, h, r, rx, ry, rz, bk);
     }
     cone(rb, rt, h, col, x, y, z, bk = 'matte', seg = 12, rx = 0, rz = 0) {
-      this.put(UCO(+(rt / rb).toFixed(3), seg), col, x, y, z, rb, h, rb, rx, 0, rz, bk);
+      this.put(
+        UCO(+(rt / rb).toFixed(3), this.low ? Math.max(6, seg >> 1) : seg),
+        col,
+        x,
+        y,
+        z,
+        rb,
+        h,
+        rb,
+        rx,
+        0,
+        rz,
+        bk,
+      );
     }
     sph(r, col, x, y, z, sx = 1, sy = 1, sz = 1, bk = 'matte', seg = 10, rx = 0, ry = 0, rz = 0) {
-      this.put(US(seg), col, x, y, z, r * sx, r * sy, r * sz, rx, ry, rz, bk);
+      this.put(US(this.low ? Math.min(seg, 6) : seg), col, x, y, z, r * sx, r * sy, r * sz, rx, ry, rz, bk);
     }
     tor(r, tube, col, x, y, z, rx = 0, ry = 0, rz = 0, bk = 'matte', seg = 16, arc = Math.PI * 2, sx = 1, sy = 1) {
-      this.put(UT(tube, seg, arc), col, x, y, z, r * sx, r * sy, r, rx, ry, rz, bk);
+      this.put(UT(tube, this.low ? Math.max(8, seg >> 1) : seg, arc), col, x, y, z, r * sx, r * sy, r, rx, ry, rz, bk);
     }
     leaf(col, x, y, z, sx, sy, rx, ry, rz = 0) {
       this.put(LEAF(), col, x, y, z, sx, sy, 1, rx, ry, rz, 'leaf');
     }
     rbox(w, h, d, r, col, x, y, z, ry = 0, bk = 'matte', rx = 0, rz = 0) {
+      if (this.low) return this.put(UB(), col, x, y, z, w, h, d, rx, ry, rz, bk);
       const g = GEO(`rb${w}_${h}_${d}_${r}`, () => new RoundedBoxGeometry(w, h, d, 2, r));
       this.put(g, col, x, y, z, 1, 1, 1, rx, ry, rz, bk);
     }
@@ -1190,7 +1205,7 @@ export const O3 = (() => {
       this.lampMat = new THREE.MeshStandardMaterial({ color: '#fff4d6', emissive: '#ffcf7a', emissiveIntensity: 0.4 });
       this.lampMats.push(this.lampMat);
 
-      this.S = new Bake(this.lampMat); // static furniture and props, merged per material when the floor is done
+      this.S = new Bake(this.lampMat, this.mobile); // static furniture and props, merged per material when the floor is done
       this._lights(root);
       this._room(root, floorLabel);
       this._screens(root);
@@ -1999,7 +2014,7 @@ export const O3 = (() => {
 
     /* ---------- chairs (one merged mesh each, so they can turn) ---------- */
     _chair(root, x, z, rotY, color = '#e8862f', o = {}) {
-      const B = new Bake();
+      const B = new Bake(null, this.mobile);
       const seatC = color,
         dark = '#2b2f38',
         mid = '#3d4350';
@@ -3207,7 +3222,7 @@ export const O3 = (() => {
 
     /* ---------- the ceiling, loft style: steel beams, ducts, pendants, recessed lights (hidden from above) ---------- */
     _ceiling(root) {
-      const C = new Bake(),
+      const C = new Bake(this.lampMat, this.mobile),
         hi = !this.mobile,
         steel = '#5c6571',
         duct = '#aab2be';
@@ -3295,7 +3310,7 @@ export const O3 = (() => {
         [-1.3, 1.3].forEach(d => C.cyl(0.006, 0.85, '#16181d', x + d, 5.15, -1.6, 'matte', 4));
       });
       // a few pipes that stay visible from above so the loft shows from the overview too
-      const Q = new Bake(this.lampMat);
+      const Q = new Bake(this.lampMat, this.mobile);
       Q.cyl(0.2, 31.2, duct, 0, 5.82, -10.35, 'metal', 20, 0, Math.PI / 2);
       Q.cyl(0.25, 21.4, duct, -15.3, 5.5, 0, 'metal', 20, Math.PI / 2);
       for (let x = -15; x < 16; x += 2.6) Q.cyl(0.22, 0.06, '#8e97a3', x, 5.82, -10.35, 'metal', 20, 0, Math.PI / 2);
@@ -3541,7 +3556,7 @@ export const O3 = (() => {
           p.animate(t, s < -0.3 ? 'sip' : s > 0.4 ? 'talk' : 'idle', c.k);
           if (s >= -0.3) {
             p.hold('mug');
-            p.props.mug.rotation.x = -(p.arms[1].sh.rotation.x + p.arms[1].el.rotation.x);
+            if (p.props.mug) p.props.mug.rotation.x = -(p.arms[1].sh.rotation.x + p.arms[1].el.rotation.x);
           }
         } else if (c.kind === 'walker') this._walkLoop(this.walker, dt, t, now);
       }
