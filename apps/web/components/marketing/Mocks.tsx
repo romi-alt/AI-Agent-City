@@ -1,8 +1,8 @@
 import { TRAINING_DIRECTORY } from './cityFacts';
 import { Icon, Tag } from './Primitives';
 
-// Monochrome product mocks, drawn as real UI (not illustrations). Every one is labelled "Sample": the data is made
-// up for the picture, and agent names are the AI personas of the public city layout.
+// Product mocks, drawn as real UI (not illustrations), with a colour per agent. Every one is labelled "Sample": the
+// data is made up for the picture, and agent names are the AI personas of the public city layout.
 
 const STATUS: Record<string, { label: string; tone: 'busy' | 'wait' | 'idle' | 'done' }> = {
   CEO: { label: 'Daily report ready', tone: 'done' },
