@@ -15,7 +15,13 @@ import { after, before, test } from 'node:test';
 const PORT = Number(process.env.B_LANDING_PORT ?? 3204);
 const WEB = `http://127.0.0.1:${PORT}`;
 const APP_DIR = join(import.meta.dirname, '..');
-const env = { ...process.env, NEXT_TELEMETRY_DISABLED: '1', NEXT_DIST_DIR: '.next/b-landing-test' };
+const env = {
+  ...process.env,
+  NEXT_TELEMETRY_DISABLED: '1',
+  NEXT_DIST_DIR: '.next/b-landing-test',
+  // The request form (and the buttons that open it) is part of the lite demo.
+  NEXT_PUBLIC_LITE_DEMO: 'true',
+};
 const nextBin = join(APP_DIR, 'node_modules/next/dist/bin/next');
 
 // Playwright is pre-installed outside the workspace (not a dependency), so it is required and typed loosely.
@@ -92,6 +98,45 @@ test('the closing call to action opens a mail to the contact address', async () 
   const { page } = await open({ reducedMotion: 'reduce' });
   const href = await page.getAttribute('#demo a.btn.primary', 'href');
   assert.match(href, /^mailto:hello@autosalescity\.site\?subject=AutoSalesCity%20demo$/);
+  await page.context().close();
+});
+
+test('"Book a demo" opens the request form, checks it, and sends it to the lite API', async () => {
+  const { page } = await open({ reducedMotion: 'reduce' });
+  const sent: any[] = [];
+  await page.route('**/api/lite/demo/form-token', (r: any) =>
+    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'test-token' }) }),
+  );
+  await page.route('**/api/lite/demo', (r: any) => {
+    sent.push(r.request().postDataJSON());
+    return r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ requestId: 'req-test', status: 'pending' }),
+    });
+  });
+  await page.route('**/demo/check-email**', (r: any) =>
+    r.fulfill({ status: 200, contentType: 'text/html', body: '<h1>check email</h1>' }),
+  );
+  await page.click('.nav-right a.btn.primary');
+  assert.ok(await page.locator('#bookDemo').evaluate((d: HTMLDialogElement) => d.open), 'form open');
+  await page.click('[data-testid=book-submit]');
+  assert.ok(await page.locator('[data-testid=book-error-summary]').isVisible(), 'empty form is refused');
+  assert.equal(sent.length, 0, 'nothing sent yet');
+  await page.fill('[data-testid=book-fullName]', 'Ana Rivera');
+  await page.fill('[data-testid=book-email]', 'ana@dealership.example');
+  await page.fill('[data-testid=book-company]', 'Rivera Motors');
+  await page.selectOption('[data-testid=book-industry]', 'automotive');
+  await page.click('[data-testid=book-submit]');
+  await page.waitForURL(/\/demo\/check-email\?request=req-test/);
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].name, 'Ana Rivera');
+  assert.equal(sent[0].email, 'ana@dealership.example');
+  assert.equal(sent[0].company, 'Rivera Motors');
+  assert.equal(sent[0].industry, 'automotive');
+  assert.equal(sent[0].marketingConsent, false);
+  assert.equal(sent[0].website2, '');
+  assert.equal(sent[0].formToken, 'test-token');
   await page.context().close();
 });
 

@@ -1929,3 +1929,118 @@ html:has(.asc) {
 .asc #demoApp .subs button.on {
   color: var(--ink, #fff);
 }
+
+/* Book a demo: the request form in a dialog (BookDemo). Builds on the .dl dialog styles above. */
+.asc .bk {
+  width: min(580px, 94vw);
+  max-height: 94vh;
+  overflow: auto;
+}
+.asc .bk .bk-lead {
+  color: var(--text2);
+  font-size: 14px;
+}
+.asc .bk-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+@media (max-width: 560px) {
+  .asc .bk-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.asc .bk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.asc .dl select {
+  background: #070a12;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #fff;
+  font: 500 15px var(--font);
+  width: 100%;
+}
+.asc .dl select[data-empty='true'] {
+  color: var(--muted);
+}
+.asc .dl input:focus-visible,
+.asc .dl select:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+.asc .bk [aria-invalid='true'] {
+  border-color: var(--coral);
+}
+.asc .bk-opt {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font);
+  font-weight: 500;
+  color: var(--muted);
+}
+.asc .bk-err {
+  color: var(--coral);
+  font-size: 12.5px;
+}
+.asc .bk-summary,
+.asc .bk-failure {
+  border: 1px solid var(--coral);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  background: rgba(255, 107, 94, 0.08);
+  color: var(--text);
+}
+.asc .bk-summary ul {
+  list-style: none;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.asc .bk-summary a {
+  color: var(--coral);
+  text-decoration: underline;
+}
+.asc .bk-failure p + p {
+  color: var(--text2);
+  margin-top: 4px;
+}
+.asc .bk-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.asc .dl .bk-consent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font: 400 13px/1.5 var(--font);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text2);
+  margin-top: 2px;
+}
+.asc .bk-consent input {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  flex: none;
+  accent-color: var(--amber);
+  margin-top: 2px;
+}
+.asc .dl .fine a {
+  color: var(--amber);
+  text-decoration: underline;
+}
+.asc .btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

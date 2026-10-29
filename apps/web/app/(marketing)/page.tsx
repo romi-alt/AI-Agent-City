@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { AscPage } from '../../components/asc/AscPage';
-import { CONTACT_EMAIL } from '../../lib/preview';
+import { CONTACT_EMAIL, LITE_DEMO } from '../../lib/preview';
 
 // Owner: workstream B. The public front page: static, rendered at build time. Markup is server-rendered; the 3D hero
 // and the live demo load in the browser (components/asc/AscClient.tsx).
@@ -30,5 +30,5 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  return <AscPage contactEmail={CONTACT_EMAIL} />;
+  return <AscPage contactEmail={CONTACT_EMAIL} bookForm={LITE_DEMO} />;
 }

@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { AscClient } from './AscClient';
+import { BookDemo } from './BookDemo';
 import {
   CLIENTS,
   DEMO_STOPS,
@@ -27,7 +28,10 @@ function barValues() {
 }
 
 /** The AutoSalesCity front page: markup is rendered on the server, AscClient wires the behaviour. */
-export function AscPage({ contactEmail }: { contactEmail: string }) {
+export function AscPage({ contactEmail, bookForm }: { contactEmail: string; bookForm: boolean }) {
+  // With the demo backend switched on, every "book a demo" button opens the request form; without it they keep their
+  // plain links (scroll to the call to action, or write to the contact address).
+  const book = bookForm ? { 'data-open-book': true } : {};
   const bars = barValues();
   const mailto = `mailto:${contactEmail}?subject=AutoSalesCity%20demo`;
   return (
@@ -51,7 +55,7 @@ export function AscPage({ contactEmail }: { contactEmail: string }) {
             <a className="nav-demo" href="#live-demo" data-open-demo>
               Live demo
             </a>
-            <a className="btn primary" href="#demo" style={{ padding: '10px 18px', fontSize: 14 }}>
+            <a className="btn primary" href="#demo" style={{ padding: '10px 18px', fontSize: 14 }} {...book}>
               Book a demo
             </a>
           </div>
@@ -86,7 +90,7 @@ export function AscPage({ contactEmail }: { contactEmail: string }) {
                 and every lead is answered in under a minute, straight from your CRM.
               </p>
               <div className="hero-cta">
-                <a className="btn primary" href="#demo">
+                <a className="btn primary" href="#demo" {...book}>
                   Get your building <span aria-hidden="true">→</span>
                 </a>
                 <a className="btn" href="#live-demo" data-open-demo>
@@ -402,7 +406,7 @@ export function AscPage({ contactEmail }: { contactEmail: string }) {
                       <li key={it}>{it}</li>
                     ))}
                   </ul>
-                  <a className={`btn${p.hot ? ' primary' : ''}`} href="#demo">
+                  <a className={`btn${p.hot ? ' primary' : ''}`} href="#demo" {...book}>
                     {p.cta}
                   </a>
                 </article>
@@ -423,7 +427,7 @@ export function AscPage({ contactEmail }: { contactEmail: string }) {
               <p className="lead">
                 A 20-minute walkthrough of the live city, then your building goes up in under a day.
               </p>
-              <a className="btn primary" href={mailto}>
+              <a className="btn primary" href={mailto} {...book}>
                 Book a demo <span aria-hidden="true">→</span>
               </a>
               <Skyline className="cta-sky" id="ctaSky" width={1200} height={140} color="#f5b83d" seed={777} />
@@ -440,6 +444,7 @@ export function AscPage({ contactEmail }: { contactEmail: string }) {
       </footer>
 
       <LiveDemo />
+      {bookForm && <BookDemo contactEmail={contactEmail} />}
       <AscClient />
     </div>
   );
