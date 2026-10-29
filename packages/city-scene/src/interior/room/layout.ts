@@ -13,6 +13,8 @@ import type { ReferencePlan, Rect } from '../plan.ts';
 export interface RoomLayout {
   width: number;
   depth: number;
+  /** Metres per legacy unit (the plan's scale): detail placed in the legacy room's coordinates is multiplied by it. */
+  scale: number;
   /** Height of the glass walls (the room has no ceiling: it is seen from above, like a diorama). */
   glassHeight: number;
   /** Height of the timber handrail along the glass. */
@@ -56,6 +58,7 @@ export function roomLayout(plan: ReferencePlan): RoomLayout {
   return {
     width: W,
     depth: D,
+    scale: s,
     glassHeight: 5 * s,
     railHeight: 1.1 * s,
     leadRug: rectOf(lead),
