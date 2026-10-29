@@ -15,3 +15,18 @@ The OFL allows use, bundling and redistribution with software, provided the lice
 font is not sold on its own. The full licence text is next to the file.
 
 `next/font/google` was not used: it downloads fonts at build time, which fails without network access.
+
+## Front page fonts (`fonts/asc/`)
+
+The AutoSalesCity front page (`components/asc/asc.css`) loads three variable fonts with plain `@font-face`, latin subset
+only, unmodified from the upstream releases as published by the `@fontsource-variable/*` npm packages (5.3.0):
+
+| File | Family | Upstream | Licence |
+|---|---|---|---|
+| `fonts/asc/space-grotesk-latin-wght-normal.woff2` | Space Grotesk (300–700) | https://github.com/floriankarsten/space-grotesk | SIL Open Font License 1.1 |
+| `fonts/asc/inter-latin-wght-normal.woff2` | Inter (100–900) | https://github.com/rsms/inter | SIL Open Font License 1.1 (`OFL-inter.txt`) |
+| `fonts/asc/jetbrains-mono-latin-wght-normal.woff2` | JetBrains Mono (100–800) | https://github.com/JetBrains/JetBrainsMono | SIL Open Font License 1.1 (`OFL-jetbrains-mono.txt`) |
+
+`public/asc/three.r128.min.js` is the unmodified `three@0.128.0` build (MIT, `public/asc/THREE-LICENSE.txt`). The hero
+scene was tuned against r128's light units and colour handling, so it keeps that build as a global instead of the
+newer three the rest of the app uses.

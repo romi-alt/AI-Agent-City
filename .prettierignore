@@ -9,3 +9,4 @@ pnpm-lock.yaml
 **/*.md
 # Synthetic legacy fixtures: generated JSON, kept byte-for-byte as committed.
 packages/legacy-import/fixtures/
+apps/web/public/asc/

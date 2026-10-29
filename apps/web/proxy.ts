@@ -21,4 +21,4 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = { matcher: ['/((?!_next/|city/|fonts/|favicon|og-).*)'] };
+export const config = { matcher: ['/((?!_next/|city/|fonts/|asc/|favicon|og-).*)'] };

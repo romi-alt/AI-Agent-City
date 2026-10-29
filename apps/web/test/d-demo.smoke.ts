@@ -257,29 +257,6 @@ test('form: can be completed with the keyboard alone; the honeypot is never focu
   await page.context().close();
 });
 
-test('landing: the form sits natively in the #get-demo card and submits to check-email', async () => {
-  for (const mobile of [false, true]) {
-    const page = await newPage({ mobile });
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`${WEB}/#get-demo`);
-    const form = page.locator('#get-demo [data-testid="demo-request-form"]');
-    await form.waitFor();
-    await page.waitForTimeout(400);
-    const card = page.locator('#get-demo .mk-demo-card');
-    await card.scrollIntoViewIfNeeded();
-    await card.screenshot({ path: join(EVIDENCE, mobile ? 'd-landing-form-390.png' : 'd-landing-form.png') });
-    assert.ok(await noHorizontalScroll(page), 'landing: no sideways scroll');
-    if (!mobile) {
-      const n = mock.requests.length;
-      await fillGood(page, { email: 'landing@analytical.example' });
-      await page.getByTestId('demo-submit').click();
-      await page.waitForURL(`${WEB}/demo/check-email?request=req-*`);
-      assert.equal(count(n, 'POST', '/api/demo/requests'), 1);
-    }
-    await page.context().close();
-  }
-});
-
 test('check-email: polls gently with growing gaps and stops when ready; dev mailbox note is shown', async () => {
   const page = await newPage();
   await page.goto(`${WEB}/demo/check-email?request=req-poll`);
