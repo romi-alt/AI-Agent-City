@@ -3,7 +3,7 @@
  * per-instance attributes), one striped awning material and one vertex-coloured material for the roof items.
  * Night glow follows one uniform the component sets from `useEnvironmentLight().nightFactor` every frame.
  */
-import { type Color, type DataArrayTexture, MeshStandardMaterial } from 'three';
+import { type Color, type DataArrayTexture, MeshBasicMaterial, MeshStandardMaterial } from 'three';
 import { FLOOR_HEIGHT } from '../../types.ts';
 import { BAY, createFacadeTexture, SINK } from './facade.ts';
 import { STYLE } from './plan.ts';
@@ -63,6 +63,8 @@ const FACADE_FRAGMENT = /* glsl */ `
 float sGlass = 0.0;
 float sLit = 0.0;
 float sBright = 1.0;
+float sFlood = 0.0;
+float sRefl = 0.0;
 vec3 sWarm = vec3(1.0, 0.76, 0.46);
 if (abs(vSN.y) < 0.5) {
   bool alongZ = abs(vSN.x) > 0.5;
@@ -76,12 +78,19 @@ if (abs(vSN.y) < 0.5) {
   float mask = texture(uSFacade, vec3(uv, style * 2.0 + 1.0)).r;
   diffuseColor.rgb = mix(diffuseColor.rgb * albedo.rgb, albedo.rgb, albedo.a);
   sGlass = mask;
+  sRefl = mask * step(5.5, vSFacade.x) * step(vSFacade.x, 6.5);
   float side = alongZ ? (vSN.x > 0.0 ? 1.0 : 2.0) : (vSN.z > 0.0 ? 3.0 : 4.0);
   float h = sHash(vec3(floor(uv.x), floor(uv.y), side + vSFacade.z * 97.0));
-  sLit = max(ground, step(h, vSFacade.w));
+  // Some floors burn bright and some sit dark (offices, cleaners), like a real tower at night.
+  float fb = sHash(vec3(floor(uv.y) * 3.1, side, vSFacade.z * 57.0));
+  sLit = max(ground, step(h, vSFacade.w * (0.3 + 1.4 * fb)));
   float tone = sHash(vec3(floor(uv.y), floor(uv.x) * 1.7, vSFacade.z * 13.0));
   sBright = mix(0.45, 1.0, fract(tone * 7.31)) * mix(1.0, 1.4, ground);
-  sWarm = tone < 0.65 ? vec3(1.0, 0.74, 0.44) : tone < 0.9 ? vec3(1.0, 0.88, 0.66) : vec3(0.8, 0.9, 1.0);
+  sWarm = tone < 0.6 ? vec3(1.0, 0.74, 0.44) : tone < 0.85 ? vec3(1.0, 0.88, 0.66) : vec3(0.8, 0.9, 1.0);
+  // Soot and street grime on the lowest floors, a lighter wash high up.
+  diffuseColor.rgb *= mix(0.78, 1.0, smoothstep(0.0, 7.0, vSLocal.y)) * (0.97 + 0.06 * sHash(vec3(floor(uv.x), floor(uv.y * 0.5), 5.0)));
+  // Floodlit stone crowns glow warm at night.
+  sFlood = step(1.5, vSFacade.y);
 } else if (vSN.y > 0.5) {
   // Roof: a darker, greyer take on the wall colour (Ring 1 roofs are covered by their cornice cap anyway).
   diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.42, 0.42, 0.44), 0.45);
@@ -90,7 +99,8 @@ if (abs(vSN.y) < 0.5) {
 // Ring 3 only: the far towers sit in haze on top of the scene fog, densest at their base, so they stay a soft pale
 // silhouette at any fog setting.
 const HAZE = /* glsl */ `
-gl_FragColor.rgb = mix(gl_FragColor.rgb, uSFog, mix(0.55, 0.3, clamp(vSLocal.y / 60.0, 0.0, 1.0)) * (1.0 - 0.5 * uSNight));`;
+float sDist = length(vViewPosition);
+gl_FragColor.rgb = mix(gl_FragColor.rgb, uSFog, 0.12 + 0.3 * smoothstep(140.0, 620.0, sDist));`;
 
 function facadeShader(u: SurroundUniforms, haze: boolean) {
   return (shader: Shader) => {
@@ -105,13 +115,17 @@ function facadeShader(u: SurroundUniforms, haze: boolean) {
       .replace('#include <color_fragment>', `#include <color_fragment>\n${FACADE_FRAGMENT}`)
       .replace(
         '#include <roughnessmap_fragment>',
-        `#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.28, sGlass);`,
+        `#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, mix(0.3, 0.1, sRefl), sGlass);`,
       )
       .replace(
         '#include <emissivemap_fragment>',
         // Lit windows by night; a faint warm hint by day keeps shop windows from reading as holes.
         `#include <emissivemap_fragment>
-        totalEmissiveRadiance += sWarm * sGlass * sLit * sBright * (0.02 + 0.75 * uSNight * uSNight);`,
+        totalEmissiveRadiance += sWarm * sGlass * sLit * sBright * (0.02 + 0.7 * uSNight * uSNight);
+        // Curtain-wall glass mirrors the hazy sky by day and a faint city glow by night.
+        float fresS = pow(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 2.0);
+        totalEmissiveRadiance += uSFog * vec3(0.8, 0.95, 1.15) * sRefl * (0.1 + 0.4 * fresS) * (1.0 - uSNight * 0.85);
+        totalEmissiveRadiance += vec3(1.0, 0.78, 0.5) * sFlood * diffuseColor.rgb * uSNight * 1.1;`,
       )
       .replace('#include <tonemapping_fragment>', `${haze ? HAZE : ''}\n#include <tonemapping_fragment>`);
   };
@@ -125,6 +139,8 @@ export interface SurroundMaterials {
   cap: MeshStandardMaterial;
   awning: MeshStandardMaterial;
   props: MeshStandardMaterial;
+  spire: MeshStandardMaterial;
+  beacon: MeshBasicMaterial;
   dispose(): void;
 }
 
@@ -155,7 +171,7 @@ function awningShader(shader: Shader) {
 function facadeMaterial(uniforms: SurroundUniforms, haze: boolean) {
   const m = new MeshStandardMaterial({ color: '#ffffff', roughness: 0.86 });
   m.onBeforeCompile = facadeShader(uniforms, haze);
-  m.customProgramCacheKey = () => `d2-surround-facade-v1-${haze ? 'far' : 'near'}`;
+  m.customProgramCacheKey = () => `d2-surround-facade-v3-${haze ? 'far' : 'near'}`;
   return m;
 }
 
@@ -169,6 +185,14 @@ export function createSurroundMaterials(fog: { value: Color }): SurroundMaterial
   awning.onBeforeCompile = awningShader;
   awning.customProgramCacheKey = () => 'd2-surround-awning-v1';
   const props = new MeshStandardMaterial({ vertexColors: true, roughness: 0.8 });
+  const spire = new MeshStandardMaterial({
+    color: '#c9ced4',
+    roughness: 0.3,
+    metalness: 0.85,
+    emissive: '#ffe7b8',
+    emissiveIntensity: 0,
+  });
+  const beacon = new MeshBasicMaterial({ color: '#ff3b3b', toneMapped: false });
   return {
     uniforms,
     facade,
@@ -176,8 +200,10 @@ export function createSurroundMaterials(fog: { value: Color }): SurroundMaterial
     cap,
     awning,
     props,
+    spire,
+    beacon,
     dispose() {
-      for (const m of [facade, far, cap, awning, props]) m.dispose();
+      for (const m of [facade, far, cap, awning, props, spire, beacon]) m.dispose();
       uniforms.uSFacade.value.dispose();
     },
   };

@@ -28,6 +28,8 @@ import { type SignalLight, SignalSourceContext } from './signal-source.ts';
 import { Flags, Fountain } from './PlazaFeatures.tsx';
 import { Trees } from './Trees.tsx';
 
+/** How far from the centre the curb slabs reach, per decor detail (world units). */
+const SLAB_REACH = { minimal: 480, reduced: 720, full: 1e9 } as const;
 const KIND: Record<CellKind, number> = { lot: 0, plaza: 1, park: 2, decor: 3, city: 4 };
 
 /**
@@ -52,7 +54,9 @@ export function Streets() {
     const road = new Mesh(mergeGeometries(strips), createRoadMaterial(rt.uniforms, district));
     road.receiveShadow = true;
     road.name = 'a1-roads';
-    const cells = district.cells;
+    // Curb slabs beyond the fog's reach are not drawn (the far paving shows through): fewer at lower quality.
+    const reach = SLAB_REACH[budget.decorBuildingDetail];
+    const cells = district.cells.filter(c => Math.max(Math.abs(c.cx), Math.abs(c.cz)) <= reach);
     const blocks = new InstancedMesh(
       new BoxGeometry(1, 1, 1),
       createBlockMaterial(rt.uniforms, district),
@@ -81,7 +85,7 @@ export function Streets() {
     ground.name = 'a1-ground';
     for (const o of [road, blocks, ground]) o.raycast = () => {};
     return { road, blocks, ground };
-  }, [rt, district]);
+  }, [rt, district, budget.decorBuildingDetail]);
   useEffect(
     () => () => {
       for (const o of [road, blocks, ground]) {
@@ -93,7 +97,7 @@ export function Streets() {
   );
 
   const furniture = useMemo(() => planFurniture(layout, district), [layout, district]);
-  const land = useMemo(() => planLandscape(district), [district]);
+  const land = useMemo(() => planLandscape(district, budget.parkTrees), [district, budget.parkTrees]);
   const trees = useMemo(() => [...furniture.trees, ...land.trees], [furniture, land]);
 
   return (

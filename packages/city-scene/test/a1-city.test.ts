@@ -29,7 +29,7 @@ describe('district plan', () => {
     assert.equal(SIDEWALK, 2.7);
   });
 
-  it('continues the layout grid to the horizon, with exactly the 15 lots, one plaza and one small park', () => {
+  it('continues the layout grid to the horizon, with exactly the 15 lots, one plaza, a strip of pocket park and the big park', () => {
     for (const r of layout.streets.roadsX) assert.ok(district.xs.includes(r));
     for (const r of layout.streets.roadsZ) assert.ok(district.zs.includes(r));
     assert.ok(Math.max(...district.xs) >= 300 && Math.min(...district.zs) <= -300, 'roads run far past the district');
@@ -41,13 +41,16 @@ describe('district plan', () => {
         b.key,
       );
     assert.equal(district.cells.filter(c => c.kind === 'plaza').length, 1);
-    assert.equal(district.cells.filter(c => c.kind === 'park').length, 1);
-    // Every other district block is filled with decor; beyond the district the surround city takes over.
+    // Every other district block is filled with decor, except the pocket park down the west side (5 blocks);
+    // beyond the district the surround city takes over, apart from the big park and the rivers (no slab on water).
     const b = district.bounds;
-    for (const c of district.cells) {
-      const inside = c.cx > b.minX && c.cx < b.maxX && c.cz > b.minZ && c.cz < b.maxZ;
-      assert.equal(c.kind === 'city', !inside);
-    }
+    const inDistrict = (c: { cx: number; cz: number }) =>
+      c.cx > b.minX && c.cx < b.maxX && c.cz > b.minZ && c.cz < b.maxZ;
+    assert.equal(district.cells.filter(c => c.kind === 'park' && inDistrict(c)).length, 5);
+    const bigPark = district.cells.filter(c => c.kind === 'park' && !inDistrict(c));
+    assert.ok(bigPark.length >= 60, `big park ${bigPark.length}`);
+    for (const c of district.cells) if (!inDistrict(c)) assert.ok(c.kind === 'city' || c.kind === 'park');
+    for (const c of district.cells) if (inDistrict(c)) assert.ok(c.kind !== 'city');
   });
 });
 
