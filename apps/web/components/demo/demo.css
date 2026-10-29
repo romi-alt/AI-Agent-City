@@ -3,7 +3,8 @@
  * Built on the landing page's system: tokens from app/theme.css and the .mk primitives from
  * components/marketing/marketing.css (mk-btn, mk-tag, mk-eyebrow, mk-h2, mk-lead, mk-avatar, mk-status, mk-pill).
  * Only layout that the landing page doesn't have lives here, as .dm-* on the same tokens: paper, ink, greys,
- * hairlines, Geist, an 8px grid, 16px cards, 48px buttons. Gold stays on the primary button and tiny accents.
+ * hairlines, Geist, an 8px grid, 16px cards, 48px buttons. The bright accents (gradient primary button, coloured
+ * eyebrows and links) come from marketing.css, so the demo pages match the landing page.
  */
 
 /* ---------- Page frame ---------- */

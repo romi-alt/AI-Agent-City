@@ -1,7 +1,8 @@
 /*
- * Marketing pages (workstream B). A restrained product site: paper, ink, greys, hairlines, one sans, gold only on
- * the primary call to action. Scoped to .mk; tokens in app/theme.css. Mobile first, 8px grid; wider layouts at
- * 720px and 1024px. The marketing pages are always light (one dark band: security).
+ * Marketing pages (workstream B). A bright product site: paper and ink with a sunny palette (gradient calls to
+ * action, a colour per step, card and row, pastel section bands). Scoped to .mk; tokens in app/theme.css. Mobile
+ * first, 8px grid; wider layouts at 720px and 1024px. The marketing pages are always light (one dark band:
+ * security, in deep ocean navy). Bright accents fill shapes; text and icons use the "-ink" shades.
  */
 
 /* ---------- Reset the app-page element styles from globals.css ---------- */
@@ -73,10 +74,30 @@ html:has(.mk) {
   padding-block: var(--section-pad);
   border-top: 1px solid var(--rule);
 }
+/* Pastel bands on alternate sections, so the page reads sunny rather than grey. */
+#how-it-works {
+  background: linear-gradient(180deg, var(--c-band-mint), var(--c-paper));
+  border-top: 0;
+}
+#who {
+  background: linear-gradient(180deg, var(--c-band-pink), var(--c-paper));
+  border-top: 0;
+}
+#pricing {
+  background: linear-gradient(180deg, var(--c-band-sand), var(--c-paper));
+  border-top: 0;
+}
+#get-demo,
+#faq {
+  border-top: 0;
+}
 .mk-eyebrow {
   font-size: var(--fs-sm);
-  font-weight: 500;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--c-coral-ink);
+}
+.mk-dark .mk-eyebrow {
+  color: var(--c-sun);
 }
 .mk-h2 {
   font-size: var(--fs-h2);
@@ -166,14 +187,17 @@ html:has(.mk) {
   transform: translateX(2px);
 }
 .mk-btn-primary {
-  background: var(--c-gold);
+  background: var(--grad-cta);
   color: var(--c-ink);
+  font-weight: 600;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    0 1px 2px rgba(12, 12, 13, 0.12);
+    0 10px 24px -12px rgba(255, 95, 110, 0.75);
 }
 .mk-btn-primary:hover {
-  background: #f7bf52;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 14px 30px -12px rgba(255, 95, 110, 0.9);
 }
 .mk-btn-secondary {
   background: var(--c-white);
@@ -182,14 +206,15 @@ html:has(.mk) {
   box-shadow: 0 1px 2px rgba(12, 12, 13, 0.05);
 }
 .mk-btn-secondary:hover {
-  border-color: #a8a29e;
+  border-color: var(--c-coral);
 }
 .mk-btn-dark {
-  background: var(--c-ink);
-  color: #fafafa;
+  background: var(--grad-cta);
+  color: var(--c-ink);
+  font-weight: 600;
 }
 .mk-btn-dark:hover {
-  background: #27272a;
+  box-shadow: 0 8px 20px -10px rgba(255, 95, 110, 0.85);
 }
 .mk-btn-sm .mk-btn-arrow {
   display: none;
@@ -221,7 +246,7 @@ html:has(.mk) {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(250, 250, 249, 0.72);
+  background: rgba(255, 250, 243, 0.78);
   -webkit-backdrop-filter: saturate(1.6) blur(14px);
   backdrop-filter: saturate(1.6) blur(14px);
   border-bottom: 1px solid transparent;
@@ -268,6 +293,16 @@ html:has(.mk) {
   width: 20px;
   height: 20px;
 }
+/* Three towers in three colours. */
+.mk-wordmark-mark rect:nth-child(1) {
+  fill: var(--c-coral);
+}
+.mk-wordmark-mark rect:nth-child(2) {
+  fill: var(--c-sun);
+}
+.mk-wordmark-mark rect:nth-child(3) {
+  fill: var(--c-ocean);
+}
 .mk-nav {
   display: none;
   margin-inline: auto;
@@ -285,7 +320,7 @@ html:has(.mk) {
 }
 .mk-nav a:hover,
 .mk-header-link:hover {
-  color: var(--c-ink);
+  color: var(--c-coral-ink);
 }
 .mk-header-actions {
   display: flex;
@@ -312,7 +347,10 @@ html:has(.mk) {
   position: relative;
   padding-top: clamp(64px, 9vw, 120px);
   padding-bottom: clamp(64px, 8vw, 120px);
-  background: linear-gradient(180deg, #ffffff 0%, var(--c-paper) 70%);
+  background:
+    radial-gradient(60% 50% at 85% 8%, rgba(255, 182, 39, 0.28), transparent 70%),
+    radial-gradient(50% 45% at 10% 20%, rgba(255, 95, 162, 0.16), transparent 70%),
+    linear-gradient(180deg, #dff1ff 0%, #f1f8ff 38%, #fff3e6 78%, var(--c-paper) 100%);
 }
 .mk-hero-inner {
   display: flex;
@@ -324,20 +362,26 @@ html:has(.mk) {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 32px;
-  padding: 0 14px;
+  /* Grows with its text: on a phone the line wraps, and a fixed height let it spill out of the pill. */
+  min-height: 32px;
+  max-width: 100%;
+  padding: 6px 14px;
   border: 1px solid var(--rule);
   border-radius: 999px;
+  line-height: 1.35;
+  text-align: left;
   background: var(--c-white);
   font-size: var(--fs-sm);
   color: var(--c-ink-2);
   box-shadow: 0 1px 2px rgba(12, 12, 13, 0.04);
 }
 .mk-pill-dot {
-  width: 6px;
-  height: 6px;
+  flex: none;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--c-gold);
+  background: var(--grad-cta);
+  box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.18);
 }
 .mk-display {
   margin-top: var(--s-4);
@@ -351,6 +395,52 @@ html:has(.mk) {
 }
 .mk-display span {
   white-space: nowrap;
+}
+/* The headline builds the logo: each line stands on one of its three towers, in the mark's colours and in its
+ * proportions (11, 18 and 14 units tall), and the towers rise once when the page loads. */
+.mk-display:has(.mk-line) {
+  /* Centred as a block, lines left-aligned inside it, so the three towers stand in one column like the mark. */
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+.mk-display .mk-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.24em;
+}
+.mk-tower {
+  display: inline-block;
+  flex: none;
+  width: 0.26em;
+  height: calc(var(--h) * 0.8em);
+  border-radius: 0.05em 0.05em 0.02em 0.02em;
+  background: var(--c);
+  transform-origin: bottom;
+  animation: mk-tower-rise 0.8s var(--ease) both;
+  animation-delay: calc(var(--i) * 140ms + 150ms);
+}
+.mk-line:nth-child(1) .mk-tower {
+  --c: var(--c-coral);
+  --h: 0.61;
+}
+.mk-line:nth-child(2) .mk-tower {
+  --c: var(--c-sun);
+  --h: 1;
+}
+.mk-line:nth-child(3) .mk-tower {
+  --c: var(--c-ocean);
+  --h: 0.78;
+}
+@keyframes mk-tower-rise {
+  from {
+    transform: scaleY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-tower {
+    animation: none;
+  }
 }
 .mk-hero-lead {
   margin-top: var(--s-3);
@@ -388,7 +478,16 @@ html:has(.mk) {
 .mk-hero-window {
   margin-top: clamp(56px, 7vw, 88px);
 }
+@media (max-width: 479px) {
+  .mk-hero .mk-display {
+    font-size: clamp(2rem, 0.9rem + 7.4vw, 2.75rem);
+  }
+}
 @media (max-width: 559px) {
+  .mk-pill {
+    border-radius: 14px;
+    font-size: var(--fs-xs);
+  }
   .mk-hero-actions {
     width: 100%;
     flex-direction: column;
@@ -402,9 +501,12 @@ html:has(.mk) {
 .mk-preview {
   overflow: hidden;
   border-radius: var(--radius-frame);
-  border: 1px solid var(--rule);
+  border: 1px solid rgba(255, 255, 255, 0.9);
   background: var(--c-white);
-  box-shadow: var(--shadow-frame);
+  box-shadow:
+    0 1px 2px rgba(12, 12, 13, 0.05),
+    0 40px 90px -36px rgba(255, 95, 110, 0.45),
+    0 30px 70px -40px rgba(47, 168, 255, 0.45);
 }
 .mk-window-bar {
   display: flex;
@@ -492,6 +594,189 @@ html:has(.mk) {
   }
 }
 
+/* ---------- Hero city, large ----------
+ * The city is the hero, not a small window under it. Below 1024px the copy comes first in a card and the city
+ * follows edge to edge; from 1024px the city fills the whole first screen and the card sits on it, left of centre.
+ * The window bar becomes a small chip in the city's corner, keeping its "simulated" label and pause button. */
+.mk-hero-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mk-hero-window {
+  max-width: none;
+  padding-inline: 0;
+}
+.mk-hero-window .mk-preview {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.mk-hero-window .mk-window-bar {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  height: 36px;
+  padding: 0 6px 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px -12px rgba(12, 12, 13, 0.35);
+}
+.mk-hero-window .mk-window-title {
+  display: none;
+}
+.mk-hero-window .mk-window-view {
+  aspect-ratio: auto;
+  height: clamp(320px, 62svh, 620px);
+}
+@media (min-width: 1024px) {
+  .mk-hero {
+    display: grid;
+    align-items: center;
+    min-height: max(640px, calc(100svh - 64px));
+    padding-block: 48px;
+  }
+  .mk-hero-window {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+  }
+  .mk-hero-window .mk-preview,
+  .mk-hero-window .mk-window-view {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+  .mk-hero-inner {
+    position: relative;
+    z-index: 2;
+    align-items: flex-start;
+    text-align: left;
+    pointer-events: none;
+  }
+  .mk-hero-card {
+    align-items: flex-start;
+    width: min(560px, 46%);
+    padding: 32px 36px 28px;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.86);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    backdrop-filter: blur(16px) saturate(1.2);
+    box-shadow:
+      0 30px 80px -30px rgba(12, 12, 13, 0.4),
+      0 30px 70px -40px rgba(255, 95, 110, 0.45);
+    pointer-events: auto;
+  }
+  .mk-hero-card .mk-display {
+    margin-top: var(--s-3);
+    font-size: clamp(2.5rem, 1.2rem + 2.6vw, 4rem);
+  }
+  .mk-hero-card .mk-display:has(.mk-line) {
+    margin-inline: 0;
+  }
+  .mk-hero-card .mk-hero-lead {
+    font-size: var(--fs-base);
+  }
+  .mk-hero-card .mk-hero-actions {
+    justify-content: flex-start;
+    margin-top: var(--s-4);
+  }
+  .mk-hero-card .mk-hero-note {
+    text-align: left;
+    margin-top: var(--s-1);
+  }
+  .mk-hero-card .mk-hero-actions + .mk-hero-note {
+    margin-top: var(--s-3);
+  }
+  .mk-hero-window .mk-window-title {
+    display: inline-flex;
+  }
+  .mk-hero-window .mk-window-bar {
+    right: 20px;
+    bottom: 20px;
+  }
+}
+/* Short laptop screens (1366x768 and similar): the card keeps to the first screen. */
+@media (min-width: 1024px) and (max-height: 820px) {
+  .mk-hero-card .mk-display {
+    font-size: clamp(2.25rem, 1rem + 2.2vw, 3.25rem);
+  }
+  .mk-hero-card .mk-hero-lead {
+    margin-top: var(--s-2);
+    font-size: var(--fs-sm);
+  }
+  .mk-hero-card .mk-hero-actions {
+    margin-top: var(--s-3);
+  }
+  .mk-hero-card .mk-btn {
+    height: 44px;
+  }
+}
+
+/* ---------- Colourful highlights strip (under the hero) ---------- */
+.mk-highlights {
+  overflow: hidden;
+  padding: 16px 0;
+  background: linear-gradient(
+    90deg,
+    var(--c-sun),
+    var(--c-coral) 28%,
+    var(--c-flamingo) 52%,
+    var(--c-violet) 76%,
+    var(--c-ocean)
+  );
+}
+.mk-highlights-track {
+  display: flex;
+  width: max-content;
+  animation: mk-highlights 40s linear infinite;
+}
+.mk-highlights ul {
+  display: flex;
+  flex: none;
+  gap: 40px;
+  padding-right: 40px;
+}
+.mk-highlights li {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--c-ink);
+  white-space: nowrap;
+}
+.mk-highlights li::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+}
+@keyframes mk-highlights {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-highlights-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+    justify-content: center;
+  }
+  .mk-highlights ul + ul {
+    display: none;
+  }
+}
+
 /* ---------- How it works ---------- */
 .mk-steps {
   display: grid;
@@ -516,9 +801,35 @@ html:has(.mk) {
 }
 .mk-step-num {
   font-size: var(--fs-xs);
-  font-weight: 500;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--c-gold-ink);
+  color: var(--ink, var(--c-gold-ink));
+}
+/* A colour per step: the icon tile is filled, the number uses the text-safe shade. */
+.mk-step {
+  padding: var(--s-4);
+  border-radius: var(--radius-card);
+  background: var(--c-white);
+  border-top: 4px solid var(--fill);
+  box-shadow: var(--shadow-card);
+}
+.mk-step:nth-child(3n + 1) {
+  --fill: var(--c-coral);
+  --ink: var(--c-coral-ink);
+}
+.mk-step:nth-child(3n + 2) {
+  --fill: var(--c-sun);
+  --ink: var(--c-sun-ink);
+}
+.mk-step:nth-child(3n + 3) {
+  --fill: var(--c-ocean);
+  --ink: var(--c-ocean-ink);
+}
+.mk-step .mk-step-icon {
+  border-color: transparent;
+  background: var(--fill);
+  color: var(--c-ink);
+  box-shadow: 0 8px 18px -10px var(--fill);
 }
 .mk-step .mk-body {
   max-width: 30em;
@@ -574,7 +885,25 @@ html:has(.mk) {
   width: 18px;
   height: 18px;
   margin-top: 4px;
-  color: var(--c-ink);
+  color: var(--row-ink, var(--c-ink));
+}
+.mk-row:nth-child(3n + 1) {
+  --row-ink: var(--c-sky-ink);
+  --row-band: var(--c-band-sky);
+  --row-fill: var(--c-sky);
+}
+.mk-row:nth-child(3n + 2) {
+  --row-ink: var(--c-flamingo-ink);
+  --row-band: var(--c-band-pink);
+  --row-fill: var(--c-flamingo);
+}
+.mk-row:nth-child(3n + 3) {
+  --row-ink: var(--c-ocean-ink);
+  --row-band: var(--c-band-mint);
+  --row-fill: var(--c-ocean);
+}
+.mk-row .mk-eyebrow {
+  color: var(--row-ink);
 }
 .mk-row .mk-note {
   margin-top: var(--s-1);
@@ -586,7 +915,15 @@ html:has(.mk) {
 .mk-row-visual {
   padding: clamp(16px, 4vw, 48px);
   border-radius: var(--radius-frame);
-  background: var(--c-tint);
+  /* Browsers without color-mix() keep the plain band from the first line. */
+  background: var(--row-band, var(--c-tint));
+  background:
+    radial-gradient(
+      70% 70% at 100% 0%,
+      color-mix(in srgb, var(--row-fill, var(--c-sun)) 22%, transparent),
+      transparent
+    ),
+    var(--row-band, var(--c-tint));
   border: 1px solid var(--rule);
 }
 @media (min-width: 1024px) {
@@ -668,6 +1005,34 @@ html:has(.mk) {
   font-weight: 600;
   color: var(--c-ink-2);
 }
+/* A colour per agent, in the order of the sample team (the landing page mock only; other avatars stay neutral). */
+.mk-agents .mk-avatar {
+  background: var(--av, var(--c-tint));
+  border-color: transparent;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+.mk-agents li:nth-child(7n + 1) .mk-avatar {
+  --av: var(--c-sun);
+}
+.mk-agents li:nth-child(7n + 2) .mk-avatar {
+  --av: var(--c-coral);
+}
+.mk-agents li:nth-child(7n + 3) .mk-avatar {
+  --av: #b3aaf7;
+}
+.mk-agents li:nth-child(7n + 4) .mk-avatar {
+  --av: #ff9fca;
+}
+.mk-agents li:nth-child(7n + 5) .mk-avatar {
+  --av: #8fd0ff;
+}
+.mk-agents li:nth-child(7n + 6) .mk-avatar {
+  --av: #7fe0d6;
+}
+.mk-agents li:nth-child(7n + 7) .mk-avatar {
+  --av: #ffc08a;
+}
 .mk-agent-name {
   display: grid;
   font-size: var(--fs-sm);
@@ -699,10 +1064,10 @@ html:has(.mk) {
   background: var(--c-faint);
 }
 .mk-status-busy .mk-status-dot {
-  background: var(--c-ink);
+  background: var(--c-sky);
 }
 .mk-status-done .mk-status-dot {
-  background: #22a35a;
+  background: var(--c-leaf);
 }
 .mk-status-wait {
   border-color: rgba(245, 179, 53, 0.6);
@@ -725,9 +1090,9 @@ html:has(.mk) {
   stroke-width: 2.4;
 }
 .mk-tasks li.is-done .mk-check {
-  background: var(--c-ink);
-  border-color: var(--c-ink);
-  color: #fafafa;
+  background: var(--c-leaf);
+  border-color: var(--c-leaf);
+  color: var(--c-ink);
 }
 .mk-task-title {
   display: grid;
@@ -785,8 +1150,8 @@ html:has(.mk) {
   height: 32px;
   padding: 0 14px;
   border-radius: 8px;
-  background: var(--c-ink);
-  color: #fafafa;
+  background: var(--grad-cta);
+  color: var(--c-ink);
   font-size: var(--fs-xs);
   font-weight: 500;
 }
@@ -828,18 +1193,42 @@ html:has(.mk) {
   .mk-audience-grid li {
     padding: var(--s-4) 0 0;
     border-bottom: 0;
-    border-top: 1px solid var(--c-ink);
+    border-top: 4px solid var(--who, var(--c-ink));
   }
+}
+.mk-audience-grid li:nth-child(4n + 1) {
+  --who: var(--c-coral);
+}
+.mk-audience-grid li:nth-child(4n + 2) {
+  --who: var(--c-sun);
+}
+.mk-audience-grid li:nth-child(4n + 3) {
+  --who: var(--c-violet);
+}
+.mk-audience-grid li:nth-child(4n + 4) {
+  --who: var(--c-ocean);
+}
+.mk-audience-grid .mk-h3::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: var(--who);
+  vertical-align: 0.08em;
 }
 
 /* ---------- Security (the one dark section) ---------- */
 .mk-dark {
   --text: #fafafa;
   --text-2: #d4d4d8;
-  --text-muted: var(--c-night-muted);
-  --rule: var(--c-night-hairline);
+  --text-muted: var(--c-deep-muted);
+  --rule: rgba(255, 255, 255, 0.12);
   --focus: #93c5fd;
-  background: var(--c-night);
+  background:
+    radial-gradient(60% 80% at 100% 0%, rgba(18, 194, 181, 0.22), transparent 70%),
+    radial-gradient(50% 70% at 0% 100%, rgba(124, 108, 242, 0.25), transparent 70%), var(--c-deep);
   color: var(--text);
   border-top: 0;
 }
@@ -866,7 +1255,19 @@ html:has(.mk) {
   width: 22px;
   height: 22px;
   margin-top: 2px;
-  color: #fafafa;
+  color: var(--c-sun);
+}
+.mk-security li:nth-child(5n + 2) .mk-icon {
+  color: var(--c-ocean);
+}
+.mk-security li:nth-child(5n + 3) .mk-icon {
+  color: #ff9fca;
+}
+.mk-security li:nth-child(5n + 4) .mk-icon {
+  color: #8fd0ff;
+}
+.mk-security li:nth-child(5n + 5) .mk-icon {
+  color: #b3aaf7;
 }
 @media (min-width: 1024px) {
   .mk-security-grid {
@@ -886,9 +1287,11 @@ html:has(.mk) {
   gap: var(--s-6);
   padding: clamp(24px, 5vw, 64px);
   border-radius: 24px;
-  border: 1px solid var(--rule);
-  background: var(--c-white);
-  box-shadow: var(--shadow-card);
+  border: 2px solid transparent;
+  background:
+    linear-gradient(160deg, #ffffff 55%, #fff6ec) padding-box,
+    linear-gradient(135deg, var(--c-sun), var(--c-coral), var(--c-flamingo), var(--c-violet)) border-box;
+  box-shadow: 0 30px 70px -40px rgba(255, 95, 110, 0.5);
 }
 .mk-demo-copy {
   display: grid;
@@ -914,9 +1317,10 @@ html:has(.mk) {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 1px solid var(--c-hairline-2);
+  border: 0;
+  background: var(--grad-cta);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--c-ink);
 }
@@ -986,7 +1390,7 @@ html:has(.mk) {
   height: 48px;
   margin-top: 4px;
   border-radius: var(--radius-btn);
-  background: var(--c-gold);
+  background: var(--grad-cta);
   color: var(--c-ink);
   font-weight: 500;
   opacity: 0.45;
@@ -1030,7 +1434,10 @@ html:has(.mk) {
   flex: none;
   width: 16px;
   height: 16px;
-  color: var(--c-muted);
+  color: var(--c-coral-ink);
+}
+.mk-faq-item[open] summary {
+  color: var(--c-coral-ink);
 }
 .mk-faq-icon::before,
 .mk-faq-icon::after {
@@ -1075,7 +1482,7 @@ html:has(.mk) {
   letter-spacing: -0.025em;
 }
 .mk-contact a:not(.mk-btn) {
-  color: var(--c-ink);
+  color: var(--c-coral-ink);
 }
 .mk-contact .mk-btn {
   margin-top: var(--s-1);
@@ -1143,9 +1550,13 @@ html:has(.mk) {
 
 /* ---------- Pricing ---------- */
 .mk-text-link {
-  color: var(--c-ink);
+  color: var(--c-coral-ink);
   text-decoration: underline;
+  text-decoration-color: var(--c-coral);
   text-underline-offset: 3px;
+}
+.mk-pricing-grid > * {
+  min-width: 0;
 }
 .mk-pricing-grid {
   display: grid;
@@ -1159,8 +1570,15 @@ html:has(.mk) {
   padding: clamp(20px, 3vw, 36px);
   border-radius: 24px;
   border: 1px solid var(--rule);
+  border-top: 5px solid var(--card, var(--c-sun));
   background: var(--c-white);
   box-shadow: var(--shadow-card);
+}
+.mk-price-card:nth-child(2n + 1) {
+  --card: var(--c-coral);
+}
+.mk-price-card:nth-child(2n + 2) {
+  --card: var(--c-violet);
 }
 .mk-price {
   display: flex;
@@ -1172,7 +1590,10 @@ html:has(.mk) {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 600;
   letter-spacing: -0.03em;
-  color: var(--c-ink);
+  background: linear-gradient(90deg, var(--c-coral-ink), var(--c-flamingo-ink) 60%, var(--c-violet-ink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 .mk-price-suffix {
   font-size: var(--fs-sm);
@@ -1195,5 +1616,24 @@ html:has(.mk) {
   .mk-pricing-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--s-6);
+  }
+}
+
+/* ---------- High-contrast mode ----------
+ * Forced colours drop backgrounds, which would leave gradient text (headline phrase, prices) without a fill, and the
+ * gradient buttons without an edge. Show plain system colours instead. */
+@media (forced-colors: active) {
+  .mk-price-amount {
+    background: none;
+    color: CanvasText;
+  }
+  .mk-tower {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+  .mk-btn-primary,
+  .mk-btn-dark,
+  .mk-form-submit {
+    border: 1px solid ButtonText;
   }
 }

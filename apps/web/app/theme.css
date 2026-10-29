@@ -2,9 +2,11 @@
  * AgentCity design tokens (X01, workstream B). Imported by the root layout after globals.css, so the existing app
  * pages (sign-in, account, status) share the same type and neutrals through the variables globals.css already uses.
  *
- * Direction: a restrained product site. Near-white paper, near-black ink, neutral greys, hairline borders, one
- * sans (Geist). Gold #f5b335 is used sparingly: the primary call to action and a couple of tiny accents.
- * Contrast of every text pair used is listed in the B report (body text ≥ 4.5:1).
+ * Direction: a bright product site. Near-white paper, near-black ink and one sans (Geist), with a sunny palette
+ * (sunshine, coral, flamingo, ocean, sky, violet, leaf) the client asked for: gradient calls to action, a colour per
+ * step, card and section, and pastel bands. The bright accents are for fills, rules and dots; small text and icons
+ * use the matching "-ink" shade. Contrast of every text pair used is listed in the B report (body text ≥ 4.5:1);
+ * each "-ink" shade is ≥ 4.7:1 on white, paper and every pastel band, and ink is ≥ 6.9:1 on the gradient stops.
  */
 :root {
   --c-paper: #fafaf9;
@@ -23,6 +25,30 @@
   --c-night-2: #18181b;
   --c-night-muted: #a1a1aa; /* 7.63:1 on night */
   --c-night-hairline: #27272a;
+
+  /* Sunny accents (fills, rules, dots) and their text-safe "-ink" shades. */
+  --c-sun: #ffb627;
+  --c-coral: #ff7a59;
+  --c-flamingo: #ff5fa2;
+  --c-ocean: #12c2b5;
+  --c-sky: #2fa8ff;
+  --c-violet: #7c6cf2;
+  --c-leaf: #22b573;
+  --c-sun-ink: #9a5b00;
+  --c-coral-ink: #c2410c;
+  --c-flamingo-ink: #b4235f;
+  --c-ocean-ink: #0f766e;
+  --c-sky-ink: #0369a1;
+  --c-violet-ink: #5b4bd6;
+  --c-leaf-ink: #1d7a3e;
+  /* Pastel section bands. */
+  --c-band-mint: #e9faf6;
+  --c-band-pink: #fff0f6;
+  --c-band-sand: #fff5e3;
+  --c-band-sky: #eaf6ff;
+  --c-deep: #0b2545; /* the one dark band (security): deep ocean navy */
+  --c-deep-muted: #b6c2d6; /* 8.56:1 on deep */
+  --grad-cta: linear-gradient(135deg, var(--c-sun) 0%, var(--c-coral) 55%, var(--c-flamingo) 100%);
 
   --surface: var(--c-paper);
   --surface-raised: var(--c-white);
@@ -122,7 +148,7 @@ main > h1 {
   line-height: 1.15;
 }
 ::selection {
-  background: var(--c-gold);
+  background: var(--c-coral);
   color: var(--c-ink);
 }
 :focus-visible,

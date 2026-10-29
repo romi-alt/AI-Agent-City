@@ -3,6 +3,7 @@ import { Audience } from '../../components/marketing/Audience';
 import { Faq } from '../../components/marketing/Faq';
 import { GetDemo } from '../../components/marketing/GetDemo';
 import { Hero } from '../../components/marketing/Hero';
+import { Highlights } from '../../components/marketing/Highlights';
 import { HowItWorks } from '../../components/marketing/HowItWorks';
 import { Pricing } from '../../components/marketing/Pricing';
 import { Product } from '../../components/marketing/Product';
@@ -49,6 +50,7 @@ export default function LandingPage() {
     <>
       <main id="main" className="mk-main" tabIndex={-1}>
         <Hero />
+        <Highlights />
         <HowItWorks />
         <Product />
         <Audience />
