@@ -28,8 +28,10 @@ const config: NextConfig = {
   transpilePackages: ['@agentcity/city-scene'],
   poweredByHeader: false,
   async rewrites() {
-    if (preview) return [];
-    return [{ source: '/api/:path*', destination: `${apiUrl}/api/:path*` }];
+    // The standalone pitch page (Miami city, full-screen Present mode) lives in public/ and answers at /pitch.
+    const pitch = { source: '/pitch', destination: '/pitch.html' };
+    if (preview) return [pitch];
+    return [pitch, { source: '/api/:path*', destination: `${apiUrl}/api/:path*` }];
   },
   async headers() {
     return [
