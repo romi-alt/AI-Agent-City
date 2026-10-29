@@ -9,3 +9,5 @@ pnpm-lock.yaml
 **/*.md
 # Synthetic legacy fixtures: generated JSON, kept byte-for-byte as committed.
 packages/legacy-import/fixtures/
+# The standalone pitch page (/pitch) is one hand-tuned HTML file with inline scripts, kept as written.
+apps/web/public/pitch.html
