@@ -1,8 +1,9 @@
 # AgentCity live build: https://autosalescity.site
 
-Status of this document: written on 2026-10-28 from the code on `main` (`1ec90a9`) and the build deployed from
-`deploy/live` (`63ae3a3`, build `01a1845c-d2b0-73bd-b9e4-77874e952607`). It says what the live site does, how it is built
-and run, and what has and has not been verified. It contains no secrets: only the names of settings.
+Status of this document: first written on 2026-10-28, updated on 2026-10-29 from the code on `main` (`e418fb8`). The live
+site runs a build of exactly that commit (Hostinger build `01a18506-6cd5-702b-997f-f13017d2511b`, zip `agentcity-live11`,
+deployed 2026-10-29 00:19 UTC). It says what the live site does, how it is built and run, and what has and has not been
+verified. It contains no secrets: only the names of settings.
 
 ## 1. At a glance
 
@@ -18,7 +19,7 @@ office. Everything inside the demo is simulated and nothing is ever sent to cust
 | Email | Resend over HTTPS, from `hello@autosalescity.site` (domain verified in Resend) |
 | Passwords | None, anywhere. Access is a single-use email link |
 | Not running | The full platform (Postgres, Keycloak, NestJS API, Temporal worker, Redis, object storage) |
-| Source of truth | Branch `deploy/live` builds the live site; `main` contains the same code plus later merges |
+| Source of truth | `main`. The live site is a manual upload of a package built from `main` (section 8). Hostinger's Git auto-deploy is **off** |
 
 The live site is a **public preview with a "lite" demo backend**. The full AgentCity platform exists in the repository
 and passes its tests locally, but it needs servers Hostinger's Cloud plan does not provide, so it is not deployed.
@@ -161,6 +162,51 @@ on the host.
   call it but cannot read leads.
 - No scheduled task is configured on Hostinger for this.
 
+### 4.6 Demo office scenarios (simulated)
+
+Code: `apps/web/lib/lite/scenarios.ts`, `scenario-types.ts` (types and the pure state machine, shared by browser and
+tests), `scenario-vocab.ts` (sample wording), `apps/web/lib/lite-scenario-parse.ts` (tolerant client parsing), and in the
+browser `components/demo/{FloorToolbar,WorkflowPanel,DayPanels,scenario-view,use-immersive,use-scenarios}` plus
+`app/demo/office/LiteOffice.tsx`.
+
+- **What it is.** Each of the eight sample agents has one playable workflow with five steps: Trigger, Checks, Draft, Your
+  review, Outcome. At the review step the visitor chooses **Approve**, **Decline**, or **Request a change** (2 or 3
+  options such as "shorter", "add a time", "warmer tone"). The agent's status ring and roster chip, its "right now" line,
+  its task list and a log of **simulated** events then update, and so do the day-summary counters and the "Daily
+  priorities report (sample)". **Run the day** plays the eight agents in day order with a timeline.
+- **What it is not.** Nothing is sent. No message, CRM, calendar or social call is made. Every item is labelled Sample or
+  Simulated, every panel says approvals in the demo do not send anything, and a test checks that no step claims a send.
+  Browser checks recorded that only same-origin `/api/lite` calls are made while scenarios play.
+- **Content.** Generated on the server from the lead id (deterministic), in one of three sample sectors chosen per lead:
+  dealership, training centre or agency. Names are "Sample ..."; no real people, brand endorsements, prices, statistics,
+  revenue promises or response-time guarantees. The wording has not had legal review.
+- **Delivery.** `GET /api/lite/demo/office` adds `scenarios`, `dayReport` and `sector` to the earlier fields (additive).
+  There is no new endpoint.
+- **State.** The visitor's choices live in the page and in `sessionStorage` (scenario ids and step numbers only, no names
+  or text; never `localStorage`), so a reload keeps progress and a new tab starts fresh.
+- **Scenarios, one per agent:**
+
+| Agent | Role | Scenario |
+|---|---|---|
+| Nora | chat | An after-hours chat question: answers from approved information and hands the booking part to a person |
+| Wren | web leads | A website enquiry: four checks and a sample fit score with reasons; a reply draft; approving pencils in a call for tomorrow |
+| Kai | follow-up | An undecided buyer silent for nine days: a gentle re-engagement draft (shorter, offer a time, softer) |
+| Vera | closer | A ready buyer: a proposal outline and decision-call prep with no promised price or terms |
+| Dex | service visits | A visit or class reminder plus an open slot to offer the waiting list |
+| Hana | CSI | An after-visit check-in with two short questions; low ratings flagged for a call |
+| Luna | content | A week plan and a caption to approve; nothing is published |
+| Rio | reviews | One happy and one critical review: a calm reply, no compensation promise, a manager call-back |
+
+- **Full screen.** "Enter full screen" uses the Fullscreen API (with the webkit-prefixed fallback). If that is refused or
+  unavailable (for example iOS Safari), a CSS immersive mode fixes the office to the viewport (`100dvh`), makes the site
+  header and footer inert and locks page scroll. Escape exits. A bottom bar offers Whole floor, desk arrows, Run the day,
+  Exit and the Team, Workflow, Day and Help panes (a right drawer on desktop, a bottom sheet on phones). The city's own
+  settings and help buttons stay reachable.
+- **Whole floor.** A gold "Whole floor" button frames the furnished floor with all eight desks; the desk arrows step
+  between agents.
+- **Accessibility.** Focus moves to the step heading when a step changes, step changes are announced through an
+  `aria-live` region, every control is a native button, and there are no auto-timers.
+
 ## 5. Email
 
 `lib/lite/mailer.ts`. Two messages exist, both sent to the address the visitor typed, from `hello@autosalescity.site`
@@ -239,9 +285,11 @@ Hosting facts: Hostinger account user `u943531942`; site `autosalescity.site` (t
 
 The restart takes a few seconds and can briefly return a 503 to visitors.
 
-Warning: Hostinger's Git auto-deploy for this site is **enabled** and points at `romi-alt/AI-Agent-City.2`, branch
-`main`. That repository is not the one development pushes to, but if its `main` ever changes the host may rebuild the
-site from source and replace the prebuilt package. Turn it off in hPanel if that is not wanted.
+Git auto-deploy: Hostinger's Git auto-deployment for this site (it pointed at `romi-alt/AI-Agent-City.2`, branch `main`)
+was **turned off on 2026-10-29** at the owner's request, and a fresh read of the site's settings shows no auto-deployment.
+Pushing to GitHub no longer changes the live site; only an upload and "start build" does. The deployed files were not
+touched. To switch it back on, reconnect the repository in hPanel (Git settings). Keep the previous zip: Hostinger keeps a
+version per build, but the zip is the simplest rollback.
 
 ## 9. Content and claims
 
@@ -268,15 +316,41 @@ The homepage was written to the proposal direction supplied by the owner and che
 Package: `packages/city-scene`. Highlights of the current version:
 - **Dense district:** the 15 client buildings (brand dealerships, the Fast Sales training centre, rentals) rise out of
   pastel street-wall blocks with awnings and rooftop details; three generated rings (street walls, simplified blocks,
-  a pale skyline) fade into fog, and there is no island edge. Day, golden hour, evening and night; clear, cloudy and rain.
-- **Life:** instanced traffic on the extended road grid (cars, taxis, vans, buses stopping at signals), pedestrians, birds
-  and aircraft. Everything stops under reduced motion and when paused.
-- **Cameras:** Overview (about 32° down, looking along a street), Top, Orbit, building, floor and office views, with eased
-  moves (about 1 s) and limits so the edge of the generated city is never visible.
-- **Building tags:** white pills with the brand, a simulated "x/y working" count and a needs-you badge, laid out so they
-  do not overlap (needs-you badges are never hidden).
+  a pale skyline) fade into fog, and there is no island edge. Day, golden hour, evening and night; clear, partly cloudy,
+  overcast and rain.
+- **Sky and clouds** (`environment/Clouds.tsx`, `cloud-field.ts`, `sky.ts`, `tonemap.ts`):
+  - A clear daytime gradient (#5AA9E6 at the zenith to #D6ECFA at the horizon) with a sun halo; at the horizon the sky
+    equals the fog colour, so the skyline blends with no seam. Golden hour, evening and night have their own colours, a
+    faint star field and a moon. Overcast adds a mottled grey deck.
+  - Clouds are one instanced draw of camera-facing puffs that share a baked 128 px noise sprite, shaded as a lit height
+    field (bright tops, undersides tinted by the time of day, a sun-coloured lining at golden hour). Big clouds sit near
+    the horizon and smaller ones higher, in three layers that drift at different speeds (parallax) and change shape
+    slowly. Cover follows the weather setting: clear shows about 2 to 6 of 20 clouds, partly cloudy about half, overcast
+    fills the sky. Puff counts are 36 (low), 71 (balanced) and 99 (ultra). Pause and reduced motion freeze the clouds.
+  - Cloud shadows on the ground come from the same field, so shadows and drawn clouds agree. A small inverse tone-map
+    keeps the sky blue at balanced and ultra quality.
+- **Life** (`life/**`, all instanced and seeded; everything stops under reduced motion and when paused):
+  - **Traffic:** cars accelerate and brake along smooth curves, stop at lines with queue spacing that compresses and
+    releases as a wave (each driver sets off 0.35 to 1.1 s after the car ahead), follow arcs through turns, keep a lane
+    offset and tilt slightly when braking or turning. Buses stop on about half of long links for 5 to 10 s and taxis pull
+    over on about one in ten. Head and tail lights are drawn at night (tail lights brighter when braking), in one extra
+    draw call that low quality skips.
+  - **Pedestrians:** a walk cycle driven by speed, 28 % of walkers in pairs and trios that pace and stop together, pauses to
+    look around, slowing behind and stepping aside for others, smoothed corners, crossing only on a walk signal.
+  - **Birds:** each bird flaps then glides on its own rhythm; about 28 % of flights are thermal circles held at least
+    5 units above the tallest tower; flocks bank into turns; the last bird to land no longer stays frozen on its roof.
+  - Aircraft and helicopters are unchanged.
+- **Cameras:** Overview (about 15.5° down, which is lower than the earlier 30 to 35° brief so that a band of sky and the
+  horizon show), Orbit (about 17.5°), Top (unchanged), plus building, floor and office views. Moves ease for about 1.1 s.
+  A 20 % "sky band" is reserved above the buildings in Overview and Orbit and fades away as the view tilts up. Limits keep
+  the edge of the generated city out of sight, which needed thinner fog (far plane 240 by day and at golden hour, 230 in
+  the evening and at night), so distant buildings fade earlier than before.
+- **Building tags:** white pills with the brand, a simulated "x/y working" count and a needs-you badge. A deterministic
+  screen-space layout nudges them apart or shrinks them to a brand-only pill, so they do not overlap; a tag with a
+  needs-you badge is never hidden, and clicking a tag opens the building.
 - **Office:** light wood floor, zone rugs, glass walls, slatted feature wall with task board and clock, low-poly agents
-  with status rings and name pills, front three-quarter camera, ease to a desk, cream-coloured panels.
+  with status rings and name pills, front three-quarter camera, ease to a desk, cream-coloured panels. On phones the agent
+  pills show only the name and are kept clear of the legend, title chip and other controls.
 - **Quality presets:** `ultra`, `balanced`, `low`, chosen automatically and overridable in settings. The landing page
   preview runs at `low`.
 - **Reduced motion and phones:** respected; phone layouts use a bottom sheet and brand-only tags.
@@ -286,25 +360,46 @@ Package: `packages/city-scene`. Highlights of the current version:
 | Check | Result |
 |---|---|
 | `pnpm install`, `pnpm build`, `pnpm -r typecheck`, `pnpm format:check` on the merged `main` tree | exit 0 |
-| Unit tests | domain 7, legacy 33, worker 3, legacy-import 7, api 57, city-scene 157, web 45; 0 failures |
-| Database integration tests (local Postgres) | db 49/49, legacy-import 9/9, api 102/102 |
-| Lite backend tests (in the web 45) | 32 lite tests, including single-use links, expiry, no enumeration, refused-email status, sign-in, sweep, cron token. They also passed against a real MariaDB 11.8 earlier in the work |
+| Unit tests (re-run on the final tree, `e418fb8`) | domain 7, legacy 33, worker 3, legacy-import 7, api 57, **city-scene 191**, **web 55**; 0 failures |
+| Database integration tests (local Postgres) | db 49/49, legacy-import 9/9, api 102/102. Run on the earlier `main`; not re-run for the last release because it changed only `packages/city-scene`, `apps/web` and docs, not the API or database |
+| Lite backend tests (in the web 55) | 32 lite tests plus 10 scenario tests (deterministic per lead id, every agent covered, every step marked simulated, no step claims a send, valid state transitions), including single-use links, expiry, no enumeration, refused-email status, sign-in, sweep, cron token. They also passed against a real MariaDB 11.8 earlier in the work |
 | Live: form, database, email | A real submission stored a lead and a real confirmation email arrived in the owner's inbox; the link opened the welcome page and the demo office (owner's screenshots) |
 | Live: pages and API | All pages and the form API return 200; admin routes are locked without a token; the cron-only token can run the expiry route and cannot read leads |
 | Browser checks of the new homepage (1440, 1024, 390 wide) | no overflow or console errors; anchors, mailto links, FAQ and form validation work; prices consistent |
+| Life animations (position logs, headless browser) | A braking car's speed fell 6.63, 5.30, 3.16, 1.32, 0.08, 0.00 with brake lights on and restarted 0.42, 0.98, 1.56 ...; a walker's stride phase advanced about 0.16 per 0.25 s and eased to a stop in 0.75 s; a bird took off flapping and then circled with wings held; 11 new unit tests for the simulations (no negative speed, no overlap over 4 simulated minutes, determinism, birds above the tallest tower) |
+| Sky and clouds (browser) | Sky and horizon visible in Overview and Orbit at 1440 and 390 wide; clouds drifted between two frames (white-cloud centroid x 650 to 712) and stayed still under pause and reduced motion; the world edge was not visible in any preset, zoom or tilt tested |
+| Demo office scenarios (browser, desktop and 390 wide, dev server) | Immersive mode on and off, page chrome back after exit, focus moves to the step heading, `aria-live` text, status changes at review and after approval, day summary counts 1 of 8 then 8 of 8 (4 approved, 2 changed, 2 declined), no cross-origin requests, counters and decisions identical after a reload |
+| Production package, local run | The packaged server answered every page as expected and the city rendered with sky, clouds and tags; the demo API correctly answered 503 without an email key |
+| Live deploy 2026-10-29 | Build `01a18506` completed; `/`, `/city`, `/demo`, `/demo/signin`, `/demo/office`, `/demo/welcome` and the form API return 200; `/api/lite/demo/me` and the leads route return 401; the 4 stored leads were intact; the live `/city` shows the new sky and clouds |
 
 Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-city`, `x03-floor-look`,
-`x04-city-dense`, `x05-polish`, `lite-demo`). `MIGRATION-STATUS.md` lists every stage and what was not run.
+`x04-city-dense`, `x05-polish`, `x06-life`, `x06-sky`, `x07-scenarios`, `lite-demo`). `MIGRATION-STATUS.md` lists every stage and what was not run.
 
 ## 12. Known limits and unverified items
 
 - **No frame rates and no real devices.** The build container only has software rendering, so no performance target is
   claimed, and phone behaviour was only checked in emulated viewports.
-- **Not exercised live by the builder:** the rest of the tour, the office floor, sign-in by email, the "email refused"
-  message, and the pricing buttons. They are covered by tests or local runs.
+- **Not exercised live by the builder:** the tour, the office floor and the scenarios (they need an emailed link), sign-in
+  by email, the "email refused" message and the pricing buttons. They are covered by tests or local runs.
+- **iOS full screen is untested.** The CSS fallback was emulated by removing `requestFullscreen` in desktop Chromium;
+  Safari's dynamic toolbar and safe areas are unverified. In full screen the bottom bar slightly overlaps the camera pad,
+  and the camera does not account for the side drawer. On phones the floor view is small while a sheet is open.
 - **The 2D map fallback** (no WebGL) is built but untested on a real device.
-- **Hero still image:** the picture shown before the 3D loads is a flat low-quality render; a nicer one needs a GPU render.
-- **Phone city view:** the city's settings buttons still overlap the "Fast Sales" tag in the phone Overview.
+- **Hero still image:** it was re-rendered from the dense city at low quality (flat tile horizon), but the live frame now
+  has a lower camera and a sky, so the picture and the live scene differ in composition at the fade. Regenerating it is
+  advisable and needs a GPU render.
+- **Thinner fog:** to keep the world edge hidden with the lower camera the fog was cut (far plane 330 to 240), so distant
+  buildings fade earlier.
+- **Sky details:** the moon sometimes clips behind a skyline tower; the top 70 px of HUD panels hide part of the sky band
+  in `/city`; cloud shadows are numerically present but subtle, and low quality draws no city shadows; other aspect ratios
+  were not tested.
+- **Life animations:** the worst-case braking jerk barely changed (p99 1.88 to 1.84; the gain is in how braking starts and
+  how queues release); a taxi or bus pulling over, a walking pair and a full thermal circle were not seen from a close
+  camera in the browser (unit tests only); group members are not counted on a crosswalk, so a trailing member can stay on
+  it about 0.5 s after the leader leaves.
+- **Phone city view:** the city's settings buttons can overlap the "Fast Sales" tag in the phone Overview.
+- **Stale browser smoke test:** `apps/web/test/d-demo.smoke.ts` still describes the old signed-in office tour and has not
+  been run against the lite office.
 - **Pricing numbers and currency** come from the owner's brief; the currency is not stated, and the page says it is
   confirmed in the quote. The GoHighLevel and "Max plus six specialist agents" scope is proposal wording, not a feature of
   this build.
@@ -315,12 +410,15 @@ Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-
 ## 13. Open decisions and risks
 
 1. Create the mailbox behind `hello@autosalescity.site`, or replies to the contact and pricing buttons will bounce.
-2. Decide about Hostinger's Git auto-deploy (section 8).
+2. Hostinger's Git auto-deploy is off; decide whether to ever reconnect it (section 8). Deploys are manual.
 3. Write or approve a privacy page and retention period for leads.
 4. Confirm the pricing, currency and scope wording.
 5. `m04/revisions` (revision hashing and approval invalidation) is not merged: its rollback test fails once the demo
    migration exists. It needs a rework and review. See `MIGRATION-STATUS.md` (X05.6).
-6. The full platform needs a VPS (Postgres, Redis, Keycloak, API, worker) and an approved email sender before any real
+6. Regenerate the hero still image with a GPU render (section 12), and review the scenario wording before it is shown to
+   real prospects.
+7. `m03/e2e` (the stopped M03 end-to-end work) is still unmerged and was not reviewed.
+8. The full platform needs a VPS (Postgres, Redis, Keycloak, API, worker) and an approved email sender before any real
    customer messaging; none of that is switched on, and `OUTBOUND_ENABLED` stays unset.
 
 ## 14. Repository map
@@ -328,12 +426,13 @@ Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-
 | Path | What |
 |---|---|
 | `apps/web` | The Next.js app: landing page (`app/(marketing)`, `components/marketing`), city page (`app/city`), demo pages (`app/demo`, `components/demo`), lite backend (`lib/lite`, `app/api/lite`), `proxy.ts`, `next.config.ts` |
-| `packages/city-scene` | The 3D city and office (buildings, streets, environment, life, camera, interior, ui, quality) |
+| `packages/city-scene` | The 3D city and office (buildings, streets, environment incl. sky and clouds, life incl. traffic, people and birds, camera, interior, ui, quality) |
 | `apps/api`, `apps/worker`, `packages/db`, `packages/domain`, `packages/contracts` | The full platform (not deployed) |
 | `apps/legacy`, `packages/legacy-import` | The original app and its importer |
 | `scripts/package-preview.sh` | Builds the deployable zip |
 | `.hostinger/site.json` | Hosting target and build settings |
 | `planning/agentcity-migration/` | Plans, decisions, evidence and `MIGRATION-STATUS.md` |
 
-Branches: `main` (everything merged except `m04/revisions`), `deploy/live` (what is deployed), plus the workstream
-branches (`design/*`, `lite/*`, `polish/city`, `migration/*`, `m04/*`) kept for history.
+Branches: `main` (everything merged except `m04/revisions` and `m03/e2e`; the live site is built from it), plus the
+workstream and release branches (`deploy/live`, `release/x06`, `design/*`, `feature/*`, `lite/*`, `polish/city`,
+`migration/*`, `m04/*`) kept for history. `deploy/live` is the earlier release branch and is no longer the source.

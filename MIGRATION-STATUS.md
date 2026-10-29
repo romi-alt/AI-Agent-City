@@ -13,7 +13,7 @@ failed / complete.
 | M03 | **Local passed** (identity, sessions, access and realtime built and tested locally against the real local Keycloak). Merged into `main` at the owner's request, together with X01–X05 (see X05.6) | Branch `migration/m03-identity` @ 689ca54 (from `main` @ ade42f4). Files: section M03.2 | `planning/agentcity-migration/m03/` (DESIGN.md, IDP.md, evidence/) | Back-channel logout cannot reach the API locally (refresh revalidation is the backstop). The parallel end-to-end suite was stopped by the owner and is not committed. CI not yet run on GitHub. See M03.5 | Owner review, then merge M03 into `main` |
 | M04 | **In progress** (common plumbing and the route inventory done; module porting not started) | Inventory, conventions and `apps/api/src/common` are now in `main` (via `m04/inventory`). Branch `m04/revisions` (revision hash, approval invalidation) is **not merged**: its rollback test fails once the X01 demo migration exists (see X05.6) | `planning/agentcity-migration/m04/` (ROUTE-PARITY.md, API-CONVENTIONS.md) | Decision for the owner: typed-client tooling (no-dependency scripts, or approve openapi-typescript / graphql-codegen / dataloader) | Port the legacy modules after M03 is merged |
 | X01 (owner-directed, out of order) | **Local passed** (cinematic city, landing page and automated demo, verified end to end on the local stack). Merged into `main` at the owner's request, together with M03 and X02–X05 (see X05.6) | Branch `feature/cinematic-city-demo` (built on M03 @ 689ca54), HEAD after this entry. Files: section X01.2 | `planning/agentcity-migration/x01-cinematic-city/` (PLAN.md, evidence/, evidence/e2e/) | No real-device frame-rate measurement (software GL only). Production email sender not approved, so nothing is sent outside Mailpit. Includes M03, so it cannot reach `main` before M03. See X01.5 | Owner review on a real browser and GPU; then merge after M03 |
-| X02–X05 (owner-directed, out of order) | **Deployed as a public preview, not a production release.** Dense 3D city, restyled office, sales copy, and a "lite" demo funnel (MySQL, one-time email links, no passwords) run on https://autosalescity.site. Merged into `main` at the owner's request (see X05.6) | Branch `deploy/live` (merges `design/city-dense-district`, `design/floor-reference-look`, `lite/backend`, `lite/frontend`). Files: section X05.2 | Section X05.3; screenshots in `planning/agentcity-migration/{x03-floor-look,x04-city-dense,lite-demo}/` | Resend key and sender set by the owner; real-device frame rates never measured (software GL only); phone layouts unverified on devices. See X05.4 | Owner review of the live site; M04 module porting |
+| X02–X07 (owner-directed, out of order) | **Deployed as a public preview, not a production release.** Dense 3D city with sky and clouds and more realistic traffic, people and birds, restyled office, sales copy and pricing, and a "lite" demo funnel (MySQL, one-time email links, no passwords) with playable simulated agent workflows run on https://autosalescity.site. Merged into `main` at the owner's request (see X05.6) | `main` @ e418fb8 (release branch `release/x06`; earlier `deploy/live`). Live build `01a18506`. Files: section X05.2 | Section X05.3; screenshots in `planning/agentcity-migration/{x03-floor-look,x04-city-dense,x05-polish,x06-life,x06-sky,x07-scenarios,lite-demo}/` | Resend key and sender set by the owner; real-device frame rates never measured (software GL only); phone layouts unverified on devices. See X05.4 | Owner review of the live site; M04 module porting; `m04/revisions` rework |
 | M05–M10, P01–P10 | Not started (parts of M05/M06 and the product demo pulled forward by X01) | — | — | — | In order, one at a time |
 
 # X01 — cinematic 3D city, premium landing page and automated demo (owner-directed)
@@ -135,7 +135,11 @@ Full documentation of the live build: `planning/agentcity-migration/x05-live-bui
 | Lite demo backend | `apps/web/app/api/lite/**`, `apps/web/lib/lite/**`: form token, submit, status, one-time verify link, session cookie, simulated office, sign-in link for returning visitors, owner-only leads and expiry routes. MySQL tables `lite_*` created on first use |
 | Lite demo frontend | Form, check-email (polls, resend, shows when the provider refused the email), welcome, tour, demo office with the visitor's building enterable, sign-in page |
 | Email | Resend over HTTPS from hello@autosalescity.site. Only the confirmation and sign-in emails exist; nothing is ever sent to customers |
-| Hosting | Hostinger Node.js (Next standalone, prebuilt zip via `scripts/package-preview.sh`), production MySQL, secrets in the host's environment (never in the repo) |
+| Hosting | Hostinger Node.js (Next standalone, prebuilt zip via `scripts/package-preview.sh`), production MySQL, secrets in the host's environment (never in the repo). Git auto-deploy turned off on 2026-10-29: deploys are manual uploads |
+| Homepage content and pricing (owner brief) | Proposal-based copy, a Pricing section (Full Office Setup $1,200 one-time; Monthly Office & AI about $800/month; currency confirmed in the quote), contact `hello@autosalescity.site`, no checkout |
+| Life animations (X06) | Traffic with smooth braking, queue release, turns, bus and taxi stops, head and tail lights; pedestrians with a walk cycle, groups, pauses and crossing rules; birds that flap, glide, bank and soar. Tests: 11 new |
+| Sky and clouds (X06) | Overview and Orbit cameras lowered so a band of sky shows; clear gradient, sun halo, horizon blended into fog, instanced drifting clouds driven by the weather setting, cloud shadows; fog thinned to keep the world edge hidden |
+| Demo office scenarios (X07) | Full-screen mode, a Whole floor view, a playable five-step simulated workflow for each of the eight agents with approve, change or decline, and Run the day; nothing is ever sent. Tests: 10 new |
 
 ### X05.2 Where
 `apps/web/lib/lite/*`, `apps/web/app/api/lite/**`, `apps/web/app/demo/**`, `apps/web/components/demo/*`,
@@ -145,23 +149,28 @@ Full documentation of the live build: `planning/agentcity-migration/x05-live-bui
 ### X05.3 Checks run
 | Check | Result |
 |---|---|
-| city-scene typecheck and tests (integrated dense city) | clean, 141/141 |
-| web typecheck, prettier, `node --test test/*.test.ts` | clean, 40+ pass (31 lite tests, including single-use links, same answer for unknown addresses, expiry, refused-email status, cron token) |
+| city-scene typecheck and tests | clean; 141/141 at the dense-city integration, **191/191** on the final tree (`e418fb8`) |
+| web typecheck, prettier, `node --test test/*.test.ts` | clean; **55/55** on the final tree (32 lite tests, including single-use links, same answer for unknown addresses, expiry, refused-email status, sweep, cron token; 10 scenario tests) |
 | Lite service tests against real MariaDB 11.8 | all passed at the time (LB, before the sign-in and cron additions) |
 | Live journey on the production site | form submit 200, lead stored, real confirmation email delivered to the owner's inbox, link opened, welcome page and the first tour step shown (owner's screenshots). Not exercised live by me: the rest of the tour, the office floor, sign-in by email, the refused-email message |
-| Leads/expiry routes | locked (401 without a token), owner token returns the leads list |
+| Leads/expiry routes | locked (401 without a token), owner token returns the leads list; the cron-only token runs the expiry route and cannot read leads |
+| Life, sky and scenario evidence | Position logs and screenshots in `x06-life`, `x06-sky`, `x07-scenarios` (headless Chromium, software GL); the scenario browser run covered immersive mode, state after reload and the absence of cross-origin requests |
+| Production package and live deploy (2026-10-29) | Local run of the packaged server, then Hostinger build `01a18506`: all pages and the form API 200, protected routes 401, 4 leads intact, live `/city` shows the new sky |
 
 ### X05.4 Not run, or not claimed
 - No frame rates anywhere (software GL only); no real phone or GPU testing.
 - The 2D map fallback for browsers without WebGL was not tested.
 - Resend was exercised for real once (the owner's confirmation email); its refusal path is covered by a unit test only.
-- The expiry job is a scheduled call to `POST /api/lite/admin/expire` with a cron-only token derived from the session secret; see the deployment notes for whether it is scheduled.
-- No privacy-policy page and no contact address exist; the form carries a short inline notice. Marketing consent stays optional and separate.
+- Expired demos are swept from funnel traffic at most once an hour (and on demand through `POST /api/lite/admin/expire`, which a cron-only token can call). No scheduled task exists on the host.
+- No privacy-policy page exists; the form carries a short inline notice. The contact address is `hello@autosalescity.site`; whether a mailbox exists behind it is unconfirmed. Marketing consent stays optional and separate.
 - The audit log and role model are platform features; the lite demo has neither, and the page says so.
-- Hostinger's GitHub auto-deploy from `main` is still enabled and could overwrite this deployment.
+- Not exercised live: the tour, the office floor and the scenarios (they need an emailed link), sign-in by email, the refused-email message. iOS full screen is untested (CSS fallback emulated only). `apps/web/test/d-demo.smoke.ts` is stale and was not run.
+- Visual caveats: thinner fog (far plane 330 to 240) so distant buildings fade earlier; the hero still image should be regenerated with a GPU render; the moon can clip behind a tower; cloud shadows are subtle; the full-screen bar slightly overlaps the camera pad.
+- Pricing figures, currency and the GoHighLevel and "Max plus six agents" scope come from the owner's brief and are described as a proposed setup confirmed in a quote; they are not features of this build.
+- Hostinger's Git auto-deploy was turned off on 2026-10-29 (it pointed at `romi-alt/AI-Agent-City.2`, `main`); a fresh read shows no auto-deployment.
 
 ### X05.5 Next safe step
-Owner review of the live site, then decide the merge order into `main` (M03, X01, X02, then the design and demo branches). The full platform (Postgres, Keycloak, real agents) still needs a VPS; the lite demo does not depend on it.
+Owner review of the live site (including the demo office scenarios with a real emailed link), a mailbox behind `hello@autosalescity.site`, privacy page wording, and a GPU render for the hero still image. The full platform (Postgres, Keycloak, real agents) still needs a VPS; the lite demo does not depend on it.
 
 ### X05.6 Merge into `main`
 Merged at the owner's request: `main` was fast-forwarded to the integration branch (`deploy/live` plus the final `design/city-camera` commits), so it now holds M03, X01, X02, X03, X04 and X05 (the public preview and lite demo). The merged tree was checked as a whole:
@@ -171,7 +180,17 @@ Merged at the owner's request: `main` was fast-forwarded to the integration bran
 | Unit tests | domain 7, legacy 33, worker 3, legacy-import 7, api 57, city-scene 157, web 45: 0 failures |
 | `pnpm db:test` (local Postgres) | db 49/49, legacy-import 9/9, api 102/102 |
 **Not merged:** `m04/revisions` (revision hashing and approval invalidation). On the merged tree its rollback test `down restores the exact pre-revisions schema` fails: that test assumes the revisions migration is the newest, and once it is ordered after the X01 demo migration the demo migration's column grants on `app.draft_revision` make the rollback differ from the reference schema. It needs a rework of that migration or test and an owner review, so it stays on its own branch.
-**Deployment note:** the live site is built from `deploy/live` by `scripts/package-preview.sh`, not from `main`. Hostinger's Git auto-deploy for the site points at a different repository and branch (`romi-alt/AI-Agent-City.2`, `main`); it was not changed.
+**Deployment note:** the live site is built from the repository by `scripts/package-preview.sh` and uploaded by hand. Hostinger's Git auto-deploy (it pointed at `romi-alt/AI-Agent-City.2`, `main`) was turned off on 2026-10-29.
+
+### X05.7 Later release (X06 and X07), merged and deployed
+On 2026-10-29 three further workstreams were merged into `release/x06`, deployed, and then `main` was fast-forwarded to it (`68a68b0` to `e418fb8`): `design/life-realism` (traffic, pedestrians, birds), `design/sky-clouds` (sky, clouds, camera presets, fog) and `feature/demo-scenarios` (full screen, whole floor, agent workflows). Only `packages/city-scene`, `apps/web` and documentation changed; the API and database did not.
+| Check | Result |
+|---|---|
+| `pnpm install`, `pnpm -r typecheck`, `pnpm format:check` on the merged tree | exit 0 |
+| Unit tests | domain 7, legacy 33, worker 3, legacy-import 7, api 57, city-scene 191, web 55: 0 failures |
+| `pnpm db:test` | not re-run for this release (no API or database change); last run db 49/49, legacy-import 9/9, api 102/102 |
+| Packaged build, local run; live checks after deploy | see X05.3 |
+Still not merged: `m04/revisions` (see above) and `m03/e2e` (the stopped M03 end-to-end work, not reviewed).
 
 ## M03.1 What was built
 
