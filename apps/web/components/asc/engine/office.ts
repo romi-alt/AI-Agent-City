@@ -1171,7 +1171,7 @@ export const O3 = (() => {
       this.glows.forEach(g => {
         g.intensity = P.glow;
       });
-      if (this.neonMat) this.neonMat.emissiveIntensity = this._neonBase = 0.7 + P.lamp * 0.5;
+      if (this.neonMat) this.neonMat.emissiveIntensity = this._neonBase = 0.5 + P.lamp * 0.2;
       if (this.bloom) this.bloom.strength = P.bloom;
       if (this.starPts) this.starPts.visible = tod === 'night';
       if (this.city) this.city.setTimeOfDay(tod);
@@ -2834,7 +2834,7 @@ export const O3 = (() => {
         g.fillRect(0, 0, W, H);
         g.fillStyle = '#f5b83d';
         g.textAlign = 'center';
-        g.font = '800 54px "Space Grotesk", sans-serif';
+        g.font = '800 40px "Space Grotesk", sans-serif';
         g.fillText('WELCOME · CHECK IN HERE', W / 2, 66);
       }).t;
       const fsm = this._plane(root, fs, 2.8, 0.44, cx, 0.52, cz + 0.416, 0, {
