@@ -1,9 +1,9 @@
 # AgentCity live build: https://autosalescity.site
 
-Status of this document: first written on 2026-10-28, updated on 2026-10-29. The live site runs Hostinger build
-`01a188c5-9965-709c-9142-c5b92fad8370` (zip `agentcity-live13`, deployed 2026-10-29 17:47 UTC), built on Windows from
-`main` `78c4cba`. It adds the standalone pitch page at `/pitch` (Miami city, light theme, full-screen Present mode);
-everything else behaves as live12 did. This document says what the live site does, how it is built and run, and what has and has not been verified.
+Status of this document: first written on 2026-10-28, updated on 2026-10-30. The live site runs Hostinger build
+`01a18910-1bea-73a8-a964-9c91a65e1ed9` (zip `agentcity-live14`, deployed 2026-10-29 19:08 UTC), built on Windows from
+`main` `e4d5a25`. It brings the manager's design to the front page (bright palette, full-screen hero city, highlights
+strip) and adds Present mode to `/city`; `/pitch` (live13) is unchanged. This document says what the live site does, how it is built and run, and what has and has not been verified.
 It contains no secrets: only the names of settings.
 
 ## 1. At a glance
@@ -378,6 +378,7 @@ Package: `packages/city-scene`. Highlights of the current version:
 | Live deploy 2026-10-29 | Build `01a18506` completed; `/`, `/city`, `/demo`, `/demo/signin`, `/demo/office`, `/demo/welcome` and the form API return 200; `/api/lite/demo/me` and the leads route return 401; the 4 stored leads were intact; the live `/city` shows the new sky and clouds |
 | Live deploy 2026-10-29 (live12, first Windows-built package) | Build `01a185bf` completed in 31 s; `/`, `/city`, `/demo`, `/demo/signin`, `/demo/check-email` and `/api/lite/demo/form-token` return 200; `/api/lite/demo/me` and the leads route return 401; `/signin` 307 and `/api/foo` 404 as before; static chunks 200; checked in a browser by the maintainer |
 | Live deploy 2026-10-29 (live13, pitch page) | Build `01a188c5` completed in 32 s and the cache was cleared; `/`, `/city`, `/pitch`, `/pitch.html`, `/demo`, `/demo/signin` and `/api/lite/demo/form-token` return 200; `/api/lite/demo/me` and the leads route return 401; `/signin` 307 and `/api/foo` 404; `/pitch#present` opened Present mode in a browser |
+| Live deploy 2026-10-29 (live14, colourful front page + Present mode) | Build `01a18910` completed in 28 s and the cache was cleared; `/`, `/city`, `/city?present=1`, `/pitch`, `/demo`, `/demo/signin` and `/api/lite/demo/form-token` return 200; `/api/lite/demo/me` and the leads route return 401; `/signin` 307 and `/api/foo` 404; the new hero and Present mode checked in a browser |
 
 Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-city`, `x03-floor-look`,
 `x04-city-dense`, `x05-polish`, `x06-life`, `x06-sky`, `x07-scenarios`, `lite-demo`). `MIGRATION-STATUS.md` lists every stage and what was not run.
