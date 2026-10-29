@@ -2044,3 +2044,97 @@ html:has(.asc) {
   opacity: 0.6;
   cursor: progress;
 }
+
+/* The design's 3D name tags, speech bubbles and screen viewer (live demo engine). */
+.asc #demoApp .tag3d {
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translateY(-6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.asc #demoApp .tag3d .nm {
+  font: 700 11px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(9, 12, 16, 0.88);
+  border: 1px solid var(--c, #6ee7f9);
+  color: #fff;
+  white-space: nowrap;
+}
+.asc #demoApp .tag3d .nm small {
+  color: var(--c, #6ee7f9);
+  font-weight: 600;
+  margin-left: 5px;
+}
+.asc #demoApp .tag3d .bubble {
+  max-width: 190px;
+  font: 500 11px/1.35 var(--font);
+  color: #e9eef5;
+  background: rgba(18, 23, 31, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 8px;
+  border-radius: 9px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.35s,
+    transform 0.35s;
+}
+.asc #demoApp .tag3d.talk .bubble {
+  opacity: 1;
+  transform: none;
+}
+.asc #demoApp .tag3d.sel .nm {
+  background: var(--c);
+  color: #0b0e13;
+}
+.asc #demoApp[data-theme='light'] .tag3d .nm {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1c2230;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.asc #demoApp[data-theme='light'] .tag3d .bubble {
+  background: rgba(255, 255, 255, 0.96);
+  color: #1c2230;
+  border-color: #e6e0d3;
+}
+.asc #demoApp .screen-dlg {
+  margin: auto;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--glass);
+  color: var(--text);
+  padding: 14px;
+  width: min(1100px, 94vw);
+  box-shadow: 0 40px 120px -30px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(14px);
+}
+.asc #demoApp .screen-dlg::backdrop {
+  background: rgba(5, 8, 15, 0.6);
+  backdrop-filter: blur(3px);
+}
+.asc #demoApp .dlg-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-family: var(--display);
+}
+.asc #demoApp .screen-dlg canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: #0a0f17;
+  display: block;
+}
+.asc #demoApp .d-fine {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}

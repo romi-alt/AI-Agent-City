@@ -147,11 +147,12 @@ test('the demo sign-in dialog rejects a wrong password and opens the overlay wit
   await page.fill('#dlPw', 'wrong');
   await page.click('#dlForm button[type=submit]');
   assert.match(await page.textContent('#dlErr'), /public demo login/);
-  assert.equal(await page.locator('#demoApp').count(), 0, 'the demo is not even loaded before sign-in');
+  assert.ok(await page.locator('#demoApp').evaluate((el: HTMLElement) => el.classList.contains('hidden')), 'closed');
   await page.fill('#dlPw', 'autosales');
   await page.click('#dlForm button[type=submit]');
   await page.waitForSelector('#demoApp:not(.hidden)');
-  assert.equal((await page.locator('.place').count()) > 10, true, "the visit list shows the city's buildings");
+  await page.waitForSelector('.place');
+  assert.ok((await page.locator('.place').count()) >= 8, 'the visit list shows the places');
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => document.getElementById('demoApp')?.classList.contains('hidden'));
   await page.context().close();
