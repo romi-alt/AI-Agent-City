@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { CityExplorer } from './CityExplorer';
+import { AscCity } from './AscCity';
 
-export const metadata: Metadata = { title: 'Explore AgentCity' };
+export const metadata: Metadata = { title: 'Explore the city · AutoSalesCity' };
 
-// Owner: workstream A3 (camera, navigation, HUD). The public city: catalog only, no tenant data.
+// The public city: the design's own 3D city, opened full screen. The earlier AgentCity explorer is still at /city/classic.
 export default function CityPage() {
-  return <CityExplorer />;
+  return <AscCity />;
 }
