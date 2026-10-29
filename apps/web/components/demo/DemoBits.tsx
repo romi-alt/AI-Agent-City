@@ -1,10 +1,11 @@
 // Small pieces shared by the demo pages, built from the landing page's primitives (components/marketing): the
 // "Simulated"/"Sample" tag, agent avatars, status chips, the demo page header and footer, and the conversion cards.
-import { Icon, Mark } from '../marketing/Primitives';
+import { Icon } from '../marketing/Primitives';
 import { PUBLIC_PREVIEW } from '../../lib/preview';
 import { describeAgentStatus } from './demo-api';
 import '../marketing/marketing.css';
 import './demo.css';
+import './demo-asc.css';
 
 /** Every piece of sample content carries this label, so nobody mistakes it for real activity. */
 export function Simulated({ label = 'Simulated' }: { label?: string }) {
@@ -47,15 +48,26 @@ export function AgentStatus({ status, testId }: { status: string; testId?: strin
   );
 }
 
+/** The front page's logo: the gradient AS badge and the two-tone name. */
+function AscLogo({ testId }: { testId?: string }) {
+  return (
+    <a className="dm-asc-logo" href="/" aria-label="AutoSalesCity home" data-testid={testId}>
+      <span className="dm-asc-mark" aria-hidden="true">
+        <span>AS</span>
+      </span>
+      <span>
+        AutoSales<b>City</b>
+      </span>
+    </a>
+  );
+}
+
 /** Header for the public demo pages: the landing page's wordmark, no section navigation. */
 export function DemoHeader() {
   return (
     <header className="mk-header dm-header">
       <div className="mk-header-inner">
-        <a className="mk-wordmark" href="/" aria-label="AgentCity home" data-testid="demo-home-link">
-          <Mark className="mk-wordmark-mark" />
-          <span>AgentCity</span>
-        </a>
+        <AscLogo testId="demo-home-link" />
         <div className="mk-header-actions">
           <a className="mk-header-link" href="/city">
             Explore the city
@@ -76,10 +88,7 @@ export function DemoFooter() {
     <footer className="dm-foot">
       <div className="mk-container">
         <div className="mk-footer-base">
-          <a className="mk-wordmark" href="/" aria-label="AgentCity home">
-            <Mark className="mk-wordmark-mark" />
-            <span>AgentCity</span>
-          </a>
+          <AscLogo />
           <p className="mk-footer-note">Demo offices use sample data. Demo agents never contact anyone.</p>
         </div>
       </div>

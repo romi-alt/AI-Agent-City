@@ -81,6 +81,8 @@ export function createResendMailer(apiKey: string, from: string, fetchFn: typeof
     async sendVerification(to, link, kind = 'verify') {
       const res = await fetchFn('https://api.resend.com/emails', {
         method: 'POST',
+        // Without a limit a provider that never answers would leave the check-email page waiting for ever.
+        signal: AbortSignal.timeout(15_000),
         headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
         body: JSON.stringify({
           from,
@@ -89,6 +91,12 @@ export function createResendMailer(apiKey: string, from: string, fetchFn: typeof
           text: verificationText(to.firstName, link, kind),
           html: verificationHtml(to.firstName, link, kind),
         }),
+      }).catch((e: unknown) => {
+        // Network trouble (blocked, timed out, DNS): name the cause so the server log says why, never the address.
+        const cause = (e as { cause?: { code?: string } }).cause?.code;
+        const err = new Error('could not reach resend');
+        err.name = `ResendNet${(e as Error).name}${cause ? `_${cause}` : ''}`;
+        throw err;
       });
       if (!res.ok) {
         const err = new Error('resend rejected the message');

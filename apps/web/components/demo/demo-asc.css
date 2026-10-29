@@ -1,0 +1,239 @@
+/* The demo funnel (request form, check-email, welcome, office) in the AutoSalesCity theme: the same night-navy
+   palette, Space Grotesk headings and amber button as the front page. It only re-points the tokens the funnel
+   already uses, so every page picks it up without changing its layout. */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/asc/space-grotesk-latin-wght-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/asc/inter-latin-wght-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/fonts/asc/jetbrains-mono-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+.mk.dm-page {
+  color-scheme: dark;
+  --c-paper: #070a12;
+  --c-white: #0f1524;
+  --c-ink: #eef2f8;
+  --c-ink-2: #b8c1d1;
+  --c-muted: #9aa5ba;
+  --c-faint: #5d687e;
+  --c-hairline: rgba(255, 255, 255, 0.1);
+  --c-hairline-2: rgba(255, 255, 255, 0.18);
+  --c-tint: #0c1120;
+  --c-gold: #f5b83d;
+  --c-gold-ink: #ffd27a;
+  --c-green-ink: #3ccf8e;
+  --surface: #070a12;
+  --surface-raised: #0f1524;
+  --text: #eef2f8;
+  --text-2: #b8c1d1;
+  --text-muted: #9aa5ba;
+  --rule: rgba(255, 255, 255, 0.1);
+  --focus: #ffd27a;
+  --bg: #070a12;
+  --fg: #eef2f8;
+  --muted: #9aa5ba;
+  --line: rgba(255, 255, 255, 0.1);
+  --ok: #3ccf8e;
+  --bad: #ff8a80;
+  --shadow-card: 0 20px 60px -24px rgba(0, 0, 0, 0.8);
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --asc-display: 'Space Grotesk', Inter, system-ui, sans-serif;
+  position: relative;
+  isolation: isolate;
+  font-family: var(--font-sans);
+  color: var(--text);
+  background:
+    radial-gradient(90% 55% at 50% 0%, rgba(129, 140, 248, 0.16), transparent 70%),
+    radial-gradient(120% 70% at 50% 115%, #2a1e3f 0%, #141a33 38%, #070a12 75%);
+  background-color: #070a12;
+}
+.mk.dm-page h1,
+.mk.dm-page h2,
+.mk.dm-page h3,
+.mk.dm-page .dm-title {
+  font-family: var(--asc-display);
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.mk.dm-page .mk-eyebrow {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: #f5b83d;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.mk.dm-page .mk-lead {
+  color: var(--text-2);
+}
+
+/* header and footer: the front page's logo */
+.mk.dm-page .dm-header {
+  background: rgba(7, 10, 18, 0.72);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--rule);
+}
+.dm-asc-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font: 700 18px var(--asc-display, 'Space Grotesk', sans-serif);
+  letter-spacing: -0.01em;
+  color: #fff;
+  text-decoration: none;
+}
+.dm-asc-logo b {
+  color: #f5b83d;
+}
+.dm-asc-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: conic-gradient(from 200deg, #f5b83d, #ff6b5e, #818cf8, #38bdf8, #f5b83d);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 24px rgba(245, 184, 61, 0.45);
+}
+.dm-asc-mark span {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #0b0f1a;
+  display: grid;
+  place-items: center;
+  font:
+    700 12px 'JetBrains Mono',
+    ui-monospace,
+    monospace;
+  color: #f5b83d;
+}
+.mk.dm-page .mk-header-link {
+  color: var(--text-2);
+}
+.mk.dm-page .mk-header-link:hover {
+  color: #fff;
+}
+.mk.dm-page .dm-foot {
+  background: rgba(7, 10, 18, 0.6);
+}
+.mk.dm-page .mk-footer-note {
+  color: var(--text-muted);
+}
+
+/* the city at the bottom of every funnel page */
+.dm-skyline {
+  position: fixed;
+  inset: auto 0 0 0;
+  height: 34vh;
+  max-height: 340px;
+  z-index: -1;
+  opacity: 0.5;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 60%);
+  mask-image: linear-gradient(180deg, transparent, #000 60%);
+}
+.dm-skyline svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* cards, buttons, notices */
+.mk.dm-page .dm-card {
+  background: rgba(16, 22, 38, 0.78);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+}
+.mk.dm-page .mk-btn-primary {
+  background: linear-gradient(135deg, #f5b83d, #ffd27a);
+  color: #1a1206;
+  font-weight: 600;
+  box-shadow: 0 8px 30px -8px rgba(245, 184, 61, 0.55);
+}
+.mk.dm-page .mk-btn-primary:hover {
+  background: linear-gradient(135deg, #ffc455, #ffdc8f);
+}
+.mk.dm-page .mk-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #eef2f8;
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+}
+.mk.dm-page .mk-btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.34);
+}
+.mk.dm-page .mk-btn-secondary:disabled {
+  color: var(--text-muted);
+}
+.mk.dm-page .mk-btn-dark {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.mk.dm-page .dm-notice {
+  background: rgba(16, 22, 38, 0.78);
+  color: var(--text-2);
+}
+.mk.dm-page .dm-notice-error,
+.mk.dm-page .dm-error-summary {
+  background: rgba(255, 107, 94, 0.1);
+  border-color: rgba(255, 107, 94, 0.4);
+  color: #ffb4ac;
+}
+.mk.dm-page .dm-notice-ok {
+  background: rgba(60, 207, 142, 0.08);
+  border-color: rgba(60, 207, 142, 0.35);
+  color: #7fe3b4;
+}
+.mk.dm-page .dm-notice-dev {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+}
+.mk.dm-page .dm-notice-dev strong,
+.mk.dm-page .dm-notice a {
+  color: #fff;
+}
+.mk.dm-page .dm-link {
+  color: #ffd27a;
+}
+.mk.dm-page .dm-field-error {
+  color: #ff8a80;
+}
+.mk.dm-page input,
+.mk.dm-page select,
+.mk.dm-page textarea {
+  background: rgba(255, 255, 255, 0.05);
+  color: #eef2f8;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.mk.dm-page input::placeholder,
+.mk.dm-page textarea::placeholder {
+  color: #6f7a90;
+}
+.mk.dm-page input:focus-visible,
+.mk.dm-page select:focus-visible,
+.mk.dm-page textarea:focus-visible {
+  outline: 2px solid #ffd27a;
+  outline-offset: 2px;
+}
+.mk.dm-page .dm-pulse {
+  background: #f5b83d;
+}
+.mk.dm-page .dm-pulse.dm-done {
+  background: #3ccf8e;
+}
