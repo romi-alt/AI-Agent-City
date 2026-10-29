@@ -26,7 +26,3 @@ only, unmodified from the upstream releases as published by the `@fontsource-var
 | `fonts/asc/space-grotesk-latin-wght-normal.woff2` | Space Grotesk (300–700) | https://github.com/floriankarsten/space-grotesk | SIL Open Font License 1.1 |
 | `fonts/asc/inter-latin-wght-normal.woff2` | Inter (100–900) | https://github.com/rsms/inter | SIL Open Font License 1.1 (`OFL-inter.txt`) |
 | `fonts/asc/jetbrains-mono-latin-wght-normal.woff2` | JetBrains Mono (100–800) | https://github.com/JetBrains/JetBrainsMono | SIL Open Font License 1.1 (`OFL-jetbrains-mono.txt`) |
-
-`public/asc/three.r128.min.js` is the unmodified `three@0.128.0` build (MIT, `public/asc/THREE-LICENSE.txt`). The hero
-scene was tuned against r128's light units and colour handling, so it keeps that build as a global instead of the
-newer three the rest of the app uses.

@@ -36,7 +36,7 @@ const config: NextConfig = {
       // Pages are prerendered, and Next gives them a one-year shared-cache lifetime. The host's CDN kept serving an old
       // homepage after a deploy because of it, so HTML is revalidated every minute; hashed assets stay long-cached.
       {
-        source: '/((?!_next/static|_next/image|api/|city/|fonts/|asc/|favicon|og-).*)',
+        source: '/((?!_next/static|_next/image|api/|city/|fonts/|favicon|og-).*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=0, s-maxage=60, stale-while-revalidate=300' }],
       },
       {

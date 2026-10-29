@@ -115,12 +115,12 @@ export const NAV_LINKS = [
 ];
 
 export const DEMO_STOPS = [
-  { color: '#f5b83d', mark: 'FS', label: 'Fast Sales Training Center HQ' },
-  { color: '#2f7cf6', mark: 'A', label: 'Aurora Motors showroom' },
-  { color: '#e5484d', mark: 'V', label: 'Vanta Auto showroom' },
-  { color: '#f08a24', mark: 'S', label: 'Summit Trucks lot' },
-  { color: '#18b67a', mark: 'V', label: 'Volta EV showroom' },
-  { color: '#64748b', mark: '◎', label: 'Billboards, planes, day & night' },
+  { color: '#f2b84b', mark: 'FS', label: 'Fast Sales Training Center' },
+  { color: '#2f7cf6', mark: 'DR', label: 'Dealer Row: nine car dealerships' },
+  { color: '#e5484d', mark: 'RC', label: 'Rick Case Honda sales associates' },
+  { color: '#18b67a', mark: 'RP', label: 'Rental Park: floors to rent' },
+  { color: '#818cf8', mark: '▲', label: 'Look inside any building, floor by floor' },
+  { color: '#64748b', mark: '◎', label: 'Day, evening and night' },
 ];
 
 export const STEPS = [

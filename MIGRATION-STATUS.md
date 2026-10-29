@@ -640,21 +640,24 @@ src/core/types.ts          report status 'skipped'
 test/containment.test.ts   12 tests: zero provider calls, catalog-only pulse, fail-closed state, file mode
 ```
 
-### X08 Front page: the AutoSalesCity design (branch `design/autosalescity-frontpage`, not deployed)
+### X08 Front page: the AutoSalesCity design on the existing city (branch `design/autosalescity-frontpage`, not deployed)
 
-The front page (`/`) now follows the supplied AutoSalesCity design file. Only the front page changed: `/city`, `/demo/**`,
+The front page (`/`) now follows the supplied AutoSalesCity design, with the existing AgentCity city kept as its 3D
+scene (owner's instruction: the design's own cities were not adopted). Only the front page changed: `/city`, `/demo/**`,
 the lite backend and the rest of the app are untouched.
 
-- **What it is.** Header, hero with the live night city, marquee, live-demo section, how it works, districts, AI team,
-  control room, numbers, pricing, closing call to action and footer, plus the full-screen live demo (sign-in dialog, HQ
-  office, four dealerships, Florida waterfront, guided tour, camera pad, Day/Evening/Night). Markup is server-rendered
-  (`components/asc/AscPage.tsx`); behaviour is wired in the browser (`AscClient.tsx`, `landing.ts`, `hero-city.ts`,
-  `demo-app.ts`); the 3D engine (`components/asc/engine/*`) loads only when a visitor opens the demo.
+- **What it is.** Header, hero, marquee, live-demo section, how it works, districts, AI team, control room, numbers,
+  pricing, closing call to action and footer, plus the design's full-screen live-demo overlay. Markup is server-rendered
+  (`components/asc/AscPage.tsx`); behaviour is wired in the browser (`AscClient.tsx`, `landing.ts`).
+- **The city is the existing one, in both places.** The hero (`HeroCity.tsx`) shows the public city scene behind the
+  design's headline, stats and feed: a rendered frame first, the live scene fading in once the page is idle, paused when
+  scrolled away or while the demo is open, and no building tags (they ran through the headline). The live demo
+  (`DemoApp.tsx`) wraps the same city scene in the design's overlay: visit list (all 15 buildings, Fast Sales first, with
+  Outside / Floor 1 / Top floor), info panel from the city layout, Day / Evening / Night, guided tour, camera pad and
+  keys. The design's own scenes (night city, HQ office, Aurora/Vanta/Summit/Volta dealerships, Florida waterfront) and
+  three r128 were dropped.
 - **Styles** are scoped under `.asc` (`asc.css`) so none of it leaks into the app's global styles. Fonts are self-hosted
-  (`public/fonts/asc/`, licences in `public/fonts/LICENSES.md`).
-- **The hero keeps three r128** (`public/asc/three.r128.min.js`, loaded as a global) because its lights and colours were
-  tuned against that release; the demo engine runs on the app's three 0.186. The engine files are ported from the
-  design and marked `@ts-nocheck`.
+  (`public/fonts/asc/`, licences in `public/fonts/LICENSES.md`). The demo's 3D chunk loads only after sign-in.
 - **The demo keeps the design's public login** (`demo` / `autosales`, checked in the browser, remembered in
   sessionStorage). It is a cosmetic gate, not security, and is not replaced by the email-link sign-in (owner's decision).
 - **Contact address** on the closing call to action is `CONTACT_EMAIL` (default `hello@autosalescity.site`), not the
@@ -662,9 +665,11 @@ the lite backend and the rest of the app are untouched.
 - **Not on the front page any more:** the lead-capture form and the Sign in link. `/demo` and `/demo/signin` still work.
   The old marketing components (`components/marketing/*`) are still in the repository, unused by `/`.
 - **Checks run:** `tsc --noEmit` clean; Prettier clean; web unit tests 55/55; `test/b-landing.smoke.ts` rewritten for the new
-  page, 8/8 (sections and copy, no console errors, sign-in dialog and overlay, reduced motion, no-WebGL fallback,
-  360/390 px phones, metadata). Screenshots checked by eye at 1440 px and 390 px, including the overlay in day and night.
-  Software rendering only: no frame rates measured; the demo's camera moves were caught mid-flight in two screenshots.
-- **Known gaps:** Open Graph image is still the old AgentCity render; claims in the design's copy (live pilot, 871
-  knowledge chunks, 42 agents, prices, integrations) are the owner's and unverified; accessibility of the overlay (focus
-  trap, aria-pressed) is as in the design; `d-demo.smoke.ts` lost its obsolete landing-form test.
+  page. Screenshots checked by eye at 1440 px and 390 px, including the overlay in day and night and a floor view.
+  Software rendering only: no frame rates measured. The scene's own console warnings (deprecated Clock, PCFSoftShadowMap)
+  come from the existing city package and also appear on `/city`.
+- **Known gaps:** copy that describes the design's cities is partly rewritten (live-demo section); the hero badge "6
+  dealerships · 42 AI agents" and the numbers band are the design's and no longer match the city (9 dealerships, 15
+  buildings); the poster frame is golden hour while the design is a night palette; Open Graph image is the old render;
+  claims in the design's copy (live pilot, 871 knowledge chunks, prices, integrations) are the owner's and unverified;
+  `d-demo.smoke.ts` lost its obsolete landing-form test.

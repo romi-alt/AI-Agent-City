@@ -102,10 +102,11 @@ test('the demo sign-in dialog rejects a wrong password and opens the overlay wit
   await page.fill('#dlPw', 'wrong');
   await page.click('#dlForm button[type=submit]');
   assert.match(await page.textContent('#dlErr'), /public demo login/);
-  assert.ok(await page.locator('#demoApp').evaluate((el: HTMLElement) => el.classList.contains('hidden')));
+  assert.equal(await page.locator('#demoApp').count(), 0, 'the demo is not even loaded before sign-in');
   await page.fill('#dlPw', 'autosales');
   await page.click('#dlForm button[type=submit]');
-  await page.waitForFunction(() => !document.getElementById('demoApp')?.classList.contains('hidden'));
+  await page.waitForSelector('#demoApp:not(.hidden)');
+  assert.equal((await page.locator('.place').count()) > 10, true, "the visit list shows the city's buildings");
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => document.getElementById('demoApp')?.classList.contains('hidden'));
   await page.context().close();
@@ -118,7 +119,7 @@ test('reduced motion shows the final numbers at once', async () => {
   await page.context().close();
 });
 
-test('without WebGL the skyline stays and the simulated feed keeps running', async () => {
+test('without WebGL the rendered city frame stays and the simulated feed keeps running', async () => {
   const noGl = await chromium.launch({ args: ['--disable-webgl', '--disable-webgl2', '--disable-3d-apis'] });
   try {
     const context = await noGl.newContext();
@@ -127,7 +128,8 @@ test('without WebGL the skyline stays and the simulated feed keeps running', asy
     page.on('console', (m: any) => m.type() === 'error' && errors.push(m.text()));
     page.on('pageerror', (e: Error) => errors.push(String(e)));
     await page.goto(WEB, { waitUntil: 'networkidle' });
-    await page.waitForFunction(() => document.getElementById('hero')?.classList.contains('no-webgl'));
+    assert.equal(await page.locator('.hero-city-poster').count(), 1, 'the rendered frame stays');
+    assert.equal(await page.locator('.hero-city-live').count(), 0, 'no live scene');
     await page.waitForFunction(() => document.querySelectorAll('#feed li').length >= 4);
     assert.deepEqual(errors, []);
   } finally {

@@ -12,7 +12,8 @@ import {
   PLANS,
   STEPS,
 } from './data';
-import { DemoOverlay } from './DemoOverlay';
+import { HeroCity } from './HeroCity';
+import { LiveDemo } from './LiveDemo';
 import { Skyline } from './Skyline';
 
 const cv = (c: string) => ({ '--c': c }) as CSSProperties;
@@ -60,21 +61,8 @@ export function AscPage({ contactEmail }: { contactEmail: string }) {
       <main id="top">
         {/* HERO: live 3D city */}
         <section className="hero" id="hero" aria-label="AutoSalesCity live city">
-          <canvas id="city" aria-hidden="true" />
+          <HeroCity />
           <div className="scrim" aria-hidden="true" />
-          <svg className="fallback" viewBox="0 0 1200 400" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <linearGradient id="fb" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#1b2140" />
-                <stop offset="1" stopColor="#070a12" />
-              </linearGradient>
-            </defs>
-            <path
-              fill="url(#fb)"
-              d="M0 400V250h60v-90h70v120h50V180h80v60h40V120h90v160h60v-70h70v110h50V90h100v190h60v-100h80v130h50V200h90v80h60v-60h80v180z"
-            />
-          </svg>
-          <div className="labels" id="labels" />
 
           <div className="hero-copy">
             <div className="wrap">
@@ -165,9 +153,9 @@ export function AscPage({ contactEmail }: { contactEmail: string }) {
             <div className="demo-grid">
               <div className="reveal d2">
                 <p className="lead">
-                  Fly over the city, step inside four dealerships and the Fast Sales Training Center HQ, and watch AI
-                  agents answer leads, book test drives and move the pipeline in real time. Click any sales board or
-                  salesperson&apos;s screen to open it full size.
+                  Fly over the city, open the Fast Sales campus, Dealer Row and Rental Park, and watch AI agents answer
+                  leads, book test drives and move the pipeline in real time. Click any building to look inside, floor
+                  by floor.
                 </p>
                 <div className="demo-creds">
                   <span>Public demo login</span>
@@ -197,9 +185,9 @@ export function AscPage({ contactEmail }: { contactEmail: string }) {
                 aria-label="Open the live demo city"
               >
                 <div className="chips">
-                  <span style={cv('#2f7cf6')}>Aurora Motors</span>
-                  <span style={cv('#f5b83d')}>Fast Sales HQ</span>
-                  <span style={cv('#18b67a')}>Volta EV</span>
+                  <span style={cv('#2f7cf6')}>Dealer Row</span>
+                  <span style={cv('#f5b83d')}>Fast Sales campus</span>
+                  <span style={cv('#18b67a')}>Rental Park</span>
                 </div>
                 <Skyline id="demoSky" width={800} height={400} color="#f5b83d" seed={4242} />
                 <span className="play">▶ Enter the demo city</span>
@@ -451,7 +439,7 @@ export function AscPage({ contactEmail }: { contactEmail: string }) {
         </div>
       </footer>
 
-      <DemoOverlay />
+      <LiveDemo />
       <AscClient />
     </div>
   );

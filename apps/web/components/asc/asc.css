@@ -1,7 +1,6 @@
 /* AutoSalesCity front page. Scoped under .asc so none of it leaks into the rest of the app (globals.css / theme.css
    carry bare element rules for main, section, h1, p, button...). Generated once from the design file's stylesheet:
    every selector is prefixed with .asc, :root/html/body map onto the wrapper, and keyframes are renamed asc-*. */
-
 @font-face {
   font-family: 'Space Grotesk';
   font-style: normal;
@@ -32,7 +31,6 @@
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
     U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
 /* Undo the app-wide element rules (globals.css) for everything inside the page. */
 .asc {
   color-scheme: dark;
@@ -59,7 +57,6 @@ body:has(.asc) {
   margin: 0;
   background: #070a12;
 }
-
 .asc {
   --bg: #070a12;
   --bg2: #0c1120;
@@ -262,17 +259,13 @@ html:has(.asc) {
   overflow: hidden;
   background: radial-gradient(120% 80% at 50% 110%, #2a1e3f 0%, #141a33 38%, #070a12 75%);
 }
-.asc #city {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
 .asc .scrim {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(7, 10, 18, 0.88) 0%, rgba(7, 10, 18, 0.55) 34%, transparent 62%);
+  background:
+    linear-gradient(180deg, rgba(7, 10, 18, 0.7) 0%, transparent 24%),
+    linear-gradient(90deg, rgba(7, 10, 18, 0.88) 0%, rgba(7, 10, 18, 0.55) 34%, transparent 62%);
 }
 @media (max-width: 760px) {
   .asc .scrim {
@@ -293,62 +286,12 @@ html:has(.asc) {
   background: linear-gradient(transparent, var(--bg));
   pointer-events: none;
 }
-.asc .labels {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-.asc .blabel {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform: translate(-50%, -100%);
-  white-space: nowrap;
-  font: 600 11px var(--mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 6px 10px 6px 8px;
-  border-radius: 8px;
-  background: rgba(8, 11, 20, 0.78);
-  border: 1px solid var(--c);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  backdrop-filter: blur(6px);
-  transition: opacity 0.3s;
-  will-change: transform;
-}
-.asc .blabel i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--c);
-  box-shadow: 0 0 10px var(--c);
-}
-.asc .blabel small {
-  color: var(--c);
-  font-weight: 500;
-}
-.asc .blabel.ping {
-  animation: asc-ping 0.9s ease-out;
-}
 @keyframes asc-ping {
   0% {
     box-shadow: 0 0 0 0 var(--c);
   }
   100% {
     box-shadow: 0 0 0 16px transparent;
-  }
-}
-@media (max-width: 640px) {
-  .asc .blabel small {
-    display: none;
-  }
-  .asc .blabel {
-    font-size: 9px;
-    padding: 4px 7px;
   }
 }
 .asc .hero-copy {
@@ -1184,15 +1127,6 @@ html:has(.asc) {
   padding-top: 28px;
 }
 /* fallback skyline when WebGL is unavailable */
-.asc .fallback {
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 60%;
-  display: none;
-}
-.asc .no-webgl .fallback {
-  display: block;
-}
 @media (prefers-reduced-motion: reduce) {
   .asc *,
   .asc *::before,
@@ -1834,98 +1768,6 @@ html:has(.asc) {
   color: #1a1205;
   border-color: var(--amber);
 }
-.asc #demoApp .tag3d {
-  pointer-events: auto;
-  cursor: pointer;
-  transform: translateY(-6px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-.asc #demoApp .tag3d .nm {
-  font: 700 11px var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: rgba(9, 12, 16, 0.88);
-  border: 1px solid var(--c, #6ee7f9);
-  color: #fff;
-  white-space: nowrap;
-}
-.asc #demoApp .tag3d .nm small {
-  color: var(--c, #6ee7f9);
-  font-weight: 600;
-  margin-left: 5px;
-}
-.asc #demoApp .tag3d .bubble {
-  max-width: 190px;
-  font: 500 11px/1.35 var(--font);
-  color: #e9eef5;
-  background: rgba(18, 23, 31, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 6px 8px;
-  border-radius: 9px;
-  text-align: center;
-  opacity: 0;
-  transform: translateY(4px);
-  transition:
-    opacity 0.35s,
-    transform 0.35s;
-}
-.asc #demoApp .tag3d.talk .bubble {
-  opacity: 1;
-  transform: none;
-}
-.asc #demoApp .tag3d.sel .nm {
-  background: var(--c);
-  color: #0b0e13;
-}
-.asc #demoApp[data-theme='light'] .tag3d .nm {
-  background: rgba(255, 255, 255, 0.95);
-  color: #1c2230;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-}
-.asc #demoApp[data-theme='light'] .tag3d .bubble {
-  background: rgba(255, 255, 255, 0.96);
-  color: #1c2230;
-  border-color: #e6e0d3;
-}
-.asc #demoApp .screen-dlg {
-  margin: auto;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--glass);
-  color: var(--text);
-  padding: 14px;
-  width: min(1100px, 94vw);
-  box-shadow: 0 40px 120px -30px rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(14px);
-}
-.asc #demoApp .screen-dlg::backdrop {
-  background: rgba(5, 8, 15, 0.6);
-  backdrop-filter: blur(3px);
-}
-.asc #demoApp .dlg-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-family: var(--display);
-}
-.asc #demoApp .screen-dlg canvas {
-  width: 100%;
-  height: auto;
-  border-radius: 12px;
-  background: #0a0f17;
-  display: block;
-}
-.asc #demoApp .d-fine {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--muted);
-}
 @media (max-width: 900px) {
   .asc #demoApp .d-visit {
     top: auto;
@@ -2028,4 +1870,62 @@ html:has(.asc) {
   .asc #demoApp .d-brand > span:not(.d-mark) {
     display: none;
   }
+}
+
+/* The hero's city is the existing AgentCity scene (HeroCity): a rendered frame first, the live scene fading in over it.
+   It sits to the right so the headline keeps the left (soft left edge), never takes the pointer (the page must scroll)
+   and shows no building tags (they would run through the headline). */
+.asc .hero-city {
+  position: absolute;
+  inset: 0 0 0 10%;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 34%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 34%);
+}
+.asc .hero-city-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 60% 50%;
+  opacity: 0.95;
+}
+.asc .hero-city-live {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.asc .hero-city-live.is-shown {
+  opacity: 1;
+}
+.asc .hero-city button {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  .asc .hero-city {
+    inset: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* The demo's city keeps its own stacking context, so its building tags stay behind the design's panels. */
+.asc #demoApp .d-scene {
+  z-index: 0;
+  isolation: isolate;
+}
+.asc #demoApp .d-visit,
+.asc #demoApp .d-info,
+.asc #demoApp .d-top,
+.asc #demoApp .navpad,
+.asc #demoApp .d-hint {
+  z-index: 1;
+}
+.asc #demoApp .place i {
+  color: var(--ink, #fff);
+}
+.asc #demoApp .subs button.on {
+  color: var(--ink, #fff);
 }
