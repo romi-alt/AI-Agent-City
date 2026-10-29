@@ -71,7 +71,7 @@ export function AscPage({ contactEmail, bookForm }: { contactEmail: string; book
           <div className="hero-copy">
             <div className="wrap">
               <span className="badge">
-                <span className="live">LIVE</span> 6 dealerships · 42 AI agents on the clock
+                <span className="live">LIVE</span> Dealerships and AI agents on the clock
               </span>
               <h1 id="headline">
                 {HEADLINE.map((w, i) => (
@@ -157,7 +157,7 @@ export function AscPage({ contactEmail, bookForm }: { contactEmail: string; book
             <div className="demo-grid">
               <div className="reveal d2">
                 <p className="lead">
-                  Fly over the city, step inside four dealerships and the Fast Sales Training Center HQ, and watch AI
+                  Fly over the city, step inside the dealerships and the Fast Sales Training Center HQ, and watch AI
                   agents answer leads, book test drives and move the pipeline in real time. Click any sales board or
                   salesperson&apos;s screen to open it full size.
                 </p>
