@@ -1,4 +1,5 @@
-import { Color, Vector3 } from 'three';
+import { Color, Vector3, Vector4 } from 'three';
+import { MAX_SHADOWS } from './cloud-field.ts';
 import { useCityContext } from '../context.tsx';
 import type { CityStore } from '../store.ts';
 import { type EnvState, presetFor } from './presets.ts';
@@ -43,6 +44,10 @@ export interface SharedUniforms {
   uFogColor: { value: Color };
   /** Cloud cover 0..1: drives the soft moving cloud shadows on the ground and buildings. */
   uCloud: { value: number };
+  /** Drift clock of the clouds in seconds: stops while paused and with reduced motion, so clouds freeze in place. */
+  uCloudT: { value: number };
+  /** Ground shadows of the drawn clouds as (x, z, radius, strength); written by <Clouds> each frame. */
+  uCloudShadow: { value: Vector4[] };
 }
 
 export interface EnvRuntime {
@@ -75,6 +80,8 @@ export function envRuntime(store: CityStore): EnvRuntime {
         uSunDir: { value: new Vector3(0.5, 0.7, 0.5).normalize() },
         uFogColor: { value: new Color() },
         uCloud: { value: 0 },
+        uCloudT: { value: 0 },
+        uCloudShadow: { value: Array.from({ length: MAX_SHADOWS }, () => new Vector4()) },
       },
       state: presetFor(s.timeOfDay, s.weather),
     };

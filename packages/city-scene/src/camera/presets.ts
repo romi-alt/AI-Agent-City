@@ -37,16 +37,45 @@ export function cityFrame(layout: CityLayout): CityFrame {
 
 const DEG = Math.PI / 180;
 
-/** Overview: about 32° down from horizontal (as in the street reference), heading almost straight up a street. */
-export const OVERVIEW_PITCH = 32 * DEG;
+/**
+ * Overview: low, about 15.5° down from horizontal, heading almost straight up a street. The earlier 32° looked at
+ * ground and facades only: with a 42° lens the frame's top edge sat 11° below the horizon, so the sky never showed.
+ * At 15.5° the horizon rises into the upper part of the frame (see `SKY_BAND`).
+ */
+export const OVERVIEW_PITCH = 15.5 * DEG;
 /** A slight turn off the street's axis, so the facades on one side read as well as the street receding. */
 export const OVERVIEW_HEADING = 0.12;
 /** Orbit: the same low angle, a touch higher so the turn keeps the whole district in view. */
-export const ORBIT_PITCH = 35 * DEG;
+export const ORBIT_PITCH = 17.5 * DEG;
 /** Orbit starts from the south-east three-quarter view (fronts and east facades), then turns. */
 export const ORBIT_HEADING = 0.62;
 /** Top: almost straight down, north up (a hair of tilt keeps "up" on screen meaning north). */
 export const TOP_PHI = 0.04;
+/**
+ * Share of the picture's height kept for sky above the framed buildings in Overview and Orbit. The buildings are fitted
+ * into the picture below this band (as if a HUD strip covered it) and the camera shifts its window to match
+ * (CameraRig), so the horizon lands about a quarter of the way down in Overview (a fifth in Orbit) with some 9° of sky above it.
+ */
+export const SKY_BAND = 0.2;
+/** The band fades out as the view tilts up: full at or below this pitch, gone at `SKY_FADE_END` (Top has none). */
+export const SKY_FADE_START = 40 * DEG;
+export const SKY_FADE_END = 65 * DEG;
+
+const smooth = (a: number, b: number, x: number) => {
+  const t = clamp((x - a) / (b - a), 0, 1);
+  return t * t * (3 - 2 * t);
+};
+
+/** The sky band in pixels for a camera tilted `pitch` below the horizontal (0 once the view looks steeply down). */
+export function skyInsetPx(pitch: number, height: number): number {
+  return SKY_BAND * height * (1 - smooth(SKY_FADE_START, SKY_FADE_END, pitch));
+}
+
+/** The viewport with the sky band counted as covered, which is how Overview and Orbit are fitted. */
+export function skyViewport(vp: Viewport): Viewport {
+  return { ...vp, top: (vp.top ?? 0) + SKY_BAND * vp.height };
+}
+
 /** Seconds for a move between presets: long enough to follow, short enough to feel direct. */
 export const PRESET_SECONDS = 1.1;
 
@@ -99,7 +128,8 @@ const inside = ([x, y]: [number, number]) => Math.abs(x) <= 1 && Math.abs(y) <= 
  * City Overview: low and close, looking up the main street so it recedes into the haze, with the client buildings
  * filling the visible part of the view.
  */
-export function overviewPreset(boxes: Box[], frame: CityFrame, vp: Viewport): Orbit {
+export function overviewPreset(boxes: Box[], frame: CityFrame, view: Viewport): Orbit {
+  const vp = skyViewport(view);
   const o = fitPoints(corners(framedHeroes(boxes, vp)), OVERVIEW_HEADING, phiOfPitch(OVERVIEW_PITCH), vp, 0.02);
   // Slide sideways (along the view's right axis) towards the main street, so it runs up the middle of the picture,
   // halving the slide until every client building is still inside the view.
@@ -126,7 +156,8 @@ export function topPreset(boxes: Box[], vp: Viewport): Orbit {
  * City Orbit: a slow turn round the district's centre at the low angle, at the mean of eight headings' fits: the
  * district fills the view along its length and runs a little off the sides when seen end-on.
  */
-export function orbitPreset(boxes: Box[], vp: Viewport, theta = ORBIT_HEADING): Orbit {
+export function orbitPreset(boxes: Box[], view: Viewport, theta = ORBIT_HEADING): Orbit {
+  const vp = skyViewport(view);
   const pts = corners(framedHeroes(boxes, vp));
   const c = centroid(pts);
   const phi = phiOfPitch(ORBIT_PITCH);
@@ -203,9 +234,9 @@ export function groundReach(o: Orbit, vp: Viewport, fogDepth: number): number {
   const t = Math.tan((vp.fov * DEG) / 2);
   const tx = (t * vp.width) / vp.height;
   const ty = t;
-  // Window shift in units of the half-extents: setViewOffset by (right / 2, bottom / 2) pixels.
+  // Window shift in units of the half-extents: setViewOffset by (right / 2, (bottom - top) / 2) pixels.
   const ox = vp.right / vp.width;
-  const oy = -vp.bottom / vp.height;
+  const oy = ((vp.top ?? 0) - vp.bottom) / vp.height;
   const h = p[1];
   if (h <= 0) return Infinity;
   let reach = 0;
@@ -273,6 +304,8 @@ export function edgeHidden(
   margin = EDGE_MARGIN,
 ): boolean {
   const limit = frame.extent - margin;
+  // The sky band moves the window down by up to its size (CameraRig fades it with the tilt), so judge both ends.
+  const windows = [vp, skyViewport(vp)];
   for (const [sx, sz] of [
     [1, 1],
     [1, -1],
@@ -281,7 +314,8 @@ export function edgeHidden(
   ] as const) {
     for (let k = 0; k < 8; k++) {
       const o: Orbit = { target: [sx * targetExtent, 0, sz * targetExtent], theta: (k * Math.PI) / 4, phi, radius };
-      if (groundReach(o, vp, fogAt(o, fogBase)) > limit) return false;
+      const depth = fogAt(o, fogBase);
+      if (windows.some(w => groundReach(o, w, depth) > limit)) return false;
     }
   }
   return true;

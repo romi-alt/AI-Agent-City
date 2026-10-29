@@ -26,7 +26,8 @@ export interface EnvState {
   sunGlow: Rgb;
   fogColor: Rgb;
   /** Linear fog: fully clear before `fogNear`, fully fogged at `fogFar` (world units). The generated city ends
-   * beyond `fogFar`, so its edge is never visible. */
+   * beyond `fogFar`, so its edge is never visible. 240 at most: with the horizon in view (low camera presets, which
+   * show the sky) a thicker fog would let the frustum's corners reach the city's edge (camera/presets.ts, d4 tests). */
   fogNear: number;
   fogFar: number;
   /** 0 by day, 1 at night: drives window lights, street lamps, headlights. */
@@ -71,13 +72,13 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#d6ecfa'),
     sunGlow: hex('#fff3d8'),
     fogColor: hex('#d6ecfa'),
-    fogNear: 110,
-    fogFar: 330,
+    fogNear: 95,
+    fogFar: 240,
     nightFactor: 0,
     stars: 0,
     cloudCover: 0.2,
     cloudLit: hex('#ffffff'),
-    cloudShade: hex('#d4e2ef'),
+    cloudShade: hex('#bccde2'),
     rain: 0,
     wetness: 0,
     envIntensity: 0.3,
@@ -98,13 +99,13 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#f8d0a4'),
     sunGlow: hex('#ffb257'),
     fogColor: hex('#f0d0ae'),
-    fogNear: 110,
-    fogFar: 320,
+    fogNear: 95,
+    fogFar: 240,
     nightFactor: 0.08,
     stars: 0,
     cloudCover: 0.2,
-    cloudLit: hex('#ffe4c4'),
-    cloudShade: hex('#d2b8ac'),
+    cloudLit: hex('#fff1dc'),
+    cloudShade: hex('#ad7878'),
     rain: 0,
     wetness: 0,
     envIntensity: 0.48,
@@ -126,8 +127,8 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#e7a07c'),
     sunGlow: hex('#ff9a66'),
     fogColor: hex('#6c6f98'),
-    fogNear: 90,
-    fogFar: 300,
+    fogNear: 85,
+    fogFar: 230,
     nightFactor: 0.6,
     stars: 0.2,
     cloudCover: 0.2,
@@ -154,8 +155,8 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#1b2a55'),
     sunGlow: hex('#3a5290'),
     fogColor: hex('#1b2a55'),
-    fogNear: 90,
-    fogFar: 300,
+    fogNear: 85,
+    fogFar: 230,
     nightFactor: 1,
     stars: 1,
     cloudCover: 0.2,

@@ -57,7 +57,7 @@ import { designsForLayout } from '../buildings/info.ts';
 import { navigate } from './useNav.ts';
 import { asMat } from '../interior/r3f.ts';
 // D4 (city presets): explore-mode framings, preset easing and the edge-hiding limits live in presets.ts.
-import { cityFrame, exploreLimits, presetFlight, presetPose } from './presets.ts';
+import { cityFrame, exploreLimits, presetFlight, presetPose, skyInsetPx } from './presets.ts';
 
 type Motion =
   | { kind: 'flight'; flight: Flight; t: number }
@@ -777,7 +777,9 @@ export function CameraRig() {
     if (camera instanceof THREE.PerspectiveCamera) {
       const kx = dampFactor(reduced ? 30 : 6, dt);
       r.offset.x += (r.insets.right / 2 - r.offset.x) * kx;
-      r.offset.y += ((r.insets.bottom - r.insets.top) / 2 - r.offset.y) * kx;
+      // Exploring keeps a band of sky above the framed city (presets.ts `SKY_BAND`), fading as the view tilts up.
+      const sky = store.get().mode.kind === 'explore' ? skyInsetPx(Math.PI / 2 - r.cur.phi, size.height) : 0;
+      r.offset.y += ((r.insets.bottom - r.insets.top - sky) / 2 - r.offset.y) * kx;
       const w = size.width;
       const h = size.height;
       if (Math.abs(r.offset.x) > 0.5 || Math.abs(r.offset.y) > 0.5)

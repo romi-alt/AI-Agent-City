@@ -3,101 +3,152 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import {
   Color,
+  DataTexture,
   DoubleSide,
   InstancedBufferAttribute,
   InstancedMesh,
+  LinearFilter,
   Matrix4,
   PlaneGeometry,
+  RepeatWrapping,
+  RGBAFormat,
   ShaderMaterial,
 } from 'three';
-import { GLSL_NOISE } from './glsl.ts';
+import {
+  bakeCloudSprite,
+  buildCloudField,
+  CLOUD_RADIUS,
+  cloudDemand,
+  groundShadows,
+  MAX_SHADOWS,
+  SPRITE_SIZE,
+  sizeBoost,
+} from './cloud-field.ts';
 import type { EnvRuntime } from './palette.ts';
-
-const PER_LAYER = 16;
-const SPAN = 2000;
+import { invAcesFilmic } from './tonemap.ts';
 
 /**
- * Layered drifting clouds: camera-facing soft billboards shaded with value noise, so a few dozen quads read as
- * volumetric cumulus at partly-cloudy and merge into a grey deck when overcast. One draw call.
+ * Cumulus as camera-facing puffs: each cloud is a handful of quads sharing one baked noise sprite, shaded in the
+ * fragment shader as a lumpy height field lit from the sun (bright tops and sun-facing edges, grey-blue or sunset
+ * undersides from the preset's cloud colours). Layers drift at different speeds for parallax, the shapes slowly
+ * morph, and distance and the horizon haze melt them into the sky. One draw call; the same cloud field also drives the
+ * ground shadows (cloud-field.ts), so what is drawn and what shades the city agree.
  */
-export function Clouds({ layers, rt }: { layers: number; rt: EnvRuntime }) {
-  const { mesh, material } = useMemo(() => {
-    const count = Math.max(1, layers) * PER_LAYER;
+export function Clouds({ layers, rt, compensate }: { layers: number; rt: EnvRuntime; compensate: boolean }) {
+  const { mesh, material, field, sprite } = useMemo(() => {
+    const field = buildCloudField(layers);
+    const count = field.puffs.length;
+    const cluster = new Float32Array(count * 4);
+    const puff = new Float32Array(count * 4);
+    const info = new Float32Array(count * 4);
+    field.puffs.forEach((p, i) => {
+      const c = field.clusters[p.cluster]!;
+      cluster.set([c.x, c.y, c.z, c.speed], i * 4);
+      puff.set([p.dx, p.dy, p.dz, p.size], i * 4);
+      info.set([c.threshold, c.follow, p.rise, p.seed], i * 4);
+    });
     const geo = new PlaneGeometry(1, 1);
-    const data = new Float32Array(count * 4);
-    const seed = new Float32Array(count * 4);
-    let s = 11;
-    const rnd = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
-    for (let i = 0; i < count; i++) {
-      const layer = Math.floor(i / PER_LAYER);
-      data.set(
-        [(rnd() - 0.5) * SPAN, 230 + layer * 80 + rnd() * 40, (rnd() - 0.5) * SPAN * 0.9, 260 + rnd() * 320],
-        i * 4,
-      );
-      seed.set([rnd() * 100, 2 + rnd() * 3 + layer * 1.5, rnd(), layer], i * 4);
-    }
-    geo.setAttribute('aCloud', new InstancedBufferAttribute(data, 4));
-    geo.setAttribute('aSeed', new InstancedBufferAttribute(seed, 4));
+    geo.setAttribute('aCluster', new InstancedBufferAttribute(cluster, 4));
+    geo.setAttribute('aPuff', new InstancedBufferAttribute(puff, 4));
+    geo.setAttribute('aInfo', new InstancedBufferAttribute(info, 4));
+    const sprite = new DataTexture(bakeCloudSprite(), SPRITE_SIZE, SPRITE_SIZE, RGBAFormat);
+    sprite.minFilter = LinearFilter;
+    sprite.magFilter = LinearFilter;
+    // Repeat: the fine-detail channel is sampled at several tiles per puff.
+    sprite.wrapS = sprite.wrapT = RepeatWrapping;
+    sprite.generateMipmaps = false;
+    sprite.needsUpdate = true;
     const material = new ShaderMaterial({
       uniforms: {
-        uTime: rt.uniforms.uTime,
+        uSprite: { value: sprite },
+        uT: rt.uniforms.uCloudT,
+        uDemand: { value: 0.3 },
+        uBoost: { value: 1 },
         uCover: { value: 0.3 },
         uLit: { value: new Color() },
         uShade: { value: new Color() },
+        uSunTint: { value: new Color() },
         uSunDir: rt.uniforms.uSunDir,
         uFog: rt.uniforms.uFogColor,
       },
       vertexShader: /* glsl */ `
-        attribute vec4 aCloud;
-        attribute vec4 aSeed;
-        uniform float uTime;
+        attribute vec4 aCluster;
+        attribute vec4 aPuff;
+        attribute vec4 aInfo;
+        uniform float uT, uDemand, uBoost;
         varying vec2 vUv;
-        varying vec4 vSeed;
-        varying float vFade;
-        varying vec3 vWorld;
+        varying vec3 vCentre;
+        varying vec2 vInfo;
+        varying float vAlpha;
+        varying float vMorph;
         void main() {
-          vec3 c = aCloud.xyz;
-          c.x = mod(c.x + uTime * aSeed.y + ${SPAN / 2}.0, ${SPAN}.0) - ${SPAN / 2}.0;
+          // Present and not faded at the rim: the same rules as cloud-field.ts (clusterPresence, rimFade, driftedX).
+          float k = clamp((uDemand * aInfo.y - aInfo.x) / 0.1, 0.0, 1.0);
+          float presence = k * k * (3.0 - 2.0 * k);
+          float chord = sqrt(max(${CLOUD_RADIUS * CLOUD_RADIUS}.0 - aCluster.z * aCluster.z, 10000.0));
+          float x = mod(aCluster.x + uT * aCluster.w + chord, 2.0 * chord) - chord;
+          float rim = 1.0 - smoothstep(0.72, 1.0, abs(x) / chord);
+          vAlpha = presence * rim;
+          if (vAlpha < 0.01) {
+            gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+            return;
+          }
+          vec3 c = vec3(x, aCluster.y, aCluster.z) + aPuff.xyz;
           vec4 mv = viewMatrix * vec4(c, 1.0);
-          mv.xy += position.xy * vec2(aCloud.w, aCloud.w * 0.42);
+          mv.xy += position.xy * aPuff.w * uBoost * (0.7 + 0.3 * presence) * vec2(1.0, 0.8);
           gl_Position = projectionMatrix * mv;
           vUv = uv;
-          vSeed = aSeed;
-          vWorld = c;
-          float edge = 1.0 - smoothstep(${SPAN * 0.32}.0, ${SPAN * 0.5}.0, max(abs(c.x), abs(c.z)));
-          vFade = edge;
+          vCentre = c;
+          vInfo = vec2(aInfo.z, aInfo.w);
+          // Each puff changes shape on its own slow cycle (about two minutes), frozen with the drift clock.
+          vMorph = 0.5 + 0.5 * sin(uT * 0.05 * (0.6 + 0.8 * aInfo.w) + aInfo.w * 40.0);
         }
       `,
       fragmentShader: /* glsl */ `
-        ${GLSL_NOISE}
-        uniform float uCover, uTime;
-        uniform vec3 uLit, uShade, uSunDir, uFog;
+        uniform sampler2D uSprite;
+        uniform vec3 uLit, uShade, uSunTint, uSunDir, uFog;
+        uniform float uCover;
         varying vec2 vUv;
-        varying vec4 vSeed;
-        varying float vFade;
-        varying vec3 vWorld;
+        varying vec3 vCentre;
+        varying vec2 vInfo;
+        varying float vAlpha;
+        varying float vMorph;
+        float shape(vec2 uv) {
+          vec2 s = texture2D(uSprite, uv).rg;
+          return mix(s.r, s.g, vMorph);
+        }
         void main() {
-          vec2 p = (vUv - 0.5) * vec2(2.0, 2.0);
-          float n = a1fbm(vUv * vec2(4.0, 2.2) + vSeed.x + vec2(uTime * 0.004, 0.0));
-          float shape = 1.0 - length(p * vec2(1.0, 1.15 - 0.3 * vUv.y));
-          float cover = clamp(uCover, 0.0, 1.0);
-          float dens = smoothstep(0.22, 0.62, shape + (n - 0.5) * 1.6 + cover * 0.32 - 0.12);
-          float keep = step(vSeed.z, 0.12 + cover * 0.9);
-          float a = dens * keep * vFade * mix(0.7, 0.95, cover);
+          bool flip = vInfo.y > 0.5;
+          vec2 t = flip ? vec2(1.0 - vUv.x, vUv.y) : vUv;
+          float e = 2.0 / ${SPRITE_SIZE}.0;
+          float d0 = shape(t);
+          // Fine noise erodes the soft edge into small lumps (cauliflower tops) without touching the dense core.
+          float fine = texture2D(uSprite, vUv * 2.3 + vInfo.yy * 7.0).b;
+          float d = d0 + (fine - 0.5) * 0.5 * (1.0 - d0 * 0.7);
+          vec2 g = vec2(shape(t + vec2(e, 0.0)) - d0, shape(t + vec2(0.0, e)) - d0) / e * 0.06;
+          if (flip) g.x = -g.x;
+          float a = smoothstep(0.08, 0.34, d) * vAlpha * mix(0.9, 1.0, uCover);
+          vec3 toCentre = vCentre - cameraPosition;
+          float dist = length(toCentre);
+          // Never a veil over the camera: puffs that come close fade out.
+          a *= smoothstep(150.0, 420.0, dist);
+          // Edge-on to the horizon, a cloud's base thins out instead of showing a hard line.
+          float sinE = toCentre.y / dist;
+          a *= smoothstep(0.0, 0.03, sinE);
           if (a < 0.01) discard;
-          float lit = clamp(vUv.y * 0.8 + n * 0.5 - 0.15, 0.0, 1.0);
-          vec3 col = mix(uShade, uLit, lit);
-          float toward = max(dot(normalize(vWorld - cameraPosition), uSunDir), 0.0);
-          col += uLit * pow(toward, 6.0) * 0.25 * (1.0 - cover);
-          float far = smoothstep(500.0, 1100.0, length(vWorld.xz - cameraPosition.xz));
-          // Never a veil in front of the camera: fade billboards that come close.
-          a *= smoothstep(180.0, 380.0, length(vWorld - cameraPosition));
-          // Clouds seen edge-on near the horizon (or from above) fade out instead of showing a hard edge.
-          a *= smoothstep(0.03, 0.14, (vWorld.y - cameraPosition.y) / length(vWorld - cameraPosition));
-          if (a < 0.01) discard;
-          col = mix(col, uFog, far * 0.7);
+          // Lumpy height field lit from the sun: the sun's side of every lump is bright, the far side dim.
+          vec3 sv = normalize((viewMatrix * vec4(uSunDir, 0.0)).xyz);
+          vec3 n = normalize(vec3(-g, 1.0));
+          float lam = 0.5 + 0.5 * dot(n, normalize(vec3(sv.xy, 0.35 - sv.z * 0.5)));
+          float shade = 0.1 + 0.5 * lam + 0.6 * vInfo.x + 0.2 * (vUv.y - 0.5) + 0.3 * (fine - 0.5);
+          vec3 col = mix(uShade, uLit, smoothstep(0.2, 0.9, shade));
+          // Thin edges toward the sun glow with the sun's colour (a silver or golden lining).
+          float toward = max(dot(toCentre / dist, uSunDir), 0.0);
+          col += uSunTint * pow(toward, 6.0) * (1.0 - smoothstep(0.1, 0.6, d)) * 0.7 * (1.0 - uCover * 0.6);
+          // Distance and the low horizon melt clouds into the haze (which is the fog colour).
+          float haze = max(smoothstep(600.0, 1500.0, dist) * 0.3, (1.0 - smoothstep(0.0, 0.15, sinE)) * 0.4);
+          col = mix(col, uFog, haze);
           gl_FragColor = vec4(col, a);
-          #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }
       `,
@@ -105,28 +156,43 @@ export function Clouds({ layers, rt }: { layers: number; rt: EnvRuntime }) {
       depthWrite: false,
       side: DoubleSide,
       fog: false,
+      // Like the sky: not tone-mapped here, so clouds and the haze they melt into stay one colour (the final pass maps
+      // both when there is a composer).
+      toneMapped: false,
     });
     const mesh = new InstancedMesh(geo, material, count);
     const id = new Matrix4();
     for (let i = 0; i < count; i++) mesh.setMatrixAt(i, id);
     mesh.frustumCulled = false;
     mesh.renderOrder = -1;
-    return { mesh, material };
+    return { mesh, material, field, sprite };
   }, [layers, rt]);
 
   useEffect(
     () => () => {
       mesh.geometry.dispose();
       material.dispose();
+      sprite.dispose();
     },
-    [mesh, material],
+    [mesh, material, sprite],
   );
 
+  const shadowData = useMemo(() => new Float32Array(MAX_SHADOWS * 4), []);
   useFrame(() => {
     const s = rt.state;
-    material.uniforms.uCover!.value = s.cloudCover;
-    (material.uniforms.uLit!.value as Color).setRGB(...s.cloudLit);
-    (material.uniforms.uShade!.value as Color).setRGB(...s.cloudShade);
+    const u = material.uniforms;
+    u.uCover!.value = s.cloudCover;
+    u.uDemand!.value = cloudDemand(s.cloudCover);
+    u.uBoost!.value = sizeBoost(s.cloudCover);
+    // With a composer the cloud colours are pre-compensated for its tone mapping, like the sky's (tonemap.ts).
+    (u.uLit!.value as Color).setRGB(...(compensate ? invAcesFilmic(s.cloudLit) : s.cloudLit));
+    (u.uShade!.value as Color).setRGB(...(compensate ? invAcesFilmic(s.cloudShade) : s.cloudShade));
+    // The sun's colour at full brightness: the lining of a cloud is tinted, not made brighter, by a strong sun.
+    const peak = Math.max(...s.sunColor, 1e-3);
+    (u.uSunTint!.value as Color).setRGB(s.sunColor[0] / peak, s.sunColor[1] / peak, s.sunColor[2] / peak);
+    const d = rt.uniforms.uSunDir.value;
+    groundShadows(field, s.cloudCover, rt.uniforms.uCloudT.value, [d.x, d.y, d.z], shadowData);
+    rt.uniforms.uCloudShadow.value.forEach((v, i) => v.fromArray(shadowData, i * 4));
   });
 
   return <primitive object={mesh} />;

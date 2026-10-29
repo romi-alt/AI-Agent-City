@@ -20,6 +20,10 @@ import {
   PRESET_SECONDS,
   presetFlight,
   presetPose,
+  SKY_BAND,
+  skyInsetPx,
+  skyViewport,
+  TOP_PHI,
   topPreset,
 } from '../src/camera/presets.ts';
 import { homeShot } from '../src/camera/shots.ts';
@@ -44,6 +48,19 @@ const FOG = { far: Math.max(...TIMES.map(t => presetFor(t, 'clear').fogFar)) };
 const LEVEL = { y: 0, dirY: 0 };
 const pitchOf = (phi: number) => 90 - (phi * 180) / Math.PI;
 
+const TAN = Math.tan((42 * Math.PI) / 360);
+/**
+ * Where the horizon falls on the screen as a fraction of the height from the top (negative: above the screen), for an
+ * orbit shown with CameraRig's sky band: the horizon is `pitch` above the view axis, and the band moves the picture
+ * down by SKY_BAND of the height.
+ */
+function horizonFromTop(o: { phi: number }, vp: Viewport): number {
+  const h = vp.height;
+  const above = Math.tan(Math.PI / 2 - o.phi) / TAN; // in half-heights above the screen centre
+  const shift = (skyInsetPx(Math.PI / 2 - o.phi, h) - vp.bottom) / h; // the picture moves down by this (full-frame NDC)
+  return (1 - (above - shift)) / 2;
+}
+
 function inView(o: ReturnType<typeof overviewPreset>, vp: Viewport, keys: Set<string>) {
   for (const b of boxes.filter(x => keys.has(x.key))) {
     for (const p of [
@@ -59,15 +76,39 @@ function inView(o: ReturnType<typeof overviewPreset>, vp: Viewport, keys: Set<st
 }
 
 describe('city presets', () => {
-  it('Overview is low (30–35° down), looks up a north–south street, and frames the client buildings', () => {
+  it('Overview is low (14–20° down), shows a band of sky, looks up a street and frames the client buildings', () => {
+    // The earlier brief asked for 30–35°; with a 42° lens that puts the top of the frame 9–14° below the horizon, so
+    // the sky could never appear. The owner asked for the sky to be visible, which needs a pitch under 21°.
     for (const vp of VIEWPORTS) {
       const o = overviewPreset(boxes, frame, vp);
       const pitch = pitchOf(o.phi);
-      assert.ok(pitch >= 30 && pitch <= 35, `pitch ${pitch.toFixed(1)}°`);
+      assert.ok(pitch >= 14 && pitch <= 20, `pitch ${pitch.toFixed(1)}°`);
       assert.ok(Math.abs(o.theta) < 0.2, 'looking (almost) straight along the streets');
       inView(o, vp, new Set(framedHeroes(boxes, vp).map(b => b.key)));
+      // The buildings are fitted below the sky band, not just inside the frame.
+      inView(o, skyViewport(vp), new Set(framedHeroes(boxes, vp).map(b => b.key)));
     }
     assert.ok(frame.roadsX.includes(mainStreet(frame)));
+  });
+  it('Overview and Orbit show the horizon in the upper quarter of the picture (no panel or sheet in the way)', () => {
+    for (const vp of [DESK, PANEL, PHONE]) {
+      for (const o of [overviewPreset(boxes, frame, vp), orbitPreset(boxes, vp)]) {
+        const f = horizonFromTop(o, vp);
+        assert.ok(f > 0.05 && f <= 0.26, `horizon ${(f * 100).toFixed(1)}% from the top`);
+      }
+    }
+  });
+  it('with the phone sheet open the horizon is pushed up toward the top edge but stays on screen', () => {
+    // The sheet covers the bottom, so the picture moves up by half its height and the sky band only offsets part of
+    // that: a sliver of sky remains above the horizon, and it grows back when the sheet is closed.
+    const f = horizonFromTop(overviewPreset(boxes, frame, PHONE_SHEET), PHONE_SHEET);
+    assert.ok(f > 0 && f < 0.15, `horizon ${(f * 100).toFixed(1)}% from the top`);
+  });
+  it('the sky band fades out as the view tilts up and is gone in Top', () => {
+    assert.equal(skyInsetPx(0.3, 900), SKY_BAND * 900);
+    assert.equal(skyInsetPx(Math.PI / 2 - TOP_PHI, 900), 0);
+    assert.ok(skyInsetPx(0.9, 900) < skyInsetPx(0.6, 900));
+    assert.equal(skyViewport(DESK).top, SKY_BAND * 900);
   });
   it('Overview is lower and closer than the old aerial', () => {
     for (const vp of [DESK, PHONE]) {
@@ -99,7 +140,7 @@ describe('city presets', () => {
   it('Orbit turns round the district centre at the low angle', () => {
     const o = orbitPreset(boxes, DESK);
     const pitch = pitchOf(o.phi);
-    assert.ok(pitch >= 30 && pitch <= 38, `pitch ${pitch.toFixed(1)}°`);
+    assert.ok(pitch >= 17 && pitch <= 23, `pitch ${pitch.toFixed(1)}°`);
     assert.ok(Math.hypot(o.target[0], o.target[2]) < 6, 'centred on the district');
   });
   it('re-frames for the HUD: a side panel moves the overview, it is never fixed coordinates', () => {
