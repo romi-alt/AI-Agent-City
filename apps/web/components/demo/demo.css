@@ -1105,3 +1105,408 @@ html[data-tour-target='ctas'] [data-tour='ctas'] {
     gap: var(--s-3);
   }
 }
+
+/* ---------- Floor controls, workflows and full screen (lite demo office) ---------- */
+.dm-lite-stage {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.dm-lite-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+}
+.dm-tb-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.dm-tb-desk {
+  min-width: 9ch;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--c-ink);
+}
+.dm-lite-play {
+  justify-self: start;
+}
+@media (min-width: 900px) {
+  .dm-lite-side > .dm-lite-workflow {
+    grid-column: span 2;
+  }
+  .dm-lite-play {
+    grid-column: 1 / -1;
+  }
+}
+.dm-lite-workflow {
+  min-width: 0;
+  scroll-margin-top: 12px;
+}
+.dm-wf-who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.dm-wf-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+.dm-wf-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  margin: var(--s-2) 0;
+  padding: 0;
+  list-style: none;
+}
+.dm-wf-dot {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--c-ink-2);
+  text-align: center;
+}
+.dm-wf-dot > span:first-child {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  background: var(--c-white);
+}
+.dm-wf-dot[data-state='done'] > span:first-child {
+  background: var(--c-ink);
+  color: var(--c-white);
+  border-color: var(--c-ink);
+}
+.dm-wf-dot[data-state='current'] {
+  color: var(--c-ink);
+  font-weight: 600;
+}
+.dm-wf-dot[data-state='current'] > span:first-child {
+  border-color: var(--c-gold);
+  background: var(--c-gold);
+  color: var(--c-ink);
+}
+.dm-wf-step {
+  display: grid;
+  gap: var(--s-2);
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--rule);
+}
+.dm-wf-h {
+  margin: 0;
+  font-size: var(--fs-md, 1rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.dm-wf-h:focus-visible {
+  outline: 2px solid var(--c-gold);
+  outline-offset: 3px;
+}
+.dm-wf-quote {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--c-gold);
+  background: var(--c-white);
+  font-style: italic;
+}
+.dm-wf-checks,
+.dm-wf-why {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dm-wf-checks li {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.dm-wf-checks li span,
+.dm-wf-why li {
+  color: var(--c-ink-2);
+  font-size: var(--fs-sm);
+}
+.dm-wf-why {
+  list-style: disc;
+  padding-left: 18px;
+}
+.dm-wf-score {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--c-white);
+}
+.dm-wf-score-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.dm-wf-meter {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--rule);
+  overflow: hidden;
+}
+.dm-wf-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--c-gold);
+}
+.dm-wf-draft {
+  margin: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--c-white);
+  overflow: hidden;
+}
+.dm-wf-draft figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.dm-wf-draft pre {
+  margin: 0;
+  padding: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+.dm-wf-decide {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dm-wf-changes {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 6px;
+}
+.dm-wf-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: var(--s-3);
+}
+.dm-wf-result li {
+  align-items: flex-start;
+}
+.dm-day-line {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dm-day-line li {
+  display: grid;
+  grid-template-columns: 5ch minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--fs-sm);
+}
+.dm-day-line li[data-state='now'] {
+  background: var(--c-white);
+  box-shadow: inset 3px 0 0 var(--c-gold);
+  padding-left: 8px;
+}
+.dm-day-time,
+.dm-day-state {
+  font-variant-numeric: tabular-nums;
+  color: var(--c-ink-2);
+}
+.dm-day-line li[data-state='approved'] .dm-day-state,
+.dm-day-line li[data-state='changed'] .dm-day-state {
+  color: var(--c-ink);
+  font-weight: 600;
+}
+.dm-day-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.dm-day-stats div {
+  padding: 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--c-white);
+}
+.dm-day-stats dt {
+  min-height: 2.4em;
+  font-size: 12px;
+  color: var(--c-ink-2);
+}
+.dm-day-stats dd {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.dm-wf-report {
+  display: grid;
+  gap: 8px;
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--rule);
+}
+.dm-wf-priorities {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: var(--fs-sm);
+}
+.dm-wf-priorities li[data-done='false'] {
+  color: var(--c-ink-2);
+}
+.dm-wf-priorities .dm-row-when {
+  margin-left: 8px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dm-wf-meter > span {
+    transition: width 0.4s ease;
+  }
+}
+
+/* Full screen: the page chrome goes, the office fills the viewport and the panels float over it. */
+html.dm-immersive-lock,
+html.dm-immersive-lock body {
+  overflow: hidden;
+}
+.dm-lite-office.is-immersive {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--c-paper, #faf8f4);
+}
+.is-immersive .dm-lite-head {
+  display: none;
+}
+.is-immersive .dm-lite-grid,
+.is-immersive .dm-lite-stage {
+  display: block;
+  height: 100%;
+}
+.is-immersive .dm-lite-scene {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  border-radius: 0;
+}
+.is-immersive .dm-lite-toolbar {
+  position: absolute;
+  z-index: 6;
+  left: max(10px, env(safe-area-inset-left));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  max-width: calc(100% - 20px);
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--c-white) 94%, transparent);
+}
+.is-immersive .dm-lite-side {
+  position: absolute;
+  z-index: 5;
+  top: max(8px, env(safe-area-inset-top));
+  right: max(8px, env(safe-area-inset-right));
+  width: min(420px, calc(100% - 16px));
+  /* Tall enough to cover the city's own side sheet, which would otherwise show through beneath it. */
+  height: calc(100dvh - 104px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--c-paper);
+}
+@media (min-width: 1440px) {
+  /* Wide enough that the control bar ends before the panel starts, so the panel can use the full height. */
+  .is-immersive .dm-lite-side {
+    height: calc(100dvh - 16px);
+  }
+}
+.is-immersive .dm-lite-side > * {
+  flex: none;
+}
+.is-immersive .dm-lite-side[data-pane-open='none'] {
+  display: none;
+}
+.is-immersive .dm-lite-side > .dm-lite-workflow {
+  grid-column: auto;
+}
+.is-immersive .dm-tour {
+  position: absolute;
+  z-index: 10;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, calc(100% - 20px));
+}
+@media (max-width: 700px) {
+  /* Phones: the panel is a bottom sheet that runs down behind the control bar. */
+  .is-immersive .dm-lite-side {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: auto;
+    height: 52dvh;
+    padding-bottom: calc(max(10px, env(safe-area-inset-bottom)) + 64px);
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+  .dm-day-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px), (max-height: 500px) {
+  .is-immersive .dm-lite-toolbar {
+    right: 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  .is-immersive .dm-tb-group {
+    flex-wrap: nowrap;
+    flex: none;
+  }
+}
+@media (max-height: 500px) and (min-width: 701px) {
+  /* Phones turned sideways: a slim panel beside the city, above the control bar. */
+  .is-immersive .dm-lite-side {
+    width: min(360px, calc(100% - 16px));
+    height: calc(100dvh - 64px);
+  }
+}

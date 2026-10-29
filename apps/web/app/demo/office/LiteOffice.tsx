@@ -16,7 +16,14 @@ import {
 import { AgentAvatar } from '../../../components/demo/DemoBits';
 import { formatExpiry } from '../../../components/demo/demo-api';
 import { GuidedTour, type TourStep } from '../../../components/demo/GuidedTour';
+import { DaySummaryPanel, RunDayPanel } from '../../../components/demo/DayPanels';
+import { FloorToolbar, type Pane } from '../../../components/demo/FloorToolbar';
 import { LiteAgentPanel } from '../../../components/demo/LiteAgentPanel';
+import { effectiveAgents, effectiveTasks, dayHeadline } from '../../../components/demo/scenario-view';
+import { useImmersive } from '../../../components/demo/use-immersive';
+import { useScenarios } from '../../../components/demo/use-scenarios';
+import { WorkflowPanel } from '../../../components/demo/WorkflowPanel';
+import { summariseDay } from '../../../lib/lite/scenario-types';
 import { daysLeft, LiteNotice, LiteStatus, talkToUsHref } from '../../../components/demo/LiteBits';
 import '../../../components/demo/demo.css';
 
@@ -146,12 +153,12 @@ function tourSteps(me: LiteMe): TourStep[] {
     {
       id: 'floor',
       title: `Your floor: level ${me.office.level}`,
-      body: `This is ${me.office.name}, the floor your sample office sits on.`,
+      body: `This is ${me.office.name}. Use Whole floor to see every desk and agent at once, step between desks with the arrows, and press Enter full screen to fill your screen with the office.`,
     },
     {
       id: 'agents',
-      title: 'Meet your AI team',
-      body: 'Each desk belongs to an agent. Pick one to see its role, what it is doing and a short summary. All of it is simulated.',
+      title: 'Play each agent’s workflow',
+      body: 'Pick an agent, then play their sample task step by step: what triggered it, what they checked, what they drafted, and your decision. Or use Run the day to play the whole team in order. Approvals here never send anything.',
     },
   ];
 }
@@ -160,7 +167,7 @@ function tourSteps(me: LiteMe): TourStep[] {
 function modeForStep(me: LiteMe, id: string): CityMode {
   const building = me.building.key;
   if (id === 'building') return { kind: 'building', building };
-  if (id === 'floor') return { kind: 'floor', building, level: me.office.level };
+  if (id === 'floor') return officeMode(me, null);
   if (id === 'agents') return officeMode(me, null);
   return { kind: 'explore' };
 }
@@ -190,6 +197,8 @@ function useFreshOffice(first: Loaded) {
   return office;
 }
 
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function Office({ first }: { first: Loaded }) {
   const me = first.me;
   const office = useFreshOffice(first);
@@ -199,13 +208,48 @@ function Office({ first }: { first: Loaded }) {
     () => store.get().selectedAgent,
     () => null,
   );
+  const mode = useSyncExternalStore(
+    store.subscribe,
+    () => store.get().mode,
+    () => store.get().mode,
+  );
   const [tourOpen, setTourOpen] = useState(false);
+  const [pane, setPane] = useState<Pane>(null);
   const tourButton = useRef<HTMLButtonElement>(null);
   const sceneBox = useRef<HTMLDivElement>(null);
+  const shell = useRef<HTMLElement>(null);
+  const fullscreenButton = useRef<HTMLButtonElement>(null);
+  const workflowBox = useRef<HTMLDivElement>(null);
+  const sideBox = useRef<HTMLElement>(null);
+  const { immersive, enter, exit } = useImmersive(shell);
+  const flow = useScenarios(office.scenarios);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('tour') === '1') setTourOpen(true);
   }, []);
+
+  const agents = useMemo(
+    () => effectiveAgents(office.agents, office.scenarios, flow.progress),
+    [office.agents, office.scenarios, flow.progress],
+  );
+  const tasks = useMemo(
+    () => effectiveTasks(office.tasks, office.scenarios, flow.progress),
+    [office.tasks, office.scenarios, flow.progress],
+  );
+  const baseStatus = useCallback(
+    (id: string) => office.agents.find(a => a.id === id)?.status ?? 'idle',
+    [office.agents],
+  );
+  const dayView = useMemo(
+    () =>
+      summariseDay(
+        office.counters ?? { repliesDrafted: 0, conversationsOpen: 0, waitingForYou: 0 },
+        office.scenarios,
+        flow.progress,
+        baseStatus,
+      ),
+    [office.counters, office.scenarios, flow.progress, baseStatus],
+  );
 
   const select = useCallback(
     (id: string) => {
@@ -216,21 +260,47 @@ function Office({ first }: { first: Loaded }) {
     [store, office.agents, me],
   );
 
-  // The team list sits below the city on every screen size: picking someone there brings the city into view.
+  // Picking someone in the team list brings the city into view (the list sits below it).
   const pickFromRoster = useCallback(
     (id: string) => {
       select(id);
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      sceneBox.current?.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
+      if (!immersive)
+        sceneBox.current?.scrollIntoView({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' });
     },
-    [select],
+    [select, immersive],
+  );
+
+  // In full screen the workflow opens by itself when an agent is chosen, wherever the choice was made.
+  useEffect(() => {
+    if (immersive && selectedId) setPane('workflow');
+  }, [immersive, selectedId]);
+
+  // A different pane starts at its top, not wherever the last one was scrolled to.
+  useEffect(() => {
+    sideBox.current?.scrollTo({ top: 0 });
+  }, [pane]);
+
+  const wholeFloor = useCallback(() => {
+    store.set({ mode: officeMode(me, null), selectedAgent: null });
+  }, [store, me]);
+
+  const stepDesk = useCallback(
+    (delta: 1 | -1) => {
+      const n = office.agents.length;
+      if (n === 0) return;
+      const at = office.agents.findIndex(a => a.id === selectedId);
+      const next = at < 0 ? (delta > 0 ? 0 : n - 1) : (at + delta + n) % n;
+      const target = office.agents[next];
+      if (target) select(target.id);
+    },
+    [office.agents, selectedId, select],
   );
 
   const onStep = useCallback(
     (step: TourStep) => {
       store.set({ mode: modeForStep(me, step.id), selectedAgent: null });
-      const first = office.agents[0];
-      if (step.id === 'agents' && first) select(first.id);
+      const firstAgent = office.agents[0];
+      if (step.id === 'agents' && firstAgent) select(firstAgent.id);
     },
     [store, me, office.agents, select],
   );
@@ -240,9 +310,74 @@ function Office({ first }: { first: Loaded }) {
     requestAnimationFrame(() => tourButton.current?.focus());
   }, []);
 
-  const agent = office.agents.find(a => a.id === selectedId) ?? null;
+  // ---- Run the day: each agent in turn stops at the point where it needs the visitor ----
+  const visit = useCallback(
+    (index: number) => {
+      const s = office.scenarios[index];
+      if (!s) {
+        wholeFloor();
+        setPane('day');
+        return;
+      }
+      select(s.agentId);
+      flow.act(s.id, { type: 'to-review' });
+      setPane('workflow');
+    },
+    [office.scenarios, select, flow, wholeFloor],
+  );
+  const startDay = useCallback(() => {
+    flow.setDay({ active: true, index: 0, skipped: [] });
+    visit(0);
+  }, [flow, visit]);
+  const nextDay = useCallback(
+    (skip: boolean) => {
+      const current = office.scenarios[flow.day.index];
+      const skipped = skip && current ? [...flow.day.skipped, current.id] : flow.day.skipped;
+      const index = flow.day.index + 1;
+      flow.setDay({ active: true, index, skipped });
+      visit(index);
+    },
+    [office.scenarios, flow, visit],
+  );
+  const runDayFromToolbar = useCallback(() => {
+    if (!flow.day.active) startDay();
+    setPane('day');
+    if (!immersive)
+      document
+        .querySelector('[data-testid="run-day"]')
+        ?.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
+  }, [flow.day.active, startDay, immersive]);
+
+  const focusWorkflow = useCallback(() => {
+    workflowBox.current?.scrollIntoView({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' });
+    workflowBox.current?.querySelector<HTMLElement>('h2')?.focus();
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (immersive) await exit();
+    else {
+      // The floor is the first thing to see; the panel opens once there is an agent to show.
+      setPane(selectedId ? 'workflow' : null);
+      await enter();
+    }
+    requestAnimationFrame(() => fullscreenButton.current?.focus());
+  }, [immersive, enter, exit, selectedId]);
+
+  const agent = agents.find(a => a.id === selectedId) ?? null;
+  const dayScenario = flow.day.active ? office.scenarios[flow.day.index] : undefined;
+  const scenario = office.scenarios.find(s => s.agentId === selectedId) ?? dayScenario ?? null;
+  const panelAgent = agents.find(a => a.id === scenario?.agentId) ?? null;
+  const wholeNow = mode.kind === 'office' && mode.desk === null;
+  const show = (p: Exclude<Pane, null>) => !immersive || pane === p;
+  const headline = dayHeadline(me.company, agents);
+
   return (
-    <main className="dm-wide dm-lite-office" data-testid="office">
+    <main
+      className={`dm-wide dm-lite-office${immersive ? ' is-immersive' : ''}`}
+      data-testid="office"
+      data-immersive={immersive}
+      ref={shell}
+    >
       <Banner me={me} onTour={() => setTourOpen(true)} tourRef={tourButton} />
       <GuidedTour
         steps={tourSteps(me)}
@@ -253,21 +388,77 @@ function Office({ first }: { first: Loaded }) {
         onClose={closeTour}
       />
       <div className="dm-lite-grid">
-        <div className="dm-scene dm-lite-scene" data-tour="scene" data-testid="lite-scene" ref={sceneBox}>
-          <LiteCityView me={me} agents={office.agents} store={store} onSelect={select} />
+        <div className="dm-lite-stage">
+          <FloorToolbar
+            wholeFloor={wholeNow}
+            viewLabel={agent ? `${agent.name}'s desk` : wholeNow ? 'Whole floor' : 'City view'}
+            immersive={immersive}
+            pane={pane}
+            dayActive={flow.day.active}
+            fullscreenRef={fullscreenButton}
+            onWhole={wholeFloor}
+            onStep={stepDesk}
+            onFullscreen={() => void toggleFullscreen()}
+            onRunDay={runDayFromToolbar}
+            onPane={setPane}
+            onHelp={() => setTourOpen(true)}
+          />
+          <div className="dm-scene dm-lite-scene" data-tour="scene" data-testid="lite-scene" ref={sceneBox}>
+            <LiteCityView me={me} agents={agents} store={store} onSelect={select} />
+          </div>
         </div>
-        <aside className="dm-lite-side" aria-label="Your AI team">
-          <Roster agents={office.agents} selectedId={selectedId} onSelect={pickFromRoster} />
-          <LiteAgentPanel agent={agent} tasks={office.tasks} />
-          {office.daySummary && (
-            <section className="dm-mock" aria-labelledby="day-title" data-testid="day-summary">
-              <div className="dm-mock-bar">
-                <h2 id="day-title" className="dm-mock-title">
-                  Today in the office
-                </h2>
-              </div>
-              <p className="dm-panel-body dm-muted">{office.daySummary}</p>
-            </section>
+        <aside
+          ref={sideBox}
+          className="dm-lite-side"
+          aria-label="Your AI team"
+          data-pane-open={immersive ? (pane ?? 'none') : 'all'}
+        >
+          {!immersive && agent && scenario && (
+            <button
+              type="button"
+              className="mk-btn mk-btn-primary mk-btn-sm dm-lite-play"
+              onClick={focusWorkflow}
+              data-testid="play-workflow"
+            >
+              Play {agent.name}&apos;s workflow
+            </button>
+          )}
+          {show('team') && (
+            <>
+              <Roster agents={agents} selectedId={selectedId} onSelect={pickFromRoster} />
+              <LiteAgentPanel agent={agent} tasks={tasks} />
+            </>
+          )}
+          {show('workflow') && (
+            <div className="dm-lite-workflow" ref={workflowBox}>
+              <WorkflowPanel
+                scenario={scenario}
+                agent={panelAgent}
+                progress={scenario ? flow.progress[scenario.id] : undefined}
+                onAction={flow.act}
+              />
+            </div>
+          )}
+          {show('day') && (
+            <>
+              <RunDayPanel
+                scenarios={office.scenarios}
+                progress={flow.progress}
+                day={flow.day}
+                onStart={startDay}
+                onNext={() => nextDay(false)}
+                onSkip={() => nextDay(true)}
+                onStop={() => flow.setDay({ ...flow.day, active: false })}
+              />
+              <DaySummaryPanel
+                headline={headline}
+                view={dayView}
+                plan={office.dayReport}
+                scenarios={office.scenarios}
+                progress={flow.progress}
+                onResetAll={flow.resetAll}
+              />
+            </>
           )}
         </aside>
       </div>

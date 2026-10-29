@@ -5,6 +5,7 @@ import { demoUnavailable, LiteError, refused } from './errors.ts';
 import { checkFormToken, issueFormToken } from './form-token.ts';
 import type { MailKind, Mailer } from './mailer.ts';
 import { buildOffice, type SimOffice } from './office.ts';
+import { withScenarios, type SimScenarioPack } from './scenarios.ts';
 import { readSession, signSession } from './session.ts';
 import type { DemoRequestRow, Lead, LeadStatus, Store } from './store.ts';
 import { firstNameOf, isUuid, parseDemoRequest, ValidationError } from './validate.ts';
@@ -366,9 +367,9 @@ export function createService(deps: ServiceDeps) {
     };
   }
 
-  async function office(cookie: string | undefined): Promise<SimOffice> {
+  async function office(cookie: string | undefined): Promise<SimOffice & SimScenarioPack> {
     const { lead } = await session(cookie);
-    return buildOffice(lead.id, lead.company, new Date(now()));
+    return withScenarios(lead.id, buildOffice(lead.id, lead.company, new Date(now())));
   }
 
   function toAdmin(l: Lead, full: boolean): AdminLead {
