@@ -32,7 +32,7 @@ and passes its tests locally, but it needs servers Hostinger's Cloud plan does n
 | `/demo` | The demo request form (same form as on the landing page) |
 | `/demo/check-email` | "Check your email": waits for the link to be used, offers a resend, shows when the email could not be sent |
 | `/demo/welcome` | "Welcome to AgentCity, [First name]." and "Your virtual AI office is ready to explore." with company, building, office and expiry |
-| `/demo/office` | The demo office: 3D city with the visitor's building enterable, a 4-step skippable tour, agent panel, simulated-demo banner, expiry countdown, sign out, "Talk to us" |
+| `/demo/office` | The demo office: 3D city with the visitor's building enterable, a 4-step skippable tour, a Whole floor view and desk-by-desk stepping, Enter full screen (Fullscreen API, CSS fallback), a playable sample workflow for each agent (trigger, checks, draft, your decision, outcome), Run the day with a timeline and a day summary that follows the visitor's decisions, simulated-demo banner, expiry countdown, sign out, "Talk to us". Approvals send nothing |
 | `/demo/signin` | "Sign in with your email": sends a fresh one-time link to a returning visitor |
 | `/demo/verified?error=...` | Shown when a link was used, expired or damaged |
 
@@ -101,7 +101,7 @@ POSTs (a cross-site `Origin` is refused).
 | `GET /api/lite/demo/verify?t=<token>` | Spend the email link | Always a 303: to `/demo/welcome` with the cookie set, or to `/demo/verified?error=expired` |
 | `POST /api/lite/demo/signin` | Ask for a new link | Body: `email`, `formToken`, `website2`. Always answers `{ status: "sent" }` |
 | `GET /api/lite/demo/me` | The signed-in visitor | `401` not signed in, `410` demo over |
-| `GET /api/lite/demo/office` | The simulated office | 8 agents, tasks, day summary, all marked `simulated: true` |
+| `GET /api/lite/demo/office` | The simulated office | 8 agents, tasks, day summary, all marked `simulated: true`; plus `scenarios` (one workflow per agent), `dayReport` and `sector`, generated from the lead id (`lib/lite/scenarios.ts`). The visitor's choices stay in the page (sessionStorage), never on the server |
 | `POST /api/lite/demo/signout` | Clear the cookie | |
 | `GET /api/lite/admin/leads?page=&pageSize=&full=1` | Owner's lead list | Bearer `ADMIN_TOKEN`; emails and phones masked unless `full=1`; `404` if the token is unset |
 | `POST /api/lite/admin/expire` | Run the expiry sweep | Bearer `ADMIN_TOKEN` or the cron-only token |

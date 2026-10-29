@@ -1,0 +1,77 @@
+[
+  {
+    "name": "immersive on",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "focus moves to the new step heading",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "aria-live announces the step",
+    "ok": true,
+    "extra": "Wren: step 2 of 5, Checks."
+  },
+  {
+    "name": "review shows needs-you",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "outcome shown",
+    "ok": true,
+    "extra": "Reply approved. A discovery call is pencilled in for tomorrow at 15:30."
+  },
+  {
+    "name": "status working after approve",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "day summary counts one",
+    "ok": true,
+    "extra": "You decided 1 of 8: 1 approved, 0 changed, 0 declined."
+  },
+  {
+    "name": "immersive survives rotation",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "day summary final",
+    "ok": true,
+    "extra": "You decided 8 of 8: 4 approved, 2 changed, 2 declined."
+  },
+  {
+    "name": "no cross-origin requests while playing",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "only /api/lite calls while playing",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "exit full screen",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "page chrome back",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "state survives reload",
+    "ok": true,
+    "extra": "Replies drafted18Conversations open10Waiting for you0 vs Replies drafted18Conversations open10Waiting for you0"
+  },
+  {
+    "name": "decisions survive reload",
+    "ok": true,
+    "extra": "You decided 8 of 8: 4 approved, 2 changed, 2 declined."
+  }
+]

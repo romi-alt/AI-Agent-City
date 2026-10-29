@@ -3,6 +3,8 @@
 // Browser-only; server code uses lib/api.ts.
 import { deviceProof, getDeviceKey } from './device-key';
 import type { AuthMeResponse, LoginStartResponse, StepUpReason } from './auth-types';
+import type { DayCounters, DayReportPlan, Scenario } from './lite/scenario-types';
+import { parseCounters, parseDayReport, parseScenarios } from './lite-scenario-parse';
 
 /** Error codes from apps/api/src/auth/contracts.ts (AUTH_ERRORS), mirrored here: the web app never imports API code. */
 export const API_ERRORS = {
@@ -243,6 +245,11 @@ export interface LiteOffice {
   agents: LiteAgent[];
   tasks: LiteTask[];
   daySummary: string | null;
+  /** The seeded day numbers, so the page can add the visitor's decisions on top. */
+  counters: DayCounters | null;
+  scenarios: Scenario[];
+  dayReport: DayReportPlan | null;
+  sector: string | null;
   simulated: true;
 }
 
@@ -364,7 +371,11 @@ export async function liteOffice(): Promise<LiteOffice> {
   return {
     agents: b.agents.map(parseAgent),
     tasks: Array.isArray(b.tasks) ? b.tasks.map(parseTask) : [],
-    daySummary: textOrNull(b.daySummary),
+    daySummary: isRec(b.daySummary) ? textOrNull(b.daySummary.headline) : textOrNull(b.daySummary),
+    counters: parseCounters(b.daySummary),
+    scenarios: parseScenarios(b.scenarios),
+    dayReport: parseDayReport(b.dayReport),
+    sector: textOrNull(b.sector),
     simulated: true,
   };
 }

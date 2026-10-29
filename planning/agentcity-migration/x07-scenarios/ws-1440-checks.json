@@ -1,0 +1,72 @@
+[
+  {
+    "name": "immersive on",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "focus moves to the new step heading",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "aria-live announces the step",
+    "ok": true,
+    "extra": "Wren: step 2 of 5, Checks."
+  },
+  {
+    "name": "review shows needs-you",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "outcome shown",
+    "ok": true,
+    "extra": "Reply approved. A test drive is pencilled in for tomorrow at 14:00."
+  },
+  {
+    "name": "status working after approve",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "day summary counts one",
+    "ok": true,
+    "extra": "You decided 1 of 8: 1 approved, 0 changed, 0 declined."
+  },
+  {
+    "name": "day summary final",
+    "ok": true,
+    "extra": "You decided 8 of 8: 4 approved, 2 changed, 2 declined."
+  },
+  {
+    "name": "no cross-origin requests while playing",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "only /api/lite calls while playing",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "exit full screen",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "page chrome back",
+    "ok": true,
+    "extra": ""
+  },
+  {
+    "name": "state survives reload",
+    "ok": true,
+    "extra": "Replies drafted29Conversations open17Waiting for you0 vs Replies drafted29Conversations open17Waiting for you0"
+  },
+  {
+    "name": "decisions survive reload",
+    "ok": true,
+    "extra": "You decided 8 of 8: 4 approved, 2 changed, 2 declined."
+  }
+]
