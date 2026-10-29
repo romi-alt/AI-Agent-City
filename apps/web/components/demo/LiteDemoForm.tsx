@@ -245,7 +245,7 @@ export function LiteDemoForm({ headingId }: { headingId?: string }) {
           data-testid="demo-marketing-consent"
         />
         <span>
-          Yes, email me occasional AgentCity news and offers. Optional: you get your demo either way, and you can
+          Yes, email me occasional AutoSalesCity news and offers. Optional: you get your demo either way, and you can
           unsubscribe at any time.
         </span>
       </label>

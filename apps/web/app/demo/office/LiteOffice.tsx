@@ -143,7 +143,7 @@ function tourSteps(me: LiteMe): TourStep[] {
     {
       id: 'city',
       title: 'Your city',
-      body: 'AgentCity is a city of office buildings. In each one, AI agents work alongside the people who supervise them. This one is a simulated demo.',
+      body: 'AutoSalesCity is a city of office buildings. In each one, AI agents work alongside the people who supervise them. This one is a simulated demo.',
     },
     {
       id: 'building',
@@ -515,7 +515,7 @@ function Banner({
           </button>
           <a
             className="mk-btn mk-btn-primary mk-btn-sm"
-            href={talkToUsHref(`AgentCity demo: ${me.company}`)}
+            href={talkToUsHref(`AutoSalesCity demo: ${me.company}`)}
             data-testid="talk-to-us"
           >
             Talk to us

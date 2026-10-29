@@ -4,8 +4,8 @@ import { LiteDemoForm } from '../../components/demo/LiteDemoForm';
 import { LITE_DEMO } from '../../lib/preview';
 
 export const metadata: Metadata = {
-  title: 'Get your demo office — AgentCity',
-  description: 'A private sample office in AgentCity with an AI team already at work.',
+  title: 'Get your demo office — AutoSalesCity',
+  description: 'A private sample office in AutoSalesCity with an AI team already at work.',
 };
 
 const STEPS = [

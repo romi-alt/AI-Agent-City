@@ -316,7 +316,7 @@ test('welcome: claims the demo and greets by first name; errors explain the next
   mock.state.claim = 'ok';
   const n = mock.requests.length;
   await page.goto(`${WEB}/demo/welcome`);
-  await page.getByTestId('welcome-title').getByText('Welcome to AgentCity, Ada.').waitFor();
+  await page.getByTestId('welcome-title').getByText('Welcome to AutoSalesCity, Ada.').waitFor();
   assert.equal(count(n, 'POST', '/api/demo/claim'), 1, 'claimed once');
   assert.equal(await page.getByTestId('welcome-company').textContent(), 'Analytical Homes');
   assert.equal(await page.getByTestId('welcome-building').textContent(), 'Rental Building 2');
@@ -330,7 +330,7 @@ test('welcome: claims the demo and greets by first name; errors explain the next
   // Claimed earlier: the workspace fills in the same details.
   mock.state.claim = 'already';
   await page.goto(`${WEB}/demo/welcome`);
-  await page.getByTestId('welcome-title').getByText('Welcome to AgentCity, Ada.').waitFor();
+  await page.getByTestId('welcome-title').getByText('Welcome to AutoSalesCity, Ada.').waitFor();
 
   for (const [mode, kind, text] of [
     ['not-verified', 'not-verified', /isn’t confirmed yet/],

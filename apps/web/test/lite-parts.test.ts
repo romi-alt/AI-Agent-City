@@ -60,7 +60,7 @@ test('attribution keeps utm values and the referrer host only', () => {
 
 test('the Resend mailer posts the documented message and never leaks the body in errors', async () => {
   let seen: { url: string; init: RequestInit } | null = null;
-  const ok = createResendMailer('key', 'AgentCity <hi@x.test>', (async (url: string, init: RequestInit) => {
+  const ok = createResendMailer('key', 'AutoSalesCity <hi@x.test>', (async (url: string, init: RequestInit) => {
     seen = { url, init };
     return new Response('{}', { status: 200 });
   }) as unknown as typeof fetch);

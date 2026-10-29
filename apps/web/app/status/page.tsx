@@ -7,7 +7,7 @@ export default async function StatusPage() {
   const status = await fetchReadiness();
   return (
     <main>
-      <h1>AgentCity platform status</h1>
+      <h1>AutoSalesCity platform status</h1>
       <p>
         The new web app asked the new API whether it is ready to serve traffic. Business screens are still in the legacy
         app (<code>apps/legacy</code>) and move here from M05 onwards.

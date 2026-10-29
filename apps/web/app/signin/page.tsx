@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { SignInForm } from './SignInForm';
 
-export const metadata: Metadata = { title: 'Sign in — AgentCity' };
+export const metadata: Metadata = { title: 'Sign in — AutoSalesCity' };
 
 const REASONS: Record<string, string> = {
   session_revoked: 'You were signed out on this device. Sign in again to continue.',
@@ -20,7 +20,7 @@ export default async function SignInPage({
   const reason = REASONS[one(params.reason) ?? ''];
   return (
     <main>
-      <h1>Sign in to AgentCity</h1>
+      <h1>Sign in to AutoSalesCity</h1>
       {reason && (
         <p className="notice" role="status" data-testid="signin-reason">
           {reason}

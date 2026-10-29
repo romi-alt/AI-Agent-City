@@ -289,5 +289,5 @@ test('sign out posts logout and follows endSessionUrl', async () => {
 
 test('the status page still renders server-side', async () => {
   const html = await (await fetch(`${WEB}/status`)).text();
-  assert.match(html, /AgentCity platform status/);
+  assert.match(html, /AutoSalesCity platform status/);
 });

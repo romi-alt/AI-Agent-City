@@ -64,7 +64,7 @@ function Ready({ me }: { me: LiteMe }) {
           Simulated demo · nothing is sent to real customers
         </span>
         <h1 id="welcome-title" className="mk-h2" data-testid="welcome-title">
-          {me.firstName ? `Welcome to AgentCity, ${me.firstName}.` : 'Welcome to AgentCity.'}
+          {me.firstName ? `Welcome to AutoSalesCity, ${me.firstName}.` : 'Welcome to AutoSalesCity.'}
         </h1>
         <p className="mk-lead">Your virtual AI office is ready to explore.</p>
         <div className="dm-actions">

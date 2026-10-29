@@ -237,3 +237,43 @@
 .mk.dm-page .dm-pulse.dm-done {
   background: #3ccf8e;
 }
+
+/* Plain pages (sign in, signed out, status) that have no .dm-main wrapper of their own. */
+.mk.dm-page > main:not(.dm-main):not(.dm-wide) {
+  flex: 1;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(40px, 7vw, 96px) var(--gutter) var(--s-12);
+  color: var(--text);
+}
+.mk.dm-page > main:not(.dm-main):not(.dm-wide) p,
+.mk.dm-page > main:not(.dm-main):not(.dm-wide) li {
+  color: var(--text-2);
+}
+.mk.dm-page > main:not(.dm-main):not(.dm-wide) a.button,
+.mk.dm-page > main:not(.dm-main):not(.dm-wide) button {
+  font: inherit;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef2f8;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.mk.dm-page > main:not(.dm-main):not(.dm-wide) a.button.primary,
+.mk.dm-page > main:not(.dm-main):not(.dm-wide) button:first-of-type {
+  background: linear-gradient(135deg, #f5b83d, #ffd27a);
+  color: #1a1206;
+  border-color: transparent;
+}
+.mk.dm-page > main:not(.dm-main):not(.dm-wide) .notice {
+  border: 1px solid rgba(245, 184, 61, 0.4);
+  background: rgba(245, 184, 61, 0.08);
+  color: #ffd27a;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
