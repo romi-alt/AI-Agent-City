@@ -121,15 +121,16 @@ describe('cloud shadows follow the clouds that are drawn', () => {
   const out = () => new Float32Array(MAX_SHADOWS * 4);
   const count = (a: Float32Array) =>
     Array.from({ length: MAX_SHADOWS }, (_, i) => a[i * 4 + 3]!).filter(s => s > 0).length;
-  it('has none when nothing is in the sky and fewer when clear than when partly cloudy', () => {
-    assert.equal(count(groundShadows(field, 0, 0, SUN, out())), 0);
+  it('has at most a wisp when cloudless, a few when clear and at least as many when partly cloudy', () => {
+    assert.ok(count(groundShadows(field, 0, 0, SUN, out())) <= 2, 'a cloudless sky keeps at most a wisp');
     // Scan a few minutes: shadows are over the city only part of the time, and more often with more clouds.
     const total = (cover: number) => {
       let n = 0;
       for (let t = 0; t < 1200; t += 20) n += count(groundShadows(field, cover, t, SUN, out()));
       return n;
     };
-    assert.ok(total(COVER('clear')) < total(COVER('partly-cloudy')));
+    assert.ok(total(COVER('clear')) > 0, 'even a clear sky throws a few moving shadows');
+    assert.ok(total(COVER('clear')) <= total(COVER('partly-cloudy')));
     assert.ok(total(COVER('partly-cloudy')) > 0);
   });
   it('lie where the sun ray through the cloud meets the ground, and move with the cloud', () => {

@@ -97,6 +97,9 @@ export function buildCloudField(layers: number, seed = 11): CloudField {
         speed: spec.speed * (0.85 + 0.3 * rnd()),
         follow: spec.follow,
       };
+      // The first two clouds of each upper layer sit where the midday sun's shadows cross the city (the shadow lies about
+      // 0.87 x altitude toward +z of its cloud), so even a few clouds put moving shadows on the streets.
+      if (l > 0 && i < 2) c.z = -0.87 * (c.y + c.height * 0.4) + (rnd() - 0.5) * 300;
       clusters.push(c);
       puffs.push(...clusterPuffs(clusters.length - 1, c, spec.puffs, rnd));
     }
