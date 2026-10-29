@@ -13,20 +13,18 @@ rm -rf "$WEB/.next"
 (cd "$WEB" && NEXT_PUBLIC_PUBLIC_PREVIEW=true PUBLIC_ORIGIN="$ORIGIN" NEXT_TELEMETRY_DISABLED=1 npx next build)
 
 STAGE="$(mktemp -d)"
-cp -a "$WEB/.next/standalone/." "$STAGE/"
-cp -a "$WEB/.next/static" "$STAGE/apps/web/.next/static"
-cp -a "$WEB/public" "$STAGE/apps/web/public"
-# Next copies the native image resizer even with images.unoptimized; nothing in the preview loads it (~37 MB).
-rm -rf "$STAGE"/node_modules/.pnpm/@img+sharp* "$STAGE"/node_modules/.pnpm/sharp@*
-find "$STAGE" -name '*.map' -delete
-# pnpm's layout is symlinks into node_modules/.pnpm, which zip archives and host-side extractors do not keep. Flatten
-# it into one plain node_modules at the root (Node resolves upward from apps/web), one copy of each package.
-python3 - "$STAGE" <<'PY'
+# pnpm's layout is symlinks into node_modules/.pnpm, which zip archives and host-side extractors do not keep. Copy the
+# standalone server without its node_modules, then flatten the store into one plain node_modules at the root (Node
+# resolves upward from apps/web), one copy of each package. Python reads through the links, so this also works in Git
+# Bash on Windows, where `cp -a` cannot recreate them.
+python3 - "$WEB/.next/standalone" "$STAGE" <<'PY'
 import os, shutil, sys
-stage = sys.argv[1]
-root_nm = os.path.join(stage, 'node_modules')
-store = os.path.join(root_nm, '.pnpm')
-flat = os.path.join(stage, 'flat_node_modules')
+standalone, stage = sys.argv[1], sys.argv[2]
+skip = {os.path.join(standalone, 'node_modules'), os.path.join(standalone, 'apps', 'web', 'node_modules')}
+shutil.copytree(standalone, stage, symlinks=False, ignore_dangling_symlinks=True, dirs_exist_ok=True,
+                ignore=lambda d, names: [n for n in names if os.path.join(d, n) in skip])
+store = os.path.join(standalone, 'node_modules', '.pnpm')
+flat = os.path.join(stage, 'node_modules')
 os.makedirs(flat)
 for entry in sorted(os.listdir(store)):
     nm = os.path.join(store, entry, 'node_modules')
@@ -39,12 +37,12 @@ for entry in sorted(os.listdir(store)):
             dst = os.path.join(flat, pkg)
             if os.path.isdir(src) and not os.path.exists(dst):
                 shutil.copytree(src, dst, symlinks=False)
-shutil.rmtree(root_nm)
-os.rename(flat, root_nm)
-web_nm = os.path.join(stage, 'apps', 'web', 'node_modules')
-if os.path.lexists(web_nm):
-    shutil.rmtree(web_nm)
 PY
+cp -r "$WEB/.next/static" "$STAGE/apps/web/.next/static"
+cp -r "$WEB/public" "$STAGE/apps/web/public"
+# Next copies the native image resizer even with images.unoptimized; nothing in the preview loads it (~37 MB).
+rm -rf "$STAGE"/node_modules/@img/sharp* "$STAGE"/node_modules/sharp
+find "$STAGE" -name '*.map' -delete
 if find "$STAGE" -type l | grep -q .; then
   echo "refusing to package: symlinks remain after flattening" >&2
   exit 1
