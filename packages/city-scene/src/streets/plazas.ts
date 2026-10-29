@@ -1,4 +1,5 @@
 import type { Part } from '../buildings/parts.ts';
+import { RESERVOIR } from '../world/park.ts';
 import { CURB_H, type District, rng } from './grid.ts';
 
 /** Animated pieces and static parts of the fountain plaza and the small park. */
@@ -214,7 +215,7 @@ function pond(plan: LandscapePlan, x: number, z: number) {
 /**
  * The fountain plaza (fountain, planted beds, benches, flags) and the one small park (playground, pond, benches).
  */
-export function planLandscape(d: District): LandscapePlan {
+export function planLandscape(d: District, treesPerParkBlock = 9): LandscapePlan {
   const plan: LandscapePlan = { parts: [], trees: [], fountains: [], ponds: [], flags: [] };
   const r = rng(77);
   for (const c of d.cells) {
@@ -240,12 +241,34 @@ export function planLandscape(d: District): LandscapePlan {
       // A row of trees along the plaza's south edge.
       for (let i = -3; i <= 3; i++) plan.trees.push([x + i * 2.1, CURB_H, c.z1 - 4.6, 1.1 + r() * 0.2]);
     } else if (c.kind === 'park') {
-      // The one small park: a playground and a pond in a lawn, benches along the inner walk.
-      playground(plan, c.cx - 2.5, c.cz - 2.5);
-      pond(plan, c.cx + 1.5, c.cz + 3.5);
-      const n = Math.max(1, Math.round((c.x1 - c.x0) / 8));
-      for (let i = 0; i < n; i++) bench(plan.parts, c.x0 + ((i + 0.5) * (c.x1 - c.x0)) / n, c.z0 + 4.9, 0);
+      const inside = c.cx > d.bounds.minX && c.cx < d.bounds.maxX && c.cz > d.bounds.minZ && c.cz < d.bounds.maxZ;
+      if (inside) {
+        // The pocket park along the west side: trees and benches, with the playground and pond at its near end.
+        if (c.cz > d.bounds.maxZ - 30) {
+          playground(plan, c.cx - 2.5, c.cz - 2.5);
+          pond(plan, c.cx + 1.5, c.cz + 3.5);
+        }
+        for (let k = 0; k < 7; k++)
+          plan.trees.push([
+            c.x0 + 3 + r() * (c.x1 - c.x0 - 6),
+            CURB_H,
+            c.z0 + 3 + r() * (c.z1 - c.z0 - 6),
+            1 + r() * 0.5,
+          ]);
+        const n = Math.max(1, Math.round((c.x1 - c.x0) / 8));
+        for (let i = 0; i < n; i++) bench(plan.parts, c.x0 + ((i + 0.5) * (c.x1 - c.x0)) / n, c.z0 + 4.9, 0);
+      } else {
+        // The big park: tree clusters on the lawns; the reservoir is drawn as one large pond.
+        const n = treesPerParkBlock;
+        for (let k = 0; k < n; k++) {
+          const x = c.x0 + 3 + r() * (c.x1 - c.x0 - 6);
+          const z = c.z0 + 3 + r() * (c.z1 - c.z0 - 6);
+          if (Math.hypot(x - RESERVOIR.x, z - RESERVOIR.z) < RESERVOIR.r + 2) continue;
+          plan.trees.push([x, CURB_H, z, 1.1 + r() * 0.7]);
+        }
+      }
     }
   }
+  plan.ponds.push({ x: RESERVOIR.x, z: RESERVOIR.z, r: RESERVOIR.r });
   return plan;
 }

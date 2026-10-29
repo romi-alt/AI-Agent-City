@@ -1,7 +1,11 @@
 import { Color, Euler, Group, InstancedBufferAttribute, InstancedMesh, Matrix4, Quaternion, Vector3 } from 'three';
+import { muteHex } from '../environment/grade.ts';
 import type { KitPart } from './kit.ts';
 import type { KitMaterials } from './materials.ts';
 import { type Shape, UNIT } from './parts.ts';
+
+/** Lit and metallic parts keep their colour; everything else is muted toward grey (see `grade.ts`). */
+const UNGRADED = new Set(['glow', 'beacon', 'gold', 'lantern']);
 
 /** Instances of one building in one instanced mesh, with their resting matrices and floors (for explode). */
 interface Slice {
@@ -53,7 +57,10 @@ export function buildKitMeshes(parts: KitPart[], mats: KitMaterials, maxLod: 0 |
     list.forEach((p, i) => {
       q.setFromEuler(e.set(p.rx ?? 0, p.ry ?? 0, p.rz ?? 0));
       mesh.setMatrixAt(i, m.compose(pos.set(p.x, p.y, p.z), q, scl.set(p.sx, p.sy, p.sz)));
-      mesh.setColorAt(i, c.set(p.color ?? '#ffffff'));
+      mesh.setColorAt(
+        i,
+        c.set(UNGRADED.has(matKey) || !p.color ? (p.color ?? '#ffffff') : muteHex(p.color, 0.3, 0.92)),
+      );
       seeds[i] = i + 1;
       let s = perBuilding.get(p.b);
       if (!s) perBuilding.set(p.b, (s = { index: [], level: [] }));

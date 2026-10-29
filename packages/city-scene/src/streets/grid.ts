@@ -1,9 +1,11 @@
 import type { CityLayout } from '../types.ts';
+import { inCentralPark } from '../world/park.ts';
+import { inWater } from '../world/waterfront.ts';
 import { cityRoadsFor, districtRect } from './extent.ts';
 
 /**
  * The street plan (X04): the layout's grid continued as one road grid to the horizon (`extent.ts`), with every
- * block between roads classified — the 15 client lots, the fountain plaza and one small park, decor blocks that
+ * block between roads classified — the 15 client lots, the fountain plaza, a strip of pocket park and the big park, decor blocks that
  * fill the rest of the district, and the city blocks beyond it (the generated surround). Street geometry matches the
  * legacy `street.ts` so traffic (lanes at ±1) and pedestrians (2.7 from the road centre) line up.
  */
@@ -39,9 +41,8 @@ export interface District {
   cells: Cell[];
 }
 
-/** Block centres (relative to the district) kept open: the fountain plaza and one small park. */
+/** Block centre (relative to the district) kept open as the fountain plaza. */
 const PLAZA_AT: [number, number] = [0, 1];
-const PARK_AT: [number, number] = [-1, 1];
 
 export function districtPlan(streets: StreetGrid): District {
   const roads = cityRoadsFor(streets);
@@ -65,8 +66,12 @@ export function districtPlan(streets: StreetGrid): District {
       // Plaza on the middle block of the near (+z) edge; the park beside it, on the corner.
       const edgeZ = cz > cz1 ? 1 : cz < cz0 ? -1 : 0;
       const plaza = inDistrict && !lot && Math.abs(cx) < 1 && edgeZ === PLAZA_AT[1];
-      const park = inDistrict && !lot && edgeZ === PARK_AT[1] && cx < cx0 && cx > bounds.minX;
+      // A long strip of pocket park down the district's west side, and the big park far to the north.
+      const pocket = inDistrict && !lot && cx < cx0 && cx > bounds.minX;
+      const park = pocket || (!inDistrict && inCentralPark(cx, cz));
       const kind: CellKind = lot ? 'lot' : plaza ? 'plaza' : park ? 'park' : inDistrict ? 'decor' : 'city';
+      // No curb slab on the rivers (the water mesh covers the road ends).
+      if (inWater(cx, cz, 0)) continue;
       cells.push({ x0, x1, z0, z1, cx, cz, kind });
     }
   return { xs, zs, extent: roads.extent, bounds, cells };

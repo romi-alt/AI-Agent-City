@@ -15,6 +15,13 @@ export interface QualityBudget {
   rainDrops: number;
   decorBuildingDetail: 'full' | 'reduced' | 'minimal';
   microAnimations: boolean;
+  /** Boats on the rivers and cars crossing each bridge. */
+  boats: number;
+  bridgeCars: number;
+  /** Trees per green block of the big park. */
+  parkTrees: number;
+  /** Lit billboards in the Times Square cluster. */
+  billboards: number;
 }
 
 export const QUALITY: Record<QualityLevel, QualityBudget> = {
@@ -34,6 +41,10 @@ export const QUALITY: Record<QualityLevel, QualityBudget> = {
     rainDrops: 6000,
     decorBuildingDetail: 'full',
     microAnimations: true,
+    boats: 14,
+    bridgeCars: 6,
+    parkTrees: 10,
+    billboards: 40,
   },
   balanced: {
     dpr: [1, 1.5],
@@ -49,6 +60,10 @@ export const QUALITY: Record<QualityLevel, QualityBudget> = {
     rainDrops: 2500,
     decorBuildingDetail: 'reduced',
     microAnimations: true,
+    boats: 10,
+    bridgeCars: 4,
+    parkTrees: 6,
+    billboards: 28,
   },
   low: {
     dpr: [0.75, 1],
@@ -64,5 +79,9 @@ export const QUALITY: Record<QualityLevel, QualityBudget> = {
     rainDrops: 600,
     decorBuildingDetail: 'minimal',
     microAnimations: false,
+    boats: 6,
+    bridgeCars: 2,
+    parkTrees: 2,
+    billboards: 12,
   },
 };
