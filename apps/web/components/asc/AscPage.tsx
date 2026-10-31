@@ -297,10 +297,10 @@ export function AscPage({ contactEmail, bookForm }: { contactEmail: string; book
           <div className="wrap control">
             <div>
               <div className="eyebrow reveal">Agency control room</div>
-              <h2 className="reveal d1">Run 50 showrooms from one screen.</h2>
+              <h2 className="reveal d1">Run every client from one screen.</h2>
               <p className="lead reveal d2">
-                White-label it under your brand. Every client building, every agent and every message is one click away,
-                with spend caps and approvals built in.
+                Planned for agencies, with client branding on the roadmap. Every client building, every agent and every
+                message is one click away, with approvals built in.
               </p>
               <ul className="feature-list">
                 {FEATURES.map(f => (
