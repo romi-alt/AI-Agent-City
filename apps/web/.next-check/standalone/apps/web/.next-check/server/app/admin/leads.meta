@@ -1,0 +1,44 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(signed-in)/layout,_N_T_/(signed-in)/admin/layout,_N_T_/(signed-in)/admin/leads/layout,_N_T_/(signed-in)/admin/leads/page,_N_T_/admin/leads"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KHNpZ25lZC1pbik/admin/leads/__PAGE__"
+  ],
+  "prefetchHints": {
+    "hints": 64,
+    "slots": {
+      "children": {
+        "hints": 96,
+        "slots": {
+          "children": {
+            "hints": 96,
+            "slots": {
+              "children": {
+                "hints": 96,
+                "slots": {
+                  "children": {
+                    "hints": 160,
+                    "slots": null
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "routeCache": {
+    "key": "/route-cache/APP_PAGE/90e7530bdf272e579a426c16f826174948b5eb1dae45fa1f909640237f50ee3d/$/admin/leads",
+    "owner": {
+      "kind": "APP_PAGE",
+      "sourceRoute": "/(signed-in)/admin/leads/page"
+    },
+    "isFallback": false
+  }
+}

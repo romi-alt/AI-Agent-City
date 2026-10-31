@@ -1,0 +1,39 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(signed-in)/layout,_N_T_/(signed-in)/office/layout,_N_T_/(signed-in)/office/page,_N_T_/office"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KHNpZ25lZC1pbik/office/__PAGE__"
+  ],
+  "prefetchHints": {
+    "hints": 64,
+    "slots": {
+      "children": {
+        "hints": 96,
+        "slots": {
+          "children": {
+            "hints": 96,
+            "slots": {
+              "children": {
+                "hints": 160,
+                "slots": null
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "routeCache": {
+    "key": "/route-cache/APP_PAGE/d34aa612719a221e8f3dd5fe677e272c45e727727cb8abe49b86fecd6b095a9b/$/office",
+    "owner": {
+      "kind": "APP_PAGE",
+      "sourceRoute": "/(signed-in)/office/page"
+    },
+    "isFallback": false
+  }
+}

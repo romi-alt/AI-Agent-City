@@ -1,0 +1,10 @@
+{
+  "pages": {},
+  "app": {
+    "[project]/apps/web/app/demo/confirm/page": [
+      "static/media/Geist_Variable-s.p.2glxvv8dkzvo5.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pagesUsingSizeAdjust": false
+}

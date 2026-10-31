@@ -39,6 +39,8 @@ const config: NextConfig = {
         source: '/((?!_next/static|_next/image|api/|city/|fonts/|favicon|og-).*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=0, s-maxage=60, stale-while-revalidate=300' }],
       },
+      // The confirm page's address carries the one-time token, so no shared cache may keep it.
+      { source: '/demo/confirm', headers: [{ key: 'Cache-Control', value: 'private, no-store' }] },
       {
         source: '/:path*',
         headers: [

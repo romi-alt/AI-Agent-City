@@ -1,0 +1,3 @@
+module.exports=[73394,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(91573);a.n(d("[project]/node_modules/.pnpm/next@16.4.3_@opentelemetry+api@1.10.0_@types+node@22.20.5_react-dom@19.3.1_react@19.3.1__react@19.3.1/node_modules/next/dist/client/components/builtin/global-error.js"))},78767,a=>{"use strict";var b=a.i(73394);a.n(b)},17910,function(a){a.n(a.i(78767))},91573,(a,b,c)=>{"use strict";b.exports=a.r(4e4).vendored["react-rsc"].ReactServerDOMTurbopackServer}];
+
+//# sourceMappingURL=0h97_next_dist_1wg5u1axyumou._.js.map

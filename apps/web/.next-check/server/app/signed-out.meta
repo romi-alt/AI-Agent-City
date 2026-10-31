@@ -1,0 +1,35 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/signed-out/layout,_N_T_/signed-out/page,_N_T_/signed-out"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/signed-out",
+    "/signed-out/__PAGE__"
+  ],
+  "prefetchHints": {
+    "hints": 64,
+    "slots": {
+      "children": {
+        "hints": 32,
+        "slots": {
+          "children": {
+            "hints": 128,
+            "slots": null
+          }
+        }
+      }
+    }
+  },
+  "routeCache": {
+    "key": "/route-cache/APP_PAGE/83b8014981411d43280e8aed4ecbc7e55d10f5d61a0fbcd7c94a32a392a864d9/$/signed-out",
+    "owner": {
+      "kind": "APP_PAGE",
+      "sourceRoute": "/signed-out/page"
+    },
+    "isFallback": false
+  }
+}
