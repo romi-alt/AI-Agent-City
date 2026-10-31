@@ -4,8 +4,10 @@ import { LiteNotice } from '../../../components/demo/LiteBits';
 
 export const metadata: Metadata = {
   title: 'Open your demo office — AutoSalesCity',
-  // The link's token is in this page's address, so it must not travel in a Referer header or be indexed.
-  referrer: 'no-referrer',
+  // Not 'no-referrer': with that policy browsers send `Origin: null` on the button's form post, and the same-origin
+  // check on the verify route then refuses every real visitor. 'same-origin' keeps the token (it is in this page's
+  // address) from ever leaving the site and still lets the post carry its real Origin.
+  referrer: 'same-origin',
   robots: { index: false },
 };
 
