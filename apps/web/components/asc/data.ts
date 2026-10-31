@@ -35,7 +35,7 @@ export const LANDING_AGENTS: LandingAgent[] = [
     name: 'Vera',
     role: 'Internet closer',
     color: '#ff6b5e',
-    text: 'Answers every new lead in under a minute by text and email, qualifies the buyer and books the test drive.',
+    text: 'Aims to answer every new lead within a minute by text and email, qualifies the buyer and books the test drive.',
   },
   {
     name: 'Nico',
@@ -97,10 +97,10 @@ export const BUYERS = [
 
 export const MARQUEE = [
   'AI sales floors',
-  'Replies in under 60 s',
-  'GoHighLevel · HubSpot · Salesforce',
-  'Test drives on autopilot',
-  'White-label for agencies',
+  'Built to reply in about a minute',
+  'CRM connections scoped per setup',
+  'Built to book test drives',
+  'Agency plan: one building per client',
   'Human approvals built in',
   'Every message logged',
 ];
@@ -137,7 +137,7 @@ export const STEPS = [
     num: '02',
     title: 'An agent replies',
     text: 'Vera checks the vehicle, the budget and past messages, then texts and emails a personal reply, never a template blast.',
-    chip: '< 60 s · first reply',
+    chip: 'target < 60 s · first reply',
     delay: 'd1',
   },
   {
@@ -262,7 +262,7 @@ export const PLANS = [
     who: 'Marketing agencies',
     price: '$999',
     per: ' /mo + per building',
-    items: ['White-label city', 'Unlimited client buildings', 'Wholesale pricing'],
+    items: ['Client-branded city (roadmap)', 'Unlimited client buildings', 'Wholesale pricing'],
     cta: 'Talk to us',
     delay: 'd3',
     hot: false,

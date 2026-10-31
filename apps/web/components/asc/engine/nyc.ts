@@ -104,13 +104,13 @@ export const N3 = (() => {
     {
       bg: '#f5b83d',
       fg: '#141414',
-      big: 'EVERY LEAD ANSWERED IN 60 SECONDS',
+      big: 'ANSWER EVERY LEAD IN 60 SECONDS',
       small: 'AutoSalesCity · the AI sales floor for dealerships',
     },
     {
       bg: '#141a2e',
       fg: '#ffffff',
-      big: 'TEST DRIVES BOOKED WHILE YOU SLEEP',
+      big: 'BOOK TEST DRIVES WHILE YOU SLEEP',
       small: 'Your AI BDC works nights, weekends and holidays',
       accent: '#3ccf8e',
     },

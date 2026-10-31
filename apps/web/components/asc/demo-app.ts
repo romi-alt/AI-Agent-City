@@ -294,9 +294,9 @@ export function initDemo() {
           c: '#f5b83d',
           icon: 'FS',
           tag: 'Headquarters · floor L4',
-          text: 'Seven AI agents run the sales department of a training center: Vera answers every new lead in under a minute, Nico follows up, and Max reports to the owner each morning.',
+          text: 'Seven AI agents run the sales department of a training center: Vera aims to answer every new lead within a minute, Nico follows up, and Max reports to the owner each morning.',
           list: [
-            'New lead → personal text and email in under 60 s',
+            'New lead → personal text and email, target under 60 s',
             'Follow-ups that stop the moment the lead replies',
             'Daily pipeline report to the owner at 8 AM',
             'Content plan approved with one tap',
@@ -312,7 +312,7 @@ export function initDemo() {
           tag: 'Dealership · ' + d.tag,
           text: `${d.short} runs its internet sales department on AutoSalesCity. Watch the sales board, the AI BDC screen and the salesperson's screen update as leads come in.`,
           list: [
-            'Internet leads answered by Vera in under 60 s',
+            'Internet leads answered by Vera, target under 60 s',
             'Test drives booked straight into the CRM calendar',
             'Sales board updates itself as deals move',
             'Aged leads revived by Nico',
