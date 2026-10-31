@@ -17,7 +17,7 @@ const AGENTS = {
     short: 'Closer',
     role: 'Internet closer (AI BDC)',
     color: '#ff6b5e',
-    desc: 'Answers every new lead in under a minute by text and email, qualifies them and books the appointment.',
+    desc: 'Aims to answer every new lead within a minute by text and email, qualifies them and books the appointment.',
   },
   nico: {
     name: 'Nico',

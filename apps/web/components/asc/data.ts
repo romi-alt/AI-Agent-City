@@ -167,7 +167,7 @@ export const DISTRICTS = [
     hex: '#818cf8',
     wide: false,
     delay: 'd1',
-    text: 'Auto brokers who live on speed: instant quotes, follow-ups and deal updates.',
+    text: 'Auto brokers who live on speed: quick quotes, follow-ups and deal updates.',
   },
   {
     n: '03',
@@ -223,7 +223,7 @@ export const NUMBERS = [
   { count: 7, prefix: '', suffix: '', label: 'AI agents working one live CRM' },
   { count: 60, prefix: '<', suffix: 's', label: 'Target first reply to a new lead' },
   { count: 871, prefix: '', suffix: '', label: 'Knowledge chunks the agents answer from' },
-  { count: 24, prefix: '', suffix: '/7', label: 'On duty, nights and weekends included' },
+  { count: 24, prefix: '', suffix: '/7', label: 'Built to work nights and weekends too' },
 ];
 
 export const PLANS = [

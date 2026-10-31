@@ -87,7 +87,7 @@ export function AscPage({ contactEmail, bookForm }: { contactEmail: string; book
               </h1>
               <p className="lead">
                 AutoSalesCity is a living city of AI-staffed showrooms. Each client is a building, each agent a desk,
-                and every lead is answered in under a minute, straight from your CRM.
+                and the goal is a first reply to every lead within a minute, once connected to your CRM.
               </p>
               <div className="hero-cta">
                 <a className="btn primary" href="#demo" {...book}>
@@ -424,9 +424,7 @@ export function AscPage({ contactEmail, bookForm }: { contactEmail: string; book
             <div className="cta reveal">
               <div className="eyebrow">Open for the first 10 buildings</div>
               <h2>Put your dealership on the skyline.</h2>
-              <p className="lead">
-                A 20-minute walkthrough of the live city, then your building goes up in under a day.
-              </p>
+              <p className="lead">A 20-minute walkthrough of the live city, then we scope your building together.</p>
               <a className="btn primary" href={mailto} {...book}>
                 Book a demo <span aria-hidden="true">→</span>
               </a>
