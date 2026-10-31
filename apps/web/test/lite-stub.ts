@@ -101,8 +101,16 @@ async function createRequest(req: IncomingMessage, res: ServerResponse) {
   json(res, 200, { requestId: r.id, status: 'verification-sent' });
 }
 
+// Mirrors the real route: opening the emailed link only forwards to the confirm page; the form post spends it.
 function verify(url: URL, res: ServerResponse) {
-  const r = byLink.get(url.searchParams.get('t') ?? '');
+  const t = url.searchParams.get('t') ?? '';
+  res.writeHead(303, { Location: `/demo/confirm?t=${encodeURIComponent(t)}` }).end();
+}
+
+async function verifyPost(req: IncomingMessage, res: ServerResponse) {
+  let raw = '';
+  for await (const chunk of req) raw += chunk;
+  const r = byLink.get(new URLSearchParams(raw).get('t') ?? '');
   if (!r || r.verified) {
     res.writeHead(303, { Location: '/demo/verified?error=expired' }).end();
     return;
@@ -158,7 +166,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
       ? json(res, 200, { status: r.verified ? 'ready' : 'verification-sent' })
       : fail(res, 400, 'bad_request', 'Unknown request.');
   }
-  if (p === '/api/lite/demo/verify') return verify(url, res);
+  if (p === '/api/lite/demo/verify') return req.method === 'POST' ? verifyPost(req, res) : verify(url, res);
   if (p === '/api/lite/demo/me') return me(req, res);
   if (p === '/api/lite/demo/office') return office(req, res);
   if (p === '/api/lite/demo/signout')
