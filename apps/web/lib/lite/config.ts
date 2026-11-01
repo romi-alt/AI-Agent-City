@@ -48,7 +48,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): LiteConfig {
     production,
     secret,
     publicOrigin: (env.PUBLIC_ORIGIN ?? 'http://localhost:3000').replace(/\/+$/, ''),
-    demoTtlDays: intFrom(env.DEMO_TTL_DAYS, 7, 1, 90),
+    demoTtlDays: intFrom(env.DEMO_TTL_DAYS, 14, 1, 90),
     linkTtlSeconds: 24 * 3600,
     formMinSeconds: intFrom(env.DEMO_FORM_MIN_SECONDS, 3, 0, 600),
     formMaxSeconds: 2 * 3600,

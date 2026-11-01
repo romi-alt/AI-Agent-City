@@ -119,7 +119,7 @@ test('config: production without LITE_SECRET has no secret; a short one is ignor
   assert.equal(loadConfig({ NODE_ENV: 'production', LITE_SECRET: 'short' } as NodeJS.ProcessEnv).secret, null);
   assert.ok(loadConfig({ NODE_ENV: 'production', LITE_SECRET: 'x'.repeat(20) } as NodeJS.ProcessEnv).secret);
   assert.equal(loadConfig({ NODE_ENV: 'test', DEMO_TTL_DAYS: '3' } as NodeJS.ProcessEnv).demoTtlDays, 3);
-  assert.equal(loadConfig({ NODE_ENV: 'test', DEMO_TTL_DAYS: '999' } as NodeJS.ProcessEnv).demoTtlDays, 7);
+  assert.equal(loadConfig({ NODE_ENV: 'test', DEMO_TTL_DAYS: '999' } as NodeJS.ProcessEnv).demoTtlDays, 14);
 });
 
 test('schema.sql is the same text as the migration the runner executes', () => {

@@ -126,7 +126,7 @@ equal by a test).
 | `lite_rate` | Fixed-window rate-limit counters, keyed by a hash |
 
 Rules that the code enforces:
-- A lead is "active" until `expiresAt` (default **7 days** after the request; `DEMO_TTL_DAYS`, 1–90).
+- A lead is "active" until `expiresAt` (default **14 days** after the request; `DEMO_TTL_DAYS`, 1–90).
 - Resubmitting never changes an active lead's details (anyone can type any address into the form), and an already-verified
   address gets no email from the form (it uses sign-in instead). The answer is identical for new and known addresses.
 - After expiry, a new request for the same address replaces the old demo and the consent choice.
@@ -258,7 +258,7 @@ including `RESEND_API_KEY`, which only the owner holds.
 | `MAIL_FROM` | Sender, `AgentCity <hello@autosalescity.site>` |
 | `PUBLIC_ORIGIN` | `https://autosalescity.site`, used in email links and redirects |
 | `ADMIN_TOKEN` | 16+ characters; owner's bearer token for the leads and expiry routes |
-| `DEMO_TTL_DAYS` (optional) | Demo length, default 7 |
+| `DEMO_TTL_DAYS` (optional) | Demo length, default 14 |
 | `DEMO_FORM_MIN_SECONDS` (optional) | Minimum form age, default 3 |
 | `LITE_PROXY_HOPS` (optional) | Proxies in front of the app, default 1 |
 | `CRON_TOKEN` (optional) | Overrides the derived cron-only token |
