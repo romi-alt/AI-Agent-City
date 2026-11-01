@@ -446,6 +446,8 @@ export const N3 = (() => {
   };
 
   const MATS = {};
+  /** Seconds, shared by every facade material: the city's lit windows slowly come on and go off. */
+  const TIME = { value: 0 };
   /**
    * One material per facade kind for a whole InstancedMesh of towers. The window grid keeps its real size whatever the
    * building's footprint and height are (UVs come from the instance scale), every instance has its own tint, a stone
@@ -465,6 +467,7 @@ export const N3 = (() => {
     m.onBeforeCompile = sh => {
       sh.uniforms.maskMap = { value: T.mask };
       sh.uniforms.uTile = { value: new THREE.Vector2(CW * TILE, FH * TILE) };
+      sh.uniforms.uTime = TIME;
       sh.vertexShader = sh.vertexShader
         .replace(
           '#include <common>',
@@ -492,6 +495,7 @@ export const N3 = (() => {
           '#include <common>',
           `#include <common>
           uniform sampler2D maskMap;
+          uniform float uTime;
           varying vec4 vTint; varying vec2 vInfo; varying float vTopD; varying float vBotD; varying float vUp;`,
         )
         .replace(
@@ -521,7 +525,10 @@ export const N3 = (() => {
           '#include <emissivemap_fragment>',
           `#ifdef USE_EMISSIVEMAP
             vec4 emitColor = texture2D(emissiveMap, vEmissiveMapUv);
-            totalEmissiveRadiance *= emitColor.rgb * emK + vec3(1., .78, .5) * shop * .55;
+            // about a fifth of the lit windows are people switching lights on and off through the evening
+            float wh = fract(sin(dot(floor(vMapUv * 8.), vec2(12.9898, 78.233)) + vTint.w * 50.) * 43758.5453);
+            float tw = mix(1., smoothstep(-.2, .2, sin(uTime * .09 + wh * 80.)), step(.8, wh));
+            totalEmissiveRadiance *= emitColor.rgb * emK * tw + vec3(1., .78, .5) * shop * .55;
           #endif`,
         );
     };
@@ -772,6 +779,7 @@ export const N3 = (() => {
     box,
     cyl,
     QUALITY,
+    TIME,
     kindTextures,
     facadeMaterial,
     Batch,

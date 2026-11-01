@@ -112,6 +112,7 @@ export const F3 = (() => {
       this._harbor();
       this._boats();
       this._traffic();
+      this._life();
       this.setTimeOfDay(office.tod || 'day');
     }
 
@@ -1338,6 +1339,158 @@ export const F3 = (() => {
       b.m.rotation.y = Math.atan2(-dz, dx) + (b.dir < 0 ? Math.PI : 0);
     }
 
+    /* ---------------- things that make the city feel lived in ---------------- */
+    /**
+     * Four flocks of birds circling the towers, a patrol helicopter, and smoke rising from rooftop vents. All of it is
+     * cheap: one instanced mesh for the birds, one for the smoke, and a handful of meshes for the helicopter.
+     */
+    _life() {
+      const rr = N3.rngOf(4242);
+      // birds: a flat V whose wings flap by flipping its height; each flock circles its own centre
+      const v = new THREE.BufferGeometry();
+      v.setAttribute(
+        'position',
+        new THREE.BufferAttribute(
+          new Float32Array([0, 0, 0.5, -1.1, 0.35, -0.1, 0, 0, -0.3, 0, 0, 0.5, 0, 0, -0.3, 1.1, 0.35, -0.1]),
+          3,
+        ),
+      );
+      const per = this.mobile ? 8 : 16;
+      this.flocks = [
+        { cx: 0, cz: -120, rad: 190, y: 105, v: 0.07 },
+        { cx: 160, cz: 40, rad: 120, y: 80, v: -0.09 },
+        { cx: -170, cz: -260, rad: 230, y: 135, v: 0.055 },
+        { cx: 40, cz: -420, rad: 160, y: 95, v: -0.075 },
+      ].map(f => ({
+        ...f,
+        a0: rr() * 6.28,
+        birds: Array.from({ length: per }, () => ({
+          da: (rr() - 0.5) * 0.5,
+          dr: (rr() - 0.5) * 36,
+          dy: (rr() - 0.5) * 16,
+          ph: rr() * 6,
+        })),
+      }));
+      const n = this.flocks.length * per;
+      this.birds = new THREE.InstancedMesh(
+        v,
+        new THREE.MeshBasicMaterial({ color: '#2b2f38', side: THREE.DoubleSide, fog: true }),
+        n,
+      );
+      this.birds.frustumCulled = false;
+      this.root.add(this.birds);
+      // patrol helicopter
+      const heli = new THREE.Group();
+      const body = new THREE.MeshStandardMaterial({ color: '#d9dde3', roughness: 0.4, metalness: 0.3 });
+      const dark = new THREE.MeshStandardMaterial({ color: '#23262d', roughness: 0.6 });
+      const cab = new THREE.Mesh(new THREE.SphereGeometry(1.6, 12, 8), body);
+      cab.scale.set(1, 0.8, 1.5);
+      heli.add(cab);
+      const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.12, 5.4, 8), body);
+      tail.rotation.x = Math.PI / 2;
+      tail.position.set(0, 0.2, -3.6);
+      heli.add(tail);
+      const glass = new THREE.Mesh(
+        new THREE.SphereGeometry(1.1, 10, 8),
+        new THREE.MeshStandardMaterial({ color: '#1b2433', metalness: 0.7, roughness: 0.1 }),
+      );
+      glass.scale.set(1, 0.75, 1);
+      glass.position.set(0, 0.25, 1.1);
+      heli.add(glass);
+      this.rotor = new THREE.Mesh(new THREE.BoxGeometry(9, 0.04, 0.32), dark);
+      this.rotor.position.y = 1.5;
+      heli.add(this.rotor);
+      this.rotor2 = new THREE.Mesh(new THREE.BoxGeometry(9, 0.04, 0.32), dark);
+      this.rotor2.position.y = 1.5;
+      this.rotor2.rotation.y = Math.PI / 2;
+      heli.add(this.rotor2);
+      const light = new THREE.Mesh(
+        new THREE.SphereGeometry(0.22, 6, 5),
+        new THREE.MeshBasicMaterial({ color: '#ff3b3b', fog: false }),
+      );
+      light.position.set(0, 1.0, -5.9);
+      heli.add(light);
+      this.heliLight = light;
+      heli.scale.setScalar(2.2);
+      this.heli = heli;
+      this.root.add(heli);
+      // smoke and steam from rooftop vents near the middle of the city
+      const vents = (this.batch?.units || []).filter(u => Math.hypot(u.x, u.z) < 330).slice(0, this.mobile ? 12 : 28);
+      this.vents = vents.map(u => ({
+        x: u.x + 1.4,
+        y: u.y + (this.batch.baseY || 0) + 1.8,
+        z: u.z + 1.2,
+        ph: rr() * 9,
+      }));
+      if (this.vents.length) {
+        const puff = new THREE.SphereGeometry(1, 7, 5);
+        this.smoke = new THREE.InstancedMesh(
+          puff,
+          new THREE.MeshBasicMaterial({
+            color: '#f1f3f5',
+            transparent: true,
+            opacity: 0.38,
+            depthWrite: false,
+            fog: true,
+          }),
+          this.vents.length * 5,
+        );
+        this.smoke.frustumCulled = false;
+        this.root.add(this.smoke);
+      }
+      this._lifeDummy = new THREE.Object3D();
+    }
+
+    _lifeTick(dt, t) {
+      const d = this._lifeDummy;
+      if (!d) return;
+      if (this.birds && this.birds.visible) {
+        let i = 0;
+        for (const f of this.flocks) {
+          const a = f.a0 + t * f.v;
+          for (const b of f.birds) {
+            const ang = a + b.da,
+              rad = f.rad + b.dr;
+            d.position.set(
+              f.cx + Math.cos(ang) * rad,
+              f.y + b.dy + Math.sin(t * 0.7 + b.ph) * 2,
+              f.cz + Math.sin(ang) * rad,
+            );
+            d.rotation.set(0, -ang + (f.v > 0 ? Math.PI : 0), 0);
+            const flap = Math.sin(t * 9 + b.ph);
+            d.scale.set(1.6, flap, 1.6);
+            d.updateMatrix();
+            this.birds.setMatrixAt(i++, d.matrix);
+          }
+        }
+        this.birds.instanceMatrix.needsUpdate = true;
+      }
+      if (this.heli) {
+        const a = t * 0.045;
+        this.heli.position.set(Math.cos(a) * 250 + 20, 92 + Math.sin(t * 0.5) * 1.8, Math.sin(a) * 140 - 150);
+        this.heli.rotation.y = -a - Math.PI / 2 + Math.PI;
+        this.heli.rotation.z = Math.sin(t * 0.3) * 0.06;
+        this.rotor.rotation.y = t * 28;
+        this.rotor2.rotation.y = t * 28 + Math.PI / 2;
+        this.heliLight.visible = Math.sin(t * 5) > 0;
+      }
+      if (this.smoke) {
+        let i = 0;
+        for (const v of this.vents) {
+          for (let k = 0; k < 5; k++) {
+            const life = (((t * 0.16 + v.ph + k * 0.2) % 1) + 1) % 1;
+            const sc = 0.5 + life * 2.6;
+            d.position.set(v.x + life * 3.2 + Math.sin(life * 6 + v.ph) * 0.3, v.y + life * 10, v.z + life * 1.2);
+            d.rotation.set(0, 0, 0);
+            d.scale.setScalar(life > 0.97 ? 0.001 : sc);
+            d.updateMatrix();
+            this.smoke.setMatrixAt(i++, d.matrix);
+          }
+        }
+        this.smoke.instanceMatrix.needsUpdate = true;
+      }
+    }
+
     /* ---------------- far traffic: instanced cabs on every avenue ---------------- */
     _traffic() {
       const rr = N3.rngOf(1234);
@@ -1483,6 +1636,8 @@ export const F3 = (() => {
     /* ---------------- per frame ---------------- */
     update(dt, t, camera) {
       dt = Math.min(dt, 0.1);
+      N3.TIME.value = t;
+      this._lifeTick(dt, t);
       for (const m of this.water) {
         m.map.offset.x += dt * 0.004;
         m.map.offset.y += dt * 0.002;
@@ -1506,6 +1661,7 @@ export const F3 = (() => {
     }
 
     setTimeOfDay(tod) {
+      if (this.birds) this.birds.visible = tod !== 'night';
       this.lit.forEach(x => {
         x.m.emissiveIntensity = x[tod] ?? x.day;
       });
