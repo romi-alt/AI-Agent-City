@@ -2,10 +2,10 @@
 import dynamic from 'next/dynamic';
 import { Component, type ReactNode, useEffect, useRef, useState } from 'react';
 
-// The hero's city is the existing AgentCity scene. A rendered frame of it is the first paint and stays when there is
+// The hero's city is the design's real city (the one the live demo opens). A rendered frame of it is the first paint and stays when there is
 // no WebGL or the visitor prefers reduced motion; otherwise the live scene loads once the page is idle and fades in
 // over it. It pauses when scrolled away, when the tab is hidden and while the live demo is open.
-const HeroCityCanvas = dynamic(() => import('./HeroCityCanvas'), { ssr: false, loading: () => null });
+const HeroCityCanvas = dynamic(() => import('./HeroWorldCanvas'), { ssr: false, loading: () => null });
 
 function hasWebGL(): boolean {
   try {
@@ -83,18 +83,19 @@ export function HeroCity() {
       {/* eslint-disable-next-line @next/next/no-img-element -- a static, pre-sized frame; no image optimiser in the preview build */}
       <img
         className="hero-city-poster"
-        src="/city/poster-golden-1920.webp"
-        srcSet="/city/poster-golden-960.webp 960w, /city/poster-golden-1920.webp 1920w"
+        src="/city/hero-real-1728.webp"
+        srcSet="/city/hero-real-864.webp 864w, /city/hero-real-1728.webp 1728w"
         sizes="100vw"
         alt=""
-        width={1920}
+        width={1728}
         height={1200}
         fetchPriority="high"
       />
-      {live && (
+      {/* While the live demo is open it runs its own copy of the city, so this one is let go and comes back on close. */}
+      {live && !demoOpen && (
         <div className={`hero-city-live${shown ? ' is-shown' : ''}`}>
           <SceneBoundary onError={() => setLive(false)}>
-            <HeroCityCanvas paused={!visible || tabHidden || demoOpen} />
+            <HeroCityCanvas paused={!visible || tabHidden || demoOpen} onError={() => setLive(false)} />
           </SceneBoundary>
         </div>
       )}

@@ -193,7 +193,18 @@ export function AscPage({ contactEmail, bookForm }: { contactEmail: string; book
                   <span style={cv('#f5b83d')}>Fast Sales HQ</span>
                   <span style={cv('#18b67a')}>Volta EV</span>
                 </div>
-                <Skyline id="demoSky" width={800} height={400} color="#f5b83d" seed={4242} />
+                {/* eslint-disable-next-line @next/next/no-img-element -- a static rendered frame; no image optimiser in the preview build */}
+                <img
+                  className="demo-img"
+                  src="/city/preview-real-1280.webp"
+                  srcSet="/city/preview-real-640.webp 640w, /city/preview-real-1280.webp 1280w"
+                  sizes="(min-width: 1100px) 560px, 100vw"
+                  alt="A frame of the demo city: dealerships and pastel and glass towers beside a palm-lined river"
+                  width={1280}
+                  height={800}
+                  loading="lazy"
+                  decoding="async"
+                />
                 <span className="play">▶ Enter the demo city</span>
               </a>
             </div>

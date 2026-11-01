@@ -1263,6 +1263,26 @@ html:has(.asc) {
   width: 100%;
   height: 78%;
 }
+/* A rendered frame of the real demo city fills the card; a soft shade at the top keeps the chips legible. */
+.asc .demo-preview .demo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.asc .demo-preview:has(.demo-img)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(7, 10, 18, 0.55) 0%, transparent 38%);
+}
+.asc .demo-preview .chips,
+.asc .demo-preview .play {
+  z-index: 2;
+}
 .asc .demo-preview .play {
   position: absolute;
   left: 50%;
@@ -1902,6 +1922,20 @@ html:has(.asc) {
 }
 .asc .hero-city button {
   display: none !important;
+}
+/* The real city behind the hero (HeroWorldCanvas): it fills the frame, and its building tags stay hidden because they
+   would run through the headline. */
+.asc .hero-world {
+  position: absolute;
+  inset: 0;
+}
+.asc .hero-world canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+.asc .hero-world > div {
+  display: none;
 }
 @media (max-width: 760px) {
   .asc .hero-city {
