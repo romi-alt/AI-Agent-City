@@ -2074,11 +2074,16 @@ export const O3 = (() => {
       [-0.5, 0.5].forEach(dz => B.cyl(0.03, 0.76, legC, X(-w / 2 + 0.12), 0.38, z + dz, 'metal', 8));
       B.box(0.04, 0.04, 1.0, legC, X(-w / 2 + 0.12), 0.1, z, 0, 'metal');
       B.box(w - 0.75, 0.42, 0.025, '#e7dfd1', X(-0.2), 0.52, z + 0.52, 0, 'satin');
-      // monitor angled toward the front so the camera can see the agent's activity
-      const mx = X(-w / 2 + 0.6),
-        mz = z - 0.25,
+      // The screens face the person sitting behind the desk (their chair is at z - 1.05), centred in front of the
+      // keyboard; a desk with two screens fans them in towards the chair.
+      const chairAt = [x, z - 1.05];
+      const faceChair = (px, pz) => Math.atan2(chairAt[0] - px, chairAt[1] - pz);
+      const sp = w > 3 ? 0.68 : 0.58;
+      const cx0 = X(o.dual ? -0.1 : -0.2);
+      const mx = o.dual ? cx0 - sp : cx0,
+        mz = z - 0.12,
         my = 1.42,
-        mr = o.dual ? 0.3 : 0.5; // a desk with two screens turns the first one less, so they do not overlap
+        mr = faceChair(mx, mz);
       B.rbox(1.1, 0.68, 0.05, 0.02, '#1c2028', mx, my, mz, mr, 'metal');
       B.cyl(0.03, 0.3, legC, mx, my - 0.45, mz, 'metal', 8);
       B.box(0.3, 0.02, 0.2, legC, mx, 0.82, mz, mr, 'metal');
@@ -2144,20 +2149,21 @@ export const O3 = (() => {
       B.box(0.2, 0.006, 0.02, '#c9ced6', kx, 0.832, kz + 0.05, 0.04);
       B.box(0.22, 0.006, 0.19, '#2b3445', X(0.28), 0.813, z - 0.36);
       B.rbox(0.06, 0.03, 0.1, 0.015, '#e9ecef', X(0.28), 0.832, z - 0.36, 0.1, 'satin');
-      if (!o.dual) this._laptopB(B, X(0.05), 0.815, z - 0.02, 0, '#c9ced6');
+      if (!o.dual) this._laptopB(B, X(0.74), 0.815, z - 0.25, Math.PI + 0.2, '#c9ced6');
       if (o.dual) {
-        // second monitor, slightly angled in
-        const m2x = mx + 1.2,
-          m2z = z - 0.3;
-        B.rbox(1.0, 0.62, 0.05, 0.02, '#1c2028', m2x, 1.4, m2z, 0.15, 'metal');
+        // second monitor, fanned in towards the chair like the first
+        const m2x = cx0 + sp,
+          m2z = z - 0.12,
+          r2 = faceChair(m2x, m2z);
+        B.rbox(1.0, 0.62, 0.05, 0.02, '#1c2028', m2x, 1.4, m2z, r2, 'metal');
         B.cyl(0.03, 0.3, legC, m2x, 0.97, m2z, 'metal', 8);
-        B.box(0.3, 0.02, 0.2, legC, m2x, 0.82, m2z, 0.15, 'metal');
+        B.box(0.3, 0.02, 0.2, legC, m2x, 0.82, m2z, r2, 'metal');
         const s2 = new THREE.Mesh(
           new THREE.PlaneGeometry(0.93, 0.55),
           new THREE.MeshBasicMaterial({ map: this._chartTex(), toneMapped: false }),
         );
-        s2.position.set(m2x + Math.sin(0.15) * 0.03, 1.4, m2z + Math.cos(0.15) * 0.03);
-        s2.rotation.y = 0.15;
+        s2.position.set(m2x + Math.sin(r2) * 0.03, 1.4, m2z + Math.cos(r2) * 0.03);
+        s2.rotation.y = r2;
         root.add(s2);
       }
       // papers, notebook with a pen, a clipboard
@@ -2263,9 +2269,9 @@ export const O3 = (() => {
       [-0.11, 0.11].forEach(dx => B.box(0.012, 0.09, 0.012, '#2b2f38', X(-0.95) + dx, 0.86, z - 0.17));
       // framed photo
       const photo = pick(['#9ec3da', '#e8b9a0', '#b8d5b0', '#d6c2e6']);
-      B.box(0.15, 0.19, 0.012, '#2b2f38', X(0.5), 0.915, z - 0.43, 0.12, 'satin');
-      B.box(0.12, 0.16, 0.014, photo, X(0.5), 0.915, z - 0.428, 0.12, 'matte');
-      B.box(0.03, 0.06, 0.012, '#d8d0c3', X(0.5), 0.9, z - 0.424, 0.12, 'matte');
+      B.box(0.15, 0.19, 0.012, '#2b2f38', X(0.12), 0.915, z - 0.12, Math.PI - 0.15, 'satin');
+      B.box(0.12, 0.16, 0.014, photo, X(0.12), 0.915, z - 0.128, Math.PI - 0.15, 'matte');
+      B.box(0.03, 0.06, 0.012, '#d8d0c3', X(0.12), 0.9, z - 0.132, Math.PI - 0.15, 'matte');
       // phone on a wireless charger
       B.cyl(0.07, 0.012, '#2b2f38', X(0.18), 0.822, z + 0.1, 'satin', 16);
       B.rbox(0.075, 0.008, 0.15, 0.012, '#15171c', X(0.18), 0.832, z + 0.1, 0.4, 'satin');
@@ -3530,8 +3536,10 @@ export const O3 = (() => {
         new THREE.PlaneGeometry(1.0, 0.58),
         new THREE.MeshBasicMaterial({ map: this.crmTex.t, toneMapped: false }),
       );
-      crmMini.position.set(x + 0.75, 1.27, z - 0.18);
-      crmMini.rotation.y = -0.4;
+      crmMini.scale.setScalar(0.7);
+      crmMini.position.set(x + 1.3, 1.25, z - 0.05);
+      crmMini.rotation.y = Math.atan2(-1.3, -1.0); // towards the owner's chair
+      crmMini.userData.view = 'crm';
       root.add(crmMini);
       const back = new THREE.Mesh(
         new RoundedBoxGeometry(1.08, 0.66, 0.04, 2, 0.02),
@@ -3539,10 +3547,11 @@ export const O3 = (() => {
       );
       back.position.copy(crmMini.position);
       back.rotation.copy(crmMini.rotation);
+      back.scale.setScalar(0.7);
       back.translateZ(-0.03);
       root.add(back);
-      crmMini.userData.view = 'crm';
-      this.clickables.push(crmMini);
+      back.userData.view = 'crm';
+      this.clickables.push(crmMini, back);
       const chair = this._chair(root, x, z - 1.0, Math.PI, '#26324d', { high: true });
       const p = this._person('owner', '#f2c879');
       p.g.position.set(x, 0, z - 1.05);
@@ -4260,8 +4269,9 @@ export const O3 = (() => {
         const a = this.actors[name.slice(6)];
         if (!a) return;
         const p = a.base;
-        pos = [p.x + 1.5, 2.6, p.z + 4.0];
-        tgt = [p.x, 1.2, p.z];
+        // from the side and a little behind: the screens face the person, so this shows them and the person together
+        pos = [p.x + 3.0, 2.3, p.z - 1.6];
+        tgt = [p.x - 0.2, 1.15, p.z - 0.4];
       } else {
         [pos, tgt] = V[name] || V.overview;
       }
