@@ -347,6 +347,15 @@ export const F3 = (() => {
                     : pickFrom(N3.TOWER_TONES);
       const finish = (cx, cz, t, floors, kind, tall) => {
         if (floors > 40) b.beacons.push({ x: cx, y: t.top + 2, z: cz, s: 1 });
+        // equipment on most roofs that are not crowned: stair bulkhead, air handlers, vents, an antenna
+        if (floors > 3 && !tall && r() < 0.75 && Math.min(t.w, t.d) > 8)
+          b.units.push({
+            x: cx + (r() - 0.5) * (t.w - 8),
+            y: t.top,
+            z: cz + (r() - 0.5) * (t.d - 8),
+            yaw: Math.floor(r() * 4) * (Math.PI / 2),
+            s: 0.8 + r() * 0.5,
+          });
         if (tall && r() < 0.35) b.crowns.push({ x: cx, y: t.top, z: cz, w: Math.min(t.w, t.d) * 0.7, h: 8 + r() * 12 });
         else if (tall && r() < 0.4) b.spires.push({ x: cx, y: t.top, z: cz, h: 10 + r() * 20, r: 0.8 });
         else if (floors > 5 && floors < 24 && r() < 0.35 && Math.hypot(cx, cz) < 800)

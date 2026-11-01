@@ -275,6 +275,12 @@ export const N3 = (() => {
       for (let y = 0; y < S; y += 4) gm.fillRect(0, y, S, 1);
       for (let y = 0; y < S; y += 8) for (let x = (y / 8) % 2 ? 0 : 6; x < S; x += 12) gm.fillRect(x, y, 1, 4);
     }
+    if (kind === 'brick' || kind === 'terra') {
+      for (let i = 0; i < 420; i++) {
+        gm.fillStyle = r() < 0.5 ? `rgba(0,0,0,${0.03 + r() * 0.06})` : `rgba(255,235,210,${0.03 + r() * 0.06})`;
+        gm.fillRect(Math.floor(r() * S), Math.floor(r() * S), 6 + Math.floor(r() * 10), 3);
+      }
+    }
     if (kind === 'lime') {
       gm.fillStyle = 'rgba(0,0,0,.07)';
       for (let x = 0; x < S; x += c) gm.fillRect(x, 0, 1, S);
@@ -296,6 +302,40 @@ export const N3 = (() => {
       gm.fillRect(x, y, w, h);
       gk.fillStyle = '#000';
       gk.fillRect(x, y, w, h);
+      // what makes a window read as a window: a reveal shadow, a sill, a sky reflection, blinds and the odd air conditioner
+      const q = r();
+      if (q < 0.24) {
+        gm.fillStyle = ['#d9cfb8', '#c8d2d8', '#e4dac4', '#bfae92'][Math.floor(r() * 4)];
+        gm.fillRect(x + 1, y + 1, w - 2, Math.max(2, h * (0.25 + r() * 0.5)));
+        gm.fillStyle = 'rgba(0,0,0,.12)';
+        for (let ly = y + 3; ly < y + h * 0.7; ly += 3) gm.fillRect(x + 1, ly, w - 2, 1);
+      } else if (q < 0.34) {
+        gm.fillStyle = ['#e8e0d0', '#d6c9b0'][Math.floor(r() * 2)];
+        gm.fillRect(x, y, Math.max(2, w * 0.28), h);
+        gm.fillRect(x + w - Math.max(2, w * 0.28), y, Math.max(2, w * 0.28), h);
+      }
+      gm.fillStyle = 'rgba(255,255,255,.17)';
+      gm.beginPath();
+      gm.moveTo(x + w * 0.1, y + h);
+      gm.lineTo(x + w * 0.55, y);
+      gm.lineTo(x + w * 0.8, y);
+      gm.lineTo(x + w * 0.35, y + h);
+      gm.fill();
+      gm.fillStyle = 'rgba(0,0,0,.42)';
+      gm.fillRect(x, y, w, 2);
+      gm.fillRect(x, y, 1.5, h);
+      if (trim) {
+        gm.fillStyle = 'rgba(255,255,255,.65)';
+        gm.fillRect(x - 1, y + h, w + 2, 1.6);
+        gm.fillStyle = 'rgba(0,0,0,.22)';
+        gm.fillRect(x - 1, y + h + 1.6, w + 2, 1);
+        if (r() < 0.07) {
+          gm.fillStyle = '#9aa0a6';
+          gm.fillRect(x + 1, y + h * 0.5, w - 2, h * 0.5);
+          gm.fillStyle = '#5f656b';
+          for (let ly = y + h * 0.58; ly < y + h - 1; ly += 2) gm.fillRect(x + 2, ly, w - 4, 1);
+        }
+      }
       if (r() < lit) {
         ge.fillStyle = lights[Math.floor(r() * lights.length)];
         ge.fillRect(x, y, w, h);
@@ -330,6 +370,8 @@ export const N3 = (() => {
           gm.fillStyle = '#2f4254';
           gm.fillRect(x0, y0, 1, c);
           gm.fillRect(x0, y0 + c - 9, c, 1);
+          gm.fillStyle = r() < 0.5 ? `rgba(255,255,255,${r() * 0.14})` : `rgba(0,25,45,${r() * 0.16})`;
+          gm.fillRect(x0 + 1, y0 + 1, c - 1, c - 10);
           gm.fillStyle = 'rgba(255,255,255,.14)';
           gm.beginPath();
           gm.moveTo(x0 + 3, y0 + c - 9);
@@ -451,6 +493,14 @@ export const N3 = (() => {
           float shop = (1. - vUp) * vInfo.x * step(vBotD, 4.2) * (1. - cornice);
           col = mix(col, vTint.rgb * vec3(.55, .5, .46), shop);
           col = mix(col, vTint.rgb * .7, vUp);
+          // weathering: street grime low down, soot under the cornice, rain streaks, a little tone change per building,
+          // and gravel on the flat roofs
+          float grime = 1. - .24 * (1. - smoothstep(0., 9., vBotD)) * (1. - vUp);
+          float soot = 1. - .12 * (1. - smoothstep(0., 3.5, vTopD)) * (1. - vUp) * (1. - cornice);
+          float vary = .93 + .14 * fract(sin(vTint.w * 91.7) * 4375.5);
+          float streak = 1. - .09 * step(.8, fract(sin(floor(vMapUv.x * 9.) + vTint.w * 40.) * 437.58)) * (1. - vUp);
+          col *= grime * soot * vary * streak;
+          col *= mix(1., .88 + .12 * step(.5, fract(vMapUv.x * 21. + vMapUv.y * 13.)), vUp);
           diffuseColor.rgb *= col;
           float emK = (1. - vUp) * (1. - cornice) * (1. - shop);`,
         )
@@ -477,6 +527,7 @@ export const N3 = (() => {
       this.crowns = [];
       this.beacons = [];
       this.tanks = [];
+      this.units = [];
       this.baseY = 0;
     }
     q(w) {
@@ -586,8 +637,41 @@ export const N3 = (() => {
           },
         );
       }
+      if (this.units.length) {
+        this.unitMesh = place(
+          this.units,
+          roofUnitsGeo(),
+          new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.15 }),
+          (d, s) => {
+            d.position.set(s.x, s.y, s.z);
+            d.rotation.set(0, s.yaw, 0);
+            d.scale.setScalar(s.s);
+          },
+        );
+      }
       return this;
     }
+  }
+
+  /** Rooftop equipment: a stair bulkhead, two air-handling boxes with fans, a vent stack and a short antenna. */
+  function roofUnitsGeo() {
+    const conc = '#a9a59b',
+      steel = '#8d949c',
+      dark = '#3a3f46',
+      duct = '#b9bdc2';
+    const ps = [
+      part(box(3.2, 2.4, 2.6), conc, -2.2, 1.2, 0.6),
+      part(box(3.4, 0.14, 2.8), '#6e6b64', -2.2, 2.47, 0.6),
+      part(box(1.4, 1.1, 1.6), steel, 1.8, 0.55, -0.9),
+      part(cyl(0.5, 0.5, 0.12, 10), dark, 1.8, 1.16, -0.9),
+      part(box(1.2, 0.9, 1.4), duct, 2.3, 0.45, 1.5),
+      part(cyl(0.4, 0.4, 0.12, 10), dark, 2.3, 0.96, 1.5),
+      part(cyl(0.16, 0.16, 1.6, 8), duct, 0.2, 0.8, 1.9),
+      part(cyl(0.22, 0.16, 0.2, 8), dark, 0.2, 1.7, 1.9),
+      part(cyl(0.05, 0.05, 4.2, 5), dark, -0.4, 2.1, -1.6),
+      part(box(0.9, 0.04, 0.04), dark, -0.4, 3.4, -1.6),
+    ];
+    return merge(ps);
   }
 
   /** A wooden rooftop water tank on a steel frame, the New York signature. One merged geometry, vertex coloured. */

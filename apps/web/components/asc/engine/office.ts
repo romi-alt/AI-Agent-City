@@ -2182,6 +2182,7 @@ export const O3 = (() => {
       // a little plant of its own
       const pk = o.plant || 'succulent';
       this._plantB(B, pk, X(-w / 2 + 0.2), 0.815, z + 0.4, pk === 'orchid' ? 0.42 : 0.4, o.pot || 'white');
+      this._deskLife(B, o.key || 'desk', x, z, w, accent, X, hi);
       this._deskExtras(B, o.key, x, z, w, accent, X);
       // the personal mug is its own mesh so it can leave the desk with its owner
       const mug = new THREE.Group();
@@ -2229,6 +2230,67 @@ export const O3 = (() => {
     }
 
     // one personal thing per agent, in their own colour
+    /**
+     * What makes a desk look used rather than furnished: a felt desk mat, a PC tower under the desk, a letter tray, a
+     * framed photo, a phone on its charger and one personal item that differs from desk to desk.
+     */
+    _deskLife(B, key, x, z, w, accent, X, hi) {
+      let h = 0;
+      for (const ch of String(key)) h = (h * 31 + ch.charCodeAt(0)) % 9973;
+      const pick = list => list[h % list.length];
+      // felt desk mat under the keyboard and mouse
+      B.box(
+        0.95,
+        0.004,
+        0.42,
+        pick(['#2b3445', '#3a3f4a', '#4a3b34', '#2f4a45']),
+        X(0.05),
+        0.8165,
+        z - 0.38,
+        0.04,
+        'matte',
+      );
+      // PC tower and a power brick under the desk
+      B.rbox(0.2, 0.42, 0.46, 0.015, '#23262d', X(0.25), 0.23, z - 0.3, 0, 'satin');
+      B.box(0.012, 0.02, 0.01, '#3ccf8e', X(0.25) + 0.101, 0.38, z - 0.1, 0, 'lamp');
+      B.box(0.14, 0.04, 0.08, '#2b2f38', X(-0.35), 0.02, z - 0.45, 0.3, 'matte');
+      if (!hi) return;
+      // letter tray with two levels of paper
+      B.box(0.24, 0.012, 0.3, '#2b2f38', X(-0.95), 0.825, z - 0.05, 0, 'satin');
+      B.box(0.22, 0.014, 0.28, '#fbfaf5', X(-0.95), 0.84, z - 0.05, 0.05);
+      B.box(0.24, 0.012, 0.3, '#2b2f38', X(-0.95), 0.9, z - 0.05, 0, 'satin');
+      B.box(0.22, 0.014, 0.28, '#f1ede2', X(-0.95), 0.915, z - 0.05, -0.04);
+      [-0.11, 0.11].forEach(dx => B.box(0.012, 0.09, 0.012, '#2b2f38', X(-0.95) + dx, 0.86, z - 0.17));
+      // framed photo
+      const photo = pick(['#9ec3da', '#e8b9a0', '#b8d5b0', '#d6c2e6']);
+      B.box(0.15, 0.19, 0.012, '#2b2f38', X(0.5), 0.915, z - 0.43, 0.12, 'satin');
+      B.box(0.12, 0.16, 0.014, photo, X(0.5), 0.915, z - 0.428, 0.12, 'matte');
+      B.box(0.03, 0.06, 0.012, '#d8d0c3', X(0.5), 0.9, z - 0.424, 0.12, 'matte');
+      // phone on a wireless charger
+      B.cyl(0.07, 0.012, '#2b2f38', X(0.18), 0.822, z + 0.1, 'satin', 16);
+      B.rbox(0.075, 0.008, 0.15, 0.012, '#15171c', X(0.18), 0.832, z + 0.1, 0.4, 'satin');
+      // one personal item per desk
+      const item = h % 4;
+      if (item === 0) {
+        // a travel tumbler
+        B.cyl(0.04, 0.036, '#e8604c', X(0.35), 0.88, z + 0.38, 'satin', 12);
+        B.cyl(0.042, 0.02, '#2b2f38', X(0.35), 0.95, z + 0.38, 'satin', 12);
+      } else if (item === 1) {
+        // a stack of books
+        B.rbox(0.22, 0.035, 0.16, 0.008, '#3fb6a8', X(0.4), 0.835, z + 0.4, 0.2, 'satin');
+        B.rbox(0.2, 0.03, 0.15, 0.008, '#f5b83d', X(0.4), 0.868, z + 0.4, -0.1, 'satin');
+        B.rbox(0.18, 0.03, 0.14, 0.008, '#26324d', X(0.4), 0.898, z + 0.4, 0.3, 'satin');
+      } else if (item === 2) {
+        // a small cactus and a pot of pens
+        this._plantB(B, 'cactus', X(0.4), 0.815, z + 0.4, 0.28, 'terra');
+      } else {
+        // headphones lying on the desk
+        B.tor(0.08, 0.012, '#1f2330', X(0.4), 0.84, z + 0.4, Math.PI / 2, 0, 0.3, 'satin', 14, Math.PI);
+        B.cyl(0.04, 0.03, '#1f2330', X(0.32), 0.83, z + 0.4, 'satin', 10, 0, Math.PI / 2);
+        B.cyl(0.04, 0.03, '#1f2330', X(0.48), 0.83, z + 0.4, 'satin', 10, 0, Math.PI / 2);
+      }
+    }
+
     _deskExtras(B, key, x, z, w, c, X) {
       const hi = !this.mobile;
       const gold = '#d9b45c';
