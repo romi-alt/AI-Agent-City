@@ -4,7 +4,7 @@
 // Everything it starts is undone by the function initDemo returns.
 import { prefersReducedMotion } from './landing';
 
-const AGENTS = {
+export const AGENTS = {
   max: {
     name: 'Max',
     short: 'CEO',
@@ -72,30 +72,28 @@ const DEALER_SUBS = [
 ];
 const FL_SUBS = {
   river: [
-    ['walk', 'Hudson riverwalk'],
-    ['bridge', 'Cable-stayed bridge'],
-    ['boats', 'Ferries & tugboats'],
+    ['walk', 'Riverwalk'],
+    ['bridge', 'Sky bridge'],
+    ['boats', 'Boat traffic'],
   ],
   skyline: [
-    ['skyline', 'Midtown skyline'],
+    ['skyline', 'From the river'],
     ['towers', 'Among the towers'],
-    ['green', 'The green block'],
   ],
-  times: [['times', 'The big screens']],
   beach: [
-    ['beach', 'Piers & harbor'],
-    ['ocean', 'Ferries & ships'],
+    ['beach', 'Beach'],
+    ['ocean', 'Cruise ship'],
   ],
 };
 const FL_PLACES = [
   {
     id: 'river',
-    name: 'Hudson riverwalk & bridges',
-    sub: 'Piers, ferries, East River bridges',
-    c: '#3d7586',
+    name: 'Riverwalk & bridges',
+    sub: 'Palm-lined river, boats',
+    c: '#1d9cc0',
     icon: '≈',
-    tag: 'Waterfront',
-    text: 'The Hudson riverwalk runs past a row of piers, with ferries and tugboats on the water and cable-stayed and arch bridges over the East River. Every block along it is room for another client building.',
+    tag: 'Florida waterfront',
+    text: 'A palm-lined river cuts through the city with water taxis, yachts and six bridges. Every block along it is room for another client building.',
     list: [
       'Room for 100+ client buildings on one map',
       'Each client keeps its own CRM, leads and brand',
@@ -104,12 +102,12 @@ const FL_PLACES = [
   },
   {
     id: 'skyline',
-    name: 'Midtown skyline',
-    sub: 'Setback towers and spires',
-    c: '#7b8998',
+    name: 'Waterfront skyline',
+    sub: 'Towers across the river',
+    c: '#4a86b5',
     icon: '▲',
     tag: 'Tower district',
-    text: 'Art-deco spires and glass towers rise over Midtown, with a green block of plane trees to the north: this is where dealer groups and agencies grow from one showroom to a whole tower of floors.',
+    text: 'Glass towers line the far bank: this is where dealer groups and agencies grow from one showroom to a whole tower of floors.',
     list: [
       'One floor per salesperson or store',
       'Dealer groups get a tower with a floor per store',
@@ -117,23 +115,13 @@ const FL_PLACES = [
     ],
   },
   {
-    id: 'times',
-    name: 'Times Square screens',
-    sub: 'Big rotating billboards',
-    c: '#e5484d',
-    icon: '◧',
-    tag: 'Junction of lights',
-    text: 'Four corner towers carry big lit screens that rotate their ads every few seconds. Your dealership can have a screen of its own.',
-    list: ['Ads rotate every 7 seconds', 'Brighter after dark', 'Fictional demo ads only'],
-  },
-  {
     id: 'beach',
-    name: 'Harbor & piers',
-    sub: 'Piers, ferries, the open harbor',
-    c: '#2f5f8f',
-    icon: '⚓',
-    tag: 'Harbor',
-    text: 'The island ends in an open harbor with a container ship, sailboats and ferries crossing to the fort island. Switch to Night to watch the whole waterfront light up.',
+    name: 'Beach & ocean',
+    sub: 'Sand, pier, cruise ship',
+    c: '#f2b36b',
+    icon: '☀',
+    tag: 'Ocean side',
+    text: 'The city runs right down to the beach, with a pier, a lifeguard tower and a cruise ship sailing past. Switch to Night to watch the whole coast light up.',
     list: [
       'Day, Evening and Night lighting',
       'Boats, planes, traffic and people move live',
@@ -149,7 +137,6 @@ const TOUR = [
   ['aurora', 'showroom'],
   ['aurora', 'board'],
   ['river', 'walk'],
-  ['times', 'times'],
   ['river', 'bridge'],
   ['vanta', 'showroom'],
   ['vanta', 'laptop'],
@@ -281,9 +268,9 @@ export function initDemo() {
           tag: 'AutoSalesCity · demo district',
           text: 'Every building is a client and every lit desk is an agent at work. Fly between the dealerships, then step into the Fast Sales HQ where the AI sales team works.',
           list: [
-            'Dealerships and the Fast Sales HQ in the middle',
+            '4 dealerships and the Fast Sales HQ in the middle',
             'Each building keeps its own CRM, leads and brand',
-            'Midtown towers, bridges, ferries, taxis and planes run live',
+            'A Florida river, beach, towers, boats and planes run live',
             'Switch Day, Evening and Night at the top',
           ],
         },

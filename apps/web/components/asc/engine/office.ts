@@ -422,10 +422,10 @@ export const O3 = (() => {
     red: '#e8604c',
   };
   const NYC_TEXT = {
-    neon: ['NEW YORK', 'SALES FLOOR'],
+    neon: ['FLORIDA', 'SALES FLOOR'],
     stations: [
       'Harbor',
-      'Midtown Leads',
+      'Palm Leads',
       'Quota Sq',
       'Pipeline',
       'Union Deal',
@@ -628,7 +628,7 @@ export const O3 = (() => {
       g.fillStyle = NY.brass;
       g.textAlign = 'center';
       g.font = `700 ${H * 0.07}px "Space Grotesk", sans-serif`;
-      g.fillText('NEW YORK', W / 2, H * 0.08);
+      g.fillText('FLORIDA', W / 2, H * 0.08);
       g.strokeRect(10, 10, W - 20, H - 20);
     },
     hustle(g, W, H) {
@@ -794,7 +794,7 @@ export const O3 = (() => {
       g.fill();
       g.fillStyle = '#fff';
       g.font = `800 ${H * 0.28}px "Space Grotesk", sans-serif`;
-      g.fillText('NEW YORK', W * 0.06, H * 0.46);
+      g.fillText('FLORIDA', W * 0.06, H * 0.46);
       g.font = `700 ${H * 0.16}px "Space Grotesk", sans-serif`;
       g.fillText('SALES', W * 0.06, H * 0.7);
     },
@@ -2498,7 +2498,7 @@ export const O3 = (() => {
         g.fillStyle = '#26324d';
         g.font = '800 54px "Space Grotesk", sans-serif';
         g.textBaseline = 'middle';
-        g.fillText('FAST SALES  ·  NEW YORK HQ', 40, H / 2 + 2);
+        g.fillText('FAST SALES  ·  FLORIDA HQ', 40, H / 2 + 2);
         g.fillStyle = '#e8604c';
         g.beginPath();
         g.arc(W - 70, H / 2, 26, 0, 7);
@@ -2774,7 +2774,7 @@ export const O3 = (() => {
         g.textAlign = 'center';
         g.fillText('THE SALES CUP', W / 2, 46);
         g.font = '600 24px Inter, sans-serif';
-        g.fillText('FAST SALES · NEW YORK', W / 2, 78);
+        g.fillText('FAST SALES · FLORIDA', W / 2, 78);
       }).t;
       const pp = P(0, 0.62, 0.262);
       this._plane(root, pt, 0.9, 0.17, pp[0], pp[1], pp[2], rot);
@@ -3682,7 +3682,7 @@ export const O3 = (() => {
       g.textAlign = 'right';
       g.fillStyle = '#f5b83d';
       g.font = '700 20px "JetBrains Mono", monospace';
-      g.fillText('NEW YORK ' + clock, W - 22, 34);
+      g.fillText('FLORIDA ' + clock, W - 22, 34);
       g.textAlign = 'left';
       const feed = this.feed.length
         ? this.feed
