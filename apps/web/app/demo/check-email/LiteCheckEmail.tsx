@@ -125,7 +125,7 @@ export function LiteCheckEmail({ requestId }: { requestId: string | null }) {
         {view === 'verification-sent' && 'Waiting for you to confirm your email address…'}
         {view === 'ready' && 'Email confirmed.'}
         {view === 'expired' && 'This request has expired.'}
-        {view === 'unknown' && 'Look for the email from AgentCity.'}
+        {view === 'unknown' && 'Look for the email from AutoSalesCity.'}
       </div>
 
       {deliveryFailed && view === 'verification-sent' && (

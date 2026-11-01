@@ -25,9 +25,10 @@ export interface EnvState {
   horizon: Rgb;
   sunGlow: Rgb;
   fogColor: Rgb;
-  /** Linear fog: fully clear before `fogNear`, fully fogged at `fogFar` (world units). The generated city ends
-   * beyond `fogFar`, so its edge is never visible. 240 at most: with the horizon in view (low camera presets, which
-   * show the sky) a thicker fog would let the frustum's corners reach the city's edge (camera/presets.ts, d4 tests). */
+  /** Linear fog: fully clear before `fogNear`, fully fogged at `fogFar` (world units). The generated city (a few km of
+   * towers, two rivers and the far banks) ends beyond `fogFar`, so its edge is never visible. 600 at most: with the
+   * horizon in view (low camera presets, which show the sky) a thicker fog would let the frustum's corners reach the
+   * city's edge (camera/presets.ts, d4 tests). */
   fogNear: number;
   fogFar: number;
   /** 0 by day, 1 at night: drives window lights, street lamps, headlights. */
@@ -61,19 +62,19 @@ const TIME: Record<TimeOfDay, EnvState> = {
   day: {
     sunElevation: 50,
     sunAzimuth: 132,
-    sunColor: hex('#fff4e0'),
+    sunColor: hex('#fff1dc'),
     sunIntensity: 2.2,
     sunDisk: 1,
     moon: 0,
     hemiSky: hex('#ffffff'),
-    hemiGround: hex('#b5a48a'),
-    hemiIntensity: 1.6,
-    zenith: hex('#5aa9e6'),
-    horizon: hex('#d6ecfa'),
+    hemiGround: hex('#8d867a'),
+    hemiIntensity: 1.55,
+    zenith: hex('#6a9ccc'),
+    horizon: hex('#cfdbe4'),
     sunGlow: hex('#fff3d8'),
-    fogColor: hex('#d6ecfa'),
-    fogNear: 95,
-    fogFar: 240,
+    fogColor: hex('#cfdbe4'),
+    fogNear: 150,
+    fogFar: 600,
     nightFactor: 0,
     stars: 0,
     cloudCover: 0.2,
@@ -95,12 +96,12 @@ const TIME: Record<TimeOfDay, EnvState> = {
     hemiSky: hex('#9fb5da'),
     hemiGround: hex('#b38c68'),
     hemiIntensity: 0.24,
-    zenith: hex('#3d74c4'),
-    horizon: hex('#f8d0a4'),
+    zenith: hex('#4a74ac'),
+    horizon: hex('#ecc9a6'),
     sunGlow: hex('#ffb257'),
-    fogColor: hex('#f0d0ae'),
-    fogNear: 95,
-    fogFar: 240,
+    fogColor: hex('#e3c8ac'),
+    fogNear: 150,
+    fogFar: 600,
     nightFactor: 0.08,
     stars: 0,
     cloudCover: 0.2,
@@ -126,9 +127,9 @@ const TIME: Record<TimeOfDay, EnvState> = {
     zenith: hex('#1b3170'),
     horizon: hex('#e7a07c'),
     sunGlow: hex('#ff9a66'),
-    fogColor: hex('#6c6f98'),
-    fogNear: 85,
-    fogFar: 230,
+    fogColor: hex('#666b8a'),
+    fogNear: 130,
+    fogFar: 560,
     nightFactor: 0.6,
     stars: 0.2,
     cloudCover: 0.2,
@@ -155,8 +156,8 @@ const TIME: Record<TimeOfDay, EnvState> = {
     horizon: hex('#1b2a55'),
     sunGlow: hex('#3a5290'),
     fogColor: hex('#1b2a55'),
-    fogNear: 85,
-    fogFar: 230,
+    fogNear: 130,
+    fogFar: 560,
     nightFactor: 1,
     stars: 1,
     cloudCover: 0.2,

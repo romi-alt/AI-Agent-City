@@ -9,9 +9,9 @@ import type { Part } from './parts.ts';
  * antenna). Pure and seeded; rendered instanced.
  */
 
-/** X04 brief palette. */
-export const PASTELS = ['#C8503F', '#E98A6B', '#F0B84A', '#8FD3A6', '#4FB6A6', '#F2A2B8', '#7BAAD6', '#9B8BD6'];
-const AWNINGS = ['#C8503F', '#2f6f6a', '#F0B84A', '#3b6ea8', '#f6f1e9', '#8f3b55', '#2f5d3a'];
+/** Manhattan fabric: pre-war brick, limestone and brownstone (no pastels). */
+export const PASTELS = ['#8c4b39', '#7d4435', '#9a5a42', '#cfc7b4', '#bdb49f', '#a99f8a', '#6e4a3c', '#b0a792'];
+const AWNINGS = ['#1f3b2d', '#5a1f1f', '#1d2f4d', '#2b2b2b', '#6b5a2e', '#7a2e2e', '#2d4a5a'];
 /** Sidewalk in front of the street walls (curb to facade). */
 export const FRONT_SETBACK = 1.9;
 
@@ -38,7 +38,7 @@ export interface DecorCell {
 }
 
 /** Fills a block with two back-to-back rows of narrow buildings, edge to edge along the streets. */
-export function planDecor(cells: DecorCell[], seed = 4242, floors: [number, number] = [2, 6]): DecorPlan {
+export function planDecor(cells: DecorCell[], seed = 4242, floors: [number, number] = [5, 11]): DecorPlan {
   const r = rng(seed);
   const plan: DecorPlan = { boxes: [], parts: [] };
   for (const c of cells) {
@@ -98,7 +98,7 @@ function addDetails(parts: Part[], b: DecorBox, face: 1 | -1, r: () => number) {
     sx: b.w + 0.16,
     sy: 0.2,
     sz: b.d + 0.16,
-    color: '#f3efe6',
+    color: '#9a948a',
   });
   // Roof item.
   const k = r();

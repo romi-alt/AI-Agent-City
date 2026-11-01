@@ -23,7 +23,7 @@ export function LiteStatus({ status, testId }: { status: LiteAgentStatus; testId
 }
 
 /** The "Talk to us" address. No booking tool is assumed: it is a plain email link. */
-export function talkToUsHref(subject = 'AgentCity demo'): string {
+export function talkToUsHref(subject = 'AutoSalesCity demo'): string {
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`;
 }
 

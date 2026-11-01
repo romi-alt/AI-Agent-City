@@ -9,8 +9,8 @@ export interface Mailer {
   sendVerification(to: { email: string; firstName: string }, link: string, kind?: MailKind): Promise<void>;
 }
 
-export const VERIFICATION_SUBJECT = 'Confirm your email to open your AgentCity demo office';
-export const SIGNIN_SUBJECT = 'Your link back into your AgentCity demo office';
+export const VERIFICATION_SUBJECT = 'Confirm your email to open your AutoSalesCity demo office';
+export const SIGNIN_SUBJECT = 'Your link back into your AutoSalesCity demo office';
 
 const esc = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -51,7 +51,7 @@ function signinText(firstName: string, link: string): string {
   return [
     `Hi ${firstName},`,
     '',
-    'You asked to get back into your AgentCity demo office. Use this link to open it:',
+    'You asked to get back into your AutoSalesCity demo office. Use this link to open it:',
     '',
     link,
     '',
@@ -66,7 +66,7 @@ function signinHtml(firstName: string, link: string): string {
   const url = esc(link);
   return `<!doctype html><html><body style="font-family:system-ui,sans-serif;line-height:1.5;color:#1a1a1a">
 <p>Hi ${esc(firstName)},</p>
-<p>You asked to get back into your AgentCity demo office. Use this link to open it:</p>
+<p>You asked to get back into your AutoSalesCity demo office. Use this link to open it:</p>
 <p><a href="${url}" style="display:inline-block;padding:12px 20px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:6px">Open my demo office</a></p>
 <p style="font-size:13px;color:#555">If the button does not work, paste this address into your browser:<br>${url}</p>
 <p>The link works once and expires in 24 hours. It opens the demo you already have, until that demo ends. There is no password to set, and we will never ask you for one.</p>
@@ -81,6 +81,8 @@ export function createResendMailer(apiKey: string, from: string, fetchFn: typeof
     async sendVerification(to, link, kind = 'verify') {
       const res = await fetchFn('https://api.resend.com/emails', {
         method: 'POST',
+        // Without a limit a provider that never answers would leave the check-email page waiting for ever.
+        signal: AbortSignal.timeout(15_000),
         headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
         body: JSON.stringify({
           from,
@@ -89,6 +91,12 @@ export function createResendMailer(apiKey: string, from: string, fetchFn: typeof
           text: verificationText(to.firstName, link, kind),
           html: verificationHtml(to.firstName, link, kind),
         }),
+      }).catch((e: unknown) => {
+        // Network trouble (blocked, timed out, DNS): name the cause so the server log says why, never the address.
+        const cause = (e as { cause?: { code?: string } }).cause?.code;
+        const err = new Error('could not reach resend');
+        err.name = `ResendNet${(e as Error).name}${cause ? `_${cause}` : ''}`;
+        throw err;
       });
       if (!res.ok) {
         const err = new Error('resend rejected the message');

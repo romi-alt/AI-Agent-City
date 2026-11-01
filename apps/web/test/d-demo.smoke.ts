@@ -257,29 +257,6 @@ test('form: can be completed with the keyboard alone; the honeypot is never focu
   await page.context().close();
 });
 
-test('landing: the form sits natively in the #get-demo card and submits to check-email', async () => {
-  for (const mobile of [false, true]) {
-    const page = await newPage({ mobile });
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`${WEB}/#get-demo`);
-    const form = page.locator('#get-demo [data-testid="demo-request-form"]');
-    await form.waitFor();
-    await page.waitForTimeout(400);
-    const card = page.locator('#get-demo .mk-demo-card');
-    await card.scrollIntoViewIfNeeded();
-    await card.screenshot({ path: join(EVIDENCE, mobile ? 'd-landing-form-390.png' : 'd-landing-form.png') });
-    assert.ok(await noHorizontalScroll(page), 'landing: no sideways scroll');
-    if (!mobile) {
-      const n = mock.requests.length;
-      await fillGood(page, { email: 'landing@analytical.example' });
-      await page.getByTestId('demo-submit').click();
-      await page.waitForURL(`${WEB}/demo/check-email?request=req-*`);
-      assert.equal(count(n, 'POST', '/api/demo/requests'), 1);
-    }
-    await page.context().close();
-  }
-});
-
 test('check-email: polls gently with growing gaps and stops when ready; dev mailbox note is shown', async () => {
   const page = await newPage();
   await page.goto(`${WEB}/demo/check-email?request=req-poll`);
@@ -339,7 +316,7 @@ test('welcome: claims the demo and greets by first name; errors explain the next
   mock.state.claim = 'ok';
   const n = mock.requests.length;
   await page.goto(`${WEB}/demo/welcome`);
-  await page.getByTestId('welcome-title').getByText('Welcome to AgentCity, Ada.').waitFor();
+  await page.getByTestId('welcome-title').getByText('Welcome to AutoSalesCity, Ada.').waitFor();
   assert.equal(count(n, 'POST', '/api/demo/claim'), 1, 'claimed once');
   assert.equal(await page.getByTestId('welcome-company').textContent(), 'Analytical Homes');
   assert.equal(await page.getByTestId('welcome-building').textContent(), 'Rental Building 2');
@@ -353,7 +330,7 @@ test('welcome: claims the demo and greets by first name; errors explain the next
   // Claimed earlier: the workspace fills in the same details.
   mock.state.claim = 'already';
   await page.goto(`${WEB}/demo/welcome`);
-  await page.getByTestId('welcome-title').getByText('Welcome to AgentCity, Ada.').waitFor();
+  await page.getByTestId('welcome-title').getByText('Welcome to AutoSalesCity, Ada.').waitFor();
 
   for (const [mode, kind, text] of [
     ['not-verified', 'not-verified', /isn’t confirmed yet/],

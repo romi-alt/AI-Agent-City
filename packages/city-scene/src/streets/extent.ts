@@ -35,8 +35,8 @@ export interface CityRoads {
   extent: number;
 }
 
-/** Half-size of the generated city (world units; 1 unit ≈ 3.5 m, so about 1.4 km each way). */
-export const CITY_EXTENT = 400;
+/** Half-size of the generated city (world units; 1 unit ≈ 3.5 m, so about 3.5 km each way: Midtown, both rivers and the far banks). */
+export const CITY_EXTENT = 1000;
 /** Blocks of decor around the 15 lots that still belong to the district (one block deep on every side). */
 export const DISTRICT_MARGIN_BLOCKS = 1;
 

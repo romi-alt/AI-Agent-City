@@ -2,6 +2,8 @@
 import { createContext, useContext } from 'react';
 import * as THREE from 'three';
 import { pictureTexture, plankFloorTexture, windowGridTexture } from '../textures.ts';
+import { oakFloorTexture } from './art.ts';
+import type { DetailLevel } from './detail.ts';
 
 /** Pastel neighbours behind the glass: brick red, salmon, mint, candy pink, sky blue. */
 export const NEIGHBOUR_COLOURS = ['#c8503f', '#e98a6b', '#8fd3a6', '#f2a2b8', '#7baad6'] as const;
@@ -60,12 +62,17 @@ function matte(color: string, extra: THREE.MeshStandardMaterialParameters = {}) 
   return new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0, ...extra });
 }
 
-export function createRoomKit(widthM: number, depthM: number): RoomKit {
-  const plank = plankFloorTexture([widthM / 4, depthM / 4]);
+export function createRoomKit(widthM: number, depthM: number, level: DetailLevel = 'low'): RoomKit {
+  // Balanced and ultra lay a grained oak floor on a larger canvas; low keeps the plain, cheap planks.
+  const plank =
+    level === 'low'
+      ? plankFloorTexture([widthM / 4, depthM / 4])
+      : oakFloorTexture([widthM / 4, depthM / 4], level === 'rich' ? 2048 : 1024);
   const grids = NEIGHBOUR_COLOURS.map(c => windowGridTexture(c));
   const prints = [1, 2].map(pictureTexture);
   const m: RoomKit['m'] = {
-    floor: matte('#ffffff', { map: plank }),
+    // The detailed oak is tinted down a little: under the room's bright sun a pure white multiply washes the grain out.
+    floor: matte(level === 'low' ? '#ffffff' : '#dccbb0', { map: plank }),
     slab: matte('#e8dccb'),
     ground: matte('#ece6db'),
     peach: matte('#e3a868'),

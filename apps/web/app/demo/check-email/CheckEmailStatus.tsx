@@ -110,7 +110,7 @@ export function CheckEmailStatus({
           {view === 'expired' && 'This demo request has expired.'}
           {view === 'not-found' && 'We couldn’t find this demo request.'}
           {view === 'stopped' && 'We’ve stopped checking automatically.'}
-          {view === 'unknown' && 'Look for the email from AgentCity.'}
+          {view === 'unknown' && 'Look for the email from AutoSalesCity.'}
         </div>
 
         {view === 'ready' && (
@@ -153,7 +153,7 @@ export function CheckEmailStatus({
               1
             </span>
             <div>
-              <strong>Open the email from AgentCity</strong>
+              <strong>Open the email from AutoSalesCity</strong>
               <span className="dm-step-text">It can take a minute to arrive.</span>
             </div>
           </li>

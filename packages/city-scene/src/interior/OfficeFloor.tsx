@@ -4,7 +4,7 @@ import { useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useSceneLabel } from '../camera/labels.ts';
 import { METRES_PER_UNIT, floorBase } from '../camera/shots.ts';
-import { useCityContext } from '../context.tsx';
+import { useCity, useCityContext } from '../context.tsx';
 import type { LayoutBuilding, LayoutFloor } from '../types.ts';
 import {
   Armchair,
@@ -34,19 +34,11 @@ import { signTexture } from './textures.ts';
 import { asMat } from './r3f.ts';
 import { Backdrop } from './room/Backdrop.tsx';
 import { createRoomKit, RoomKitContext } from './room/kit.ts';
+import { createDetailKit, DetailKitContext } from './room/detailKit.ts';
+import { detailLevelFor } from './room/detail.ts';
+import { RoomDetail, useDetailLayout } from './room/Detail.tsx';
 import { roomLayout, type RoomLayout } from './room/layout.ts';
-import {
-  FeatureWall,
-  Library,
-  LiveScreen,
-  Lounge as RefLounge,
-  MeetingCorner,
-  Plants,
-  RoomShell,
-  Rugs,
-  useCanvasMaterial,
-  Utilities,
-} from './room/Room.tsx';
+import { FeatureWall, LiveScreen, RoomShell, Rugs, useCanvasMaterial } from './room/Room.tsx';
 
 export interface OfficeFloorProps {
   building: LayoutBuilding;
@@ -83,8 +75,15 @@ export function OfficeFloor(props: OfficeFloorProps) {
   const reference = props.look === 'reference';
   const refPlan = useMemo(() => referencePlanFor(b, props.occupants), [b, props.occupants]);
   const room = useMemo(() => roomLayout(refPlan), [refPlan]);
-  const roomKit = useMemo(() => (reference ? createRoomKit(width, depth) : null), [reference, width, depth]);
+  // Detail follows the quality setting: low keeps the room's few big pieces, balanced and ultra add the rest.
+  const level = detailLevelFor(useCity(s => s.quality));
+  const roomKit = useMemo(
+    () => (reference ? createRoomKit(width, depth, level) : null),
+    [reference, width, depth, level],
+  );
   useEffect(() => () => roomKit?.dispose(), [roomKit]);
+  const detailKit = useMemo(() => (reference ? createDetailKit(level) : null), [reference, level]);
+  useEffect(() => () => detailKit?.dispose(), [detailKit]);
   const root = useRef<THREE.Group>(null);
   const batchVersion = `${b.key}:${floor.level}:${plan.variant}:${props.detail}:${props.occupants
     .map(o => `${o.kind}${o.status}`)
@@ -107,17 +106,19 @@ export function OfficeFloor(props: OfficeFloorProps) {
       >
         {reference ? (
           <RoomKitContext.Provider value={roomKit!}>
-            <StaticBatch version={`ref:${batchVersion}`}>
-              <ReferenceRoom room={room} building={b} floor={floor} occupants={props.occupants} />
-              <ReferenceDesks
-                plan={refPlan}
-                occupants={props.occupants}
-                selected={props.selected}
-                onSelectDesk={props.onSelectDesk}
-                showLabels={props.detail === 'full'}
-                animate={props.animate}
-              />
-            </StaticBatch>
+            <DetailKitContext.Provider value={detailKit!}>
+              <StaticBatch version={`ref:${level}:${batchVersion}`}>
+                <ReferenceRoom room={room} building={b} floor={floor} occupants={props.occupants} />
+                <ReferenceDesks
+                  plan={refPlan}
+                  occupants={props.occupants}
+                  selected={props.selected}
+                  onSelectDesk={props.onSelectDesk}
+                  showLabels={props.detail === 'full'}
+                  animate={props.animate}
+                />
+              </StaticBatch>
+            </DetailKitContext.Provider>
           </RoomKitContext.Provider>
         ) : (
           <StaticBatch version={batchVersion}>
@@ -177,17 +178,14 @@ function ReferenceRoom({
     g => drawLiveScreen(g, 512, 640, `${building.shortName} · Floor ${floor.level}`, occupants),
     [building.shortName, floor.level, occupants],
   );
+  const detail = useDetailLayout(room);
   return (
     <group>
       <RoomShell room={room} />
       <Rugs room={room} />
       <FeatureWall room={room} board={board} />
       <LiveScreen room={room} screen={live} />
-      <RefLounge room={room} />
-      <MeetingCorner room={room} />
-      <Library room={room} />
-      <Utilities room={room} />
-      <Plants room={room} />
+      <RoomDetail room={room} detail={detail} />
       <Backdrop room={room} />
     </group>
   );

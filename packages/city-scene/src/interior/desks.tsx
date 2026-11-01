@@ -5,6 +5,9 @@ import * as THREE from 'three';
 import { useSceneLabel } from '../camera/labels.ts';
 import { useCityContext } from '../context.tsx';
 import { ToyAgent } from './figure.tsx';
+import { Person } from './person.tsx';
+import { DetailKitContext } from './room/detailKit.ts';
+import { deskAccent } from './room/detail.ts';
 import { REF_DESK, RefChair, RefDeskTop, refMat, screenMaterial } from './furniture.tsx';
 import { type DeskOccupant, OfficeOccupantsContext, refStatusColor, statusLabel } from './occupants.ts';
 import { deskLabel } from './placement.ts';
@@ -101,6 +104,12 @@ function ReferenceDesk({
   const { store } = useCityContext();
   const testIdFor = useContext(OfficeOccupantsContext)?.deskTestId;
   const anchor = useRef<THREE.Group>(null);
+  // Inside the detailed office desks carry accent colours, a name plate on leadership desks and people with faces.
+  const detail = useContext(DetailKitContext);
+  const plate = useMemo(
+    () => (detail && occupant && desk.zone === 'lead' ? detail.plate(occupant.role) : null),
+    [detail, occupant, desk.zone],
+  );
   const select = occupant && onSelect ? () => onSelect(desk.slot) : undefined;
   const click = select
     ? (e: ThreeEvent<MouseEvent>) => {
@@ -137,11 +146,18 @@ function ReferenceDesk({
       onPointerOver={select ? () => (document.body.style.cursor = 'pointer') : undefined}
       onPointerOut={select ? () => (document.body.style.cursor = '') : undefined}
     >
-      <RefDeskTop screen={occupant ? screen : refMat(REF_DESK.monitor)} />
+      <RefDeskTop
+        screen={occupant ? screen : refMat(REF_DESK.monitor)}
+        {...(detail ? { accent: deskAccent(desk.slot), empty: !occupant, plate } : {})}
+      />
       <RefChair />
       {occupant && (
         <>
-          <ToyAgent kind={occupant.kind} seed={index} status={occupant.status} animate={animate} />
+          {detail && detail.level !== 'low' ? (
+            <Person kind={occupant.kind} seed={desk.slot + 1} status={occupant.status} animate={animate} />
+          ) : (
+            <ToyAgent kind={occupant.kind} seed={index} status={occupant.status} animate={animate} />
+          )}
           <StatusRing status={occupant.status} selected={selected} animate={animate} />
           {/* Generous invisible hit area so a desk is easy to click or tap. */}
           <mesh position={[0, 1.2, 0.5]} visible={false} userData={{ interior: true, dynamic: true }}>

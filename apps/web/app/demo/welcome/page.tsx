@@ -3,7 +3,7 @@ import { LITE_DEMO } from '../../../lib/preview';
 import { DemoWelcome } from './DemoWelcome';
 import { LiteWelcome } from './LiteWelcome';
 
-export const metadata: Metadata = { title: 'Welcome to AgentCity' };
+export const metadata: Metadata = { title: 'Welcome to AutoSalesCity' };
 
 /** Signed in: the demo is claimed here (the API checks the session and the verified email). */
 export default function WelcomePage() {

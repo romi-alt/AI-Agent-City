@@ -3,7 +3,7 @@ import { LITE_DEMO } from '../../../lib/preview';
 import { LiteVerified } from './LiteVerified';
 import { VerifiedSignIn } from './VerifiedSignIn';
 
-export const metadata: Metadata = { title: 'Email confirmed — AgentCity', referrer: 'no-referrer' };
+export const metadata: Metadata = { title: 'Email confirmed — AutoSalesCity', referrer: 'no-referrer' };
 
 /**
  * Where the identity provider sends people after they confirm their email address (PLAN.md "Visitor journey"). The

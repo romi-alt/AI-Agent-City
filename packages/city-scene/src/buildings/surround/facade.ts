@@ -57,18 +57,22 @@ function rect(
     }
 }
 
-const WHITE: Rgb = [250, 248, 244];
+/** Window surrounds are stone grey, not white: a Manhattan wall is limestone, brick and dark glass. */
+const STONE: Rgb = [201, 194, 181];
+const STONE_DARK: Rgb = [150, 144, 134];
+const BRONZE: Rgb = [56, 50, 44];
+const STEEL: Rgb = [58, 64, 72];
 
-/** Glass with the legacy gradient and a diagonal sheen. */
-function glass(tint: string) {
+/** Glass with a vertical sky gradient and a diagonal sheen. `tint` is the mid colour. */
+function glass(tint: string, sheenK = 0.22) {
   const base = hex(tint);
-  const light = lerp(base, [255, 255, 255], 0.35);
-  const dark = lerp(base, [0, 0, 0], 0.25);
+  const light = lerp(base, [255, 255, 255], 0.3);
+  const dark = lerp(base, [0, 0, 0], 0.35);
   return (u: number, v: number): [Rgb, number, number] => {
-    const g = (u + (1 - v)) / 2;
-    let c = g < 0.55 ? lerp(light, base, g / 0.55) : lerp(base, dark, (g - 0.55) / 0.45);
-    const sheen = Math.abs(u - (1 - v) * 0.6 - 0.2) < 0.08;
-    if (sheen) c = lerp(c, [255, 255, 255], 0.28);
+    const g = (u * 0.35 + (1 - v)) / 1.35;
+    let c = g < 0.5 ? lerp(light, base, g / 0.5) : lerp(base, dark, (g - 0.5) / 0.5);
+    const sheen = Math.abs(u - (1 - v) * 0.6 - 0.2) < 0.07;
+    if (sheen) c = lerp(c, [255, 255, 255], sheenK);
     return [c, 255, 255];
   };
 }
@@ -78,47 +82,54 @@ const solid =
 /** Shade the wall colour (alpha 0 keeps it the building's own colour). */
 const wallShade = (k: number) => solid([k * 255, k * 255, k * 255], 0, 0);
 
+/** Pre-war mid-rise: punched double-hung window with a stone lintel and a projecting sill. */
 function classic(): Tile {
   const t = tile();
-  rect(t, 0, 0, TILE, 5, wallShade(0.86)); // floor band
-  rect(t, 15, 13, 34, 42, solid(WHITE, 255, 0)); // white frame
-  rect(t, 18, 16, 28, 36, glass('#5f7f99'));
-  rect(t, 31, 16, 2, 36, solid(WHITE, 255, 0)); // mullion
-  rect(t, 12, 11, 40, 3, solid(WHITE, 255, 0)); // sill
+  rect(t, 0, 0, TILE, 4, wallShade(0.88)); // floor band
+  rect(t, 13, 9, 38, 3, solid(STONE, 255, 0)); // sill
+  rect(t, 16, 12, 32, 44, solid(STONE_DARK, 255, 0)); // reveal
+  rect(t, 19, 14, 26, 40, glass('#3a4c5e'));
+  rect(t, 19, 33, 26, 2, solid(STONE, 255, 0)); // meeting rail
+  rect(t, 31, 14, 2, 40, solid(STONE, 255, 0)); // mullion
+  rect(t, 13, 56, 38, 4, solid(STONE, 255, 0)); // lintel
   return t;
 }
 
+/** Brick wall with coursing, a darker reveal and a stone sill. */
 function brick(): Tile {
   const t = tile();
-  for (let y = 0; y < TILE; y += 6) {
-    rect(t, 0, y, TILE, 1, wallShade(0.8));
-    for (let x = (y / 6) % 2 ? 6 : 0; x < TILE; x += 12) rect(t, x, y, 1, 6, wallShade(0.82));
+  for (let y = 0; y < TILE; y += 5) {
+    rect(t, 0, y, TILE, 1, wallShade(0.78));
+    for (let x = (y / 5) % 2 ? 5 : 0; x < TILE; x += 10) rect(t, x, y, 1, 5, wallShade(0.82));
   }
-  rect(t, 17, 12, 30, 44, solid(WHITE, 255, 0));
-  rect(t, 20, 15, 24, 38, glass('#5f86a6'));
-  rect(t, 31, 15, 2, 38, solid(WHITE, 255, 0));
-  rect(t, 14, 9, 36, 4, solid(WHITE, 255, 0));
+  rect(t, 17, 11, 30, 44, solid([92, 84, 76], 255, 0));
+  rect(t, 20, 14, 24, 38, glass('#38495a'));
+  rect(t, 31, 14, 2, 38, solid(STONE_DARK, 255, 0));
+  rect(t, 14, 8, 36, 3, solid(STONE, 255, 0));
   return t;
 }
 
+/** Mid-century office: a continuous glass ribbon between spandrel panels. */
 function ribbon(): Tile {
   const t = tile();
-  rect(t, 0, 0, TILE, 6, wallShade(0.88));
-  rect(t, 0, 18, TILE, 30, glass('#4f7896'));
-  rect(t, 0, 16, TILE, 2, solid(WHITE, 255, 0));
-  rect(t, 0, 48, TILE, 2, solid(WHITE, 255, 0));
-  rect(t, 0, 18, 2, 30, solid(WHITE, 255, 0));
-  rect(t, 62, 18, 2, 30, solid(WHITE, 255, 0));
+  rect(t, 0, 0, TILE, 6, wallShade(0.86));
+  rect(t, 0, 18, TILE, 30, glass('#3a4b5c'));
+  rect(t, 0, 16, TILE, 2, solid([126, 128, 132], 255, 0));
+  rect(t, 0, 48, TILE, 2, solid([126, 128, 132], 255, 0));
+  rect(t, 0, 18, 2, 30, solid([126, 128, 132], 255, 0));
+  rect(t, 31, 18, 2, 30, solid([126, 128, 132], 255, 0));
   return t;
 }
 
-/** Ground-floor shop: a big display window in a white frame and a sign band above (under the awning). */
+/** Ground-floor shop: a big display window in a dark bronze frame and a sign band above (under the awning). */
 function shop(): Tile {
   const t = tile();
-  rect(t, 0, 0, TILE, 4, solid([120, 116, 110], 255, 0)); // stall riser
-  rect(t, 0, 4, TILE, 40, solid(WHITE, 255, 0));
-  rect(t, 3, 6, 58, 36, glass('#3f5a6e'));
-  rect(t, 0, 50, TILE, 10, solid([240, 236, 226], 255, 0)); // sign band
+  rect(t, 0, 0, TILE, 5, solid([88, 84, 78], 255, 0)); // stall riser
+  rect(t, 0, 5, TILE, 40, solid(BRONZE, 255, 0));
+  rect(t, 3, 7, 26, 36, glass('#2a3948'));
+  rect(t, 35, 7, 26, 36, glass('#2a3948'));
+  rect(t, 0, 48, TILE, 11, solid([34, 31, 29], 255, 0)); // sign band
+  rect(t, 0, 59, TILE, 2, solid(STONE, 255, 0));
   return t;
 }
 
@@ -126,20 +137,62 @@ function shop(): Tile {
 function plain(): Tile {
   const t = tile();
   rect(t, 0, 0, TILE, 4, wallShade(0.88));
-  rect(t, 18, 15, 28, 36, solid([236, 234, 228], 255, 0)); // light frame
-  rect(t, 21, 18, 22, 30, solid([112, 134, 156], 255, 255));
+  rect(t, 18, 15, 28, 36, solid([196, 190, 180], 255, 0)); // light frame
+  rect(t, 21, 18, 22, 30, solid([66, 82, 98], 255, 255));
   return t;
 }
 
-/** Ring 3: pale curtain-wall bands, tinted by the tower colour so it stays a soft silhouette. */
+/** Ring 3: curtain-wall bands, tinted by the tower colour so it stays a soft silhouette. */
 function tower(): Tile {
   const t = tile();
-  rect(t, 0, 14, TILE, 40, (_u, v) => [[205 + 20 * v, 214 + 18 * v, 226 + 14 * v], 0, 255]);
-  rect(t, 30, 14, 3, 40, wallShade(1));
+  rect(t, 0, 12, TILE, 42, (_u, v) => [[104 + 36 * v, 118 + 34 * v, 136 + 30 * v], 0, 255]);
+  rect(t, 30, 12, 3, 42, wallShade(0.8));
   return t;
 }
 
-const BUILDERS: Record<keyof typeof STYLE, () => Tile> = { classic, brick, ribbon, shop, plain, tower };
+/** Glass curtain wall: fine vertical mullions, a dark spandrel and highly reflective glazing. */
+function curtain(): Tile {
+  const t = tile();
+  rect(t, 0, 0, TILE, 11, solid([34, 44, 54], 255, 0)); // spandrel
+  rect(t, 0, 11, TILE, 53, glass('#566f86', 0.28));
+  for (const x of [0, 21, 42]) rect(t, x, 11, 2, 53, solid(STEEL, 255, 0));
+  rect(t, 0, 62, TILE, 2, solid(STEEL, 255, 0));
+  return t;
+}
+
+/** Art-deco stone: broad piers, recessed spandrels and tall narrow windows (the Empire State and Chrysler look). */
+function deco(): Tile {
+  const t = tile();
+  rect(t, 0, 0, TILE, 12, wallShade(0.74)); // recessed spandrel
+  rect(t, 6, 12, 52, 52, wallShade(0.97));
+  rect(t, 24, 14, 16, 46, solid([62, 72, 82], 255, 255));
+  rect(t, 24, 14, 16, 46, glass('#44566a', 0.1));
+  rect(t, 31, 14, 2, 46, solid(STONE, 255, 0));
+  rect(t, 0, 0, 6, TILE, wallShade(1));
+  rect(t, 58, 0, 6, TILE, wallShade(1));
+  return t;
+}
+
+/** Crown tiers: fluted stone with narrow slits of light. */
+function crown(): Tile {
+  const t = tile();
+  rect(t, 0, 0, TILE, TILE, wallShade(0.95));
+  for (const x of [8, 20, 32, 44, 56]) rect(t, x, 0, 4, TILE, wallShade(0.78));
+  rect(t, 26, 18, 12, 36, glass('#5f7790', 0.1));
+  return t;
+}
+
+const BUILDERS: Record<keyof typeof STYLE, () => Tile> = {
+  classic,
+  brick,
+  ribbon,
+  shop,
+  plain,
+  tower,
+  glass: curtain,
+  stone: deco,
+  crown,
+};
 
 /** All layers, in STYLE order: albedo then glass mask per style. */
 export function facadePixels(): Uint8Array {

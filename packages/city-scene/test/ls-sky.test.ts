@@ -172,14 +172,14 @@ describe('sprite', () => {
 });
 
 describe('sky presets', () => {
-  it('clear daylight is the X04 gradient: #5AA9E6 at the zenith to #D6ECFA at the horizon and in the fog', () => {
+  it('clear daylight is a hazy city gradient (a desaturated blue, #6A9CCC at the zenith, to #CFDBE4 at the horizon and in the fog)', () => {
     const s = presetFor('day', 'clear');
-    assert.deepEqual(s.zenith, hex('#5aa9e6'));
-    assert.deepEqual(s.horizon, hex('#d6ecfa'));
+    assert.deepEqual(s.zenith, hex('#6a9ccc'));
+    assert.deepEqual(s.horizon, hex('#cfdbe4'));
     assert.deepEqual(s.fogColor, s.horizon, 'no seam between the fogged skyline and the sky');
   });
   it('keeps the fog thin enough that the low presets never show the edge (see d4)', () => {
-    for (const t of TIMES) assert.ok(presetFor(t, 'clear').fogFar <= 240);
+    for (const t of TIMES) assert.ok(presetFor(t, 'clear').fogFar <= 600);
   });
   it('every time of day has cloud colours that read against its sky: lit tops brighter than their undersides', () => {
     const lum = (c: number[]) => 0.2126 * c[0]! + 0.7152 * c[1]! + 0.0722 * c[2]!;

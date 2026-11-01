@@ -1,13 +1,7 @@
 import type { ReactNode } from 'react';
-import { DemoFooter, DemoHeader } from '../../components/demo/DemoBits';
+import { DemoFrame } from '../../components/demo/DemoFrame';
 
-/** The public demo pages share the landing page's look (.mk): the visitor isn't in the signed-in app yet. */
+/** The public demo pages share the front page's look: the AutoSalesCity night theme (demo-asc.css). */
 export default function DemoLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="mk dm-page">
-      <DemoHeader />
-      {children}
-      <DemoFooter />
-    </div>
-  );
+  return <DemoFrame>{children}</DemoFrame>;
 }

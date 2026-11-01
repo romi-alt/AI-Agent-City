@@ -166,7 +166,7 @@ export function DemoWelcome() {
           Your demo is ready · sample data
         </span>
         <h1 id="welcome-title" className="mk-h2" data-testid="welcome-title">
-          {claim.firstName ? `Welcome to AgentCity, ${claim.firstName}.` : 'Welcome to AgentCity.'}
+          {claim.firstName ? `Welcome to AutoSalesCity, ${claim.firstName}.` : 'Welcome to AutoSalesCity.'}
         </h1>
         <p className="mk-lead">Your virtual AI office is ready to explore.</p>
         <div className="dm-actions">

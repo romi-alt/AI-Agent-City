@@ -228,9 +228,9 @@ export function createFarGroundMaterial(shared: SharedUniforms, d: District) {
 }
 
 /** Pond water: deep teal, small moving ripples, reflective. */
-export function createWaterMaterial(shared: SharedUniforms) {
+export function createWaterMaterial(shared: SharedUniforms, tint = '#1c4a5c') {
   const m = new MeshStandardMaterial({
-    color: new Color('#1c4a5c'),
+    color: new Color(tint),
     roughness: 0.08,
     metalness: 0.1,
     envMapIntensity: 1.2,

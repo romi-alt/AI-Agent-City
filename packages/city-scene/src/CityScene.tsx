@@ -15,9 +15,16 @@ import { QualityManager } from './quality/QualityManager.tsx';
 import { createCityStore, type CityStore, useCityState } from './store.ts';
 import { type SignalLight, type SignalSource, SignalSourceContext } from './streets/signal-source.ts';
 import { Streets } from './streets/Streets.tsx';
+import { CENTRAL_PARK } from './world/park.ts';
+import { Dressing } from './world/Dressing.tsx';
+import { Blimp } from './world/Blimp.tsx';
+import { Billboards } from './world/Billboards.tsx';
+import { Waterfront } from './world/Waterfront.tsx';
 import type { CityLayout, CityState } from './types.ts';
 
 export const CITY_LAYOUT = layoutJson as CityLayout;
+/** Blocks the surround leaves green: the big park north of the district. */
+const PARK = [CENTRAL_PARK];
 
 const HEAD: Record<'green' | 'amber' | 'red', SignalLight> = { green: 'g', amber: 'y', red: 'r' };
 /** The signal heads (A1) show the same phase the traffic (A2) obeys. A2's `ew` is traffic along x. */
@@ -70,7 +77,11 @@ export function CityScene({ store: given, initial, overlay, onNavigate, homePose
               <Environment />
               <Streets />
               <Buildings />
-              <Surround />
+              <Surround park={PARK} />
+              <Waterfront />
+              <Billboards />
+              <Dressing />
+              <Blimp />
               <Life />
               <Interior />
               <CameraRig />

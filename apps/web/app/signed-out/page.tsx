@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'Signed out — AgentCity' };
+export const metadata: Metadata = { title: 'Signed out — AutoSalesCity' };
 
 export default function SignedOutPage() {
   return (

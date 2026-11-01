@@ -101,7 +101,7 @@ test('full journey: submit, status, verify, me, office, expiry', async () => {
   assert.ok(office.agents.every(a => a.simulated === true && ['working', 'idle', 'needs-you'].includes(a.status)));
   assert.deepEqual(await ctx.service.office(outcome.cookie), office);
 
-  ctx.clock.t += 8 * 86_400_000;
+  ctx.clock.t += 15 * 86_400_000;
   assert.equal(await code(ctx.service.me(outcome.cookie)), 'gone');
 });
 
@@ -332,7 +332,7 @@ test('sign-in sends nothing to an address whose demo has expired, and refuses ba
   await ctx.service.submit(await body(ctx), '1.1.1.1');
   await ctx.service.whenIdle();
   await ctx.service.verify(tokenOf(ctx.sent[0]!.link), '1.1.1.1');
-  ctx.clock.t += 8 * 86_400_000;
+  ctx.clock.t += 15 * 86_400_000;
   const { token } = await ctx.service.formToken('3.3.3.3');
   ctx.clock.t += 5000;
   assert.deepEqual(await ctx.service.signIn({ email: 'ada@acme.test', formToken: token }, '3.3.3.3'), {
@@ -383,7 +383,7 @@ test('funnel traffic sweeps expired demos by itself, at most once an hour', asyn
   await ctx.service.verify(tokenOf(ctx.sent[0]!.link), '1.1.1.1');
   const sweeps = () => ctx.logs.filter(l => l.includes('lite: expired')).length;
   const before = sweeps(); // the first form token of the journey already swept once
-  ctx.clock.t += 8 * 86_400_000; // the demo is over
+  ctx.clock.t += 15 * 86_400_000; // the demo is over
   await ctx.service.formToken('9.9.9.9');
   await ctx.service.whenIdle();
   assert.equal(sweeps(), before + 1, 'swept once more');

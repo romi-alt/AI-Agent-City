@@ -3,7 +3,7 @@ import { LITE_DEMO } from '../../../lib/preview';
 import { CheckEmailStatus } from './CheckEmailStatus';
 import { LiteCheckEmail } from './LiteCheckEmail';
 
-export const metadata: Metadata = { title: 'Check your email — AgentCity', referrer: 'no-referrer' };
+export const metadata: Metadata = { title: 'Check your email — AutoSalesCity', referrer: 'no-referrer' };
 
 /**
  * After the request form. The request id in the address is unguessable and carries no personal data; the status

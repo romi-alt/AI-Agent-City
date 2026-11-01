@@ -64,18 +64,14 @@ function ac(): BufferGeometry {
   return merge(parts);
 }
 
-/** A unit-square lawn (scaled to the roof) with low planters and a few round shrubs. */
-function garden(): BufferGeometry {
-  const parts: BufferGeometry[] = [part(new BoxGeometry(1, 0.18, 1), '#7cc36b', 0, 0.09, 0)];
-  parts.push(part(new BoxGeometry(1, 0.26, 0.06), '#b98e62', 0, 0.13, 0.47));
-  parts.push(part(new BoxGeometry(1, 0.26, 0.06), '#b98e62', 0, 0.13, -0.47));
-  for (const [x, z, s, c] of [
-    [-0.25, -0.2, 0.2, '#4f9d4a'],
-    [0.22, 0.18, 0.24, '#5fae54'],
-    [0.28, -0.25, 0.15, '#6fbf5f'],
-  ] as const)
-    parts.push(part(new IcosahedronGeometry(s, 0), c, x, 0.18 + s * 0.8, z));
-  return merge(parts);
+/** A stair / elevator bulkhead: a plain box with a small vent stack. */
+function bulkhead(): BufferGeometry {
+  return merge([
+    part(new BoxGeometry(1.5, 0.9, 1.1), '#a9a59c', 0, 0.45, 0),
+    part(new BoxGeometry(1.56, 0.08, 1.16), '#8d8a82', 0, 0.94, 0),
+    part(new CylinderGeometry(0.1, 0.1, 0.9, 6, 1), '#6d7178', 0.5, 1.4, 0.3),
+    part(new BoxGeometry(0.5, 0.35, 0.5), '#d7dbe0', -0.45, 1.1, 0.7),
+  ]);
 }
 
 /** A mast with two crossbars and a small dish. */
@@ -90,4 +86,4 @@ function antenna(): BufferGeometry {
   ]);
 }
 
-export const ROOF_GEOMETRY: Record<RoofItem, () => BufferGeometry> = { tank, ac, garden, antenna };
+export const ROOF_GEOMETRY: Record<RoofItem, () => BufferGeometry> = { tank, ac, bulkhead, antenna };

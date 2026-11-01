@@ -32,8 +32,8 @@ export function vehicleMix(total: number): Record<VehicleKind, number> {
   mix.emergency = total >= 30 ? 1 : 0;
   mix.bus = Math.max(total >= 12 ? 1 : 0, Math.round(total * 0.05));
   mix.van = Math.round(total * 0.12);
-  mix.taxi = Math.round(total * 0.24);
-  mix.suv = Math.round(total * 0.2);
+  mix.taxi = Math.round(total * 0.4);
+  mix.suv = Math.round(total * 0.12);
   mix.sedan = Math.max(0, total - mix.emergency - mix.bus - mix.van - mix.taxi - mix.suv);
   return mix;
 }

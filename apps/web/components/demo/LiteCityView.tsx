@@ -59,7 +59,7 @@ export function LiteCityView({
         <SceneErrorBoundary onShowMap={() => setView('failed')}>
           <CityScene
             store={store}
-            label={`AgentCity, with your building ${me.building.name} highlighted. Use the panel to enter it and meet your AI team.`}
+            label={`AutoSalesCity, with your building ${me.building.name} highlighted. Use the panel to enter it and meet your AI team.`}
             overlay={
               <>
                 <CityHud {...panel} brand={null} />
