@@ -22,6 +22,9 @@ interface Engine {
   flyTo(pos: number[], tgt: number[], instant?: boolean): void;
   view(name: string, instant?: boolean): void;
   select(key: string | null, fromScene?: boolean): void;
+  drawCRM(data: object): void;
+  drawDash(data: object): void;
+  drawContent(posts: object[], week?: string): void;
   say(key: string, text: string, ms?: number): void;
   spin(on: boolean): boolean;
   resize(): void;
@@ -111,6 +114,43 @@ function Scene({
         showCeo: latest.current.slots.some(s => s.key === 'max'),
         available: false,
       });
+      // The wall screens would otherwise sit on "pending" and "connecting": they show a labelled sample week instead.
+      office.drawCRM({
+        title: 'CRM · SAMPLE SALES PIPELINE',
+        won: ['sold'],
+        pipeline: [
+          ['new', 'New lead', 23],
+          ['contacted', 'Contacted', 41],
+          ['appointment', 'Appointment set', 17],
+          ['drive', 'Test drive done', 11],
+          ['quote', 'Quote sent', 8],
+          ['sold', 'Sold', 6],
+        ].map(([key, label, count]) => ({ key, label, count })),
+      });
+      office.drawDash({
+        leadsToday: 18,
+        booked24h: 7,
+        enrolledMonth: 6,
+        replySeconds: 38,
+        labels: ['TEST DRIVES BOOKED · 24H', 'SOLD THIS MONTH'],
+      });
+      office.drawContent(
+        [
+          {
+            day: 'Mon',
+            format: 'Reel',
+            title: 'Three phrases that lose a car deal, and what to say instead',
+            status: 'approved',
+          },
+          { day: 'Tue', format: 'Carousel', title: 'Meet the team: a day on the sales floor', status: 'approved' },
+          { day: 'Wed', format: 'Short video', title: 'How to handle "I need to think about it"', status: 'pending' },
+          { day: 'Thu', format: 'Post', title: 'Customer story: first car, delivered', status: 'approved' },
+          { day: 'Fri', format: 'Reel', title: 'Why a fast first reply wins the test drive', status: 'pending' },
+          { day: 'Sat', format: 'Live', title: 'Weekend open house Q&A', status: 'changes' },
+          { day: 'Sun', format: 'Post', title: 'Weekend test-drive offer', status: 'pending' },
+        ],
+        'sample week',
+      );
       office.extras.push(new DemoWorld(office, { mobile }));
       const florida = new Florida(office, { mobile });
       office.extras.push(florida);

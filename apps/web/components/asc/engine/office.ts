@@ -1211,6 +1211,7 @@ export const O3 = (() => {
       this._screens(root);
       this._decor(root);
 
+      this.humanName = human.name;
       this._ownerDesk(root, human);
       if (showCeo && agents.includes('max')) this._agentAt(root, 'max', CEO_DESK.x, CEO_DESK.z, { big: true });
       const team = agents.filter(a => a !== 'max').slice(0, 6);
@@ -2077,7 +2078,7 @@ export const O3 = (() => {
       const mx = X(-w / 2 + 0.6),
         mz = z - 0.25,
         my = 1.42,
-        mr = 0.5;
+        mr = o.dual ? 0.3 : 0.5; // a desk with two screens turns the first one less, so they do not overlap
       B.rbox(1.1, 0.68, 0.05, 0.02, '#1c2028', mx, my, mz, mr, 'metal');
       B.cyl(0.03, 0.3, legC, mx, my - 0.45, mz, 'metal', 8);
       B.box(0.3, 0.02, 0.2, legC, mx, 0.82, mz, mr, 'metal');
@@ -2146,7 +2147,7 @@ export const O3 = (() => {
       if (!o.dual) this._laptopB(B, X(0.05), 0.815, z - 0.02, 0, '#c9ced6');
       if (o.dual) {
         // second monitor, slightly angled in
-        const m2x = mx + 1.12,
+        const m2x = mx + 1.2,
           m2z = z - 0.3;
         B.rbox(1.0, 0.62, 0.05, 0.02, '#1c2028', m2x, 1.4, m2z, 0.15, 'metal');
         B.cyl(0.03, 0.3, legC, m2x, 0.97, m2z, 'metal', 8);
@@ -3922,7 +3923,11 @@ export const O3 = (() => {
       g.fillText('CONTENT WEEK' + (week ? ' · ' + week : ''), 28, 46);
       g.fillStyle = '#8792a3';
       g.font = '500 18px "JetBrains Mono", monospace';
-      g.fillText('LUNA · approved by Elvis before publishing', 28, 76);
+      g.fillText(
+        `${String(this.info?.luna?.name || 'Luna').toUpperCase()} · approved by ${this.humanName || 'Elvis'} before publishing`,
+        28,
+        76,
+      );
       const days = posts.length
         ? posts.slice(0, 7)
         : ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(d => ({
@@ -3992,7 +3997,7 @@ export const O3 = (() => {
       g.fillRect(0, 0, W, 576);
       g.fillStyle = '#6aa8ff';
       g.font = '700 30px "Space Grotesk", sans-serif';
-      g.fillText('CRM · ENROLLMENT PIPELINE', 30, 50);
+      g.fillText(data?.title || 'CRM · ENROLLMENT PIPELINE', 30, 50);
       const pipe = data?.pipeline || [];
       const max = Math.max(1, ...pipe.map(p => p.count || 0));
       pipe.forEach((p, i) => {
@@ -4003,7 +4008,7 @@ export const O3 = (() => {
         g.fillStyle = '#141c28';
         rr(g, 290, y + 6, 600, 24, 12);
         g.fill();
-        g.fillStyle = ['enrolled', 'active', 'completed'].includes(p.key) ? '#3ccf8e' : '#6aa8ff';
+        g.fillStyle = (data?.won || ['enrolled', 'active', 'completed']).includes(p.key) ? '#3ccf8e' : '#6aa8ff';
         rr(g, 290, y + 6, Math.max(14, (600 * (p.count || 0)) / max), 24, 12);
         g.fill();
         g.fillStyle = '#e8ecf2';
@@ -4034,8 +4039,8 @@ export const O3 = (() => {
       g.fillText('LIVE', 60, 54);
       const rows = [
         ['LEADS TODAY', k?.leadsToday],
-        ['CALLS BOOKED · 24H', k?.booked24h],
-        ['ENROLLED THIS MONTH', k?.enrolledMonth],
+        [k?.labels?.[0] || 'CALLS BOOKED · 24H', k?.booked24h],
+        [k?.labels?.[1] || 'ENROLLED THIS MONTH', k?.enrolledMonth],
         ['REPLY TIME', k?.replySeconds != null ? k.replySeconds + ' s' : '—'],
       ];
       rows.forEach(([l, v], i) => {
