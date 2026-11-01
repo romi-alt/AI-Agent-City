@@ -135,6 +135,19 @@ export const N3 = (() => {
   ];
   /** Painted and terracotta mid-rises, so a block is not all brick. */
   const TERRACOTTAS = ['#c8714a', '#d68a5a', '#b85a3c', '#d9a077', '#a8553d', '#e2b88f', '#8f5a45', '#cf8f6e'];
+  /** Painted plaster and stucco in pale colours that are not brick: mint, powder blue, butter, lilac, blush, sage. */
+  const PAINTED = [
+    '#a9c7d6',
+    '#c4dcc8',
+    '#e8d9a6',
+    '#d9c6df',
+    '#ecc2b3',
+    '#9db9c8',
+    '#f0e3c6',
+    '#b7cfa6',
+    '#c9d3e6',
+    '#f2d3a0',
+  ];
   const AWNINGS = ['#1f3b2d', '#5a1f1f', '#1d2f4d', '#2b2b2b', '#6b5a2e', '#7a2e2e', '#2d4a5a', '#c9a24a'];
   const SHOPS = [
     'DELI',
@@ -500,7 +513,7 @@ export const N3 = (() => {
           float vary = .93 + .14 * fract(sin(vTint.w * 91.7) * 4375.5);
           float streak = 1. - .09 * step(.8, fract(sin(floor(vMapUv.x * 9.) + vTint.w * 40.) * 437.58)) * (1. - vUp);
           col *= grime * soot * vary * streak;
-          col *= mix(1., .88 + .12 * step(.5, fract(vMapUv.x * 21. + vMapUv.y * 13.)), vUp);
+          col *= mix(1., .86 + .14 * fract(sin(dot(floor(vMapUv * 38.), vec2(12.9898, 78.233))) * 43758.5453), vUp);
           diffuseColor.rgb *= col;
           float emK = (1. - vUp) * (1. - cornice) * (1. - shop);`,
         )
@@ -744,6 +757,7 @@ export const N3 = (() => {
     STONES,
     BROWNSTONES,
     TERRACOTTAS,
+    PAINTED,
     GLASSES,
     CONCRETES,
     TOWER_TONES,

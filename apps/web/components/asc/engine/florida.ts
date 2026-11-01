@@ -342,9 +342,11 @@ export const F3 = (() => {
                 ? pickFrom(N3.GLASSES)
                 : kind === 'dark'
                   ? pickFrom(N3.CONCRETES)
-                  : r() < 0.6
-                    ? pickFrom(N3.STONES)
-                    : pickFrom(N3.TOWER_TONES);
+                  : r() < 0.3
+                    ? pickFrom(N3.PAINTED)
+                    : r() < 0.55
+                      ? pickFrom(N3.STONES)
+                      : pickFrom(N3.TOWER_TONES);
       const finish = (cx, cz, t, floors, kind, tall) => {
         if (floors > 40) b.beacons.push({ x: cx, y: t.top + 2, z: cz, s: 1 });
         // equipment on most roofs that are not crowned: stair bulkhead, air handlers, vents, an antenna
@@ -546,7 +548,7 @@ export const F3 = (() => {
                 : floors > 14
                   ? pickFrom(['lime', 'deco', 'brick', 'glass', 'terra', 'ribbon'])
                   : floors > 7
-                    ? pickFrom(['brick', 'lime', 'dark', 'terra', 'terra'])
+                    ? pickFrom(['brick', 'lime', 'dark', 'terra', 'lime', 'ribbon'])
                     : pickFrom(['brick', 'brick', 'dark', 'terra']);
             const tint = tintOf(kind);
             const seed = r();

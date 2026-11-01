@@ -235,9 +235,10 @@ export const W3 = (() => {
     view(id, which) {
       const L = p => this.local(id, p);
       const V = {
+        // high and well back, so the low blocks across the street never sit between the camera and the lot
         outside: [
-          [11, 11, 23],
-          [-1, 2.5, -3],
+          [13, 19, 33],
+          [-1, 1.5, -2],
         ],
         showroom: [
           [6, 6.2, 9.5],
@@ -256,8 +257,8 @@ export const W3 = (() => {
           [7.5, 4.4, -11.8],
         ],
       }[which] || [
-        [11, 11, 23],
-        [-1, 2.5, -3],
+        [13, 19, 33],
+        [-1, 1.5, -2],
       ];
       return [L(V[0]), L(V[1])];
     }
@@ -755,10 +756,98 @@ export const W3 = (() => {
         seg: 0,
       });
 
+      this._dealerExterior(D, S, g, add);
       // first draw of every screen
       this._drawBoard(S);
       this._drawBdc(S);
       S.laptops.forEach((l, i) => this._drawLaptop(S, i));
+    }
+
+    /**
+     * What makes the building read as a car dealership from the air and from the street: a big brand panel painted on
+     * the roof, tall flagpoles with the brand flag, two inflatable air dancers by the entrance, and a banner over the
+     * lot. The flags and dancers move in update().
+     */
+    _dealerExterior(D, S, g, add) {
+      S.flags = [];
+      S.dancers = [];
+      // brand panel on the roof (seen from above) with the name in large letters
+      const rf = canvasTex(1024, 512);
+      {
+        const c = rf.g;
+        c.fillStyle = '#eceef2';
+        c.fillRect(0, 0, 1024, 512);
+        c.fillStyle = D.color;
+        c.fillRect(0, 0, 1024, 150);
+        c.fillRect(0, 362, 1024, 150);
+        c.fillStyle = '#ffffff';
+        c.font = '800 112px "Space Grotesk", Inter, sans-serif';
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(D.name, 512, 78);
+        c.fillText(D.name, 512, 438);
+        c.fillStyle = '#16181d';
+        c.font = '700 70px "Space Grotesk", Inter, sans-serif';
+        c.fillText('NEW · USED · SERVICE', 512, 256);
+        rf.t.needsUpdate = true;
+      }
+      const roofSign = new THREE.Mesh(
+        new THREE.PlaneGeometry(22, 11),
+        new THREE.MeshStandardMaterial({ map: rf.t, roughness: 0.7, transparent: true }),
+      );
+      roofSign.rotation.x = -Math.PI / 2;
+      add(roofSign, 0, 7.4 + 0.52, -5.5);
+      S.roofMats.push(roofSign.material);
+      // flagpoles along the street edge of the lot, each with a brand flag
+      const flagTex = canvasTex(256, 160);
+      {
+        const c = flagTex.g;
+        c.fillStyle = D.color;
+        c.fillRect(0, 0, 256, 160);
+        c.fillStyle = '#ffffff';
+        c.fillRect(0, 62, 256, 36);
+        c.fillStyle = D.accent;
+        c.fillRect(0, 98, 256, 12);
+        c.fillStyle = '#ffffff';
+        c.font = '800 44px "Space Grotesk", Inter, sans-serif';
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(D.name[0], 128, 36);
+        flagTex.t.needsUpdate = true;
+      }
+      [-13.2, -9, 9, 13.2].forEach((fx, i) => {
+        const pole = new THREE.Mesh(
+          (G.flagPole ||= new THREE.CylinderGeometry(0.07, 0.1, 11, 8)),
+          mat('#d7dbe0', { metalness: 0.7, roughness: 0.3 }),
+        );
+        add(pole, fx, 5.5, 14.4);
+        const flag = new THREE.Mesh(
+          new THREE.PlaneGeometry(2.6, 1.6, 6, 1),
+          new THREE.MeshStandardMaterial({ map: flagTex.t, side: THREE.DoubleSide, roughness: 0.8 }),
+        );
+        flag.position.set(fx + 1.35, 10.1, 14.4);
+        g.add(flag);
+        S.flags.push({ m: flag, off: i * 1.3 });
+      });
+      // two air dancers (tall inflatable tubes) either side of the entrance
+      [-3.4, 3.4].forEach((dx, i) => {
+        const grp = new THREE.Group();
+        const col = mat(i ? D.accent : D.color, { roughness: 0.6 });
+        for (let k = 0; k < 6; k++) {
+          const seg = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.34 - k * 0.02, 0.38 - k * 0.02, 0.62, 10),
+            k % 2 ? col : mat('#ffffff', { roughness: 0.6 }),
+          );
+          seg.position.y = 0.31 + k * 0.6;
+          seg.userData.k = k;
+          grp.add(seg);
+        }
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), col);
+        head.position.y = 3.95;
+        grp.add(head);
+        add(grp, dx, 0, 2.6);
+        S.dancers.push({ g: grp, off: i * 1.9 });
+      });
     }
 
     /* -------------------- screens -------------------- */
@@ -1241,6 +1330,24 @@ export const W3 = (() => {
         const on = (t * 1.3 + p.off) % 1 < 0.12;
         p.lights[2].material.opacity = on ? 1 : 0;
         p.lights[0].material.opacity = p.lights[1].material.opacity = 0.65 + Math.sin(t * 3) * 0.3;
+      }
+      // flags ripple and the air dancers flail, but only while the camera is near enough to see it
+      for (const S of Object.values(this.dealers)) {
+        if (!S.flags) continue;
+        for (const f of S.flags) {
+          const pos = f.m.geometry.attributes.position;
+          for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i);
+            pos.setZ(i, Math.sin(t * 3 + f.off + x * 1.6) * 0.09 * (x + 1.3));
+          }
+          pos.needsUpdate = true;
+        }
+        for (const d of S.dancers) {
+          d.g.children.forEach((seg, k) => {
+            seg.position.x = Math.sin(t * 3.2 + d.off + k * 0.7) * 0.07 * k;
+            seg.rotation.z = Math.sin(t * 3.2 + d.off + k * 0.7) * 0.18;
+          });
+        }
       }
       if (this.blimp) {
         const a = t * 0.045;
