@@ -317,38 +317,106 @@ export const F3 = (() => {
 
     /* ---------------- districts all around (instanced) ---------------- */
     _districts() {
-      const facade = (glass, rows) =>
-        canvasTex(64, 256, (g, w, h) => {
-          g.fillStyle = '#ffffff';
+      // Window layouts on one 64x256 facade tile. The colour map and the night-glow map are drawn from the same list of
+      // window rectangles, so the lights always sit in the windows.
+      const layout = (style, rows) => {
+        const rh = 256 / rows,
+          out = [];
+        for (let r = 0; r < rows; r++) {
+          if (style === 'grid') for (let c = 0; c < 4; c++) out.push([4 + c * 15, r * rh + rh * 0.2, 11, rh * 0.6]);
+          else if (style === 'punched')
+            for (let c = 0; c < 3; c++) out.push([6 + c * 19, r * rh + rh * 0.25, 10, rh * 0.5]);
+          else if (style === 'ribbon')
+            for (let c = 0; c < 4; c++) out.push([3 + c * 15, r * rh + rh * 0.22, 14, rh * 0.5]);
+          else if (style === 'curtain')
+            for (let c = 0; c < 6; c++) out.push([2 + c * 10, r * rh + rh * 0.08, 9, rh * 0.84]);
+          else if (style === 'banded') {
+            if (r % 2 === 0) for (let c = 0; c < 4; c++) out.push([4 + c * 15, r * rh + rh * 0.15, 11, rh * 0.7]);
+          } else if (style === 'pilaster')
+            for (let c = 0; c < 4; c++) out.push([6 + c * 15, r * rh + rh * 0.1, 6, rh * 0.8]);
+        }
+        return out;
+      };
+      const facadeTex = (style, glass, rows) => {
+        const rects = layout(style, rows);
+        const rh = 256 / rows;
+        const map = canvasTex(64, 256, (g, w, h) => {
+          g.fillStyle = '#ffffff'; // the wall: tinted per building
           g.fillRect(0, 0, w, h);
-          const rh = h / rows;
-          for (let r = 0; r < rows; r++)
-            for (let c = 0; c < 4; c++) {
-              g.fillStyle = glass;
-              g.fillRect(4 + c * 15, r * rh + rh * 0.2, 11, rh * 0.6);
+          if (style === 'curtain') {
+            g.fillStyle = glass;
+            g.fillRect(0, 0, w, h);
+          }
+          if (style === 'banded') {
+            g.fillStyle = 'rgba(0,0,0,.14)'; // the solid bands between the window rows
+            for (let r = 1; r < rows; r += 2) g.fillRect(0, r * rh, w, rh);
+          }
+          if (style === 'ribbon') {
+            g.fillStyle = 'rgba(0,0,0,.1)'; // spandrel under each window band
+            for (let r = 0; r < rows; r++) g.fillRect(0, r * rh + rh * 0.78, w, rh * 0.22);
+          }
+          if (style === 'pilaster') {
+            g.fillStyle = 'rgba(0,0,0,.08)'; // recessed bays between the pilasters
+            for (let c = 0; c < 4; c++) g.fillRect(3 + c * 15, 0, 12, h);
+          }
+          for (const [x, y, ww, hh] of rects) {
+            if (style === 'punched') {
+              g.fillStyle = 'rgba(30,36,46,.65)'; // deep-set opening
+              g.fillRect(x - 1, y - 1, ww + 2, hh + 2);
             }
+            g.fillStyle = glass;
+            g.fillRect(x, y, ww, hh);
+          }
+          if (style === 'curtain') {
+            g.fillStyle = 'rgba(20,30,45,.45)'; // grid of mullions
+            for (let r = 0; r <= rows; r++) g.fillRect(0, r * rh - 0.4, w, 0.8);
+            for (let c = 0; c <= 6; c++) g.fillRect(c * 10 + 1, 0, 0.8, h);
+          }
         });
-      const lit = rows =>
-        canvasTex(64, 256, (g, w, h) => {
+        const lit = canvasTex(64, 256, (g, w, h) => {
           g.fillStyle = '#000';
           g.fillRect(0, 0, w, h);
-          const rh = h / rows;
-          for (let r = 0; r < rows; r++)
-            for (let c = 0; c < 4; c++)
-              if (rnd() < 0.42) {
-                g.fillStyle = rnd() < 0.8 ? '#ffd88a' : '#cfe6ff';
-                g.fillRect(4 + c * 15, r * rh + rh * 0.2, 11, rh * 0.6);
-              }
+          for (const [x, y, ww, hh] of rects)
+            if (rnd() < 0.42) {
+              g.fillStyle = rnd() < 0.8 ? '#ffd88a' : '#cfe6ff';
+              g.fillRect(x, y, ww, hh);
+            }
         });
-      // [name, rows, glass colour, palette]
+        return { map, lit };
+      };
+      // Each kind has several facade styles: its own window layout, glass colour and wall colours. Buildings pick one,
+      // so neighbouring blocks differ in colour and texture instead of repeating one pale box.
       const KINDS = {
         deco: {
           rows: 8,
-          glass: '#6fb7cf',
-          pal: ['#f7c6c7', '#bfe6dc', '#fde3a7', '#f9d7b5', '#cfe3f5', '#f2f0e8', '#d9c7ef'],
+          variants: [
+            { style: 'punched', glass: '#6fb7cf', pal: ['#f7c6c7', '#fde3a7', '#f9d7b5', '#f2f0e8'] },
+            { style: 'pilaster', glass: '#7fc0b4', pal: ['#bfe6dc', '#cfe3f5', '#d9c7ef', '#fdf0c8'] },
+            { style: 'banded', glass: '#8fb8d8', pal: ['#f4a99a', '#f5c05a', '#7fd0c4', '#f3b6d2'] },
+            { style: 'ribbon', glass: '#6aa7c4', pal: ['#ef8f6b', '#e8604c', '#f6c445', '#3fb6a8'] },
+          ],
         },
-        mid: { rows: 18, glass: '#5c8fae', pal: ['#f3e2c0', '#e9d8bf', '#cfd8e3', '#f7f3ea', '#e6c9a8', '#bcd7d1'] },
-        tower: { rows: 40, glass: '#4a86b5', pal: ['#dbe9f4', '#c9dcea', '#e8eef3', '#b9d0e3', '#f2f5f8', '#a9c6dc'] },
+        mid: {
+          rows: 18,
+          variants: [
+            { style: 'ribbon', glass: '#5c8fae', pal: ['#f3e2c0', '#e9d8bf', '#f7f3ea', '#e6c9a8'] },
+            { style: 'punched', glass: '#4f6f8a', pal: ['#b4533c', '#a35d47', '#c4694a', '#8a4a3a'] },
+            { style: 'curtain', glass: '#6a9fb8', pal: ['#cfd8e3', '#bcd7d1', '#9fc0d4', '#d9e4ea'] },
+            { style: 'banded', glass: '#5a86a3', pal: ['#c9c3b8', '#a7acb4', '#e6dccb', '#b9bcc2'] },
+            { style: 'pilaster', glass: '#5f7f96', pal: ['#d8c3a0', '#cfa97a', '#e1b9a0', '#c8d3b0'] },
+          ],
+        },
+        tower: {
+          rows: 40,
+          variants: [
+            { style: 'curtain', glass: '#4a86b5', pal: ['#dbe9f4', '#c9dcea', '#b9d0e3', '#a9c6dc'] },
+            { style: 'curtain', glass: '#3f9b9a', pal: ['#cfeae6', '#b4ddd6', '#e1f2ef', '#9fd0c8'] },
+            { style: 'curtain', glass: '#6b7f93', pal: ['#7d8da0', '#6a7a8c', '#8e9db0', '#5d6b7c'], metal: 0.5 },
+            { style: 'curtain', glass: '#9a7c56', pal: ['#d9c19a', '#c8ad82', '#e6d3b0', '#b99b70'], metal: 0.45 },
+            { style: 'ribbon', glass: '#5c8fae', pal: ['#f2f5f8', '#e8eef3', '#dccfb8', '#e6d9c4'] },
+            { style: 'grid', glass: '#4a86b5', pal: ['#e8eef3', '#f2f5f8', '#c9dcea', '#d6d2c8'] },
+          ],
+        },
       };
       const items = { deco: [], mid: [], tower: [] };
       const CORE = (x, z) => Math.abs(x) < 132 && z > -160 && z < 60;
@@ -384,7 +452,9 @@ export const F3 = (() => {
               kind = 'mid';
               h = 14 + rnd() * 30;
             }
-            items[kind].push({ x: cx + ox, z: cz + oz, w, d: dd, h });
+            // The style comes from the building's position, not the random stream, so the layout stays as designed.
+            const v = Math.abs(Math.floor(cx * 7 + cz * 13 + k * 5)) % KINDS[kind].variants.length;
+            items[kind].push({ x: cx + ox, z: cz + oz, w, d: dd, h, v });
           }
         }
       const geo = new THREE.BoxGeometry(1, 1, 1);
@@ -394,24 +464,29 @@ export const F3 = (() => {
       for (const [name, K] of Object.entries(KINDS)) {
         const list = items[name];
         if (!list.length) continue;
-        const m = new THREE.MeshStandardMaterial({
-          map: facade(K.glass, K.rows),
-          emissiveMap: lit(K.rows),
-          emissive: '#ffffff',
-          emissiveIntensity: 0,
-          roughness: name === 'tower' ? 0.35 : 0.8,
-          metalness: name === 'tower' ? 0.35 : 0,
+        K.variants.forEach((V, vi) => {
+          const sub = list.filter(b => b.v === vi);
+          if (!sub.length) return;
+          const t = facadeTex(V.style, V.glass, K.rows);
+          const m = new THREE.MeshStandardMaterial({
+            map: t.map,
+            emissiveMap: t.lit,
+            emissive: '#ffffff',
+            emissiveIntensity: 0,
+            roughness: name === 'tower' ? 0.35 : 0.8,
+            metalness: V.metal ?? (name === 'tower' ? 0.35 : 0),
+          });
+          this.lit.push({ m, day: 0, evening: 0.7, night: 1.05 });
+          const im = new THREE.InstancedMesh(geo, m, sub.length);
+          sub.forEach((b, i) => {
+            dmy.position.set(b.x, Y, b.z);
+            dmy.scale.set(b.w, b.h, b.d);
+            dmy.updateMatrix();
+            im.setMatrixAt(i, dmy.matrix);
+            im.setColorAt(i, col.set(pick(V.pal)));
+          });
+          this.root.add(im);
         });
-        this.lit.push({ m, day: 0, evening: 0.7, night: 1.05 });
-        const im = new THREE.InstancedMesh(geo, m, list.length);
-        list.forEach((b, i) => {
-          dmy.position.set(b.x, Y, b.z);
-          dmy.scale.set(b.w, b.h, b.d);
-          dmy.updateMatrix();
-          im.setMatrixAt(i, dmy.matrix);
-          im.setColorAt(i, col.set(pick(K.pal)));
-        });
-        this.root.add(im);
         // roofs: a slab on every building, plus a red aircraft light on towers
         const roof = new THREE.InstancedMesh(
           geo,

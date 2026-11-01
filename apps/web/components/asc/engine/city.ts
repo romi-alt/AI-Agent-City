@@ -26,6 +26,30 @@ export const C3 = (() => {
     '#ef8f6b',
     '#63c1d8',
   ];
+  // Facade styles for the street-level buildings. Each has its own wall colours, so neighbouring buildings differ in
+  // material as well as colour: painted plaster, real brick, glass curtain wall, banded ribbon windows, concrete
+  // panels and mosaic tile. (Buildings given a brand colour keep the painted look.)
+  const STYLE_PALETTE = {
+    plaster: PALETTE,
+    brick: ['#b4533c', '#9c4b36', '#c4694a', '#8a4a3a', '#a35d47', '#cf7a52', '#7d3f33'],
+    glass: ['#5d7f9a', '#3f6b88', '#2f5d73', '#4a7a8c', '#6a8fa6', '#355c7a'],
+    stripes: ['#f4e3c1', '#e8d3a8', '#cfe3d9', '#f2d0c4', '#d9d2f0', '#bcd7e8'],
+    concrete: ['#b9bcc2', '#a7acb4', '#c9c3b8', '#9aa1a9', '#d3cec4'],
+    tile: ['#2f8f83', '#c9a24b', '#3d6fa5', '#b9573c', '#7a5aa6', '#3c8d5a'],
+  };
+  // Weighted: painted plaster stays the most common, the rest share the remainder.
+  const STYLE_BAG = [
+    'plaster',
+    'plaster',
+    'plaster',
+    'brick',
+    'brick',
+    'glass',
+    'stripes',
+    'stripes',
+    'concrete',
+    'tile',
+  ];
   const SHOPS = [
     'BOOKS',
     'CAFE',
@@ -242,7 +266,7 @@ export const C3 = (() => {
     }
 
     /* ---------------- buildings ---------------- */
-    _facade(w, h, base, shop, isOffice = false) {
+    _facade(w, h, base, shop, isOffice = false, style = 'plaster') {
       const PX = 30,
         W = Math.min(1024, Math.round(w * PX)),
         H = Math.min(1024, Math.round(h * PX));
@@ -252,64 +276,71 @@ export const C3 = (() => {
         [ce, ge] = canvas(W, H);
       ge.fillStyle = '#000';
       ge.fillRect(0, 0, W, H);
-      const grd = g.createLinearGradient(0, 0, 0, H);
-      grd.addColorStop(0, shade(base, 0.06));
-      grd.addColorStop(1, shade(base, -0.06));
-      g.fillStyle = grd;
-      g.fillRect(0, 0, W, H);
-      // brick / plaster texture
-      g.fillStyle = 'rgba(0,0,0,.035)';
-      for (let y = 0; y < H; y += 6) for (let x = (y / 6) % 2 ? 0 : 8; x < W; x += 16) g.fillRect(x, y, 14, 1);
-      // cornice
-      g.fillStyle = shade(base, -0.18);
-      g.fillRect(0, 0, W, 0.5 * sy);
-      g.fillStyle = shade(base, 0.15);
-      g.fillRect(0, 0.5 * sy, W, 0.12 * sy);
+      const glass = isOffice
+        ? '#a9d8ee'
+        : style === 'glass'
+          ? pick(['#6fb7cf', '#5b9fc2', '#7cc4b8', '#8fb4d9', '#5f8fb0'])
+          : pick(['#7fc7d9', '#8fd0c6', '#9cc7e8', '#86b7d6']);
       const groundH = 3.4,
         floorH = 3.0;
-      const cols = Math.max(2, Math.floor(w / 2.4)),
-        cw = w / cols;
-      const glass = isOffice ? '#a9d8ee' : pick(['#7fc7d9', '#8fd0c6', '#9cc7e8', '#86b7d6']);
-      for (let fy = groundH; fy < h - 1; fy += floorH) {
-        const y = H - (fy + floorH - 0.6) * sy;
-        for (let i = 0; i < cols; i++) {
-          const x = (i * cw + cw * 0.22) * sx,
-            ww = cw * 0.56 * sx,
-            wh = 1.7 * sy;
-          g.fillStyle = '#f7f1e3';
-          g.fillRect(x - 3, y - 3, ww + 6, wh + 6); // frame
-          const gg = g.createLinearGradient(0, y, 0, y + wh);
-          gg.addColorStop(0, shade(glass, 0.12));
-          gg.addColorStop(1, shade(glass, -0.1));
-          g.fillStyle = gg;
-          g.fillRect(x, y, ww, wh);
-          g.fillStyle = 'rgba(255,255,255,.45)';
-          g.beginPath();
-          g.moveTo(x + ww * 0.15, y + wh);
-          g.lineTo(x + ww * 0.45, y);
-          g.lineTo(x + ww * 0.6, y);
-          g.lineTo(x + ww * 0.3, y + wh);
-          g.fill();
-          if (rnd() < 0.35) {
-            g.fillStyle = pick(['#ffffff', '#f6e0b5', '#f4c6c0']);
-            g.fillRect(x, y, ww * 0.28, wh);
-            g.fillRect(x + ww * 0.72, y, ww * 0.28, wh);
-          }
-          g.fillStyle = '#ffffff';
-          g.fillRect(x - 5, y + wh + 2, ww + 10, 0.12 * sy); // sill
-          if (rnd() < 0.15) {
-            g.fillStyle = '#4f9d5a';
-            for (let k = 0; k < 5; k++) {
-              g.beginPath();
-              g.arc(x + rnd() * ww, y + wh - 2, 4 + rnd() * 4, 0, 7);
-              g.fill();
+      if (style !== 'plaster') this._wall(style, { g, ge, W, H, w, h, sx, sy, base, glass, groundH, floorH });
+      else {
+        const grd = g.createLinearGradient(0, 0, 0, H);
+        grd.addColorStop(0, shade(base, 0.06));
+        grd.addColorStop(1, shade(base, -0.06));
+        g.fillStyle = grd;
+        g.fillRect(0, 0, W, H);
+        // brick / plaster texture
+        g.fillStyle = 'rgba(0,0,0,.035)';
+        for (let y = 0; y < H; y += 6) for (let x = (y / 6) % 2 ? 0 : 8; x < W; x += 16) g.fillRect(x, y, 14, 1);
+        // cornice
+        g.fillStyle = shade(base, -0.18);
+        g.fillRect(0, 0, W, 0.5 * sy);
+        g.fillStyle = shade(base, 0.15);
+        g.fillRect(0, 0.5 * sy, W, 0.12 * sy);
+        const cols = Math.max(2, Math.floor(w / 2.4)),
+          cw = w / cols;
+        for (let fy = groundH; fy < h - 1; fy += floorH) {
+          const y = H - (fy + floorH - 0.6) * sy;
+          for (let i = 0; i < cols; i++) {
+            const x = (i * cw + cw * 0.22) * sx,
+              ww = cw * 0.56 * sx,
+              wh = 1.7 * sy;
+            g.fillStyle = '#f7f1e3';
+            g.fillRect(x - 3, y - 3, ww + 6, wh + 6); // frame
+            const gg = g.createLinearGradient(0, y, 0, y + wh);
+            gg.addColorStop(0, shade(glass, 0.12));
+            gg.addColorStop(1, shade(glass, -0.1));
+            g.fillStyle = gg;
+            g.fillRect(x, y, ww, wh);
+            g.fillStyle = 'rgba(255,255,255,.45)';
+            g.beginPath();
+            g.moveTo(x + ww * 0.15, y + wh);
+            g.lineTo(x + ww * 0.45, y);
+            g.lineTo(x + ww * 0.6, y);
+            g.lineTo(x + ww * 0.3, y + wh);
+            g.fill();
+            if (rnd() < 0.35) {
+              g.fillStyle = pick(['#ffffff', '#f6e0b5', '#f4c6c0']);
+              g.fillRect(x, y, ww * 0.28, wh);
+              g.fillRect(x + ww * 0.72, y, ww * 0.28, wh);
             }
-          }
-          g.fillStyle = '#3d3d48';
-          g.fillRect(x + ww / 2 - 1, y, 2, wh); // mullion
-          if (rnd() < (isOffice ? 0.9 : 0.55)) {
-            ge.fillStyle = pick(['#ffd88a', '#ffe7b0', '#ffc66b', '#cfe6ff']);
-            ge.fillRect(x, y, ww, wh);
+            g.fillStyle = '#ffffff';
+            g.fillRect(x - 5, y + wh + 2, ww + 10, 0.12 * sy); // sill
+            if (rnd() < 0.15) {
+              g.fillStyle = '#4f9d5a';
+              for (let k = 0; k < 5; k++) {
+                g.beginPath();
+                g.arc(x + rnd() * ww, y + wh - 2, 4 + rnd() * 4, 0, 7);
+                g.fill();
+              }
+            }
+            g.fillStyle = '#3d3d48';
+            g.fillRect(x + ww / 2 - 1, y, 2, wh); // mullion
+            if (rnd() < (isOffice ? 0.9 : 0.55)) {
+              ge.fillStyle = pick(['#ffd88a', '#ffe7b0', '#ffc66b', '#cfe6ff']);
+              ge.fillRect(x, y, ww, wh);
+            }
           }
         }
       }
@@ -352,9 +383,148 @@ export const C3 = (() => {
       return { map: tex(c), emissiveMap: tex(ce) };
     }
 
+    /** Draws the walls and windows of one non-painted facade style into the colour (g) and glow (ge) canvases. */
+    _wall(style, { g, ge, W, H, w, h, sx, sy, base, glass, groundH, floorH }) {
+      const cols = Math.max(2, Math.floor(w / 2.4)),
+        cw = w / cols;
+      const pane = (x, y, ww, wh, tone = glass) => {
+        const gg = g.createLinearGradient(0, y, 0, y + wh);
+        gg.addColorStop(0, shade(tone, 0.14));
+        gg.addColorStop(1, shade(tone, -0.12));
+        g.fillStyle = gg;
+        g.fillRect(x, y, ww, wh);
+      };
+      const glow = (x, y, ww, wh, chance = 0.55) => {
+        if (rnd() < chance) {
+          ge.fillStyle = pick(['#ffd88a', '#ffe7b0', '#ffc66b', '#cfe6ff']);
+          ge.fillRect(x, y, ww, wh);
+        }
+      };
+      const floors = fn => {
+        for (let fy = groundH; fy < h - 1; fy += floorH) fn(H - (fy + floorH - 0.6) * sy, fy);
+      };
+      if (style === 'brick') {
+        g.fillStyle = '#cdbfae'; // mortar shows between the bricks
+        g.fillRect(0, 0, W, H);
+        const bh = 0.22 * sy,
+          bw = 0.5 * sx;
+        for (let y = 0, row = 0; y < H; y += bh, row++)
+          for (let x = row % 2 ? -bw / 2 : 0; x < W; x += bw) {
+            g.fillStyle = shade(base, (rnd() - 0.5) * 0.16);
+            g.fillRect(x + 0.7, y + 0.7, bw - 1.4, bh - 1.4);
+          }
+        g.fillStyle = shade(base, -0.22); // cornice
+        g.fillRect(0, 0, W, 0.5 * sy);
+        floors(y => {
+          for (let i = 0; i < cols; i++) {
+            const x = (i * cw + cw * 0.24) * sx,
+              ww = cw * 0.52 * sx,
+              wh = 1.7 * sy;
+            g.fillStyle = '#e4dccb';
+            g.fillRect(x - 4, y - 8, ww + 8, 6); // stone lintel
+            g.fillRect(x - 5, y + wh + 2, ww + 10, 5); // sill
+            g.fillStyle = '#2d2f36';
+            g.fillRect(x - 2, y - 2, ww + 4, wh + 4);
+            pane(x, y, ww, wh, shade(glass, -0.1));
+            g.fillStyle = '#2d2f36';
+            g.fillRect(x + ww / 2 - 1, y, 2, wh);
+            glow(x, y, ww, wh);
+          }
+        });
+      } else if (style === 'glass') {
+        g.fillStyle = shade(base, -0.1); // spandrel panels between the glass bands
+        g.fillRect(0, 0, W, H);
+        g.fillStyle = shade(base, 0.12);
+        g.fillRect(0, 0, W, 0.4 * sy);
+        floors(y => {
+          const wh = 2.1 * sy;
+          pane(0.3 * sx, y - 0.2 * sy, W - 0.6 * sx, wh);
+          g.fillStyle = 'rgba(255,255,255,.28)';
+          for (let k = 0; k < 2; k++) {
+            const x = rnd() * (W - 40);
+            g.beginPath();
+            g.moveTo(x, y + wh - 0.2 * sy);
+            g.lineTo(x + 26, y - 0.2 * sy);
+            g.lineTo(x + 38, y - 0.2 * sy);
+            g.lineTo(x + 12, y + wh - 0.2 * sy);
+            g.fill();
+          }
+          g.fillStyle = '#26303b';
+          for (let i = 0; i <= cols * 2; i++) g.fillRect((i * cw * sx) / 2 - 1, y - 0.2 * sy, 2, wh);
+          for (let i = 0; i < cols * 2; i++) glow((i * cw * sx) / 2 + 2, y - 0.2 * sy, (cw * sx) / 2 - 4, wh, 0.5);
+        });
+      } else if (style === 'stripes') {
+        g.fillStyle = base;
+        g.fillRect(0, 0, W, H);
+        floors(y => {
+          const wh = 1.5 * sy;
+          g.fillStyle = shade(base, -0.2); // accent stripe under every ribbon
+          g.fillRect(0, y + wh + 0.3 * sy, W, 0.32 * sy);
+          g.fillStyle = '#fffaf0';
+          g.fillRect(0.4 * sx, y - 4, W - 0.8 * sx, wh + 8);
+          pane(0.55 * sx, y, W - 1.1 * sx, wh, shade(glass, -0.05));
+          g.fillStyle = '#fffaf0';
+          for (let i = 1; i < cols * 2; i++) g.fillRect((i * cw * sx) / 2 - 1.5, y, 3, wh);
+          for (let i = 0; i < cols * 2; i++) glow((i * cw * sx) / 2 + 2, y, (cw * sx) / 2 - 4, wh, 0.5);
+        });
+      } else if (style === 'concrete') {
+        g.fillStyle = base;
+        g.fillRect(0, 0, W, H);
+        for (let n = 0; n < W * H * 0.0035; n++) {
+          g.fillStyle = rnd() < 0.5 ? 'rgba(0,0,0,.06)' : 'rgba(255,255,255,.07)';
+          g.fillRect(rnd() * W, rnd() * H, 2, 2);
+        }
+        g.fillStyle = 'rgba(0,0,0,.2)'; // panel joints
+        for (let x = 0; x < W; x += 2.4 * sx) g.fillRect(x, 0, 2, H);
+        for (let y = H; y > 0; y -= floorH * sy) g.fillRect(0, y, W, 2);
+        floors(y => {
+          for (let i = 0; i < cols; i++) {
+            const x = (i * cw + cw * 0.27) * sx,
+              ww = cw * 0.46 * sx,
+              wh = 1.45 * sy;
+            g.fillStyle = '#2a2f37'; // deep-set opening
+            g.fillRect(x - 3, y - 3, ww + 6, wh + 6);
+            pane(x + 2, y + 5, ww - 4, wh - 5, shade(glass, -0.18));
+            glow(x + 2, y + 5, ww - 4, wh - 5);
+          }
+        });
+      } else {
+        // tile: small mosaic tiles, lighter pilasters between the bays, tall arched windows
+        const t = 0.34 * sx;
+        for (let y = 0; y < H; y += t)
+          for (let x = 0; x < W; x += t) {
+            g.fillStyle = shade(base, (rnd() - 0.5) * 0.14);
+            g.fillRect(x, y, t - 1, t - 1);
+          }
+        g.fillStyle = shade(base, 0.22);
+        for (let i = 0; i <= cols; i++) g.fillRect(i * cw * sx - 0.18 * sx, 0, 0.36 * sx, H);
+        g.fillStyle = shade(base, -0.2);
+        g.fillRect(0, 0, W, 0.45 * sy);
+        floors(y => {
+          for (let i = 0; i < cols; i++) {
+            const x = (i * cw + cw * 0.3) * sx,
+              ww = cw * 0.4 * sx,
+              wh = 1.9 * sy;
+            g.fillStyle = '#f2ead8';
+            g.fillRect(x - 3, y + ww / 2 - 3, ww + 6, wh - ww / 2 + 6);
+            g.beginPath();
+            g.arc(x + ww / 2, y + ww / 2, ww / 2 + 3, Math.PI, 0);
+            g.fill();
+            pane(x, y + ww / 2, ww, wh - ww / 2);
+            g.fillStyle = shade(glass, 0.05);
+            g.beginPath();
+            g.arc(x + ww / 2, y + ww / 2, ww / 2, Math.PI, 0);
+            g.fill();
+            glow(x, y, ww, wh, 0.55);
+          }
+        });
+      }
+    }
+
     _building(x, z, w, d, h, opts = {}) {
-      const base = opts.color || pick(PALETTE);
-      const f = this._facade(w, h, base, opts.shop || pick(SHOPS), opts.office);
+      const style = opts.office || opts.color ? 'plaster' : pick(STYLE_BAG);
+      const base = opts.color || pick(STYLE_PALETTE[style]);
+      const f = this._facade(w, h, base, opts.shop || pick(SHOPS), opts.office, style);
       const side = new THREE.MeshStandardMaterial({
         map: f.map,
         emissiveMap: f.emissiveMap,
