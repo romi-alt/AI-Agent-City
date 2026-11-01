@@ -238,7 +238,7 @@ export function createService(deps: ServiceDeps) {
         createdAt: new Date(now()),
       };
       await store.insertRequest(request);
-      if (send) {
+      if (send || shadow) {
         const { token, hash } = newToken();
         await store.replaceLink({
           tokenHash: hash,
@@ -246,7 +246,15 @@ export function createService(deps: ServiceDeps) {
           generation: lead.generation,
           expiresAt: new Date(now() + config.linkTtlSeconds * 1000),
         });
-        sendLater(lead, request.id, firstNameOf(input.fullName), token);
+        // An address that already has an active demo gets a sign-in link to it instead of silence: the visitor
+        // sees the same page either way, and the link only ever goes to the address's own inbox.
+        sendLater(
+          lead,
+          request.id,
+          firstNameOf(shadow ? lead.fullName : input.fullName),
+          token,
+          shadow ? 'signin' : 'verify',
+        );
       }
       return { requestId: request.id, status: 'verification-sent' };
     } catch (e) {

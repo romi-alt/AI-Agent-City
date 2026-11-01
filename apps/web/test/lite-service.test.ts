@@ -33,11 +33,11 @@ async function freshStore(): Promise<Store> {
 
 async function setup(env: Record<string, string> = {}) {
   const clock = { t: Date.parse('2026-10-28T10:00:00Z') };
-  const sent: { email: string; link: string }[] = [];
+  const sent: { email: string; link: string; kind: string }[] = [];
   const mailer: Mailer = {
     name: 'test',
-    async sendVerification(to, link) {
-      sent.push({ email: to.email, link });
+    async sendVerification(to, link, kind = 'verify') {
+      sent.push({ email: to.email, link, kind });
     },
   };
   const store = await freshStore();
@@ -134,7 +134,7 @@ test('a second submission sends a new link and voids the first', async () => {
   assert.ok(await ctx.service.verify(tokenOf(ctx.sent[1]!.link), '1.1.1.1'));
 });
 
-test('a verified address gets the same answer but no email, and details are not overwritten', async () => {
+test('a verified address gets the same answer plus a sign-in link to its own demo, and details are not overwritten', async () => {
   const ctx = await setup();
   await ctx.service.submit(await body(ctx), '1.1.1.1');
   await ctx.service.whenIdle();
@@ -142,9 +142,13 @@ test('a verified address gets the same answer but no email, and details are not 
   const again = await ctx.service.submit(await body(ctx, { fullName: 'Mallory X', company: 'Evil' }), '1.1.1.1');
   await ctx.service.whenIdle();
   assert.equal(again.status, 'verification-sent');
-  assert.equal(ctx.sent.length, 1);
+  assert.equal(ctx.sent.length, 2);
+  assert.equal(ctx.sent[1]!.kind, 'signin');
+  assert.equal(ctx.sent[1]!.email, ctx.sent[0]!.email);
   assert.deepEqual(await ctx.service.status(again.requestId, '1.1.1.1'), { status: 'verification-sent' });
   assert.equal((await ctx.service.me(first!.cookie)).company, 'Acme Ltd');
+  const back = await ctx.service.verify(tokenOf(ctx.sent[1]!.link), '1.1.1.1');
+  assert.equal((await ctx.service.me(back!.cookie)).company, 'Acme Ltd');
 });
 
 test('replaying the same form submission returns the first request and sends nothing more', async () => {
