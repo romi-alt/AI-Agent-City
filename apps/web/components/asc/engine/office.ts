@@ -3428,7 +3428,7 @@ export const O3 = (() => {
       p.g.position.set(x, 0, z - 1.05);
       root.add(p.g);
       const lab = this._label(key, a.name, a.short || a.role, a.color);
-      lab.obj.position.set(0, 2.15, 0);
+      lab.obj.position.set(0, 1.8, 0); // seated: the tag sits just over the head
       p.g.add(lab.obj);
       const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
       hit.position.y = 1.0;
@@ -3485,7 +3485,7 @@ export const O3 = (() => {
       p.g.position.set(x, 0, z - 1.05);
       root.add(p.g);
       const lab = this._label('owner', human.name, human.role, '#f2c879');
-      lab.obj.position.set(0, 2.15, 0);
+      lab.obj.position.set(0, 1.8, 0); // seated: the tag sits just over the head
       p.g.add(lab.obj);
       const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
       hit.position.y = 1.0;
