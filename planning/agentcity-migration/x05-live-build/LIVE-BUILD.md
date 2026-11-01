@@ -1,9 +1,13 @@
 # AgentCity live build: https://autosalescity.site
 
-Status of this document: first written on 2026-10-28, updated on 2026-10-30. The live site runs Hostinger build
-`01a18910-1bea-73a8-a964-9c91a65e1ed9` (zip `agentcity-live14`, deployed 2026-10-29 19:08 UTC), built on Windows from
-`main` `e4d5a25`. It brings the manager's design to the front page (bright palette, full-screen hero city, highlights
-strip) and adds Present mode to `/city`; `/pitch` (live13) is unchanged. This document says what the live site does, how it is built and run, and what has and has not been verified.
+Status of this document: first written on 2026-10-28, updated on 2026-11-01. The live site runs Hostinger build
+`01a19620-9243-7053-aa1d-acbb9925079d` (zip `agentcity-live22`, deployed 2026-11-01 08:01 UTC), built from `main`
+`3fc1ae8` (identical tree to branch commit `f16b583`; PR #8). It is the AutoSalesCity front page with the live New York
+city in `/city` and the demo (richer colours, terracotta and ribbon-glass facades, staff teams on the HQ floor), the
+scanner-proof confirm page, reworded claims, CSP and HSTS headers, a 14-day demo default, and `/pitch` plus Present mode
+from live13/live14 (`/pitch` has its own wider CSP for its CDN scripts). To rebuild it:
+`NEXT_PUBLIC_LITE_DEMO=true scripts/package-preview.sh https://autosalescity.site agentcity.zip`. Rollback: rebuild from
+`569682e` (the live17 source). Earlier text below that still names live14 describes the older build. This document says what the live site does, how it is built and run, and what has and has not been verified.
 It contains no secrets: only the names of settings.
 
 ## 1. At a glance
@@ -379,6 +383,7 @@ Package: `packages/city-scene`. Highlights of the current version:
 | Live deploy 2026-10-29 (live12, first Windows-built package) | Build `01a185bf` completed in 31 s; `/`, `/city`, `/demo`, `/demo/signin`, `/demo/check-email` and `/api/lite/demo/form-token` return 200; `/api/lite/demo/me` and the leads route return 401; `/signin` 307 and `/api/foo` 404 as before; static chunks 200; checked in a browser by the maintainer |
 | Live deploy 2026-10-29 (live13, pitch page) | Build `01a188c5` completed in 32 s and the cache was cleared; `/`, `/city`, `/pitch`, `/pitch.html`, `/demo`, `/demo/signin` and `/api/lite/demo/form-token` return 200; `/api/lite/demo/me` and the leads route return 401; `/signin` 307 and `/api/foo` 404; `/pitch#present` opened Present mode in a browser |
 | Live deploy 2026-10-29 (live14, colourful front page + Present mode) | Build `01a18910` completed in 28 s and the cache was cleared; `/`, `/city`, `/city?present=1`, `/pitch`, `/demo`, `/demo/signin` and `/api/lite/demo/form-token` return 200; `/api/lite/demo/me` and the leads route return 401; `/signin` 307 and `/api/foo` 404; the new hero and Present mode checked in a browser |
+| Live deploy 2026-11-01 (live22, `main` `3fc1ae8`) | Build `01a19620` completed in 31 s and the cache was cleared; `/`, `/city`, `/pitch`, `/demo`, `/demo/signin`, `/api/lite/demo/form-token` and `/demo/confirm?t=x` return 200; the leads route returns 401; `/api/lite/demo/verify?t=x` answers 303 to the confirm page; CSP and HSTS headers present (`/pitch` has its own CSP); home, `/city` and HQ floor screenshotted in a software-rendered browser. Not measured on a real device; real email delivery and MySQL not exercised |
 
 Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-city`, `x03-floor-look`,
 `x04-city-dense`, `x05-polish`, `x06-life`, `x06-sky`, `x07-scenarios`, `lite-demo`). `MIGRATION-STATUS.md` lists every stage and what was not run.
