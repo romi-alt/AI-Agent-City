@@ -1439,6 +1439,88 @@ export const F3 = (() => {
         this.root.add(this.smoke);
       }
       this._lifeDummy = new THREE.Object3D();
+      this._night();
+    }
+
+    /**
+     * What turns on after dark: amber street lights along every avenue (a glowing bulb and a pool of light on the road),
+     * and a moon with a halo low in the northern sky. Hidden by day, so it costs nothing then.
+     */
+    _night() {
+      const lamps = [];
+      AVENUES.forEach(a => {
+        [-1, 1].forEach(side => {
+          const z0 = Math.abs(a) === 22 ? 170 : -620;
+          for (let z = z0; z < 440; z += 38) lamps.push([a + side * 6.5, z + side * 9]);
+        });
+      });
+      // the cross streets too
+      STREETS.forEach(sz => {
+        for (let x = -300; x <= 300; x += 46) lamps.push([x, sz + 6.5]);
+      });
+      const group = new THREE.Group();
+      const bulbs = new THREE.InstancedMesh(
+        new THREE.SphereGeometry(0.7, 6, 4),
+        new THREE.MeshBasicMaterial({ color: '#ffc46b', fog: true }),
+        lamps.length,
+      );
+      const pools = new THREE.InstancedMesh(
+        new THREE.CircleGeometry(7, 16),
+        new THREE.MeshBasicMaterial({
+          color: '#ff9a3c',
+          transparent: true,
+          opacity: 0.2,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          fog: true,
+        }),
+        lamps.length,
+      );
+      const d = new THREE.Object3D();
+      lamps.forEach(([x, z], i) => {
+        d.rotation.set(0, 0, 0);
+        d.scale.setScalar(1);
+        d.position.set(x, STREET_Y + 6.2, z);
+        d.updateMatrix();
+        bulbs.setMatrixAt(i, d.matrix);
+        d.rotation.set(-Math.PI / 2, 0, 0);
+        d.position.set(x, STREET_Y + 0.15, z);
+        d.updateMatrix();
+        pools.setMatrixAt(i, d.matrix);
+      });
+      bulbs.frustumCulled = false;
+      pools.frustumCulled = false;
+      group.add(pools, bulbs);
+      // the moon: a pale disc with two soft halos, far out so the city never reaches it
+      const moon = new THREE.Group();
+      const disc = new THREE.Mesh(
+        new THREE.CircleGeometry(70, 40),
+        new THREE.MeshBasicMaterial({ color: '#f4f1e4', fog: false }),
+      );
+      moon.add(disc);
+      [
+        [130, 0.12],
+        [230, 0.06],
+      ].forEach(([rad, op]) => {
+        const halo = new THREE.Mesh(
+          new THREE.CircleGeometry(rad, 40),
+          new THREE.MeshBasicMaterial({
+            color: '#cfd9f5',
+            transparent: true,
+            opacity: op,
+            depthWrite: false,
+            fog: false,
+          }),
+        );
+        halo.position.z = -1;
+        moon.add(halo);
+      });
+      moon.position.set(-650, 820, -2300);
+      moon.lookAt(0, 200, 400);
+      group.add(moon);
+      this.night = group;
+      group.visible = false;
+      this.root.add(group);
     }
 
     _lifeTick(dt, t) {
@@ -1662,6 +1744,7 @@ export const F3 = (() => {
 
     setTimeOfDay(tod) {
       if (this.birds) this.birds.visible = tod !== 'night';
+      if (this.night) this.night.visible = tod === 'night';
       this.lit.forEach(x => {
         x.m.emissiveIntensity = x[tod] ?? x.day;
       });

@@ -299,7 +299,18 @@ export const N3 = (() => {
       for (let x = 0; x < S; x += c) gm.fillRect(x, 0, 1, S);
       for (let y = 0; y < S; y += c) gm.fillRect(0, y + c - 2, S, 1);
     }
-    const lights = ['#ffd88a', '#ffe7b0', '#ffc66b', '#cfe6ff'];
+    // a lit window: warm lamps, white office tubes, the odd blue TV, each at its own brightness and with a soft halo
+    const lights = ['#ffd88a', '#ffe7b0', '#ffc66b', '#ffb36b', '#fff3d6', '#cfe6ff', '#9ec4ff'];
+    const lightUp = (x, y, w, h) => {
+      const k = r();
+      ge.save();
+      ge.shadowColor = 'rgba(255,205,130,.85)';
+      ge.shadowBlur = 5;
+      ge.globalAlpha = 0.4 + k * 0.6;
+      ge.fillStyle = lights[Math.floor(r() * lights.length)];
+      ge.fillRect(x + 0.5, y + 0.5, Math.max(1, w - 1), Math.max(1, h - 1));
+      ge.restore();
+    };
     const win = (x, y, w, h, glass, trim) => {
       // trim and glass do not take the wall tint
       if (trim) {
@@ -350,8 +361,7 @@ export const N3 = (() => {
         }
       }
       if (r() < lit) {
-        ge.fillStyle = lights[Math.floor(r() * lights.length)];
-        ge.fillRect(x, y, w, h);
+        lightUp(x, y, w, h);
       }
     };
     for (let cy = 0; cy < TILE; cy++)
@@ -393,8 +403,7 @@ export const N3 = (() => {
           gm.lineTo(x0 + 11, y0 + c - 9);
           gm.fill();
           if (r() < lit) {
-            ge.fillStyle = lights[Math.floor(r() * lights.length)];
-            ge.fillRect(x0 + 1, y0 + 1, c - 1, c - 10);
+            lightUp(x0 + 1, y0 + 1, c - 1, c - 10);
           }
         } else if (kind === 'deco') {
           win(x0 + 8, y0 + 5, 16, 22, ['#34495f', '#1e2d3d'], null);
@@ -428,8 +437,7 @@ export const N3 = (() => {
           gm.fillStyle = '#2b3b4a';
           gm.fillRect(x0 + c - 1, y0 + 5, 1, 17);
           if (r() < lit) {
-            ge.fillStyle = lights[Math.floor(r() * lights.length)];
-            ge.fillRect(x0, y0 + 5, c, 17);
+            lightUp(x0, y0 + 5, c, 17);
           }
         } else {
           win(x0 + 11, y0 + 9, 10, 13, ['#2f4358', '#1e2b3a'], '#d6cdb9');
