@@ -16,8 +16,14 @@ import {
 import { useEffect, useState } from 'react';
 import { liteMe } from '../../lib/api-client';
 import { LITE_DEMO } from '../../lib/preview';
+import { PresentButton, PresentMode } from './PresentMode';
 
 type View = 'webgl' | 'map' | 'failed';
+
+/** ?present=1 (the landing page's "Present the city" link) opens the explorer straight into Present mode. */
+function presentRequested(): boolean {
+  return new URLSearchParams(window.location.search).get('present') === '1';
+}
 
 /** The public explorer's starting state: catalog only, nothing enterable, the arrival once per session. */
 function initialState(): Partial<CityState> {
@@ -32,7 +38,8 @@ function initialState(): Partial<CityState> {
   } catch {
     storage = null;
   }
-  const arrival = shouldPlayArrival(storage, params.get('tour') === '1');
+  // A pitch starts on its own first stop, so it skips the arrival.
+  const arrival = !presentRequested() && shouldPlayArrival(storage, params.get('tour') === '1');
   return {
     mode: arrival ? { kind: 'arrival' } : highlight ? { kind: 'building', building: highlight } : { kind: 'explore' },
     enterable: [],
@@ -74,6 +81,20 @@ function useOwnDemo(store: CityStore) {
 export function CityClient() {
   const [store] = useState<CityStore>(() => createCityStore(initialState()));
   const [view, setView] = useState<View>(() => (detectWebGL() ? 'webgl' : 'map'));
+  const [presenting, setPresenting] = useState(presentRequested);
+  const startPresenting = () => {
+    // Full screen needs the click that asked for it; refused, the city still fills the window.
+    document.documentElement.requestFullscreen?.().catch(() => undefined);
+    setPresenting(true);
+  };
+  const stopPresenting = () => {
+    setPresenting(false);
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('present')) {
+      url.searchParams.delete('present');
+      window.history.replaceState(null, '', url);
+    }
+  };
 
   // Follow the system's reduced-motion setting while the page is open (the HUD toggle can still override it).
   useEffect(() => {
@@ -97,7 +118,14 @@ export function CityClient() {
             label="AgentCity: a 3D city of office towers where AI agents work. Use the panel or the list of buildings to explore."
             overlay={
               <>
-                <CityHud {...panel} />
+                {presenting ? (
+                  <PresentMode store={store} onExit={stopPresenting} />
+                ) : (
+                  <>
+                    <CityHud {...panel} />
+                    <PresentButton onStart={startPresenting} />
+                  </>
+                )}
                 <LoadingVeil />
               </>
             }
@@ -116,6 +144,7 @@ export function CityClient() {
             }
             {...panel}
           />
+          {presenting && <PresentMode store={store} onExit={stopPresenting} />}
         </div>
       )}
     </main>

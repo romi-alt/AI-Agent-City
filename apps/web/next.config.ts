@@ -29,6 +29,20 @@ const csp = [
   "frame-ancestors 'none'",
 ].join('; ');
 
+// The standalone pitch page loads three.js and its fonts from public CDNs, so it gets its own, slightly wider policy.
+const pitchCsp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "connect-src 'self' data: blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+].join('; ');
+
 const config: NextConfig = {
   // The public preview ships as a self-contained server (no workspace install on the host); tracing starts at the
   // repository root so the workspace packages are included. No page uses next/image, so the native image resizer
@@ -49,8 +63,10 @@ const config: NextConfig = {
   transpilePackages: ['@agentcity/city-scene'],
   poweredByHeader: false,
   async rewrites() {
-    if (preview) return [];
-    return [{ source: '/api/:path*', destination: `${apiUrl}/api/:path*` }];
+    // The standalone pitch page (Miami city, full-screen Present mode) lives in public/ and answers at /pitch.
+    const pitch = { source: '/pitch', destination: '/pitch.html' };
+    if (preview) return [pitch];
+    return [pitch, { source: '/api/:path*', destination: `${apiUrl}/api/:path*` }];
   },
   async headers() {
     return [
@@ -62,10 +78,11 @@ const config: NextConfig = {
       },
       // The confirm page's address carries the one-time token, so no shared cache may keep it.
       { source: '/demo/confirm', headers: [{ key: 'Cache-Control', value: 'private, no-store' }] },
+      { source: '/((?!pitch).*)', headers: [{ key: 'Content-Security-Policy', value: csp }] },
+      { source: '/pitch:rest(.*)', headers: [{ key: 'Content-Security-Policy', value: pitchCsp }] },
       {
         source: '/:path*',
         headers: [
-          { key: 'Content-Security-Policy', value: csp },
           // Browsers ignore this over plain http, so it only takes effect on the https site. No includeSubDomains
           // or preload: other subdomains of the domain (mail, say) are not ours to commit to https from here.
           { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
