@@ -28,7 +28,7 @@ import { daysLeft, LiteNotice, LiteStatus, talkToUsHref } from '../../../compone
 import '../../../components/demo/demo.css';
 
 // WebGL needs the browser, so the city never renders on the server.
-const LiteCityView = dynamic(() => import('../../../components/demo/LiteCityView').then(m => m.LiteCityView), {
+const CityView = dynamic(() => import('../../../components/demo/AscCityView').then(m => m.AscCityView), {
   ssr: false,
   loading: () => (
     <p className="dm-status-line" style={{ padding: 24 }}>
@@ -404,7 +404,7 @@ function Office({ first }: { first: Loaded }) {
             onHelp={() => setTourOpen(true)}
           />
           <div className="dm-scene dm-lite-scene" data-tour="scene" data-testid="lite-scene" ref={sceneBox}>
-            <LiteCityView me={me} agents={agents} store={store} onSelect={select} />
+            <CityView me={me} agents={agents} store={store} onSelect={select} />
           </div>
         </div>
         <aside
