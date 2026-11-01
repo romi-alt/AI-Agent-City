@@ -299,12 +299,14 @@ export const P3 = (() => {
       if (rich) buildShoe(shoeStyle, o, knee, f, shoes);
       legs.push({ hip, knee });
     });
+    let skirtMesh = null;
     if (o.skirt) {
       const sk = new THREE.Mesh(
         G(`skirt${seg}`, () => new THREE.CylinderGeometry(0.2, 0.27, 0.36, seg, 1, true)),
         bottom,
       );
       sk.position.y = hipY - 0.14;
+      skirtMesh = sk;
       g.add(sk);
       sk.material.side = THREE.DoubleSide;
     }
@@ -391,6 +393,8 @@ export const P3 = (() => {
         legs.forEach(l => {
           l.hip.position.y = hipY - 0.38;
         });
+        // the skirt hangs from the hips, so it goes down with them (left behind, it rides up over the torso)
+        if (skirtMesh) skirtMesh.position.y = hipY - 0.14 - 0.38;
       } else {
         legs.forEach(l => {
           l.hip.rotation.x = 0;
@@ -398,6 +402,7 @@ export const P3 = (() => {
           l.hip.position.y = hipY;
         });
         body.position.y = 0;
+        if (skirtMesh) skirtMesh.position.y = hipY - 0.14;
       }
     };
     /** Put something in the right hand ('mug' | 'phone' | 'papers') or null to empty it. */

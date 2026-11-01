@@ -2128,6 +2128,10 @@ html:has(.asc) {
   background: var(--c);
   color: #0b0e13;
 }
+.asc #demoApp .tag3d.sel .nm small {
+  color: #0b0e13;
+  opacity: 0.75;
+}
 .asc #demoApp[data-theme='light'] .tag3d .nm {
   background: rgba(255, 255, 255, 0.95);
   color: #1c2230;
