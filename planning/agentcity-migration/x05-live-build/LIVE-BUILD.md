@@ -1,13 +1,18 @@
 # AgentCity live build: https://autosalescity.site
 
 Status of this document: first written on 2026-10-28, updated on 2026-11-01. The live site runs Hostinger build
-`01a19620-9243-7053-aa1d-acbb9925079d` (zip `agentcity-live22`, deployed 2026-11-01 08:01 UTC), built from `main`
-`3fc1ae8` (identical tree to branch commit `f16b583`; PR #8). It is the AutoSalesCity front page with the live New York
-city in `/city` and the demo (richer colours, terracotta and ribbon-glass facades, staff teams on the HQ floor), the
-scanner-proof confirm page, reworded claims, CSP and HSTS headers, a 14-day demo default, and `/pitch` plus Present mode
-from live13/live14 (`/pitch` has its own wider CSP for its CDN scripts). To rebuild it:
-`NEXT_PUBLIC_LITE_DEMO=true scripts/package-preview.sh https://autosalescity.site agentcity.zip`. Rollback: rebuild from
-`569682e` (the live17 source). Earlier text below that still names live14 describes the older build. This document says what the live site does, how it is built and run, and what has and has not been verified.
+`01a1970f-c16a-7343-96eb-fd97eb5658a5` (zip `agentcity-live26`, deployed 2026-11-01 12:22 UTC), built from `main`
+`79e2e2b` (PR #14; same code as branch commit `4625bce`). Since live22 it adds: a sign-in link when the request form is
+used with an address that already has an active demo (live23, backend only); the signed-in office page (`/demo/office`)
+running the live New York city and Fast Sales floor instead of the older explorer scene, with the visitor's agents at the
+desks (live24); seated skirts, selected name-tag roles and tag height fixed (live25); labelled sample content, CRM and
+dashboard wall screens and non-overlapping two-screen desks (live26); and `/pitch` with its claims reworded as targets.
+The rest is as in live22: the AutoSalesCity front page, the New York city in `/city` and the demo, the scanner-proof
+confirm page, CSP and HSTS headers (`/pitch` has its own wider CSP for its CDN scripts), a 14-day demo default, and
+Present mode. The owner confirmed on 2026-11-01 that the email arrives and the office opens. To rebuild it:
+`NEXT_PUBLIC_LITE_DEMO=true scripts/package-preview.sh https://autosalescity.site agentcity.zip` from `main`.
+Rollback: rebuild from `3fc1ae8` (live22) or `569682e` (the live17 source). Earlier text below that still names live14
+or live22 describes an older build. This document says what the live site does, how it is built and run, and what has and has not been verified.
 It contains no secrets: only the names of settings.
 
 ## 1. At a glance
@@ -384,6 +389,7 @@ Package: `packages/city-scene`. Highlights of the current version:
 | Live deploy 2026-10-29 (live13, pitch page) | Build `01a188c5` completed in 32 s and the cache was cleared; `/`, `/city`, `/pitch`, `/pitch.html`, `/demo`, `/demo/signin` and `/api/lite/demo/form-token` return 200; `/api/lite/demo/me` and the leads route return 401; `/signin` 307 and `/api/foo` 404; `/pitch#present` opened Present mode in a browser |
 | Live deploy 2026-10-29 (live14, colourful front page + Present mode) | Build `01a18910` completed in 28 s and the cache was cleared; `/`, `/city`, `/city?present=1`, `/pitch`, `/demo`, `/demo/signin` and `/api/lite/demo/form-token` return 200; `/api/lite/demo/me` and the leads route return 401; `/signin` 307 and `/api/foo` 404; the new hero and Present mode checked in a browser |
 | Live deploy 2026-11-01 (live22, `main` `3fc1ae8`) | Build `01a19620` completed in 31 s and the cache was cleared; `/`, `/city`, `/pitch`, `/demo`, `/demo/signin`, `/api/lite/demo/form-token` and `/demo/confirm?t=x` return 200; the leads route returns 401; `/api/lite/demo/verify?t=x` answers 303 to the confirm page; CSP and HSTS headers present (`/pitch` has its own CSP); home, `/city` and HQ floor screenshotted in a software-rendered browser. Not measured on a real device; real email delivery and MySQL not exercised |
+| Live deploys 2026-11-01 (live23 to live26, `main` `79e2e2b`) | Each build completed in about 31 to 36 s and the cache was cleared; after live26, `/`, `/city`, `/pitch`, `/demo`, `/demo/signin`, `/demo/office`, `/api/lite/demo/form-token` and `/demo/confirm?t=x` return 200; the leads route returns 401; `/api/lite/demo/verify?t=x` answers 303 to the confirm page; HSTS present. Server log after live23: a request for an address with an active demo logged "signin link sent via resend" (before, it logged nothing). Resend accepted a message to its sandbox address; a reserved-domain address got `ResendHttp422`. The owner confirmed the email arrives and the signed-in office opens. The signed-in office was checked locally (in-memory store, console mailer) and the public `/city` floor on the live site; the sample wall screens were not seen on the live site. Not measured on a real device |
 
 Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-city`, `x03-floor-look`,
 `x04-city-dense`, `x05-polish`, `x06-life`, `x06-sky`, `x07-scenarios`, `lite-demo`). `MIGRATION-STATUS.md` lists every stage and what was not run.
