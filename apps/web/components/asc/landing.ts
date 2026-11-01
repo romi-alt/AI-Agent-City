@@ -100,43 +100,7 @@ export function initLanding(): { hud: Hud; dispose: () => void } {
   document.querySelectorAll('.asc .reveal').forEach(el => io.observe(el));
   cleanups.push(() => io.disconnect());
 
-  // hero HUD (simulated, and labelled as such on the page)
-  const S = {
-    leads: 214 + Math.floor(Math.random() * 40),
-    booked: 37 + Math.floor(Math.random() * 9),
-    replies: [] as number[],
-  };
-  for (let i = 0; i < 20; i++) S.replies.push(28 + Math.random() * 26);
-  const setStats = () => {
-    const leads = $('#sLeads');
-    const booked = $('#sBooked');
-    const reply = $('#sReply');
-    if (leads) leads.textContent = S.leads.toLocaleString();
-    if (booked) booked.textContent = String(S.booked);
-    const avg = S.replies.length ? S.replies.reduce((a, b) => a + b, 0) / S.replies.length : 0;
-    if (reply) reply.textContent = `${Math.round(avg)}s`;
-  };
-  const animate = (el: HTMLElement | null, to: number, suffix = '') => {
-    if (!el) return;
-    if (reduced) {
-      el.textContent = to + suffix;
-      return;
-    }
-    const t0 = performance.now();
-    const step = (t: number) => {
-      if (stopped) return;
-      const k = Math.min(1, (t - t0) / 1800);
-      const e = 1 - Math.pow(1 - k, 3);
-      el.textContent = Math.round(to * e).toLocaleString() + suffix;
-      if (k < 1) requestAnimationFrame(step);
-      else setStats();
-    };
-    requestAnimationFrame(step);
-  };
-  animate($('#sLeads'), S.leads);
-  animate($('#sBooked'), S.booked);
-  animate($('#sReply'), Math.round(S.replies.reduce((a, b) => a + b, 0) / S.replies.length), 's');
-
+  // hero city feed (simulated, and labelled as such on the page)
   const feed = (bold: string, rest: string, color: string) => {
     const ul = $('#feed');
     if (!ul) return;
@@ -169,17 +133,12 @@ export function initLanding(): { hud: Hud; dispose: () => void } {
     const secs = Math.round(24 + Math.random() * 34);
     const short = client.name.split(' ')[0] ?? client.name;
     if (kind < 0.62) {
-      S.leads++;
-      S.replies.push(secs);
-      if (S.replies.length > 60) S.replies.shift();
       feed('Vera', `replied to ${pick(BUYERS)} about a ${pick(VEHICLES)} · ${short} · ${secs}s`, client.color);
     } else if (kind < 0.85) {
-      S.booked++;
       feed('Test drive booked', `· ${pick(BUYERS)} · ${pick(VEHICLES)} · ${short}`, '#3ccf8e');
     } else {
       feed('Nico', `revived an aged lead for ${short}`, client.color);
     }
-    setStats();
   };
 
   return {

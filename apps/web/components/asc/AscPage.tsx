@@ -103,27 +103,7 @@ export function AscPage({ contactEmail, bookForm }: { contactEmail: string; book
           <div className="hud">
             <div className="wrap">
               <div>
-                <div className="stats">
-                  <div className="stat">
-                    <div className="n mono" id="sLeads">
-                      0
-                    </div>
-                    <div className="l">Leads answered today</div>
-                  </div>
-                  <div className="stat">
-                    <div className="n mono" id="sReply">
-                      0s
-                    </div>
-                    <div className="l">Avg first reply</div>
-                  </div>
-                  <div className="stat">
-                    <div className="n mono" id="sBooked">
-                      0
-                    </div>
-                    <div className="l">Test drives booked</div>
-                  </div>
-                </div>
-                <div className="demo-note">Simulated demo city · numbers are illustrative</div>
+                <div className="demo-note">Simulated demo city · the feed is sample activity</div>
               </div>
               <div className="ticker" aria-live="polite">
                 <div className="t-head">
