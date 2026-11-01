@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { C3 } from './city';
 import { P3 } from './people';
+import { N3 } from './nyc';
 
 export const W3 = (() => {
   const { makePerson, SKIN, HAIR } = P3,
@@ -1003,47 +1004,8 @@ export const W3 = (() => {
 
     /* -------------------- billboards -------------------- */
     _billboards() {
-      const ADS = [
-        {
-          bg: '#f5b83d',
-          fg: '#141414',
-          big: 'EVERY LEAD ANSWERED IN 60 SECONDS',
-          small: 'AutoSalesCity · the AI sales floor for dealerships',
-        },
-        {
-          bg: '#141a2e',
-          fg: '#ffffff',
-          big: 'TEST DRIVES BOOKED WHILE YOU SLEEP',
-          small: 'Your AI BDC works nights, weekends and holidays',
-          accent: '#3ccf8e',
-        },
-        {
-          bg: '#2f7cf6',
-          fg: '#ffffff',
-          big: 'AURORA MOTORS · TRADE-IN WEEK',
-          small: 'Get your appraisal in 10 minutes · 42nd St.',
-        },
-        {
-          bg: '#1c2230',
-          fg: '#f5b83d',
-          big: 'FAST SALES TRAINING CENTER',
-          small: 'Train your next F&I manager · Enroll today',
-          accent: '#f5b83d',
-        },
-        {
-          bg: '#18b67a',
-          fg: '#ffffff',
-          big: 'VOLTA EV · CHARGE INTO SPRING',
-          small: 'Book a quiet test drive in 2 taps',
-        },
-        {
-          bg: '#e5484d',
-          fg: '#ffffff',
-          big: 'NO LEAD LEFT BEHIND',
-          small: 'Follow-ups that never forget · AutoSalesCity',
-        },
-      ];
-      const make = (x, z, ry, w, h, baseY, start) => {
+      const ADS = N3.ADS;
+      const make = (x, z, ry, w, h, baseY, start, onWall = false) => {
         const g = new THREE.Group();
         g.position.set(x, 0, z);
         g.rotation.y = ry;
@@ -1076,26 +1038,29 @@ export const W3 = (() => {
         g.add(frame);
         const postM = mat('#4a505c', { metalness: 0.6, roughness: 0.4 });
         const top = baseY - STREET_Y;
-        [-w / 3, w / 3].forEach(px => {
-          const p = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, top, 10), postM);
-          p.position.set(px, STREET_Y + top / 2, -0.4);
-          g.add(p);
-        });
-        const walk = new THREE.Mesh(new THREE.BoxGeometry(w, 0.12, 1.2), postM);
-        walk.position.set(0, baseY - 0.3, 0.5);
-        g.add(walk);
-        const spotM = this._lit(
-          new THREE.MeshStandardMaterial({ color: '#fff6dc', emissive: '#ffe6b0', emissiveIntensity: 0.1 }),
-          0.1,
-          2.5,
-          3,
-        );
-        for (let i = 0; i < 4; i++) {
-          const s = new THREE.Mesh((G.spot ||= new THREE.BoxGeometry(0.5, 0.3, 0.4)), spotM);
-          s.position.set(-w / 2 + w / 8 + (i * w) / 4, baseY - 0.2, 1.1);
-          g.add(s);
+        // screens on a Times Square tower hang on the wall: no posts, walkway or spotlights
+        if (!onWall) {
+          [-w / 3, w / 3].forEach(px => {
+            const p = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, top, 10), postM);
+            p.position.set(px, STREET_Y + top / 2, -0.4);
+            g.add(p);
+          });
+          const walk = new THREE.Mesh(new THREE.BoxGeometry(w, 0.12, 1.2), postM);
+          walk.position.set(0, baseY - 0.3, 0.5);
+          g.add(walk);
+          const spotM = this._lit(
+            new THREE.MeshStandardMaterial({ color: '#fff6dc', emissive: '#ffe6b0', emissiveIntensity: 0.1 }),
+            0.1,
+            2.5,
+            3,
+          );
+          for (let i = 0; i < 4; i++) {
+            const s = new THREE.Mesh((G.spot ||= new THREE.BoxGeometry(0.5, 0.3, 0.4)), spotM);
+            s.position.set(-w / 2 + w / 8 + (i * w) / 4, baseY - 0.2, 1.1);
+            g.add(s);
+          }
         }
-        const bb = { cv, w, h, i: start, t0: 0, wipe: 1, ads: ADS };
+        const bb = { cv, w, h, i: start, t0: onWall ? Math.random() * 6 : 0, wipe: 1, ads: ADS };
         this._drawAd(bb, 1);
         this.billboards.push(bb);
       };
@@ -1104,6 +1069,10 @@ export const W3 = (() => {
       make(-52, -36, 0.45, 20, 8.5, STREET_Y + 25, 3);
       make(104, 20, -Math.PI / 2 + 0.3, 18, 7.5, STREET_Y + 13, 2);
       make(-104, 20, Math.PI / 2 - 0.3, 18, 7.5, STREET_Y + 13, 4);
+      // Times Square: big lit screens on the four corner towers of one junction
+      N3.squareScreens()
+        .slice(0, this.mobile ? 4 : 8)
+        .forEach((sc, i) => make(sc.x, sc.z, sc.yaw, sc.w, sc.h, STREET_Y + sc.y, sc.ad + 5, true));
     }
     _drawAd(bb, k) {
       const { g, c, t } = bb.cv,

@@ -422,10 +422,10 @@ export const O3 = (() => {
     red: '#e8604c',
   };
   const NYC_TEXT = {
-    neon: ['FLORIDA', 'SALES FLOOR'],
+    neon: ['NEW YORK', 'SALES FLOOR'],
     stations: [
       'Harbor',
-      'Palm Leads',
+      'Midtown Leads',
       'Quota Sq',
       'Pipeline',
       'Union Deal',
@@ -628,7 +628,7 @@ export const O3 = (() => {
       g.fillStyle = NY.brass;
       g.textAlign = 'center';
       g.font = `700 ${H * 0.07}px "Space Grotesk", sans-serif`;
-      g.fillText('FLORIDA', W / 2, H * 0.08);
+      g.fillText('NEW YORK', W / 2, H * 0.08);
       g.strokeRect(10, 10, W - 20, H - 20);
     },
     hustle(g, W, H) {
@@ -794,7 +794,7 @@ export const O3 = (() => {
       g.fill();
       g.fillStyle = '#fff';
       g.font = `800 ${H * 0.28}px "Space Grotesk", sans-serif`;
-      g.fillText('FLORIDA', W * 0.06, H * 0.46);
+      g.fillText('NEW YORK', W * 0.06, H * 0.46);
       g.font = `700 ${H * 0.16}px "Space Grotesk", sans-serif`;
       g.fillText('SALES', W * 0.06, H * 0.7);
     },
@@ -2498,7 +2498,7 @@ export const O3 = (() => {
         g.fillStyle = '#26324d';
         g.font = '800 54px "Space Grotesk", sans-serif';
         g.textBaseline = 'middle';
-        g.fillText('FAST SALES  ·  FLORIDA HQ', 40, H / 2 + 2);
+        g.fillText('FAST SALES  ·  NEW YORK HQ', 40, H / 2 + 2);
         g.fillStyle = '#e8604c';
         g.beginPath();
         g.arc(W - 70, H / 2, 26, 0, 7);
@@ -2774,7 +2774,7 @@ export const O3 = (() => {
         g.textAlign = 'center';
         g.fillText('THE SALES CUP', W / 2, 46);
         g.font = '600 24px Inter, sans-serif';
-        g.fillText('FAST SALES · FLORIDA', W / 2, 78);
+        g.fillText('FAST SALES · NEW YORK', W / 2, 78);
       }).t;
       const pp = P(0, 0.62, 0.262);
       this._plane(root, pt, 0.9, 0.17, pp[0], pp[1], pp[2], rot);
@@ -3543,6 +3543,97 @@ export const O3 = (() => {
       root.add(w.g);
       this.walker = { p: w, pts, seg: 0, pauseUntil: performance.now() + 2500, a: Math.PI };
       this.crowd.push({ p: w, kind: 'walker', k: 0.7 });
+      this._team(root);
+    }
+
+    /**
+     * The human side of the floor: a few teammates who are busy all day. Two meet round the table, two share the huddle
+     * bench, one works at the standing desk, one presents at the whiteboard to a listener, and two more cross the floor
+     * with papers. None of them are agents (no label, no click): they just make the room look worked in.
+     */
+    _team(root) {
+      const FACE = (x, z, tx, tz) => Math.atan2(tx - x, tz - z);
+      const staff = (look, x, z, face, mode, k, o = {}) => {
+        const p = makePerson({ ...look, rich: !this.mobile });
+        if (o.sit) p.pose('sit');
+        p.g.position.set(x, o.y || 0, z);
+        p.g.rotation.y = face;
+        if (o.hold) p.hold(o.hold);
+        root.add(p.g);
+        this.crowd.push({ p, kind: 'staff', mode, k, o });
+        return p;
+      };
+      const L = (gender, skin, hairStyle, hair, top, bottom, extra = {}) => ({
+        gender,
+        skin,
+        hairStyle,
+        hair,
+        top: soften(top, 0.18),
+        accent: '#ffffff',
+        bottom,
+        eyes: '#2a1d14',
+        grin: true,
+        lanyard: '#f5b83d',
+        ...extra,
+      });
+      const look = {
+        sam: L('m', SKIN[0], 'quiff', '#5b3a22', '#5aa6e0', '#2f3a52', { shoeStyle: 'sneaker' }),
+        priya: L('f', SKIN[3], 'pony', '#1d1612', '#e98aa8', '#3a4a6b', { earrings: true, shoeStyle: 'flat' }),
+        marcus: L('m', SKIN[4], 'afro', '#1d1612', '#3fb6a8', '#26324d', { glasses: 'round', shoeStyle: 'sneaker' }),
+        elena: L('f', SKIN[5], 'braids', '#8a5a2b', '#9b7fd1', '#2b2f3a', { sleeves: 'three' }),
+        tom: L('m', SKIN[2], 'slick', '#2a2a2e', '#ef8f6b', '#3a4a6b', { stubble: true, shoeStyle: 'boot' }),
+        yuki: L('f', SKIN[0], 'pony', '#1d1612', '#f6c445', '#2f3a52', { headband: true, outfit: 'hoodie' }),
+        omar: L('m', SKIN[3], 'quiff', '#1d1612', '#2f7a55', '#3a4a6b', { beard: true }),
+        hana: L('f', SKIN[1], 'braids', '#3a2618', '#5aa6e0', '#2b2f3a', { glasses: 'tort' }),
+      };
+      // meeting table (the chairs stand at 1.9 m round it)
+      const tx = 11.4,
+        tz = 6.6;
+      [
+        [look.priya, 0.6, 'talk'],
+        [look.marcus, 0.6 + Math.PI, 'type'],
+        [look.tom, 0.6 + Math.PI * 1.5, 'idle'],
+      ].forEach(([lk, a, mode], i) => {
+        const x = tx + Math.cos(a) * 1.9,
+          z = tz + Math.sin(a) * 1.9;
+        staff(lk, x, z, FACE(x, z, tx, tz), mode, i * 1.7, { sit: true });
+      });
+      // huddle booth: two on the back bench with a laptop between them
+      staff(look.elena, -6.0, 3.95, 0, 'type', 0.4, { sit: true, y: 0.02 });
+      staff(look.omar, -4.8, 3.95, 0.25, 'talk', 2.2, { sit: true, y: 0.02 });
+      // standing desk, whiteboard
+      staff(look.yuki, 6.0, 5.25, Math.PI, 'type', 1.1);
+      staff(look.sam, 1.5, 6.1, Math.PI + 0.25, 'present', 0.3);
+      staff(look.hana, 3.7, 7.0, FACE(3.7, 7.0, 2.3, 5.0), 'listen', 1.9, { hold: 'mug' });
+      // two more people crossing the floor with papers (the aisles at z = -6.1 and z = -2.0)
+      const lane = (pts, p, delay) => ({ p, pts, seg: 0, pauseUntil: performance.now() + delay, a: 0, paper: true });
+      const a = makePerson({ ...look.tom, top: soften('#26324d', 0.2), rich: !this.mobile });
+      a.hold('papers');
+      const aPts = [
+        { x: 13.4, z: -6.1, pause: 2500, face: -Math.PI / 2 },
+        { x: 4.0, z: -6.1 },
+        { x: -3.0, z: -6.1 },
+        { x: -3.0, z: -2.0 },
+        { x: 6.0, z: -2.0 },
+        { x: 12.5, z: -2.0, pause: 2200, face: Math.PI / 2 },
+      ];
+      a.g.position.set(aPts[0].x, 0, aPts[0].z);
+      root.add(a.g);
+      this.crowd.push({ p: a, kind: 'lane', w: lane(aPts, a, 4000), k: 1.6 });
+      const b = makePerson({ ...look.priya, top: soften('#ef8f6b', 0.2), rich: !this.mobile });
+      b.hold('papers');
+      const bPts = [
+        { x: -13.2, z: -4.0, pause: 3000, face: Math.PI / 2 },
+        { x: -13.2, z: -2.0 },
+        { x: -4.0, z: -2.0 },
+        { x: 2.0, z: -2.0, pause: 2600, face: Math.PI },
+        { x: 8.0, z: -6.1 },
+        { x: -3.0, z: -6.1 },
+        { x: -13.2, z: -6.1 },
+      ];
+      b.g.position.set(bPts[0].x, 0, bPts[0].z);
+      root.add(b.g);
+      this.crowd.push({ p: b, kind: 'lane', w: lane(bPts, b, 9000), k: 2.9 });
     }
 
     _crowdTick(dt, t, now) {
@@ -3559,6 +3650,17 @@ export const O3 = (() => {
             if (p.props.mug) p.props.mug.rotation.x = -(p.arms[1].sh.rotation.x + p.arms[1].el.rotation.x);
           }
         } else if (c.kind === 'walker') this._walkLoop(this.walker, dt, t, now);
+        else if (c.kind === 'lane') this._walkLoop(c.w, dt, t, now);
+        else if (c.kind === 'staff') {
+          // a slow rhythm per person, so the group never moves in step
+          const s = Math.sin(t * 0.25 + c.k);
+          if (c.mode === 'present') p.animate(t, s > -0.2 ? 'talk' : 'look', c.k);
+          else if (c.mode === 'listen') p.animate(t, s > 0.5 ? 'sip' : s < -0.5 ? 'think' : 'idle', c.k);
+          else if (c.mode === 'talk') p.animate(t, s > -0.1 ? 'talk' : 'idle', c.k);
+          else if (c.mode === 'type') p.animate(t, s > 0.7 ? 'think' : s < -0.8 ? 'look' : 'type', c.k);
+          else p.animate(t, 'idle', c.k);
+          if (c.mode === 'listen' && s <= 0.5 && s >= -0.5 && p.props.mug) p.props.mug.rotation.x = 0;
+        }
       }
     }
 
@@ -3571,7 +3673,7 @@ export const O3 = (() => {
         let d = (cur.face ?? 0) - p.g.rotation.y;
         d = Math.atan2(Math.sin(d), Math.cos(d));
         p.g.rotation.y += d * 0.1;
-        p.animate(t, 'sip', 1.3);
+        p.animate(t, w.paper ? 'idle' : 'sip', 1.3);
         return;
       }
       const dx = nxt.x - p.g.position.x,
@@ -3589,7 +3691,7 @@ export const O3 = (() => {
       let d = Math.atan2(dx, dz) - p.g.rotation.y;
       d = Math.atan2(Math.sin(d), Math.cos(d));
       p.g.rotation.y += d * 0.12;
-      p.animate(t, 'walkMug', 0.7);
+      p.animate(t, w.paper ? 'walk' : 'walkMug', 0.7);
     }
 
     /** Idle life at the desks: sipping, reading the screen, a phone call, a stretch... and short chats between neighbours. */
@@ -3682,7 +3784,7 @@ export const O3 = (() => {
       g.textAlign = 'right';
       g.fillStyle = '#f5b83d';
       g.font = '700 20px "JetBrains Mono", monospace';
-      g.fillText('FLORIDA ' + clock, W - 22, 34);
+      g.fillText('NEW YORK ' + clock, W - 22, 34);
       g.textAlign = 'left';
       const feed = this.feed.length
         ? this.feed
