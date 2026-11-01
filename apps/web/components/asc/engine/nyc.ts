@@ -268,6 +268,11 @@ export const N3 = (() => {
       [ce, ge] = canvas(S, S);
     const r = rngOf(kind.length * 977 + kind.charCodeAt(0));
     const lit = { brick: 0.36, lime: 0.42, glass: 0.5, deco: 0.4, dark: 0.3, terra: 0.38, ribbon: 0.48 }[kind];
+    // at night most lit windows come in whole floors (an office working late) with a few stragglers between, which
+    // reads as a building; scattered single windows read as noise
+    const rowOn = Array.from({ length: TILE }, () => r() < lit * 0.95);
+    let curRow = 0;
+    const isLit = () => r() < (rowOn[curRow] ? 0.82 : 0.06);
     const wall = {
       brick: '#f2e9e2',
       lime: '#f4efe4',
@@ -306,7 +311,7 @@ export const N3 = (() => {
       ge.save();
       ge.shadowColor = 'rgba(255,205,130,.85)';
       ge.shadowBlur = 5;
-      ge.globalAlpha = 0.4 + k * 0.6;
+      ge.globalAlpha = 0.35 + k * 0.5;
       ge.fillStyle = lights[Math.floor(r() * lights.length)];
       ge.fillRect(x + 0.5, y + 0.5, Math.max(1, w - 1), Math.max(1, h - 1));
       ge.restore();
@@ -360,12 +365,13 @@ export const N3 = (() => {
           for (let ly = y + h * 0.58; ly < y + h - 1; ly += 2) gm.fillRect(x + 2, ly, w - 4, 1);
         }
       }
-      if (r() < lit) {
+      if (isLit()) {
         lightUp(x, y, w, h);
       }
     };
     for (let cy = 0; cy < TILE; cy++)
       for (let cx = 0; cx < TILE; cx++) {
+        curRow = cy;
         const x0 = cx * c,
           y0 = cy * c;
         if (kind === 'brick') {
@@ -402,7 +408,7 @@ export const N3 = (() => {
           gm.lineTo(x0 + 28, y0);
           gm.lineTo(x0 + 11, y0 + c - 9);
           gm.fill();
-          if (r() < lit) {
+          if (isLit()) {
             lightUp(x0 + 1, y0 + 1, c - 1, c - 10);
           }
         } else if (kind === 'deco') {
@@ -436,7 +442,7 @@ export const N3 = (() => {
           gk.fillRect(x0, y0 + 5, c, 17);
           gm.fillStyle = '#2b3b4a';
           gm.fillRect(x0 + c - 1, y0 + 5, 1, 17);
-          if (r() < lit) {
+          if (isLit()) {
             lightUp(x0, y0 + 5, c, 17);
           }
         } else {
@@ -456,6 +462,8 @@ export const N3 = (() => {
   const MATS = {};
   /** Seconds, shared by every facade material: the city's lit windows slowly come on and go off. */
   const TIME = { value: 0 };
+  /** 0 by day, 1 at night: how much the walls themselves show in the dark (moonlight and street glow). */
+  const NIGHT = { value: 0 };
   /**
    * One material per facade kind for a whole InstancedMesh of towers. The window grid keeps its real size whatever the
    * building's footprint and height are (UVs come from the instance scale), every instance has its own tint, a stone
@@ -476,6 +484,7 @@ export const N3 = (() => {
       sh.uniforms.maskMap = { value: T.mask };
       sh.uniforms.uTile = { value: new THREE.Vector2(CW * TILE, FH * TILE) };
       sh.uniforms.uTime = TIME;
+      sh.uniforms.uNight = NIGHT;
       sh.vertexShader = sh.vertexShader
         .replace(
           '#include <common>',
@@ -504,6 +513,7 @@ export const N3 = (() => {
           `#include <common>
           uniform sampler2D maskMap;
           uniform float uTime;
+          uniform float uNight;
           varying vec4 vTint; varying vec2 vInfo; varying float vTopD; varying float vBotD; varying float vUp;`,
         )
         .replace(
@@ -537,7 +547,10 @@ export const N3 = (() => {
             float wh = fract(sin(dot(floor(vMapUv * 8.), vec2(12.9898, 78.233)) + vTint.w * 50.) * 43758.5453);
             float tw = mix(1., smoothstep(-.2, .2, sin(uTime * .09 + wh * 80.)), step(.8, wh));
             totalEmissiveRadiance *= emitColor.rgb * emK * tw + vec3(1., .78, .5) * shop * .55;
-          #endif`,
+          #endif
+          // the walls themselves: faint moonlight on every face and warm street glow up the lower floors, so a tower
+          // keeps its shape and its colour after dark instead of vanishing between its lit windows
+          totalEmissiveRadiance += diffuseColor.rgb * uNight * (vec3(.07, .09, .16) + vec3(.55, .32, .12) * exp(-vBotD / 24.) * (1. - vUp));`,
         );
     };
     m.customProgramCacheKey = () => 'nyc-facade';
@@ -788,6 +801,7 @@ export const N3 = (() => {
     cyl,
     QUALITY,
     TIME,
+    NIGHT,
     kindTextures,
     facadeMaterial,
     Batch,

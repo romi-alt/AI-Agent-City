@@ -1745,6 +1745,7 @@ export const F3 = (() => {
     setTimeOfDay(tod) {
       if (this.birds) this.birds.visible = tod !== 'night';
       if (this.night) this.night.visible = tod === 'night';
+      N3.NIGHT.value = tod === 'night' ? 1 : tod === 'evening' ? 0.3 : 0;
       this.lit.forEach(x => {
         x.m.emissiveIntensity = x[tod] ?? x.day;
       });
