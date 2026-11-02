@@ -116,6 +116,14 @@ export const N3 = (() => {
     '#a5773f',
     '#3a4c78',
     '#7a6aa0',
+    '#2fa6b8',
+    '#3a86d6',
+    '#4cae7c',
+    '#8a62c8',
+    '#d1708f',
+    '#d6a447',
+    '#35b7a8',
+    '#5a7ae0',
   ];
   const CONCRETES = ['#b5b0a6', '#9c9a94', '#c5c0b4', '#a8a69e'];
   const TOWER_TONES = [
@@ -147,6 +155,33 @@ export const N3 = (() => {
     '#b7cfa6',
     '#c9d3e6',
     '#f2d3a0',
+  ];
+  /** Bold, clearly different wall colours: a city of painted and glazed fronts, picked in a rotation so no two neighbours match. */
+  const VIVID = [
+    '#e4572e',
+    '#f3722c',
+    '#f9a03f',
+    '#f6c445',
+    '#c5d86d',
+    '#7bc86c',
+    '#2fa86a',
+    '#1fa7a0',
+    '#3dbbc9',
+    '#4aa3e3',
+    '#3b78d8',
+    '#5c6bd6',
+    '#8e63d1',
+    '#c05fc1',
+    '#e0569a',
+    '#f38ba0',
+    '#ef6f6f',
+    '#d99a5b',
+    '#8fd0c0',
+    '#9ac0f0',
+    '#b9a3e8',
+    '#f5a8c8',
+    '#a8d672',
+    '#f2d16b',
   ];
   const AWNINGS = ['#1f3b2d', '#5a1f1f', '#1d2f4d', '#2b2b2b', '#6b5a2e', '#7a2e2e', '#2d4a5a', '#c9a24a'];
   const SHOPS = [
@@ -786,6 +821,7 @@ export const N3 = (() => {
     BROWNSTONES,
     TERRACOTTAS,
     PAINTED,
+    VIVID,
     GLASSES,
     CONCRETES,
     TOWER_TONES,

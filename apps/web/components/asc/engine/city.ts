@@ -12,7 +12,15 @@ export const C3 = (() => {
   const { makePerson, SKIN, HAIR } = P3;
   const { STREET_Y } = N3;
 
-  const PALETTE = [...N3.BRICKS, ...N3.STONES, ...N3.TERRACOTTAS, ...N3.BROWNSTONES, '#a89c86', '#8d6e5a', '#b9a58a'];
+  const PALETTE = [
+    ...N3.BRICKS,
+    ...N3.TERRACOTTAS,
+    ...N3.VIVID,
+    ...N3.VIVID,
+    ...N3.PAINTED,
+    ...N3.STONES.slice(0, 4),
+    ...N3.BROWNSTONES.slice(0, 2),
+  ];
   const SHOPS = N3.SHOPS;
   // New York traffic is mostly yellow cabs
   const CAB = '#f2b807';

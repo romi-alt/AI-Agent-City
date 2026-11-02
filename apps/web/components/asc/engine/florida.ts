@@ -330,24 +330,21 @@ export const F3 = (() => {
       const taken = KEEP.slice();
       const hit = (x0, x1, z0, z1) => taken.some(k => x1 > k[0] && x0 < k[1] && z1 > k[2] && z0 < k[3]);
       const pickFrom = a => a[Math.floor(r() * a.length)];
-      const tintOf = kind =>
-        kind === 'terra'
-          ? pickFrom(N3.TERRACOTTAS)
-          : kind === 'ribbon'
-            ? pickFrom(N3.GLASSES)
-            : kind === 'brick'
-              ? r() < 0.3
-                ? pickFrom(N3.BROWNSTONES)
-                : pickFrom(N3.BRICKS)
-              : kind === 'glass'
-                ? pickFrom(N3.GLASSES)
-                : kind === 'dark'
-                  ? pickFrom(N3.CONCRETES)
-                  : r() < 0.3
-                    ? pickFrom(N3.PAINTED)
-                    : r() < 0.55
-                      ? pickFrom(N3.STONES)
-                      : pickFrom(N3.TOWER_TONES);
+      // Wall colours rotate through a bold palette by lot number, so neighbours always differ; glass towers take saturated
+      // tints; brick and terracotta keep their own, with the odd bright one. Two random draws per call, whatever the
+      // kind, so the layout does not change when the palettes do.
+      let lot = 0;
+      const tintOf = kind => {
+        const u = r(),
+          v = r();
+        const bold = () => N3.VIVID[(lot++ * 7 + Math.floor(v * 3)) % N3.VIVID.length];
+        const from = a => a[Math.floor(u * a.length) % a.length];
+        if (kind === 'glass' || kind === 'ribbon') return from(N3.GLASSES);
+        if (kind === 'terra') return v < 0.4 ? bold() : from(N3.TERRACOTTAS);
+        if (kind === 'brick') return v < 0.25 ? bold() : u < 0.3 ? from(N3.BROWNSTONES) : from(N3.BRICKS);
+        if (kind === 'dark') return v < 0.55 ? bold() : from(N3.CONCRETES);
+        return v < 0.85 ? bold() : from(N3.PAINTED);
+      };
       const finish = (cx, cz, t, floors, kind, tall) => {
         if (floors > 40) b.beacons.push({ x: cx, y: t.top + 2, z: cz, s: 1 });
         // equipment on most roofs that are not crowned: stair bulkhead, air handlers, vents, an antenna
@@ -545,12 +542,12 @@ export const F3 = (() => {
             floors = Math.max(3, floors);
             const kind =
               floors > 30
-                ? pickFrom(['glass', 'deco', 'glass', 'lime', 'ribbon'])
+                ? pickFrom(['glass', 'deco', 'glass', 'lime', 'ribbon', 'lime'])
                 : floors > 14
-                  ? pickFrom(['lime', 'deco', 'brick', 'glass', 'terra', 'ribbon'])
+                  ? pickFrom(['lime', 'deco', 'brick', 'glass', 'terra', 'ribbon', 'lime', 'deco'])
                   : floors > 7
-                    ? pickFrom(['brick', 'lime', 'dark', 'terra', 'lime', 'ribbon'])
-                    : pickFrom(['brick', 'brick', 'dark', 'terra']);
+                    ? pickFrom(['brick', 'lime', 'dark', 'terra', 'lime', 'ribbon', 'lime'])
+                    : pickFrom(['lime', 'brick', 'dark', 'terra', 'lime']);
             const tint = tintOf(kind);
             const seed = r();
             let t;
