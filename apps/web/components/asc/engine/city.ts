@@ -12,7 +12,15 @@ export const C3 = (() => {
   const { makePerson, SKIN, HAIR } = P3;
   const { STREET_Y } = N3;
 
-  const PALETTE = [...N3.BRICKS, ...N3.STONES, ...N3.TERRACOTTAS, ...N3.BROWNSTONES, '#a89c86', '#8d6e5a', '#b9a58a'];
+  const PALETTE = [
+    ...N3.BRICKS,
+    ...N3.TERRACOTTAS,
+    ...N3.VIVID,
+    ...N3.VIVID,
+    ...N3.PAINTED,
+    ...N3.STONES.slice(0, 4),
+    ...N3.BROWNSTONES.slice(0, 2),
+  ];
   const SHOPS = N3.SHOPS;
   // New York traffic is mostly yellow cabs
   const CAB = '#f2b807';
@@ -1061,9 +1069,14 @@ export const C3 = (() => {
         x.m.emissiveIntensity = x[tod] ?? 0;
       });
       this.groundMat.color.set(GROUND[tod]);
-      this.cloudM.color.set(tod === 'day' ? '#ffffff' : tod === 'evening' ? '#ffc9b0' : '#4a5470');
+      this.cloudM.color.set(tod === 'day' ? '#ffffff' : tod === 'evening' ? '#ffc9b0' : '#7683a8');
       this.cloudM.emissive.set(tod === 'day' ? '#ffffff' : tod === 'evening' ? '#ff9e80' : '#1e2436');
       this.cloudM.emissiveIntensity = tod === 'night' ? 0.4 : 0.35;
+      // at night the clouds are thin, pale smudges lit by the city, not solid dark balls
+      this.cloudM.transparent = tod === 'night';
+      this.cloudM.opacity = tod === 'night' ? 0.32 : 1;
+      this.cloudM.depthWrite = tod !== 'night';
+      this.cloudM.needsUpdate = true;
       this.birds.forEach(b => {
         b.g.visible = tod !== 'night';
       });

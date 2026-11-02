@@ -116,6 +116,14 @@ export const N3 = (() => {
     '#a5773f',
     '#3a4c78',
     '#7a6aa0',
+    '#2fa6b8',
+    '#3a86d6',
+    '#4cae7c',
+    '#8a62c8',
+    '#d1708f',
+    '#d6a447',
+    '#35b7a8',
+    '#5a7ae0',
   ];
   const CONCRETES = ['#b5b0a6', '#9c9a94', '#c5c0b4', '#a8a69e'];
   const TOWER_TONES = [
@@ -135,6 +143,46 @@ export const N3 = (() => {
   ];
   /** Painted and terracotta mid-rises, so a block is not all brick. */
   const TERRACOTTAS = ['#c8714a', '#d68a5a', '#b85a3c', '#d9a077', '#a8553d', '#e2b88f', '#8f5a45', '#cf8f6e'];
+  /** Painted plaster and stucco in pale colours that are not brick: mint, powder blue, butter, lilac, blush, sage. */
+  const PAINTED = [
+    '#a9c7d6',
+    '#c4dcc8',
+    '#e8d9a6',
+    '#d9c6df',
+    '#ecc2b3',
+    '#9db9c8',
+    '#f0e3c6',
+    '#b7cfa6',
+    '#c9d3e6',
+    '#f2d3a0',
+  ];
+  /** Bold, clearly different wall colours: a city of painted and glazed fronts, picked in a rotation so no two neighbours match. */
+  const VIVID = [
+    '#e4572e',
+    '#f3722c',
+    '#f9a03f',
+    '#f6c445',
+    '#c5d86d',
+    '#7bc86c',
+    '#2fa86a',
+    '#1fa7a0',
+    '#3dbbc9',
+    '#4aa3e3',
+    '#3b78d8',
+    '#5c6bd6',
+    '#8e63d1',
+    '#c05fc1',
+    '#e0569a',
+    '#f38ba0',
+    '#ef6f6f',
+    '#d99a5b',
+    '#8fd0c0',
+    '#9ac0f0',
+    '#b9a3e8',
+    '#f5a8c8',
+    '#a8d672',
+    '#f2d16b',
+  ];
   const AWNINGS = ['#1f3b2d', '#5a1f1f', '#1d2f4d', '#2b2b2b', '#6b5a2e', '#7a2e2e', '#2d4a5a', '#c9a24a'];
   const SHOPS = [
     'DELI',
@@ -255,6 +303,11 @@ export const N3 = (() => {
       [ce, ge] = canvas(S, S);
     const r = rngOf(kind.length * 977 + kind.charCodeAt(0));
     const lit = { brick: 0.36, lime: 0.42, glass: 0.5, deco: 0.4, dark: 0.3, terra: 0.38, ribbon: 0.48 }[kind];
+    // at night most lit windows come in whole floors (an office working late) with a few stragglers between, which
+    // reads as a building; scattered single windows read as noise
+    const rowOn = Array.from({ length: TILE }, () => r() < lit * 0.95);
+    let curRow = 0;
+    const isLit = () => r() < (rowOn[curRow] ? 0.82 : 0.06);
     const wall = {
       brick: '#f2e9e2',
       lime: '#f4efe4',
@@ -275,12 +328,29 @@ export const N3 = (() => {
       for (let y = 0; y < S; y += 4) gm.fillRect(0, y, S, 1);
       for (let y = 0; y < S; y += 8) for (let x = (y / 8) % 2 ? 0 : 6; x < S; x += 12) gm.fillRect(x, y, 1, 4);
     }
+    if (kind === 'brick' || kind === 'terra') {
+      for (let i = 0; i < 420; i++) {
+        gm.fillStyle = r() < 0.5 ? `rgba(0,0,0,${0.03 + r() * 0.06})` : `rgba(255,235,210,${0.03 + r() * 0.06})`;
+        gm.fillRect(Math.floor(r() * S), Math.floor(r() * S), 6 + Math.floor(r() * 10), 3);
+      }
+    }
     if (kind === 'lime') {
       gm.fillStyle = 'rgba(0,0,0,.07)';
       for (let x = 0; x < S; x += c) gm.fillRect(x, 0, 1, S);
       for (let y = 0; y < S; y += c) gm.fillRect(0, y + c - 2, S, 1);
     }
-    const lights = ['#ffd88a', '#ffe7b0', '#ffc66b', '#cfe6ff'];
+    // a lit window: warm lamps, white office tubes, the odd blue TV, each at its own brightness and with a soft halo
+    const lights = ['#ffd88a', '#ffe7b0', '#ffc66b', '#ffb36b', '#fff3d6', '#cfe6ff', '#9ec4ff'];
+    const lightUp = (x, y, w, h) => {
+      const k = r();
+      ge.save();
+      ge.shadowColor = 'rgba(255,205,130,.85)';
+      ge.shadowBlur = 5;
+      ge.globalAlpha = 0.35 + k * 0.5;
+      ge.fillStyle = lights[Math.floor(r() * lights.length)];
+      ge.fillRect(x + 0.5, y + 0.5, Math.max(1, w - 1), Math.max(1, h - 1));
+      ge.restore();
+    };
     const win = (x, y, w, h, glass, trim) => {
       // trim and glass do not take the wall tint
       if (trim) {
@@ -296,13 +366,47 @@ export const N3 = (() => {
       gm.fillRect(x, y, w, h);
       gk.fillStyle = '#000';
       gk.fillRect(x, y, w, h);
-      if (r() < lit) {
-        ge.fillStyle = lights[Math.floor(r() * lights.length)];
-        ge.fillRect(x, y, w, h);
+      // what makes a window read as a window: a reveal shadow, a sill, a sky reflection, blinds and the odd air conditioner
+      const q = r();
+      if (q < 0.24) {
+        gm.fillStyle = ['#d9cfb8', '#c8d2d8', '#e4dac4', '#bfae92'][Math.floor(r() * 4)];
+        gm.fillRect(x + 1, y + 1, w - 2, Math.max(2, h * (0.25 + r() * 0.5)));
+        gm.fillStyle = 'rgba(0,0,0,.12)';
+        for (let ly = y + 3; ly < y + h * 0.7; ly += 3) gm.fillRect(x + 1, ly, w - 2, 1);
+      } else if (q < 0.34) {
+        gm.fillStyle = ['#e8e0d0', '#d6c9b0'][Math.floor(r() * 2)];
+        gm.fillRect(x, y, Math.max(2, w * 0.28), h);
+        gm.fillRect(x + w - Math.max(2, w * 0.28), y, Math.max(2, w * 0.28), h);
+      }
+      gm.fillStyle = 'rgba(255,255,255,.17)';
+      gm.beginPath();
+      gm.moveTo(x + w * 0.1, y + h);
+      gm.lineTo(x + w * 0.55, y);
+      gm.lineTo(x + w * 0.8, y);
+      gm.lineTo(x + w * 0.35, y + h);
+      gm.fill();
+      gm.fillStyle = 'rgba(0,0,0,.42)';
+      gm.fillRect(x, y, w, 2);
+      gm.fillRect(x, y, 1.5, h);
+      if (trim) {
+        gm.fillStyle = 'rgba(255,255,255,.65)';
+        gm.fillRect(x - 1, y + h, w + 2, 1.6);
+        gm.fillStyle = 'rgba(0,0,0,.22)';
+        gm.fillRect(x - 1, y + h + 1.6, w + 2, 1);
+        if (r() < 0.07) {
+          gm.fillStyle = '#9aa0a6';
+          gm.fillRect(x + 1, y + h * 0.5, w - 2, h * 0.5);
+          gm.fillStyle = '#5f656b';
+          for (let ly = y + h * 0.58; ly < y + h - 1; ly += 2) gm.fillRect(x + 2, ly, w - 4, 1);
+        }
+      }
+      if (isLit()) {
+        lightUp(x, y, w, h);
       }
     };
     for (let cy = 0; cy < TILE; cy++)
       for (let cx = 0; cx < TILE; cx++) {
+        curRow = cy;
         const x0 = cx * c,
           y0 = cy * c;
         if (kind === 'brick') {
@@ -330,6 +434,8 @@ export const N3 = (() => {
           gm.fillStyle = '#2f4254';
           gm.fillRect(x0, y0, 1, c);
           gm.fillRect(x0, y0 + c - 9, c, 1);
+          gm.fillStyle = r() < 0.5 ? `rgba(255,255,255,${r() * 0.14})` : `rgba(0,25,45,${r() * 0.16})`;
+          gm.fillRect(x0 + 1, y0 + 1, c - 1, c - 10);
           gm.fillStyle = 'rgba(255,255,255,.14)';
           gm.beginPath();
           gm.moveTo(x0 + 3, y0 + c - 9);
@@ -337,9 +443,8 @@ export const N3 = (() => {
           gm.lineTo(x0 + 28, y0);
           gm.lineTo(x0 + 11, y0 + c - 9);
           gm.fill();
-          if (r() < lit) {
-            ge.fillStyle = lights[Math.floor(r() * lights.length)];
-            ge.fillRect(x0 + 1, y0 + 1, c - 1, c - 10);
+          if (isLit()) {
+            lightUp(x0 + 1, y0 + 1, c - 1, c - 10);
           }
         } else if (kind === 'deco') {
           win(x0 + 8, y0 + 5, 16, 22, ['#34495f', '#1e2d3d'], null);
@@ -372,9 +477,8 @@ export const N3 = (() => {
           gk.fillRect(x0, y0 + 5, c, 17);
           gm.fillStyle = '#2b3b4a';
           gm.fillRect(x0 + c - 1, y0 + 5, 1, 17);
-          if (r() < lit) {
-            ge.fillStyle = lights[Math.floor(r() * lights.length)];
-            ge.fillRect(x0, y0 + 5, c, 17);
+          if (isLit()) {
+            lightUp(x0, y0 + 5, c, 17);
           }
         } else {
           win(x0 + 11, y0 + 9, 10, 13, ['#2f4358', '#1e2b3a'], '#d6cdb9');
@@ -391,6 +495,10 @@ export const N3 = (() => {
   };
 
   const MATS = {};
+  /** Seconds, shared by every facade material: the city's lit windows slowly come on and go off. */
+  const TIME = { value: 0 };
+  /** 0 by day, 1 at night: how much the walls themselves show in the dark (moonlight and street glow). */
+  const NIGHT = { value: 0 };
   /**
    * One material per facade kind for a whole InstancedMesh of towers. The window grid keeps its real size whatever the
    * building's footprint and height are (UVs come from the instance scale), every instance has its own tint, a stone
@@ -410,6 +518,8 @@ export const N3 = (() => {
     m.onBeforeCompile = sh => {
       sh.uniforms.maskMap = { value: T.mask };
       sh.uniforms.uTile = { value: new THREE.Vector2(CW * TILE, FH * TILE) };
+      sh.uniforms.uTime = TIME;
+      sh.uniforms.uNight = NIGHT;
       sh.vertexShader = sh.vertexShader
         .replace(
           '#include <common>',
@@ -437,6 +547,8 @@ export const N3 = (() => {
           '#include <common>',
           `#include <common>
           uniform sampler2D maskMap;
+          uniform float uTime;
+          uniform float uNight;
           varying vec4 vTint; varying vec2 vInfo; varying float vTopD; varying float vBotD; varying float vUp;`,
         )
         .replace(
@@ -451,6 +563,14 @@ export const N3 = (() => {
           float shop = (1. - vUp) * vInfo.x * step(vBotD, 4.2) * (1. - cornice);
           col = mix(col, vTint.rgb * vec3(.55, .5, .46), shop);
           col = mix(col, vTint.rgb * .7, vUp);
+          // weathering: street grime low down, soot under the cornice, rain streaks, a little tone change per building,
+          // and gravel on the flat roofs
+          float grime = 1. - .24 * (1. - smoothstep(0., 9., vBotD)) * (1. - vUp);
+          float soot = 1. - .12 * (1. - smoothstep(0., 3.5, vTopD)) * (1. - vUp) * (1. - cornice);
+          float vary = .93 + .14 * fract(sin(vTint.w * 91.7) * 4375.5);
+          float streak = 1. - .09 * step(.8, fract(sin(floor(vMapUv.x * 9.) + vTint.w * 40.) * 437.58)) * (1. - vUp);
+          col *= grime * soot * vary * streak;
+          col *= mix(1., .86 + .14 * fract(sin(dot(floor(vMapUv * 38.), vec2(12.9898, 78.233))) * 43758.5453), vUp);
           diffuseColor.rgb *= col;
           float emK = (1. - vUp) * (1. - cornice) * (1. - shop);`,
         )
@@ -458,8 +578,14 @@ export const N3 = (() => {
           '#include <emissivemap_fragment>',
           `#ifdef USE_EMISSIVEMAP
             vec4 emitColor = texture2D(emissiveMap, vEmissiveMapUv);
-            totalEmissiveRadiance *= emitColor.rgb * emK + vec3(1., .78, .5) * shop * .55;
-          #endif`,
+            // about a fifth of the lit windows are people switching lights on and off through the evening
+            float wh = fract(sin(dot(floor(vMapUv * 8.), vec2(12.9898, 78.233)) + vTint.w * 50.) * 43758.5453);
+            float tw = mix(1., smoothstep(-.2, .2, sin(uTime * .09 + wh * 80.)), step(.8, wh));
+            totalEmissiveRadiance *= emitColor.rgb * emK * tw + vec3(1., .78, .5) * shop * .55;
+          #endif
+          // the walls themselves: faint moonlight on every face and warm street glow up the lower floors, so a tower
+          // keeps its shape and its colour after dark instead of vanishing between its lit windows
+          totalEmissiveRadiance += diffuseColor.rgb * uNight * (vec3(.07, .09, .16) + vec3(.55, .32, .12) * exp(-vBotD / 24.) * (1. - vUp));`,
         );
     };
     m.customProgramCacheKey = () => 'nyc-facade';
@@ -477,6 +603,7 @@ export const N3 = (() => {
       this.crowns = [];
       this.beacons = [];
       this.tanks = [];
+      this.units = [];
       this.baseY = 0;
     }
     q(w) {
@@ -586,8 +713,41 @@ export const N3 = (() => {
           },
         );
       }
+      if (this.units.length) {
+        this.unitMesh = place(
+          this.units,
+          roofUnitsGeo(),
+          new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.15 }),
+          (d, s) => {
+            d.position.set(s.x, s.y, s.z);
+            d.rotation.set(0, s.yaw, 0);
+            d.scale.setScalar(s.s);
+          },
+        );
+      }
       return this;
     }
+  }
+
+  /** Rooftop equipment: a stair bulkhead, two air-handling boxes with fans, a vent stack and a short antenna. */
+  function roofUnitsGeo() {
+    const conc = '#a9a59b',
+      steel = '#8d949c',
+      dark = '#3a3f46',
+      duct = '#b9bdc2';
+    const ps = [
+      part(box(3.2, 2.4, 2.6), conc, -2.2, 1.2, 0.6),
+      part(box(3.4, 0.14, 2.8), '#6e6b64', -2.2, 2.47, 0.6),
+      part(box(1.4, 1.1, 1.6), steel, 1.8, 0.55, -0.9),
+      part(cyl(0.5, 0.5, 0.12, 10), dark, 1.8, 1.16, -0.9),
+      part(box(1.2, 0.9, 1.4), duct, 2.3, 0.45, 1.5),
+      part(cyl(0.4, 0.4, 0.12, 10), dark, 2.3, 0.96, 1.5),
+      part(cyl(0.16, 0.16, 1.6, 8), duct, 0.2, 0.8, 1.9),
+      part(cyl(0.22, 0.16, 0.2, 8), dark, 0.2, 1.7, 1.9),
+      part(cyl(0.05, 0.05, 4.2, 5), dark, -0.4, 2.1, -1.6),
+      part(box(0.9, 0.04, 0.04), dark, -0.4, 3.4, -1.6),
+    ];
+    return merge(ps);
   }
 
   /** A wooden rooftop water tank on a steel frame, the New York signature. One merged geometry, vertex coloured. */
@@ -660,6 +820,8 @@ export const N3 = (() => {
     STONES,
     BROWNSTONES,
     TERRACOTTAS,
+    PAINTED,
+    VIVID,
     GLASSES,
     CONCRETES,
     TOWER_TONES,
@@ -674,6 +836,8 @@ export const N3 = (() => {
     box,
     cyl,
     QUALITY,
+    TIME,
+    NIGHT,
     kindTextures,
     facadeMaterial,
     Batch,

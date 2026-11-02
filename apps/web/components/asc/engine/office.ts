@@ -2074,11 +2074,16 @@ export const O3 = (() => {
       [-0.5, 0.5].forEach(dz => B.cyl(0.03, 0.76, legC, X(-w / 2 + 0.12), 0.38, z + dz, 'metal', 8));
       B.box(0.04, 0.04, 1.0, legC, X(-w / 2 + 0.12), 0.1, z, 0, 'metal');
       B.box(w - 0.75, 0.42, 0.025, '#e7dfd1', X(-0.2), 0.52, z + 0.52, 0, 'satin');
-      // monitor angled toward the front so the camera can see the agent's activity
-      const mx = X(-w / 2 + 0.6),
-        mz = z - 0.25,
+      // The screens face the person sitting behind the desk (their chair is at z - 1.05), centred in front of the
+      // keyboard; a desk with two screens fans them in towards the chair.
+      const chairAt = [x, z - 1.05];
+      const faceChair = (px, pz) => Math.atan2(chairAt[0] - px, chairAt[1] - pz);
+      const sp = w > 3 ? 0.68 : 0.58;
+      const cx0 = X(o.dual ? -0.1 : -0.2);
+      const mx = o.dual ? cx0 - sp : cx0,
+        mz = z - 0.12,
         my = 1.42,
-        mr = o.dual ? 0.3 : 0.5; // a desk with two screens turns the first one less, so they do not overlap
+        mr = faceChair(mx, mz);
       B.rbox(1.1, 0.68, 0.05, 0.02, '#1c2028', mx, my, mz, mr, 'metal');
       B.cyl(0.03, 0.3, legC, mx, my - 0.45, mz, 'metal', 8);
       B.box(0.3, 0.02, 0.2, legC, mx, 0.82, mz, mr, 'metal');
@@ -2144,20 +2149,21 @@ export const O3 = (() => {
       B.box(0.2, 0.006, 0.02, '#c9ced6', kx, 0.832, kz + 0.05, 0.04);
       B.box(0.22, 0.006, 0.19, '#2b3445', X(0.28), 0.813, z - 0.36);
       B.rbox(0.06, 0.03, 0.1, 0.015, '#e9ecef', X(0.28), 0.832, z - 0.36, 0.1, 'satin');
-      if (!o.dual) this._laptopB(B, X(0.05), 0.815, z - 0.02, 0, '#c9ced6');
+      if (!o.dual) this._laptopB(B, X(0.74), 0.815, z - 0.25, Math.PI + 0.2, '#c9ced6');
       if (o.dual) {
-        // second monitor, slightly angled in
-        const m2x = mx + 1.2,
-          m2z = z - 0.3;
-        B.rbox(1.0, 0.62, 0.05, 0.02, '#1c2028', m2x, 1.4, m2z, 0.15, 'metal');
+        // second monitor, fanned in towards the chair like the first
+        const m2x = cx0 + sp,
+          m2z = z - 0.12,
+          r2 = faceChair(m2x, m2z);
+        B.rbox(1.0, 0.62, 0.05, 0.02, '#1c2028', m2x, 1.4, m2z, r2, 'metal');
         B.cyl(0.03, 0.3, legC, m2x, 0.97, m2z, 'metal', 8);
-        B.box(0.3, 0.02, 0.2, legC, m2x, 0.82, m2z, 0.15, 'metal');
+        B.box(0.3, 0.02, 0.2, legC, m2x, 0.82, m2z, r2, 'metal');
         const s2 = new THREE.Mesh(
           new THREE.PlaneGeometry(0.93, 0.55),
           new THREE.MeshBasicMaterial({ map: this._chartTex(), toneMapped: false }),
         );
-        s2.position.set(m2x + Math.sin(0.15) * 0.03, 1.4, m2z + Math.cos(0.15) * 0.03);
-        s2.rotation.y = 0.15;
+        s2.position.set(m2x + Math.sin(r2) * 0.03, 1.4, m2z + Math.cos(r2) * 0.03);
+        s2.rotation.y = r2;
         root.add(s2);
       }
       // papers, notebook with a pen, a clipboard
@@ -2182,6 +2188,7 @@ export const O3 = (() => {
       // a little plant of its own
       const pk = o.plant || 'succulent';
       this._plantB(B, pk, X(-w / 2 + 0.2), 0.815, z + 0.4, pk === 'orchid' ? 0.42 : 0.4, o.pot || 'white');
+      this._deskLife(B, o.key || 'desk', x, z, w, accent, X, hi);
       this._deskExtras(B, o.key, x, z, w, accent, X);
       // the personal mug is its own mesh so it can leave the desk with its owner
       const mug = new THREE.Group();
@@ -2229,6 +2236,67 @@ export const O3 = (() => {
     }
 
     // one personal thing per agent, in their own colour
+    /**
+     * What makes a desk look used rather than furnished: a felt desk mat, a PC tower under the desk, a letter tray, a
+     * framed photo, a phone on its charger and one personal item that differs from desk to desk.
+     */
+    _deskLife(B, key, x, z, w, accent, X, hi) {
+      let h = 0;
+      for (const ch of String(key)) h = (h * 31 + ch.charCodeAt(0)) % 9973;
+      const pick = list => list[h % list.length];
+      // felt desk mat under the keyboard and mouse
+      B.box(
+        0.95,
+        0.004,
+        0.42,
+        pick(['#2b3445', '#3a3f4a', '#4a3b34', '#2f4a45']),
+        X(0.05),
+        0.8165,
+        z - 0.38,
+        0.04,
+        'matte',
+      );
+      // PC tower and a power brick under the desk
+      B.rbox(0.2, 0.42, 0.46, 0.015, '#23262d', X(0.25), 0.23, z - 0.3, 0, 'satin');
+      B.box(0.012, 0.02, 0.01, '#3ccf8e', X(0.25) + 0.101, 0.38, z - 0.1, 0, 'lamp');
+      B.box(0.14, 0.04, 0.08, '#2b2f38', X(-0.35), 0.02, z - 0.45, 0.3, 'matte');
+      if (!hi) return;
+      // letter tray with two levels of paper
+      B.box(0.24, 0.012, 0.3, '#2b2f38', X(-0.95), 0.825, z - 0.05, 0, 'satin');
+      B.box(0.22, 0.014, 0.28, '#fbfaf5', X(-0.95), 0.84, z - 0.05, 0.05);
+      B.box(0.24, 0.012, 0.3, '#2b2f38', X(-0.95), 0.9, z - 0.05, 0, 'satin');
+      B.box(0.22, 0.014, 0.28, '#f1ede2', X(-0.95), 0.915, z - 0.05, -0.04);
+      [-0.11, 0.11].forEach(dx => B.box(0.012, 0.09, 0.012, '#2b2f38', X(-0.95) + dx, 0.86, z - 0.17));
+      // framed photo
+      const photo = pick(['#9ec3da', '#e8b9a0', '#b8d5b0', '#d6c2e6']);
+      B.box(0.15, 0.19, 0.012, '#2b2f38', X(0.12), 0.915, z - 0.12, Math.PI - 0.15, 'satin');
+      B.box(0.12, 0.16, 0.014, photo, X(0.12), 0.915, z - 0.128, Math.PI - 0.15, 'matte');
+      B.box(0.03, 0.06, 0.012, '#d8d0c3', X(0.12), 0.9, z - 0.132, Math.PI - 0.15, 'matte');
+      // phone on a wireless charger
+      B.cyl(0.07, 0.012, '#2b2f38', X(0.18), 0.822, z + 0.1, 'satin', 16);
+      B.rbox(0.075, 0.008, 0.15, 0.012, '#15171c', X(0.18), 0.832, z + 0.1, 0.4, 'satin');
+      // one personal item per desk
+      const item = h % 4;
+      if (item === 0) {
+        // a travel tumbler
+        B.cyl(0.04, 0.036, '#e8604c', X(0.35), 0.88, z + 0.38, 'satin', 12);
+        B.cyl(0.042, 0.02, '#2b2f38', X(0.35), 0.95, z + 0.38, 'satin', 12);
+      } else if (item === 1) {
+        // a stack of books
+        B.rbox(0.22, 0.035, 0.16, 0.008, '#3fb6a8', X(0.4), 0.835, z + 0.4, 0.2, 'satin');
+        B.rbox(0.2, 0.03, 0.15, 0.008, '#f5b83d', X(0.4), 0.868, z + 0.4, -0.1, 'satin');
+        B.rbox(0.18, 0.03, 0.14, 0.008, '#26324d', X(0.4), 0.898, z + 0.4, 0.3, 'satin');
+      } else if (item === 2) {
+        // a small cactus and a pot of pens
+        this._plantB(B, 'cactus', X(0.4), 0.815, z + 0.4, 0.28, 'terra');
+      } else {
+        // headphones lying on the desk
+        B.tor(0.08, 0.012, '#1f2330', X(0.4), 0.84, z + 0.4, Math.PI / 2, 0, 0.3, 'satin', 14, Math.PI);
+        B.cyl(0.04, 0.03, '#1f2330', X(0.32), 0.83, z + 0.4, 'satin', 10, 0, Math.PI / 2);
+        B.cyl(0.04, 0.03, '#1f2330', X(0.48), 0.83, z + 0.4, 'satin', 10, 0, Math.PI / 2);
+      }
+    }
+
     _deskExtras(B, key, x, z, w, c, X) {
       const hi = !this.mobile;
       const gold = '#d9b45c';
@@ -3340,7 +3408,12 @@ export const O3 = (() => {
 
     _agentScreen(color, name) {
       const s = canvasTex(256, 150);
-      const draw = (lines = []) => {
+      let last = '',
+        work = false,
+        frame = -1;
+      // a chat-style window: the agent's replies (coloured) and the customer's messages (grey) scroll up while the
+      // agent works, and three dots show it is writing; the last thing it did sits along the bottom
+      const render = t => {
         const g = s.ctx;
         g.fillStyle = '#0f141c';
         g.fillRect(0, 0, 256, 150);
@@ -3349,20 +3422,52 @@ export const O3 = (() => {
         g.fillStyle = '#0a0e14';
         g.font = '700 13px "JetBrains Mono", monospace';
         g.fillText(name.toUpperCase(), 8, 16);
-        g.font = '500 11px "JetBrains Mono", monospace';
-        for (let i = 0; i < 8; i++) {
-          const w = 40 + ((i * 53 + lines.length * 17) % 170);
-          g.fillStyle = i === 0 ? color : 'rgba(200,215,235,.35)';
-          g.fillRect(8, 32 + i * 14, w, 6);
+        g.fillStyle = work ? '#0a0e14' : 'rgba(10,14,20,.35)';
+        g.beginPath();
+        g.arc(244, 11, 4, 0, 7);
+        g.fill();
+        const scroll = work ? Math.floor(t * 0.6) : 0;
+        for (let i = 0; i < 5; i++) {
+          const k = i + scroll,
+            mine = k % 2 === 0,
+            w = 56 + ((k * 53) % 112),
+            y = 30 + i * 18;
+          g.fillStyle = mine ? color : 'rgba(200,215,235,.26)';
+          rr(g, mine ? 248 - w : 8, y, w, 13, 6);
+          g.fill();
+          g.fillStyle = mine ? 'rgba(10,14,20,.45)' : 'rgba(10,14,20,.35)';
+          g.fillRect((mine ? 248 - w : 8) + 8, y + 5, Math.max(10, w - 26), 3);
         }
-        if (lines[0]) {
+        if (work) {
+          for (let d = 0; d < 3; d++) {
+            g.fillStyle = `rgba(200,215,235,${(Math.floor(t * 3) + d) % 3 === 0 ? 0.95 : 0.3})`;
+            g.beginPath();
+            g.arc(14 + d * 9, 126, 2.5, 0, 7);
+            g.fill();
+          }
+        }
+        if (last) {
           g.fillStyle = '#e9eef5';
-          g.fillText(String(lines[0]).slice(0, 34), 8, 144);
+          g.font = '500 11px "JetBrains Mono", monospace';
+          g.fillText(last.slice(0, 34), 8, 144);
         }
         s.t.needsUpdate = true;
       };
-      draw();
-      return { tex: s.t, draw };
+      const draw = (lines = []) => {
+        last = lines[0] ? String(lines[0]) : last;
+        frame = -1;
+        render(0);
+      };
+      /** Called every frame; redraws only when the animation step or the working flag changes (three times a second). */
+      const tick = (t, working) => {
+        const f = Math.floor(t * 3);
+        if (f === frame && working === work) return;
+        frame = f;
+        work = working;
+        render(t);
+      };
+      render(0);
+      return { tex: s.t, draw, tick };
     }
 
     _mkPerson(key, color) {
@@ -3468,8 +3573,10 @@ export const O3 = (() => {
         new THREE.PlaneGeometry(1.0, 0.58),
         new THREE.MeshBasicMaterial({ map: this.crmTex.t, toneMapped: false }),
       );
-      crmMini.position.set(x + 0.75, 1.27, z - 0.18);
-      crmMini.rotation.y = -0.4;
+      crmMini.scale.setScalar(0.7);
+      crmMini.position.set(x + 1.3, 1.25, z - 0.05);
+      crmMini.rotation.y = Math.atan2(-1.3, -1.0); // towards the owner's chair
+      crmMini.userData.view = 'crm';
       root.add(crmMini);
       const back = new THREE.Mesh(
         new RoundedBoxGeometry(1.08, 0.66, 0.04, 2, 0.02),
@@ -3477,10 +3584,11 @@ export const O3 = (() => {
       );
       back.position.copy(crmMini.position);
       back.rotation.copy(crmMini.rotation);
+      back.scale.setScalar(0.7);
       back.translateZ(-0.03);
       root.add(back);
-      crmMini.userData.view = 'crm';
-      this.clickables.push(crmMini);
+      back.userData.view = 'crm';
+      this.clickables.push(crmMini, back);
       const chair = this._chair(root, x, z - 1.0, Math.PI, '#26324d', { high: true });
       const p = this._person('owner', '#f2c879');
       p.g.position.set(x, 0, z - 1.05);
@@ -4064,6 +4172,18 @@ export const O3 = (() => {
       if (a) a.state = state;
     }
 
+    /**
+     * A standing status for an agent (the office page feeds it from the server): 'working' keeps the green ring and the
+     * typing dots on, 'needs' raises a hand and shows a red "needs you" tag, null returns to the idle routine.
+     */
+    setStatus(key, status) {
+      const a = this.actors[key];
+      if (!a || a.pin === status) return;
+      a.pin = status;
+      a.label.el.classList.toggle('is-working', status === 'working');
+      a.label.el.classList.toggle('is-needs', status === 'needs');
+    }
+
     say(key, text, ms = 7000, walk = false) {
       const a = this.actors[key];
       if (!a) return;
@@ -4198,8 +4318,9 @@ export const O3 = (() => {
         const a = this.actors[name.slice(6)];
         if (!a) return;
         const p = a.base;
-        pos = [p.x + 1.5, 2.6, p.z + 4.0];
-        tgt = [p.x, 1.2, p.z];
+        // from the side and a little behind: the screens face the person, so this shows them and the person together
+        pos = [p.x + 3.0, 2.3, p.z - 1.6];
+        tgt = [p.x - 0.2, 1.15, p.z - 0.4];
       } else {
         [pos, tgt] = V[name] || V.overview;
       }
@@ -4297,26 +4418,34 @@ export const O3 = (() => {
         for (const x of this.extras) x.update?.(dt, t, this.camera);
         for (const a of Object.values(this.actors)) {
           const talking = a.talkUntil > now,
-            working = a.state === 'working' || talking;
+            needs = a.state === 'needs' || a.pin === 'needs',
+            working = a.state === 'working' || a.pin === 'working' || talking;
+          if (a.screen?.tick) a.screen.tick(t, working && !needs);
           if (a.trip) this._walk(a, now, t);
           else {
             let mode = talking
               ? 'talk'
-              : working || a.key === 'owner' || Math.sin(t * 0.15 + a.phase) > -0.3
-                ? 'type'
-                : 'idle';
-            if (!talking && !working) mode = this._microMode(a, now) || mode;
+              : needs
+                ? Math.sin(t * 0.9 + a.phase) > 0.35
+                  ? 'wave'
+                  : 'look'
+                : working || a.key === 'owner' || Math.sin(t * 0.15 + a.phase) > -0.3
+                  ? 'type'
+                  : 'idle';
+            if (!talking && !working && !needs) mode = this._microMode(a, now) || mode;
             // turn the chair (and whoever sits in it) towards a neighbour while they chat
             a.yaw += (a.yawT - a.yaw) * 0.05;
-            a.g.rotation.y = a.yaw;
-            if (a.chairObj) a.chairObj.rotation.y = Math.PI + a.yaw;
+            // the chair gives a little with every shift of weight, so nobody sits quite still
+            const sway = Math.sin(t * 0.7 + a.phase * 2) * (working ? 0.035 : 0.06);
+            a.g.rotation.y = a.yaw + sway;
+            if (a.chairObj) a.chairObj.rotation.y = Math.PI + a.yaw + sway;
             if (a.deskMug) a.deskMug.visible = mode !== 'sip';
             a.animate(t, mode, a.phase);
           }
           if (a.ring) {
-            const col = a.state === 'needs' ? '#ff6b5e' : working ? '#3ccf8e' : a.color;
+            const col = needs ? '#ff6b5e' : working ? '#3ccf8e' : a.color;
             a.ring.material.color.set(col);
-            a.ring.material.opacity = working || a.state === 'needs' ? 0.55 + Math.sin(t * 5) * 0.35 : 0.5;
+            a.ring.material.opacity = working || needs ? 0.55 + Math.sin(t * 5) * 0.35 : 0.5;
             a.ring.scale.setScalar(working ? 1 + Math.sin(t * 5) * 0.06 : 1);
           }
           if (a.talkUntil && a.talkUntil < now) {
