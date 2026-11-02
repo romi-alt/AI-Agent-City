@@ -26,6 +26,7 @@ interface Engine {
   drawDash(data: object): void;
   drawContent(posts: object[], week?: string): void;
   say(key: string, text: string, ms?: number): void;
+  setStatus(key: string, status: 'working' | 'needs' | null): void;
   spin(on: boolean): boolean;
   resize(): void;
   dispose(): void;
@@ -160,6 +161,7 @@ function Scene({
       flyHome.current = city;
       office.flyTo(aerialPos, aerialTgt, true);
       office.resize();
+      applyStatus.current();
       const ro = new ResizeObserver(() => office.resize());
       ro.observe(el);
 
@@ -212,14 +214,21 @@ function Scene({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slotKeys, me.office.level]);
 
-  // What each agent is doing right now shows as a speech bubble over their desk.
-  useEffect(() => {
+  // The server's view of each agent drives the floor: working agents type with the green ring on, agents that need the
+  // visitor raise a hand under a red tag, and a new task shows once as a speech bubble over the desk.
+  const lastTask = useRef<Record<string, string>>({});
+  const applyStatus = useRef<() => void>(() => undefined);
+  applyStatus.current = () => {
     const office = engine.current;
     if (!office) return;
     slots.forEach(({ key, agent }) => {
-      if (agent.status === 'working' && agent.currentTask) office.say(key, agent.currentTask.slice(0, 60), 6000);
+      office.setStatus(key, agent.status === 'needs-you' ? 'needs' : agent.status === 'working' ? 'working' : null);
+      const task = agent.status === 'working' && agent.currentTask ? agent.currentTask.slice(0, 60) : '';
+      if (task && lastTask.current[key] !== task) office.say(key, task, 6000);
+      lastTask.current[key] = task;
     });
-  }, [slots]);
+  };
+  useEffect(() => applyStatus.current(), [slots]);
 
   return (
     <div

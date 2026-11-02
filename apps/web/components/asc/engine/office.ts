@@ -3408,7 +3408,12 @@ export const O3 = (() => {
 
     _agentScreen(color, name) {
       const s = canvasTex(256, 150);
-      const draw = (lines = []) => {
+      let last = '',
+        work = false,
+        frame = -1;
+      // a chat-style window: the agent's replies (coloured) and the customer's messages (grey) scroll up while the
+      // agent works, and three dots show it is writing; the last thing it did sits along the bottom
+      const render = t => {
         const g = s.ctx;
         g.fillStyle = '#0f141c';
         g.fillRect(0, 0, 256, 150);
@@ -3417,20 +3422,52 @@ export const O3 = (() => {
         g.fillStyle = '#0a0e14';
         g.font = '700 13px "JetBrains Mono", monospace';
         g.fillText(name.toUpperCase(), 8, 16);
-        g.font = '500 11px "JetBrains Mono", monospace';
-        for (let i = 0; i < 8; i++) {
-          const w = 40 + ((i * 53 + lines.length * 17) % 170);
-          g.fillStyle = i === 0 ? color : 'rgba(200,215,235,.35)';
-          g.fillRect(8, 32 + i * 14, w, 6);
+        g.fillStyle = work ? '#0a0e14' : 'rgba(10,14,20,.35)';
+        g.beginPath();
+        g.arc(244, 11, 4, 0, 7);
+        g.fill();
+        const scroll = work ? Math.floor(t * 0.6) : 0;
+        for (let i = 0; i < 5; i++) {
+          const k = i + scroll,
+            mine = k % 2 === 0,
+            w = 56 + ((k * 53) % 112),
+            y = 30 + i * 18;
+          g.fillStyle = mine ? color : 'rgba(200,215,235,.26)';
+          rr(g, mine ? 248 - w : 8, y, w, 13, 6);
+          g.fill();
+          g.fillStyle = mine ? 'rgba(10,14,20,.45)' : 'rgba(10,14,20,.35)';
+          g.fillRect((mine ? 248 - w : 8) + 8, y + 5, Math.max(10, w - 26), 3);
         }
-        if (lines[0]) {
+        if (work) {
+          for (let d = 0; d < 3; d++) {
+            g.fillStyle = `rgba(200,215,235,${(Math.floor(t * 3) + d) % 3 === 0 ? 0.95 : 0.3})`;
+            g.beginPath();
+            g.arc(14 + d * 9, 126, 2.5, 0, 7);
+            g.fill();
+          }
+        }
+        if (last) {
           g.fillStyle = '#e9eef5';
-          g.fillText(String(lines[0]).slice(0, 34), 8, 144);
+          g.font = '500 11px "JetBrains Mono", monospace';
+          g.fillText(last.slice(0, 34), 8, 144);
         }
         s.t.needsUpdate = true;
       };
-      draw();
-      return { tex: s.t, draw };
+      const draw = (lines = []) => {
+        last = lines[0] ? String(lines[0]) : last;
+        frame = -1;
+        render(0);
+      };
+      /** Called every frame; redraws only when the animation step or the working flag changes (three times a second). */
+      const tick = (t, working) => {
+        const f = Math.floor(t * 3);
+        if (f === frame && working === work) return;
+        frame = f;
+        work = working;
+        render(t);
+      };
+      render(0);
+      return { tex: s.t, draw, tick };
     }
 
     _mkPerson(key, color) {
@@ -4135,6 +4172,18 @@ export const O3 = (() => {
       if (a) a.state = state;
     }
 
+    /**
+     * A standing status for an agent (the office page feeds it from the server): 'working' keeps the green ring and the
+     * typing dots on, 'needs' raises a hand and shows a red "needs you" tag, null returns to the idle routine.
+     */
+    setStatus(key, status) {
+      const a = this.actors[key];
+      if (!a || a.pin === status) return;
+      a.pin = status;
+      a.label.el.classList.toggle('is-working', status === 'working');
+      a.label.el.classList.toggle('is-needs', status === 'needs');
+    }
+
     say(key, text, ms = 7000, walk = false) {
       const a = this.actors[key];
       if (!a) return;
@@ -4369,26 +4418,34 @@ export const O3 = (() => {
         for (const x of this.extras) x.update?.(dt, t, this.camera);
         for (const a of Object.values(this.actors)) {
           const talking = a.talkUntil > now,
-            working = a.state === 'working' || talking;
+            needs = a.state === 'needs' || a.pin === 'needs',
+            working = a.state === 'working' || a.pin === 'working' || talking;
+          if (a.screen?.tick) a.screen.tick(t, working && !needs);
           if (a.trip) this._walk(a, now, t);
           else {
             let mode = talking
               ? 'talk'
-              : working || a.key === 'owner' || Math.sin(t * 0.15 + a.phase) > -0.3
-                ? 'type'
-                : 'idle';
-            if (!talking && !working) mode = this._microMode(a, now) || mode;
+              : needs
+                ? Math.sin(t * 0.9 + a.phase) > 0.35
+                  ? 'wave'
+                  : 'look'
+                : working || a.key === 'owner' || Math.sin(t * 0.15 + a.phase) > -0.3
+                  ? 'type'
+                  : 'idle';
+            if (!talking && !working && !needs) mode = this._microMode(a, now) || mode;
             // turn the chair (and whoever sits in it) towards a neighbour while they chat
             a.yaw += (a.yawT - a.yaw) * 0.05;
-            a.g.rotation.y = a.yaw;
-            if (a.chairObj) a.chairObj.rotation.y = Math.PI + a.yaw;
+            // the chair gives a little with every shift of weight, so nobody sits quite still
+            const sway = Math.sin(t * 0.7 + a.phase * 2) * (working ? 0.035 : 0.06);
+            a.g.rotation.y = a.yaw + sway;
+            if (a.chairObj) a.chairObj.rotation.y = Math.PI + a.yaw + sway;
             if (a.deskMug) a.deskMug.visible = mode !== 'sip';
             a.animate(t, mode, a.phase);
           }
           if (a.ring) {
-            const col = a.state === 'needs' ? '#ff6b5e' : working ? '#3ccf8e' : a.color;
+            const col = needs ? '#ff6b5e' : working ? '#3ccf8e' : a.color;
             a.ring.material.color.set(col);
-            a.ring.material.opacity = working || a.state === 'needs' ? 0.55 + Math.sin(t * 5) * 0.35 : 0.5;
+            a.ring.material.opacity = working || needs ? 0.55 + Math.sin(t * 5) * 0.35 : 0.5;
             a.ring.scale.setScalar(working ? 1 + Math.sin(t * 5) * 0.06 : 1);
           }
           if (a.talkUntil && a.talkUntil < now) {

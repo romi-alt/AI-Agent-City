@@ -2176,3 +2176,29 @@ html:has(.asc) {
   font-size: 12px;
   color: var(--muted);
 }
+
+.asc #demoApp .tag3d.is-working .nm {
+  box-shadow: 0 0 0 1px #3ccf8e;
+}
+.asc #demoApp .tag3d.is-working .nm::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #3ccf8e;
+  vertical-align: 1px;
+}
+.asc #demoApp .tag3d.is-needs .nm {
+  box-shadow: 0 0 0 1px #ff6b5e;
+}
+.asc #demoApp .tag3d.is-needs .nm::after {
+  content: 'NEEDS YOU';
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: #ff6b5e;
+  color: #fff;
+  font-size: 9px;
+}
