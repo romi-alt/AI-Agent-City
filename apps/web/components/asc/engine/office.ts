@@ -1061,9 +1061,9 @@ export const O3 = (() => {
         ],
         evening: [
           [0, '#2f2f66'],
-          [0.35, '#7a4f86'],
-          [0.62, '#f08a6a'],
-          [0.82, '#ffc27a'],
+          [0.16, '#7a4f86'],
+          [0.31, '#e79a78'], // meets the haze (fog colour) where a wide view's horizon sits, so there is no seam
+          [0.6, '#ffc27a'],
           [1, '#ffe0a8'],
         ],
         night: [

@@ -13,6 +13,7 @@ interface Engine {
   setTimeOfDay(t: string): void;
   flyTo(pos: number[], tgt: number[], instant?: boolean): void;
   spin(on: boolean): boolean;
+  camera: { matrixWorldInverse: { elements: number[] }; projectionMatrix: { elements: number[] } };
   resize(): void;
   dispose(): void;
 }
@@ -24,9 +25,13 @@ interface EngineModule {
   Florida: new (office: Engine, opts: object) => { view(id: string): [number[], number[]] };
 }
 
+/** Where the floor tag points: a little below the top of the HQ tower, in city units. */
+const HQ_TAG_HEIGHT = 30;
+
 export default function HeroWorldCanvas({ paused, onError }: { paused: boolean; onError: () => void }) {
   const host = useRef<HTMLDivElement>(null);
   const engine = useRef<Engine | null>(null);
+  const tag = useRef<HTMLDivElement>(null);
   const pausedNow = useRef(paused);
   pausedNow.current = paused;
 
@@ -36,6 +41,8 @@ export default function HeroWorldCanvas({ paused, onError }: { paused: boolean; 
     let cancelled = false;
     let ro: ResizeObserver | undefined;
     let spinTimer = 0;
+    let stopTimer = 0;
+    let raf = 0;
     (async () => {
       const { Office3D, DemoWorld, Florida } = (await import('./engine')) as unknown as EngineModule;
       if (cancelled) return;
@@ -66,23 +73,54 @@ export default function HeroWorldCanvas({ paused, onError }: { paused: boolean; 
       office.extras.push(new DemoWorld(office, { mobile }));
       const florida = new Florida(office, { mobile });
       office.extras.push(florida);
-      office.setTimeOfDay('day');
-      // The demo's aerial view, pulled in to about half the distance: a steeper look down over the river and the
-      // dealership core, with no world edge on the horizon. On a tall phone screen it comes in closer and steeper still, so the far edge of the ground stays out of frame.
-      const [far, tgt] = florida.view('aerial');
-      const k = mobile ? [0.35, 0.75, 0.35] : [0.5, 0.5, 0.5];
+      office.setTimeOfDay('evening'); // dusk: warm sky and lit windows, the hero's lighting
+      // Dusk skyline: the demo's skyline view pulled back and raised so the towers stand against the warm sky, like a
+      // photograph of the city at the end of the day. On a tall phone screen the old close aerial still works better.
+      const [far, tgt] = florida.view(mobile ? 'aerial' : 'skyline');
+      const k = mobile ? [0.35, 0.75, 0.35] : [1.5, 1.5, 1.5];
       const pos = far.map((v, i) => tgt[i]! + (v - tgt[i]!) * k[i]!);
+      if (!mobile) pos[1] = 120;
       office.flyTo(pos, tgt, true);
       office.paused = pausedNow.current;
       office.resize();
       ro = new ResizeObserver(() => office.resize());
       ro.observe(el);
-      // Start turning once the live scene has faded in over the still frame, so the two line up at first.
-      spinTimer = window.setTimeout(() => office.spin(true), 3000);
+      // Start turning once the live scene has faded in over the still frame, so the two line up at first. It turns for
+      // a short while and then holds, so the camera never swings round to the back of the skyline.
+      spinTimer = window.setTimeout(() => {
+        office.spin(true);
+        stopTimer = window.setTimeout(() => office.spin(false), 6000);
+      }, 3000);
+      // The floor tag follows the HQ tower as the camera turns: a small card on a leader line, hidden whenever the tower
+      // is behind the camera, outside the frame or under the headline.
+      const place = () => {
+        raf = requestAnimationFrame(place);
+        const t = tag.current;
+        if (!t || pausedNow.current) return;
+        const v = office.camera.matrixWorldInverse.elements;
+        const pr = office.camera.projectionMatrix.elements;
+        // the tag's world point (the HQ tower) through the camera's view and projection matrices (column-major)
+        const vx = v[12]! + v[4]! * HQ_TAG_HEIGHT;
+        const vy = v[13]! + v[5]! * HQ_TAG_HEIGHT;
+        const vz = v[14]! + v[6]! * HQ_TAG_HEIGHT;
+        const cw = pr[11]! * vz;
+        const nx = (pr[0]! * vx) / cw;
+        const ny = (pr[5]! * vy) / cw;
+        const w = el.clientWidth;
+        const h = el.clientHeight;
+        const x = (nx * 0.5 + 0.5) * w;
+        const y = (-ny * 0.5 + 0.5) * h;
+        const ok = vz < 0 && x > w * 0.42 && x < w - 190 && y > 90 && y < h - 150;
+        t.style.opacity = ok ? '1' : '0';
+        if (ok) t.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+      };
+      raf = requestAnimationFrame(place);
     })().catch(() => !cancelled && onError());
     return () => {
       cancelled = true;
       window.clearTimeout(spinTimer);
+      window.clearTimeout(stopTimer);
+      cancelAnimationFrame(raf);
       ro?.disconnect();
       engine.current?.dispose();
       engine.current = null;
@@ -95,5 +133,17 @@ export default function HeroWorldCanvas({ paused, onError }: { paused: boolean; 
     if (engine.current) engine.current.paused = paused;
   }, [paused]);
 
-  return <div ref={host} className="hero-world" />;
+  return (
+    <>
+      <div ref={host} className="hero-world" />
+      <div ref={tag} className="hero-floor-tag" aria-hidden="true">
+        <span className="hero-floor-tag-dot" />
+        <span className="hero-floor-tag-card">
+          <small>Floor 24</small>
+          <b>Fast Sales</b>
+          <em>Simulated sample floor</em>
+        </span>
+      </div>
+    </>
+  );
 }
