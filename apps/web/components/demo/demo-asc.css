@@ -277,3 +277,29 @@
   padding: 12px 16px;
   border-radius: 12px;
 }
+
+/* ---- UI audit fixes ---- */
+/* The request form card kept the landing page's hard-coded white background, which made light text invisible. */
+.mk.dm-page .mk-demo-card {
+  background:
+    linear-gradient(160deg, rgba(16, 22, 38, 0.92) 55%, rgba(24, 20, 40, 0.92)) padding-box,
+    linear-gradient(135deg, #f5b83d, #ff6b5e, #e879f9, #818cf8) border-box;
+  box-shadow: 0 30px 70px -40px rgba(255, 107, 94, 0.5);
+}
+.mk.dm-page .mk-demo-steps li,
+.mk.dm-page .mk-demo-copy p {
+  color: var(--text-2);
+}
+.mk.dm-page .mk-demo-steps span {
+  color: #1a1206;
+}
+/* A bigger tick box and a tap area that is the whole consent line. */
+.mk.dm-page input[type='checkbox'] {
+  width: 24px;
+  height: 24px;
+  accent-color: #f5b83d;
+}
+.mk.dm-page .dm-link {
+  display: inline-block;
+  padding-block: 10px;
+}

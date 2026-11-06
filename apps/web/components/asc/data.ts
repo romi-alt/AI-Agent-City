@@ -106,7 +106,7 @@ export const MARQUEE = [
 ];
 
 export const NAV_LINKS = [
-  { href: '#live-demo', label: 'Live demo' },
+  { href: '#live-demo', label: 'Preview' },
   { href: '#how', label: 'How it works' },
   { href: '#districts', label: 'Districts' },
   { href: '#agents', label: 'AI team' },

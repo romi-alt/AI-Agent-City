@@ -36,7 +36,7 @@ const pitchCsp = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob:",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' data: blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+  "connect-src 'self' data: blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
