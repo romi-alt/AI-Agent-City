@@ -1121,6 +1121,7 @@ export const O3 = (() => {
             env: true,
             bloom: 0.18,
             glow: 1,
+            cool: 0.3,
           },
           evening: {
             fog: ['#e79a78', 80, 210],
@@ -1133,6 +1134,7 @@ export const O3 = (() => {
             env: false,
             bloom: 0.55,
             glow: 2.5,
+            cool: 0.5,
           },
           night: {
             fog: ['#1a2242', 70, 200],
@@ -1145,6 +1147,7 @@ export const O3 = (() => {
             env: false,
             bloom: 0.75,
             glow: 3.5,
+            cool: 0.6,
           },
         }[tod] || {};
       this.scene.background = this._skyTex(tod);
@@ -1164,6 +1167,7 @@ export const O3 = (() => {
         this.L.warm.forEach(l => {
           l.intensity = P.warm;
         });
+        this.L.cool.intensity = P.cool;
       }
       this.lampMats.forEach(m => {
         m.emissiveIntensity = P.lamp;
@@ -1258,52 +1262,64 @@ export const O3 = (() => {
         root.add(l);
         return l;
       });
-      this.L = { hemi, amb, sun, warm };
+      // cool light from the glass wall, so warm lamps and cool dusk light stay separate sources (as in the references)
+      const cool = new THREE.DirectionalLight('#a9c6ff', 0.3);
+      cool.position.set(2, 9, -26);
+      root.add(cool);
+      this.L = { hemi, amb, sun, warm, cool };
     }
 
     _room(root, floorLabel) {
-      // light oak plank floor
+      // large-format pale stone tiles (about 1.2 m) with fine grout lines and soft veining, polished
       const ft = canvasTex(1024, 704);
       const g = ft.ctx;
-      g.fillStyle = '#e2c39a';
+      g.fillStyle = '#cdc6ba';
       g.fillRect(0, 0, 1024, 704);
-      const plankH = 32;
-      for (let y = 0; y < 704; y += plankH) {
-        let x = -((y / plankH) % 4) * 60;
-        while (x < 1024) {
-          const len = 160 + rnd() * 140,
-            l = 0.9 + rnd() * 0.16;
-          g.fillStyle = `rgb(${(226 * l) | 0},${(193 * l) | 0},${(152 * l) | 0})`;
-          g.fillRect(x, y, len, plankH);
-          g.strokeStyle = 'rgba(150,100,55,.10)';
+      const tile = 76;
+      for (let y = 0; y < 704; y += tile)
+        for (let x = 0; x < 1024; x += tile) {
+          const l = 0.95 + rnd() * 0.08;
+          g.fillStyle = `rgb(${(206 * l) | 0},${(199 * l) | 0},${(188 * l) | 0})`;
+          g.fillRect(x, y, tile, tile);
+          g.strokeStyle = 'rgba(120,110,98,.12)';
           g.lineWidth = 1;
           for (let k = 0; k < 3; k++) {
             g.beginPath();
-            g.moveTo(x + 4, y + 6 + k * 9 + rnd() * 3);
-            g.bezierCurveTo(x + len * 0.3, y + 4 + k * 9, x + len * 0.6, y + 10 + k * 9, x + len - 4, y + 6 + k * 9);
+            g.moveTo(x + rnd() * tile, y);
+            g.bezierCurveTo(
+              x + rnd() * tile,
+              y + tile * 0.3,
+              x + rnd() * tile,
+              y + tile * 0.7,
+              x + rnd() * tile,
+              y + tile,
+            );
             g.stroke();
           }
-          g.fillStyle = 'rgba(120,80,40,.28)';
-          g.fillRect(x, y, 2, plankH);
-          x += len;
         }
-        g.fillStyle = 'rgba(120,80,40,.22)';
-        g.fillRect(0, y, 1024, 2);
-      }
+      g.fillStyle = 'rgba(96,88,78,.38)';
+      for (let y = 0; y <= 704; y += tile) g.fillRect(0, y, 1024, 2);
+      for (let x = 0; x <= 1024; x += tile) g.fillRect(x, 0, 2, 704);
       ft.t.wrapS = ft.t.wrapT = THREE.RepeatWrapping;
       ft.t.repeat.set(2, 2);
       ft.t.needsUpdate = true;
       const floor = new THREE.Mesh(
         new THREE.PlaneGeometry(W, D),
-        new THREE.MeshStandardMaterial({ map: ft.t, roughness: 0.78, metalness: 0 }),
+        new THREE.MeshPhysicalMaterial({
+          map: ft.t,
+          roughness: 0.46,
+          metalness: 0,
+          clearcoat: 0.3,
+          clearcoatRoughness: 0.4,
+        }),
       );
       floor.rotation.x = -Math.PI / 2;
       floor.receiveShadow = true;
       root.add(floor);
 
-      const wallMat = new THREE.MeshStandardMaterial({ color: '#f7e6cf', roughness: 0.92 });
-      const wood = (this.woodMat = new THREE.MeshStandardMaterial({ color: '#b97e4e', roughness: 0.6 }));
-      const frameMat = new THREE.MeshStandardMaterial({ color: '#f4eee6', roughness: 0.5, metalness: 0.1 });
+      const wallMat = new THREE.MeshStandardMaterial({ color: '#ece6dc', roughness: 0.92 });
+      const wood = (this.woodMat = new THREE.MeshStandardMaterial({ color: '#98704c', roughness: 0.58 }));
+      const frameMat = new THREE.MeshStandardMaterial({ color: '#35322f', roughness: 0.4, metalness: 0.5 });
 
       // left wall: solid, peach wainscot + cream
       const left = new THREE.Mesh(new THREE.BoxGeometry(0.3, WALL_H, D), wallMat);
@@ -1312,7 +1328,7 @@ export const O3 = (() => {
       root.add(left);
       const wains = new THREE.Mesh(
         new THREE.BoxGeometry(0.06, 1.1, D),
-        new THREE.MeshStandardMaterial({ color: '#efb48a', roughness: 0.85 }),
+        new THREE.MeshStandardMaterial({ color: '#8a6a4f', roughness: 0.6 }),
       );
       wains.position.set(-W / 2 + 0.18, 0.55, 0);
       root.add(wains);
@@ -1326,7 +1342,7 @@ export const O3 = (() => {
       const sg = st.ctx; // vertical wood slats
       for (let x = 0; x < 512; x += 16) {
         const l = 0.88 + rnd() * 0.2;
-        sg.fillStyle = `rgb(${(185 * l) | 0},${(126 * l) | 0},${(78 * l) | 0})`;
+        sg.fillStyle = `rgb(${(150 * l) | 0},${(110 * l) | 0},${(76 * l) | 0})`;
         sg.fillRect(x, 0, 13, 256);
         sg.fillStyle = '#4a3020';
         sg.fillRect(x + 13, 0, 3, 256);
@@ -1345,11 +1361,12 @@ export const O3 = (() => {
       panel.receiveShadow = true;
       root.add(panel);
       const glassMat = new THREE.MeshStandardMaterial({
-        color: '#cfe8f5',
+        color: '#aecde4',
         transparent: true,
-        opacity: 0.1,
-        roughness: 0.05,
-        metalness: 0.2,
+        opacity: 0.16,
+        roughness: 0.03,
+        metalness: 0.1,
+        envMapIntensity: 1.4,
         depthWrite: false,
         side: THREE.DoubleSide,
       });
@@ -1376,8 +1393,8 @@ export const O3 = (() => {
         };
         box(len, 0.22, 0.32, (x0 + x1) / 2, 0.11, z, wood); // sill
         box(len, 0.14, 0.2, (x0 + x1) / 2, h - 0.07, z); // head
-        box(len, 0.06, 0.12, (x0 + x1) / 2, 1.0, z); // transom
-        for (let i = 0; i <= n; i++) box(0.1, h, 0.16, x0 + (len / n) * i, h / 2, z);
+        box(len, 0.04, 0.1, (x0 + x1) / 2, 1.0, z); // transom
+        for (let i = 0; i <= n; i++) box(0.06, h, 0.14, x0 + (len / n) * i, h / 2, z);
       };
       glassRun(-W / 2, PANEL[0], zb);
       glassRun(PANEL[1], W / 2, zb);
@@ -2014,7 +2031,7 @@ export const O3 = (() => {
     }
 
     /* ---------- chairs (one merged mesh each, so they can turn) ---------- */
-    _chair(root, x, z, rotY, color = '#e8862f', o = {}) {
+    _chair(root, x, z, rotY, color = '#34373d', o = {}) {
       const B = new Bake(null, this.mobile);
       const seatC = color,
         dark = '#2b2f38',
@@ -2060,7 +2077,7 @@ export const O3 = (() => {
       const B = this.S,
         hi = !this.mobile,
         X = lx => x + lx,
-        top = '#b97e4e',
+        top = '#9a7048',
         white = '#f4eee6',
         legC = '#2b2f38';
       B.rbox(w, 0.07, 1.15, 0.03, top, x, 0.78, z, 0, 'satin');
@@ -2404,10 +2421,10 @@ export const O3 = (() => {
     }
 
     _decor(root) {
-      this._rug(root, 3.6, -1.6, 15.6, 9.6, '#efdcc0', '#d9a066', 'diamonds'); // team area
-      this._rug(root, -8.2, -5.2, 7.2, 7.4, '#e7d2b4', '#c9845a', 'kilim'); // owner + CEO
-      this._rug(root, 11.4, 6.6, 6.6, 6.6, '#cfe0d4', '#3fb6a8', 'rings', true); // meeting corner
-      this._rug(root, -9.5, 7.6, 6.4, 4.2, '#f2cf9a', '#e8604c', 'stripes'); // sofa corner
+      this._rug(root, 3.6, -1.6, 15.6, 9.6, '#e6dfd2', '#b5a690', 'diamonds'); // team area
+      this._rug(root, -8.2, -5.2, 7.2, 7.4, '#ded4c4', '#8d7a63', 'kilim'); // owner + CEO
+      this._rug(root, 11.4, 6.6, 6.6, 6.6, '#d8dedb', '#8fa39b', 'rings', true); // meeting corner
+      this._rug(root, -9.5, 7.6, 6.4, 4.2, '#e5dac8', '#a3735a', 'stripes'); // sofa corner
       this._rug(root, -11.6, -9.0, 5.6, 1.1, '#e9e1d2', '#26324d', 'stripes'); // kitchenette runner
       this._rug(root, -5.4, 5.0, 3.6, 3.0, '#e4ecf0', '#26324d', 'diamonds'); // huddle booth
       this._brickWall(root);
@@ -2967,7 +2984,7 @@ export const O3 = (() => {
       S.rbox(0.38, 0.55, 0.2, 0.04, '#3fb6a8', 0.9, 0.34, 10.6, 0.4, 'satin');
       S.box(0.04, 0.5, 0.04, '#2b2f38', 0.84, 0.75, 10.6, 0.4, 'metal');
       // sofa corner: tufted mustard sofa with cushions and a throw
-      const sofaC = '#e2a63b';
+      const sofaC = '#cfc7ba';
       S.rbox(3.6, 0.5, 1.1, 0.15, sofaC, -9.5, 0.35, 8.4, 0, 'matte');
       S.rbox(3.6, 0.9, 0.32, 0.14, sofaC, -9.5, 0.85, 8.85, 0, 'matte');
       [-1, 1].forEach(s => S.rbox(0.32, 0.75, 1.1, 0.12, sofaC, -9.5 + s * 1.75, 0.5, 8.4, 0, 'matte'));
@@ -3306,6 +3323,10 @@ export const O3 = (() => {
             C.cyl(0.02, 0.06, '#2b2f38', x + 0.1, 5.52, z, 'metal', 6);
           }
       });
+      // indirect cove strips: a warm line of light under every beam and a wash along the left wall (they glow more as it gets dark)
+      [-12.4, -4.2, 4.0, 12.2].forEach(x => C.box(0.1, 0.02, 20.4, '#fff4d6', x, 5.44, 0, 0, 'lamp'));
+      C.box(0.08, 0.03, 20.4, '#fff4d6', -15.45, 4.95, 0, 0, 'lamp');
+      C.box(0.14, 0.06, 20.4, '#d9d2c4', -15.5, 5.0, 0, 0, 'satin');
       // round galvanised ducts along the room, joints and hangers
       [
         [-6.0, 5.1, 0.42],
