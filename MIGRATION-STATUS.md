@@ -640,6 +640,15 @@ src/core/types.ts          report status 'skipped'
 test/containment.test.ts   12 tests: zero provider calls, catalog-only pulse, fail-closed state, file mode
 ```
 
+### X08 update (live27 and live28)
+
+X08 below is the first state of the front page and is out of date: the owner later asked for the design's own engine
+everywhere, and it shipped. `main` `4e15d41` (live28) has the front page, `/city`, the live demo and the signed-in
+office on the design engine (New York city, dealerships, Fast Sales floor), a dusk hero, the demo funnel in the
+AutoSalesCity theme, and live27's building, night and floor work. `/city/classic` keeps the earlier city-scene explorer.
+Checks on `main`: install, Prettier, package builds, typecheck and 62/62 web tests pass. See
+`planning/agentcity-migration/x05-live-build/LIVE-BUILD.md` for what is live and what is unverified.
+
 ### X08 Front page: the AutoSalesCity design on the existing city (branch `design/autosalescity-frontpage`, not deployed)
 
 The front page (`/`) now follows the supplied AutoSalesCity design, with the existing AgentCity city kept as its 3D
