@@ -1,23 +1,29 @@
 # AgentCity live build: https://autosalescity.site
 
-Status of this document: first written on 2026-10-28, updated on 2026-11-02. The live site runs Hostinger build
-`01a199cf-4188-70ac-a47c-f36606fd7697` (zip `agentcity-live27`, deployed 2026-11-02 01:11 UTC), built from the code of
-`main` `f00b18e` (PR #16; the package was built from branch commit `22e50a1`, the same tree). Since live26 it adds:
-realistic building facades with weathering and rooftop equipment; richer desks with monitors facing the seated agent;
-dealership exteriors (roof panels, flags, air dancers) and a clearer dealership camera; city life (birds, a helicopter,
-smoke, flickering windows); a much better night view (lit windows by whole floor, moonlit walls, street lights, moon,
-thin clouds); live agent status on the floor (working ring and green tag, needs-you hand and red tag, signed-in page
-only), animated chat screens and chair sway; and bold, clearly different daytime building colours (a 24-colour palette
-rotated by lot so neighbours never match, saturated glass towers). Earlier changes: a sign-in link when the request form
-is used with an address that already has an active demo (live23, backend only); the signed-in office page
-(`/demo/office`) running the live New York city and Fast Sales floor, with the visitor's agents at the desks (live24);
-seated skirts, selected name-tag roles and tag height fixed (live25); labelled sample content, CRM and dashboard wall
-screens and non-overlapping two-screen desks (live26); and `/pitch` with its claims reworded as targets.
+Status of this document: first written on 2026-10-28, updated for live28. The live build is live28, built from the code
+of `main` `4e15d41` (PR #19, "Hero at dusk", on top of PR #18, "Floor realism", PR #17 and live27's `f00b18e`). The
+Hostinger build id, the zip name and the deploy time of live28 were not recorded when this was written and need
+filling in from the host's deployment list: build id ____, deployed ____ UTC. Since live27 (`f00b18e`, build
+`01a199cf-4188-70ac-a47c-f36606fd7697`, deployed 2026-11-02 01:11 UTC) it adds: a warm dusk hero on the front page (the
+live demo engine's aerial view of the New York city as a slow-spinning backdrop, with new dusk poster images
+`public/city/hero-real-864.webp` and `hero-real-1728.webp`, a seamless horizon and a floor tag on the HQ tower); and a
+calmer, more realistic Fast Sales floor (pale stone tiles, walnut timber, slim dark glass mullions, a glass-walled
+meeting room, a lounge armchair, a floor plant, a stone reception floor, calm rugs and upholstery, warm cove lighting
+and a cool window fill). Live27 itself added realistic building facades with weathering and rooftop equipment; richer
+desks with monitors facing the seated agent; dealership exteriors (roof panels, flags, air dancers) and a clearer
+dealership camera; city life (birds, a helicopter, smoke, flickering windows); a much better night view; live agent
+status on the floor (signed-in page only), animated chat screens and chair sway; and bold, clearly different daytime
+building colours. Earlier changes: a sign-in link when the request form is used with an address that already has an
+active demo (live23, backend only); the signed-in office page (`/demo/office`) running the live New York city and Fast
+Sales floor, with the visitor's agents at the desks (live24); seated skirts, selected name-tag roles and tag height
+fixed (live25); labelled sample content, CRM and dashboard wall screens and non-overlapping two-screen desks (live26);
+the demo pages (request form, check-email, welcome, sign-in) in the AutoSalesCity night theme; and `/pitch` with its
+claims reworded as targets.
 The rest is as in live22: the AutoSalesCity front page, the New York city in `/city` and the demo, the scanner-proof
 confirm page, CSP and HSTS headers (`/pitch` has its own wider CSP for its CDN scripts), a 14-day demo default, and
 Present mode. The owner confirmed on 2026-11-01 that the email arrives and the office opens. To rebuild it:
 `NEXT_PUBLIC_LITE_DEMO=true scripts/package-preview.sh https://autosalescity.site agentcity.zip` from `main`.
-Rollback: rebuild from `3fc1ae8` (live22) or `569682e` (the live17 source). Earlier text below that still names live14
+Rollback: rebuild from `f00b18e` (live27), `3fc1ae8` (live22) or `569682e` (the live17 source). Earlier text below that still names live14
 or live22 describes an older build. This document says what the live site does, how it is built and run, and what has and has not been verified.
 It contains no secrets: only the names of settings.
 
@@ -333,6 +339,12 @@ The homepage was written to the proposal direction supplied by the owner and che
 
 ## 10. The 3D city and office
 
+> **Which engine draws what (live28).** The front-page hero, `/city`, the live-demo overlay and the signed-in office all
+> run the design engine in `apps/web/components/asc/engine/` (`florida.ts` the New York city, `city.ts` street level,
+> `dealers.ts` dealerships, `office.ts` the Fast Sales floor, `people.ts`, `nyc.ts` building looks and window shader).
+> The hero uses it through `HeroWorldCanvas.tsx` (aerial view, slow spin, dusk time of day, poster frame first). The
+> older `packages/city-scene` described below is kept at `/city/classic`; read the bullets below as that package.
+
 Package: `packages/city-scene`. Highlights of the current version:
 - **Dense district:** the 15 client buildings (brand dealerships, the Fast Sales training centre, rentals) rise out of
   pastel street-wall blocks with awnings and rooftop details; three generated rings (street walls, simplified blocks,
@@ -397,6 +409,7 @@ Package: `packages/city-scene`. Highlights of the current version:
 | Live deploy 2026-11-01 (live22, `main` `3fc1ae8`) | Build `01a19620` completed in 31 s and the cache was cleared; `/`, `/city`, `/pitch`, `/demo`, `/demo/signin`, `/api/lite/demo/form-token` and `/demo/confirm?t=x` return 200; the leads route returns 401; `/api/lite/demo/verify?t=x` answers 303 to the confirm page; CSP and HSTS headers present (`/pitch` has its own CSP); home, `/city` and HQ floor screenshotted in a software-rendered browser. Not measured on a real device; real email delivery and MySQL not exercised |
 | Live deploys 2026-11-01 (live23 to live26, `main` `79e2e2b`) | Each build completed in about 31 to 36 s and the cache was cleared; after live26, `/`, `/city`, `/pitch`, `/demo`, `/demo/signin`, `/demo/office`, `/api/lite/demo/form-token` and `/demo/confirm?t=x` return 200; the leads route returns 401; `/api/lite/demo/verify?t=x` answers 303 to the confirm page; HSTS present. Server log after live23: a request for an address with an active demo logged "signin link sent via resend" (before, it logged nothing). Resend accepted a message to its sandbox address; a reserved-domain address got `ResendHttp422`. The owner confirmed the email arrives and the signed-in office opens. The signed-in office was checked locally (in-memory store, console mailer) and the public `/city` floor on the live site; the sample wall screens were not seen on the live site. Not measured on a real device |
 | Live deploy 2026-11-02 (live27, `main` `f00b18e`) | Build completed in about 31 s (upload, build, restart) and the cache was cleared; afterwards `/`, `/city`, `/demo` and `/pitch` returned 200 and screenshots of the home hero and `/city` loaded with no page errors. Locally, format check, typecheck and the 62 web tests passed. Not checked: the signed-in office on the live site, the night view and city life (birds, helicopter, smoke) in screenshots, the Vanta, Summit and Volta dealership views after the camera change, and frame rate on a real device (software rendering only) |
+| Live28 docs check (`main` `4e15d41`) | Written from the repository, not from a deploy log. On `main`: `pnpm install --frozen-lockfile`, `prettier --check .`, package builds, `pnpm typecheck` all pass and the 62 web tests pass (62/62). Live site screenshotted before the dusk hero merged (home, `/city`, `/pitch`: 200, no page errors); `/` references the `hero-real-*` posters. Not checked: that the host runs `4e15d41` (build id not read), the signed-in office on live28, frame rate on a real device (software rendering only) |
 
 Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-city`, `x03-floor-look`,
 `x04-city-dense`, `x05-polish`, `x06-life`, `x06-sky`, `x07-scenarios`, `lite-demo`). `MIGRATION-STATUS.md` lists every stage and what was not run.
