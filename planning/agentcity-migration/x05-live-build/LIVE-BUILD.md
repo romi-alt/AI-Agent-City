@@ -1,15 +1,27 @@
 # AgentCity live build: https://autosalescity.site
 
-Status of this document: first written on 2026-10-28, updated for live28. The live site runs Hostinger build
-`01a1b28d-2522-7294-a5f3-0e75f3e4be35` (zip `agentcity-live28`, deployed 2026-11-06, build completed 20:29:52 UTC, cache
-cleared afterwards), built from `main` `b4fa535`, which has the same app code as `4e15d41` (PR #19, "Hero at dusk", on
-top of PR #18, "Floor realism", PR #17 and live27's `f00b18e`; `b4fa535` only adds the live28 docs). Since live27 (`f00b18e`, build
-`01a199cf-4188-70ac-a47c-f36606fd7697`, deployed 2026-11-02 01:11 UTC) it adds: a warm dusk hero on the front page (the
+Status of this document: first written on 2026-10-28, updated for live30. The live site runs Hostinger build
+`01a1b321-1ea6-72dd-8c20-2b191fe030d7` (zip `agentcity-live30`, deployed 2026-11-06, build completed 23:11:33 UTC, cache
+cleared afterwards), built from the branch `fix/ui-audit`, whose code is `main` `d3b2a2a` (PR #24, which includes PR #23).
+Live29 (build `01a1b30f-9e02-7026-98e5-ca0b4bb77012`, completed 22:52:27 UTC, from the branch `design/floor-life`, commit
+`6bf06b8`) added the floor life; live30 added the UI audit fixes on top of it. Live28 (build
+`01a1b28d-2522-7294-a5f3-0e75f3e4be35`, completed 20:29:52 UTC, `main` `b4fa535`, the same app code as `4e15d41`: PR #19,
+"Hero at dusk", on top of PR #18, "Floor realism", PR #17 and live27's `f00b18e`) is the rollback target if live30
+misbehaves. Since live28, live29 adds soft contact shadows under the desks, chairs, meeting table, huddle benches and
+reception desk, warm sun patches from the glass wall (day and evening), dust drifting in the light, steam from the coffee
+machine and the meeting-table mugs, and a cool monitor glow on the desks at evening and night (`engine/floorlife.ts`,
+plugged into the office's `extras` list; phones get fewer particles). Live30 adds the UI audit fixes: the demo request
+form is readable below 1024 px (it kept a hard-coded white card); `/city` has an h1, a main landmark, a region role on the
+scene and readable place chips; `theme-color` is `#070a12`; `/pitch` has its Google Fonts requests allowed by its CSP, a
+darker logo mark and larger smallest text; the header section link reads "Preview" (the pill is "Live demo"); demo
+controls, the camera pad, the info button, the consent tick box and links are at least 44 px on touch screens; and labels
+that were 9 to 10.5 px are 11 px. Before that, live28 added a warm dusk hero on the front page (the
 live demo engine's aerial view of the New York city as a slow-spinning backdrop, with new dusk poster images
 `public/city/hero-real-864.webp` and `hero-real-1728.webp`, a seamless horizon and a floor tag on the HQ tower); and a
 calmer, more realistic Fast Sales floor (pale stone tiles, walnut timber, slim dark glass mullions, a glass-walled
 meeting room, a lounge armchair, a floor plant, a stone reception floor, calm rugs and upholstery, warm cove lighting
-and a cool window fill). Live27 itself added realistic building facades with weathering and rooftop equipment; richer
+and a cool window fill). Live27 (`f00b18e`, build `01a199cf-4188-70ac-a47c-f36606fd7697`, deployed 2026-11-02 01:11 UTC)
+itself added realistic building facades with weathering and rooftop equipment; richer
 desks with monitors facing the seated agent; dealership exteriors (roof panels, flags, air dancers) and a clearer
 dealership camera; city life (birds, a helicopter, smoke, flickering windows); a much better night view; live agent
 status on the floor (signed-in page only), animated chat screens and chair sway; and bold, clearly different daytime
@@ -23,7 +35,7 @@ The rest is as in live22: the AutoSalesCity front page, the New York city in `/c
 confirm page, CSP and HSTS headers (`/pitch` has its own wider CSP for its CDN scripts), a 14-day demo default, and
 Present mode. The owner confirmed on 2026-11-01 that the email arrives and the office opens. To rebuild it:
 `NEXT_PUBLIC_LITE_DEMO=true scripts/package-preview.sh https://autosalescity.site agentcity.zip` from `main`.
-Rollback: rebuild from `f00b18e` (live27, build `01a199cf-4188-70ac-a47c-f36606fd7697`), `3fc1ae8` (live22) or `569682e` (the live17 source). Earlier text below that still names live14
+Rollback: rebuild from `b4fa535` (live28), `f00b18e` (live27, build `01a199cf-4188-70ac-a47c-f36606fd7697`), `3fc1ae8` (live22) or `569682e` (the live17 source). Earlier text below that still names live14
 or live22 describes an older build. This document says what the live site does, how it is built and run, and what has and has not been verified.
 It contains no secrets: only the names of settings.
 
@@ -344,6 +356,7 @@ The homepage was written to the proposal direction supplied by the owner and che
 > `dealers.ts` dealerships, `office.ts` the Fast Sales floor, `people.ts`, `nyc.ts` building looks and window shader).
 > The hero uses it through `HeroWorldCanvas.tsx` (aerial view, slow spin, dusk time of day, poster frame first). The
 > older `packages/city-scene` described below is kept at `/city/classic`; read the bullets below as that package.
+> Live29 adds `engine/floorlife.ts` to the office floor: contact shadows, sun patches, dust, steam and monitor glow.
 
 Package: `packages/city-scene`. Highlights of the current version:
 - **Dense district:** the 15 client buildings (brand dealerships, the Fast Sales training centre, rentals) rise out of
@@ -411,6 +424,9 @@ Package: `packages/city-scene`. Highlights of the current version:
 | Live deploy 2026-11-02 (live27, `main` `f00b18e`) | Build completed in about 31 s (upload, build, restart) and the cache was cleared; afterwards `/`, `/city`, `/demo` and `/pitch` returned 200 and screenshots of the home hero and `/city` loaded with no page errors. Locally, format check, typecheck and the 62 web tests passed. Not checked: the signed-in office on the live site, the night view and city life (birds, helicopter, smoke) in screenshots, the Vanta, Summit and Volta dealership views after the camera change, and frame rate on a real device (software rendering only) |
 | Live deploy 2026-11-06 (live28, `main` `b4fa535`) | Build `01a1b28d` completed in about 36 s (upload, build, restart) and the cache was cleared. Afterwards `/`, `/city`, `/city/classic`, `/demo`, `/demo/check-email`, `/demo/signin`, `/pitch` and `/api/lite/demo/form-token` returned 200; the front page loaded in a software-rendered browser with no page errors and showed the dusk hero with the "Floor 24 · Fast Sales" tag; `hero-real-1728.webp` is served at the new size (291,890 bytes). Before packaging, on `main`: `pnpm install --frozen-lockfile`, `prettier --check .`, package builds and `pnpm typecheck` passed and the 62 web tests passed (62/62). Not checked: the signed-in office with the floor-realism changes, a test email, frame rate on a real device (software rendering only) |
 | Live28 confirmation email test, 2026-11-06 | One request for the owner's test address was submitted on the live site (request `3c678a93`). The form answered `verification-sent`, the status endpoint showed no refused-email flag, and the server log recorded `verify link sent via resend` at 20:37:22 UTC with no timeout or network error. The owner then confirmed that the email arrived and that the link opened the demo office. This is a single test with one address; inbox placement for other providers and the spam folder behaviour are not measured |
+| Live deploy 2026-11-06 (live29, branch `design/floor-life` `6bf06b8`) | Build `01a1b30f` completed in about 40 s and the cache was cleared; `/`, `/city`, `/demo` and `/pitch` returned 200. Before packaging: package builds, `pnpm typecheck`, `prettier --check .`, 62/62 web tests and 9/9 landing smoke passed. Screenshots of the Fast Sales floor in day, evening and night (software rendering) showed the contact shadows, dust and evening light with no page errors; the public `/city` floor was opened on the live site and showed the new look. Not checked: steam and monitor glow close up, the signed-in office, frame rate on a real device |
+| Live deploy 2026-11-06 (live30, branch `fix/ui-audit`, `main` `d3b2a2a`) | Build `01a1b321` completed in about 39 s and the cache was cleared; `/`, `/city`, `/demo`, `/demo/check-email` and `/pitch` returned 200. `theme-color` is `#070a12`, the header link reads "Preview", and the `/pitch` CSP `connect-src` includes the font hosts. axe-core on the live site: no violations on `/demo` at 390 and 820 px or on `/city` at 390 px (one h1, one main); `/pitch` still reports 2 serious colour-contrast nodes (3 before). Before packaging: package builds, typecheck, prettier, 62/62 web tests and 9/9 landing smoke passed. Not rechecked on the live site: touch-target and text sizes (checked locally), the signed-in office |
+| UI and UX audit, 2026-11-06 (live29) | axe-core, tap-target, heading, landmark and keyboard checks on `/`, `/demo`, `/demo/check-email`, `/demo/signin`, `/pitch` and `/city` at 1440 and 390 px, plus the Book dialog, empty-submit errors, reduced motion and screenshots. Found: the demo form unreadable below 1024 px (critical), `/city` missing h1 and main, a light `theme-color`, `/pitch` fonts blocked by its CSP, small touch targets and 9 to 11 px text, and two header items both labelled "Live demo". Fixed in live30 except the `/pitch` contrast nodes. Not audited: the signed-in office, the tour, full screen, a screen reader, real devices, performance |
 
 Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-city`, `x03-floor-look`,
 `x04-city-dense`, `x05-polish`, `x06-life`, `x06-sky`, `x07-scenarios`, `lite-demo`). `MIGRATION-STATUS.md` lists every stage and what was not run.
