@@ -29,11 +29,15 @@ export function AscCity() {
     };
   }, []);
   return (
-    <div className="asc" style={{ minHeight: '100vh', background: '#070a12' }}>
+    <main
+      className="asc"
+      style={{ minHeight: '100vh', background: '#070a12', maxWidth: 'none', margin: 0, padding: 0 }}
+    >
+      <h1 className="sr-only">Explore the AutoSalesCity demo city</h1>
       <a id="cityOpen" href="#live-demo" data-open-demo hidden>
         Open the city
       </a>
       <DemoOverlay />
-    </div>
+    </main>
   );
 }

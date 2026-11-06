@@ -533,7 +533,7 @@ html:has(.asc) {
 .asc .marquee-track span::after {
   content: '◆';
   color: var(--amber);
-  font-size: 10px;
+  font-size: 11px;
 }
 @keyframes asc-marquee {
   to {
@@ -2200,7 +2200,7 @@ html:has(.asc) {
   border-radius: 5px;
   background: #ff6b5e;
   color: #fff;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 /* The floor tag on the hero's HQ tower (HeroWorldCanvas): a gold dot, a leader line and a small card. */
@@ -2253,7 +2253,7 @@ html:has(.asc) {
   transform-origin: left center;
 }
 .asc .hero-floor-tag-card small {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #f2c879;
@@ -2264,7 +2264,7 @@ html:has(.asc) {
   letter-spacing: 0.01em;
 }
 .asc .hero-floor-tag-card em {
-  font-size: 10.5px;
+  font-size: 11px;
   font-style: normal;
   letter-spacing: 0.08em;
   color: rgba(244, 239, 230, 0.6);
@@ -2272,5 +2272,48 @@ html:has(.asc) {
 @media (max-width: 760px) {
   .asc .hero-floor-tag {
     display: none;
+  }
+}
+
+/* ---- UI audit fixes ---- */
+/* Visually hidden text that screen readers still read (the /city page title). */
+.asc .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* Two links in the header read "Live demo": the section link is the shorter hit area, so give header links room. */
+.asc .nav-links a {
+  padding-block: 8px;
+}
+/* The place chips use white text on bright colours; dark text passes contrast on all of them. */
+.asc #demoApp .place i {
+  color: #14110a;
+}
+/* Touch targets: at least 44 px on phones and tablets (WCAG 2.5.8 asks 24, platform guidance asks 44). */
+@media (pointer: coarse), (max-width: 760px) {
+  .asc #demoApp .seg button {
+    min-width: 44px;
+    min-height: 40px;
+  }
+  .asc #demoApp .d-btn {
+    min-height: 44px;
+  }
+  .asc #demoApp .navpad button {
+    width: 44px;
+    height: 44px;
+  }
+  .asc #demoApp .place {
+    min-height: 44px;
+  }
+  .asc #demoApp .d-info-toggle {
+    width: 44px;
+    height: 44px;
   }
 }

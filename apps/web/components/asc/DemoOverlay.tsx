@@ -32,7 +32,7 @@ export function DemoOverlay() {
       </dialog>
 
       <div id="demoApp" className="hidden" data-theme="light" role="dialog" aria-label="AutoSalesCity live demo">
-        <div id="dScene" className="d-scene" aria-label="3D demo city" />
+        <div id="dScene" className="d-scene" role="region" aria-label="3D demo city" />
         <div className="d-loading" id="dLoading">
           <span />
           Building the demo city…
