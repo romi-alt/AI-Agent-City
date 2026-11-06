@@ -14,6 +14,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { C3 } from './city';
 import { P3 } from './people';
+import { FloorLife } from './floorlife';
 
 export const O3 = (() => {
   const { makePerson, SKIN } = P3,
@@ -1228,6 +1229,8 @@ export const O3 = (() => {
         this._desk(root, x, z, '#c9b79c', null, true);
       }
       this._ambient(root);
+      this.extras = this.extras.filter(x => !x.isFloorLife);
+      this.extras.push(new FloorLife(this, root));
       if (available) this._availableSign(root);
       this._clock(root);
       this.S.flush(root, true);
