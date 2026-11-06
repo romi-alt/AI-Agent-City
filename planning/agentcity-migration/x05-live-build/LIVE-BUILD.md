@@ -1,9 +1,9 @@
 # AgentCity live build: https://autosalescity.site
 
-Status of this document: first written on 2026-10-28, updated for live28. The live build is live28, built from the code
-of `main` `4e15d41` (PR #19, "Hero at dusk", on top of PR #18, "Floor realism", PR #17 and live27's `f00b18e`). The
-Hostinger build id, the zip name and the deploy time of live28 were not recorded when this was written and need
-filling in from the host's deployment list: build id ____, deployed ____ UTC. Since live27 (`f00b18e`, build
+Status of this document: first written on 2026-10-28, updated for live28. The live site runs Hostinger build
+`01a1b28d-2522-7294-a5f3-0e75f3e4be35` (zip `agentcity-live28`, deployed 2026-11-06, build completed 20:29:52 UTC, cache
+cleared afterwards), built from `main` `b4fa535`, which has the same app code as `4e15d41` (PR #19, "Hero at dusk", on
+top of PR #18, "Floor realism", PR #17 and live27's `f00b18e`; `b4fa535` only adds the live28 docs). Since live27 (`f00b18e`, build
 `01a199cf-4188-70ac-a47c-f36606fd7697`, deployed 2026-11-02 01:11 UTC) it adds: a warm dusk hero on the front page (the
 live demo engine's aerial view of the New York city as a slow-spinning backdrop, with new dusk poster images
 `public/city/hero-real-864.webp` and `hero-real-1728.webp`, a seamless horizon and a floor tag on the HQ tower); and a
@@ -23,7 +23,7 @@ The rest is as in live22: the AutoSalesCity front page, the New York city in `/c
 confirm page, CSP and HSTS headers (`/pitch` has its own wider CSP for its CDN scripts), a 14-day demo default, and
 Present mode. The owner confirmed on 2026-11-01 that the email arrives and the office opens. To rebuild it:
 `NEXT_PUBLIC_LITE_DEMO=true scripts/package-preview.sh https://autosalescity.site agentcity.zip` from `main`.
-Rollback: rebuild from `f00b18e` (live27), `3fc1ae8` (live22) or `569682e` (the live17 source). Earlier text below that still names live14
+Rollback: rebuild from `f00b18e` (live27, build `01a199cf-4188-70ac-a47c-f36606fd7697`), `3fc1ae8` (live22) or `569682e` (the live17 source). Earlier text below that still names live14
 or live22 describes an older build. This document says what the live site does, how it is built and run, and what has and has not been verified.
 It contains no secrets: only the names of settings.
 
@@ -409,7 +409,7 @@ Package: `packages/city-scene`. Highlights of the current version:
 | Live deploy 2026-11-01 (live22, `main` `3fc1ae8`) | Build `01a19620` completed in 31 s and the cache was cleared; `/`, `/city`, `/pitch`, `/demo`, `/demo/signin`, `/api/lite/demo/form-token` and `/demo/confirm?t=x` return 200; the leads route returns 401; `/api/lite/demo/verify?t=x` answers 303 to the confirm page; CSP and HSTS headers present (`/pitch` has its own CSP); home, `/city` and HQ floor screenshotted in a software-rendered browser. Not measured on a real device; real email delivery and MySQL not exercised |
 | Live deploys 2026-11-01 (live23 to live26, `main` `79e2e2b`) | Each build completed in about 31 to 36 s and the cache was cleared; after live26, `/`, `/city`, `/pitch`, `/demo`, `/demo/signin`, `/demo/office`, `/api/lite/demo/form-token` and `/demo/confirm?t=x` return 200; the leads route returns 401; `/api/lite/demo/verify?t=x` answers 303 to the confirm page; HSTS present. Server log after live23: a request for an address with an active demo logged "signin link sent via resend" (before, it logged nothing). Resend accepted a message to its sandbox address; a reserved-domain address got `ResendHttp422`. The owner confirmed the email arrives and the signed-in office opens. The signed-in office was checked locally (in-memory store, console mailer) and the public `/city` floor on the live site; the sample wall screens were not seen on the live site. Not measured on a real device |
 | Live deploy 2026-11-02 (live27, `main` `f00b18e`) | Build completed in about 31 s (upload, build, restart) and the cache was cleared; afterwards `/`, `/city`, `/demo` and `/pitch` returned 200 and screenshots of the home hero and `/city` loaded with no page errors. Locally, format check, typecheck and the 62 web tests passed. Not checked: the signed-in office on the live site, the night view and city life (birds, helicopter, smoke) in screenshots, the Vanta, Summit and Volta dealership views after the camera change, and frame rate on a real device (software rendering only) |
-| Live28 docs check (`main` `4e15d41`) | Written from the repository, not from a deploy log. On `main`: `pnpm install --frozen-lockfile`, `prettier --check .`, package builds, `pnpm typecheck` all pass and the 62 web tests pass (62/62). Live site screenshotted before the dusk hero merged (home, `/city`, `/pitch`: 200, no page errors); `/` references the `hero-real-*` posters. Not checked: that the host runs `4e15d41` (build id not read), the signed-in office on live28, frame rate on a real device (software rendering only) |
+| Live deploy 2026-11-06 (live28, `main` `b4fa535`) | Build `01a1b28d` completed in about 36 s (upload, build, restart) and the cache was cleared. Afterwards `/`, `/city`, `/city/classic`, `/demo`, `/demo/check-email`, `/demo/signin`, `/pitch` and `/api/lite/demo/form-token` returned 200; the front page loaded in a software-rendered browser with no page errors and showed the dusk hero with the "Floor 24 · Fast Sales" tag; `hero-real-1728.webp` is served at the new size (291,890 bytes). Before packaging, on `main`: `pnpm install --frozen-lockfile`, `prettier --check .`, package builds and `pnpm typecheck` passed and the 62 web tests passed (62/62). Not checked: the signed-in office with the floor-realism changes, a test email, frame rate on a real device (software rendering only) |
 
 Evidence files and screenshots: `planning/agentcity-migration/` (`x01-cinematic-city`, `x03-floor-look`,
 `x04-city-dense`, `x05-polish`, `x06-life`, `x06-sky`, `x07-scenarios`, `lite-demo`). `MIGRATION-STATUS.md` lists every stage and what was not run.
