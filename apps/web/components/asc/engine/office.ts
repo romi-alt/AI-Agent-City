@@ -46,12 +46,12 @@ export const O3 = (() => {
       skin: SKIN[2],
       top: '#26324d',
       jacket: '#26324d',
-      tie: '#f5b83d',
+      tie: '#c9a24f',
       accent: '#ffffff',
       bottom: '#26324d',
       shoes: '#2a1d14',
       shoeStyle: 'loafer',
-      socks: '#f5b83d',
+      socks: '#c9a24f',
       watch: '#d9b45c',
       stubble: true,
       grin: true,
@@ -198,9 +198,9 @@ export const O3 = (() => {
       accent: '#ffffff',
       bottom: '#2b2f3a',
       shoeStyle: 'flat',
-      scarf: '#f5b83d',
+      scarf: '#c9a24f',
       headset: '#2b2f38',
-      lanyard: '#f5b83d',
+      lanyard: '#c9a24f',
       earrings: true,
       lipColor: '#9c2f4a',
       eyes: '#2a1d14',
@@ -218,7 +218,7 @@ export const O3 = (() => {
       bottom: '#3a4a6b',
       glasses: 'round',
       scarf: '#2f7a55',
-      lanyard: '#e8604c',
+      lanyard: '#b4614f',
       shoeStyle: 'boot',
       shoes: '#3a2a20',
       outfit: 'dress',
@@ -237,7 +237,7 @@ export const O3 = (() => {
       shoeStyle: 'sneaker',
       earbuds: true,
       lanyard: '#ef8f6b',
-      bracelet: '#f5b83d',
+      bracelet: '#c9a24f',
       freckles: true,
       eyes: '#3a5a7a',
     },
@@ -262,10 +262,10 @@ export const O3 = (() => {
     { gender: 'm', hairStyle: 'quiff', hair: '#3a2618', skin: SKIN[3] },
   ];
   const BOOK_COLORS = [
-    '#e8604c',
+    '#b4614f',
     '#f6c445',
-    '#3fb6a8',
-    '#5aa6e0',
+    '#7a9a93',
+    '#6f93b5',
     '#9b7fd1',
     '#ef8f6b',
     '#2f7a55',
@@ -418,8 +418,8 @@ export const O3 = (() => {
     cream: '#f4eee6',
     wood: '#b97e4e',
     brass: '#d9b45c',
-    teal: '#3fb6a8',
-    red: '#e8604c',
+    teal: '#7a9a93',
+    red: '#b4614f',
   };
   const NYC_TEXT = {
     neon: ['NEW YORK', 'SALES FLOOR'],
@@ -785,7 +785,7 @@ export const O3 = (() => {
     },
     pennant(g, W, H) {
       g.clearRect(0, 0, W, H);
-      g.fillStyle = '#e8604c';
+      g.fillStyle = '#b4614f';
       g.beginPath();
       g.moveTo(0, 4);
       g.lineTo(W - 4, H / 2);
@@ -827,7 +827,7 @@ export const O3 = (() => {
       g.fillStyle = '#26324d';
       g.font = `700 ${H * 0.07}px "Space Grotesk", sans-serif`;
       g.fillText('SALES FUNNEL', W * 0.04, H * 0.1);
-      const cols = ['#6aa8ff', '#3fb6a8', '#f5b83d', '#3ccf8e'];
+      const cols = ['#6aa8ff', '#7a9a93', '#c9a24f', '#3ccf8e'];
       NYC_TEXT.funnel.forEach((t, i) => {
         const y = H * (0.18 + i * 0.17),
           w0 = W * (0.52 - i * 0.09),
@@ -897,7 +897,7 @@ export const O3 = (() => {
       const n = 10;
       for (let y = 0; y < n; y++)
         for (let x = 0; x < n; x++) {
-          g.fillStyle = (x + y) % 2 ? '#262a33' : '#f1ede4';
+          g.fillStyle = (x + y) % 2 ? '#7b746a' : '#e2dccf';
           g.fillRect((x * W) / n, (y * H) / n, W / n + 1, H / n + 1);
         }
       g.strokeStyle = NY.brass;
@@ -917,7 +917,7 @@ export const O3 = (() => {
     vending(g, W, H) {
       g.fillStyle = '#11151c';
       g.fillRect(0, 0, W, H);
-      const cols = ['#e8604c', '#f5b83d', '#3fb6a8', '#5aa6e0', '#e879f9', '#f29c38', '#7cc36b', '#f3e2c0'];
+      const cols = ['#b4614f', '#c9a24f', '#7a9a93', '#6f93b5', '#e879f9', '#c58a45', '#86a67a', '#f3e2c0'];
       for (let r = 0; r < 4; r++)
         for (let c = 0; c < 2; c++) {
           const i = r * 2 + c;
@@ -930,7 +930,7 @@ export const O3 = (() => {
           g.font = '700 14px "JetBrains Mono", monospace';
           g.fillText(NYC_TEXT.vend[i], 20 + c * (W / 2 - 4), 130 + r * 118);
         }
-      g.fillStyle = '#f5b83d';
+      g.fillStyle = '#c9a24f';
       g.font = '800 22px "Space Grotesk", sans-serif';
       g.fillText('SNACKS', 14, 28);
     },
@@ -1121,6 +1121,7 @@ export const O3 = (() => {
             env: true,
             bloom: 0.18,
             glow: 1,
+            cool: 0.3,
           },
           evening: {
             fog: ['#e79a78', 80, 210],
@@ -1133,6 +1134,7 @@ export const O3 = (() => {
             env: false,
             bloom: 0.55,
             glow: 2.5,
+            cool: 0.5,
           },
           night: {
             fog: ['#1a2242', 70, 200],
@@ -1145,6 +1147,7 @@ export const O3 = (() => {
             env: false,
             bloom: 0.75,
             glow: 3.5,
+            cool: 0.6,
           },
         }[tod] || {};
       this.scene.background = this._skyTex(tod);
@@ -1164,6 +1167,7 @@ export const O3 = (() => {
         this.L.warm.forEach(l => {
           l.intensity = P.warm;
         });
+        this.L.cool.intensity = P.cool;
       }
       this.lampMats.forEach(m => {
         m.emissiveIntensity = P.lamp;
@@ -1258,52 +1262,64 @@ export const O3 = (() => {
         root.add(l);
         return l;
       });
-      this.L = { hemi, amb, sun, warm };
+      // cool light from the glass wall, so warm lamps and cool dusk light stay separate sources (as in the references)
+      const cool = new THREE.DirectionalLight('#a9c6ff', 0.3);
+      cool.position.set(2, 9, -26);
+      root.add(cool);
+      this.L = { hemi, amb, sun, warm, cool };
     }
 
     _room(root, floorLabel) {
-      // light oak plank floor
+      // large-format pale stone tiles (about 1.2 m) with fine grout lines and soft veining, polished
       const ft = canvasTex(1024, 704);
       const g = ft.ctx;
-      g.fillStyle = '#e2c39a';
+      g.fillStyle = '#cdc6ba';
       g.fillRect(0, 0, 1024, 704);
-      const plankH = 32;
-      for (let y = 0; y < 704; y += plankH) {
-        let x = -((y / plankH) % 4) * 60;
-        while (x < 1024) {
-          const len = 160 + rnd() * 140,
-            l = 0.9 + rnd() * 0.16;
-          g.fillStyle = `rgb(${(226 * l) | 0},${(193 * l) | 0},${(152 * l) | 0})`;
-          g.fillRect(x, y, len, plankH);
-          g.strokeStyle = 'rgba(150,100,55,.10)';
+      const tile = 76;
+      for (let y = 0; y < 704; y += tile)
+        for (let x = 0; x < 1024; x += tile) {
+          const l = 0.95 + rnd() * 0.08;
+          g.fillStyle = `rgb(${(206 * l) | 0},${(199 * l) | 0},${(188 * l) | 0})`;
+          g.fillRect(x, y, tile, tile);
+          g.strokeStyle = 'rgba(120,110,98,.12)';
           g.lineWidth = 1;
           for (let k = 0; k < 3; k++) {
             g.beginPath();
-            g.moveTo(x + 4, y + 6 + k * 9 + rnd() * 3);
-            g.bezierCurveTo(x + len * 0.3, y + 4 + k * 9, x + len * 0.6, y + 10 + k * 9, x + len - 4, y + 6 + k * 9);
+            g.moveTo(x + rnd() * tile, y);
+            g.bezierCurveTo(
+              x + rnd() * tile,
+              y + tile * 0.3,
+              x + rnd() * tile,
+              y + tile * 0.7,
+              x + rnd() * tile,
+              y + tile,
+            );
             g.stroke();
           }
-          g.fillStyle = 'rgba(120,80,40,.28)';
-          g.fillRect(x, y, 2, plankH);
-          x += len;
         }
-        g.fillStyle = 'rgba(120,80,40,.22)';
-        g.fillRect(0, y, 1024, 2);
-      }
+      g.fillStyle = 'rgba(96,88,78,.38)';
+      for (let y = 0; y <= 704; y += tile) g.fillRect(0, y, 1024, 2);
+      for (let x = 0; x <= 1024; x += tile) g.fillRect(x, 0, 2, 704);
       ft.t.wrapS = ft.t.wrapT = THREE.RepeatWrapping;
       ft.t.repeat.set(2, 2);
       ft.t.needsUpdate = true;
       const floor = new THREE.Mesh(
         new THREE.PlaneGeometry(W, D),
-        new THREE.MeshStandardMaterial({ map: ft.t, roughness: 0.78, metalness: 0 }),
+        new THREE.MeshPhysicalMaterial({
+          map: ft.t,
+          roughness: 0.46,
+          metalness: 0,
+          clearcoat: 0.3,
+          clearcoatRoughness: 0.4,
+        }),
       );
       floor.rotation.x = -Math.PI / 2;
       floor.receiveShadow = true;
       root.add(floor);
 
-      const wallMat = new THREE.MeshStandardMaterial({ color: '#f7e6cf', roughness: 0.92 });
-      const wood = (this.woodMat = new THREE.MeshStandardMaterial({ color: '#b97e4e', roughness: 0.6 }));
-      const frameMat = new THREE.MeshStandardMaterial({ color: '#f4eee6', roughness: 0.5, metalness: 0.1 });
+      const wallMat = new THREE.MeshStandardMaterial({ color: '#ece6dc', roughness: 0.92 });
+      const wood = (this.woodMat = new THREE.MeshStandardMaterial({ color: '#98704c', roughness: 0.58 }));
+      const frameMat = new THREE.MeshStandardMaterial({ color: '#35322f', roughness: 0.4, metalness: 0.5 });
 
       // left wall: solid, peach wainscot + cream
       const left = new THREE.Mesh(new THREE.BoxGeometry(0.3, WALL_H, D), wallMat);
@@ -1312,7 +1328,7 @@ export const O3 = (() => {
       root.add(left);
       const wains = new THREE.Mesh(
         new THREE.BoxGeometry(0.06, 1.1, D),
-        new THREE.MeshStandardMaterial({ color: '#efb48a', roughness: 0.85 }),
+        new THREE.MeshStandardMaterial({ color: '#8a6a4f', roughness: 0.6 }),
       );
       wains.position.set(-W / 2 + 0.18, 0.55, 0);
       root.add(wains);
@@ -1326,7 +1342,7 @@ export const O3 = (() => {
       const sg = st.ctx; // vertical wood slats
       for (let x = 0; x < 512; x += 16) {
         const l = 0.88 + rnd() * 0.2;
-        sg.fillStyle = `rgb(${(185 * l) | 0},${(126 * l) | 0},${(78 * l) | 0})`;
+        sg.fillStyle = `rgb(${(150 * l) | 0},${(110 * l) | 0},${(76 * l) | 0})`;
         sg.fillRect(x, 0, 13, 256);
         sg.fillStyle = '#4a3020';
         sg.fillRect(x + 13, 0, 3, 256);
@@ -1345,11 +1361,12 @@ export const O3 = (() => {
       panel.receiveShadow = true;
       root.add(panel);
       const glassMat = new THREE.MeshStandardMaterial({
-        color: '#cfe8f5',
+        color: '#aecde4',
         transparent: true,
-        opacity: 0.1,
-        roughness: 0.05,
-        metalness: 0.2,
+        opacity: 0.16,
+        roughness: 0.03,
+        metalness: 0.1,
+        envMapIntensity: 1.4,
         depthWrite: false,
         side: THREE.DoubleSide,
       });
@@ -1376,8 +1393,8 @@ export const O3 = (() => {
         };
         box(len, 0.22, 0.32, (x0 + x1) / 2, 0.11, z, wood); // sill
         box(len, 0.14, 0.2, (x0 + x1) / 2, h - 0.07, z); // head
-        box(len, 0.06, 0.12, (x0 + x1) / 2, 1.0, z); // transom
-        for (let i = 0; i <= n; i++) box(0.1, h, 0.16, x0 + (len / n) * i, h / 2, z);
+        box(len, 0.04, 0.1, (x0 + x1) / 2, 1.0, z); // transom
+        for (let i = 0; i <= n; i++) box(0.06, h, 0.14, x0 + (len / n) * i, h / 2, z);
       };
       glassRun(-W / 2, PANEL[0], zb);
       glassRun(PANEL[1], W / 2, zb);
@@ -1386,7 +1403,7 @@ export const O3 = (() => {
       // front edge strip
       const edge = new THREE.Mesh(
         new THREE.BoxGeometry(W, 0.05, 0.08),
-        new THREE.MeshBasicMaterial({ color: '#f5b83d' }),
+        new THREE.MeshBasicMaterial({ color: '#c9a24f' }),
       );
       edge.position.set(0, 0.025, D / 2);
       root.add(edge);
@@ -1489,7 +1506,7 @@ export const O3 = (() => {
         add(new RoundedBoxGeometry(1.4, 0.6, 1.4, 2, 0.08), box, x, top + 0.35, z);
         add((this._g5 ||= new THREE.IcosahedronGeometry(0.9, 1)), green, x, top + 1.35, z);
       });
-      const umb = mat({ color: '#e8604c', roughness: 0.8 });
+      const umb = mat({ color: '#b4614f', roughness: 0.8 });
       [
         [-9.5, 6],
         [-4.5, 6],
@@ -1502,7 +1519,7 @@ export const O3 = (() => {
       const s = canvasTex(1024, 160);
       const c = s.ctx;
       c.clearRect(0, 0, 1024, 160);
-      c.fillStyle = '#f5b83d';
+      c.fillStyle = '#c9a24f';
       c.font = '800 96px "Space Grotesk", Inter, sans-serif';
       c.textAlign = 'center';
       c.textBaseline = 'middle';
@@ -1796,7 +1813,7 @@ export const O3 = (() => {
         concrete: '#9aa0a6',
         basket: '#b58a5a',
         navy: '#2f3b5c',
-        teal: '#3fb6a8',
+        teal: '#7a9a93',
       }[pot];
       const greens = ['#3f9a5c', '#4ea457', '#5fb760', '#2f7a55'];
       const P = (px, py, pz) => [x + px * s, y + py * s, z + pz * s];
@@ -1984,9 +2001,9 @@ export const O3 = (() => {
         // something other than books at the end of the row
         const ox = Math.min(end + 0.2, w / 2 - 0.2);
         if (r === 0) {
-          B.box(0.3, 0.05, 0.22, '#e8604c', ...L(ox, y0 + 0.03, 0.02), rotY + 0.2);
-          B.box(0.26, 0.04, 0.2, '#3fb6a8', ...L(ox, y0 + 0.075, 0.02), rotY - 0.15);
-          B.box(0.22, 0.04, 0.18, '#f5b83d', ...L(ox, y0 + 0.115, 0.02), rotY + 0.1);
+          B.box(0.3, 0.05, 0.22, '#b4614f', ...L(ox, y0 + 0.03, 0.02), rotY + 0.2);
+          B.box(0.26, 0.04, 0.2, '#7a9a93', ...L(ox, y0 + 0.075, 0.02), rotY - 0.15);
+          B.box(0.22, 0.04, 0.18, '#c9a24f', ...L(ox, y0 + 0.115, 0.02), rotY + 0.1);
         } else if (r === 1) {
           const q = L(ox, y0 + 0.12, 0.02); // small globe
           B.cyl(0.05, 0.02, '#2b2f38', q[0], y0 + 0.01, q[2], 'metal', 10);
@@ -2014,7 +2031,7 @@ export const O3 = (() => {
     }
 
     /* ---------- chairs (one merged mesh each, so they can turn) ---------- */
-    _chair(root, x, z, rotY, color = '#e8862f', o = {}) {
+    _chair(root, x, z, rotY, color = '#34373d', o = {}) {
       const B = new Bake(null, this.mobile);
       const seatC = color,
         dark = '#2b2f38',
@@ -2060,7 +2077,7 @@ export const O3 = (() => {
       const B = this.S,
         hi = !this.mobile,
         X = lx => x + lx,
-        top = '#b97e4e',
+        top = '#9a7048',
         white = '#f4eee6',
         legC = '#2b2f38';
       B.rbox(w, 0.07, 1.15, 0.03, top, x, 0.78, z, 0, 'satin');
@@ -2176,7 +2193,7 @@ export const O3 = (() => {
         B.cyl(
           0.004,
           0.14,
-          ['#e8604c', '#3fb6a8', '#26324d'][i],
+          ['#b4614f', '#7a9a93', '#26324d'][i],
           X(w / 2 - 0.62) + (i - 1) * 0.01,
           0.89,
           z + 0.1,
@@ -2226,7 +2243,7 @@ export const O3 = (() => {
           g.fillStyle = i % 3 === 0 ? '#3ccf8e' : '#6aa8ff';
           g.fillRect(16 + i * 24, H - 14 - h, 16, h);
         }
-        g.strokeStyle = '#f5b83d';
+        g.strokeStyle = '#c9a24f';
         g.lineWidth = 3;
         g.beginPath();
         g.moveTo(10, 118);
@@ -2279,12 +2296,12 @@ export const O3 = (() => {
       const item = h % 4;
       if (item === 0) {
         // a travel tumbler
-        B.cyl(0.04, 0.036, '#e8604c', X(0.35), 0.88, z + 0.38, 'satin', 12);
+        B.cyl(0.04, 0.036, '#b4614f', X(0.35), 0.88, z + 0.38, 'satin', 12);
         B.cyl(0.042, 0.02, '#2b2f38', X(0.35), 0.95, z + 0.38, 'satin', 12);
       } else if (item === 1) {
         // a stack of books
-        B.rbox(0.22, 0.035, 0.16, 0.008, '#3fb6a8', X(0.4), 0.835, z + 0.4, 0.2, 'satin');
-        B.rbox(0.2, 0.03, 0.15, 0.008, '#f5b83d', X(0.4), 0.868, z + 0.4, -0.1, 'satin');
+        B.rbox(0.22, 0.035, 0.16, 0.008, '#7a9a93', X(0.4), 0.835, z + 0.4, 0.2, 'satin');
+        B.rbox(0.2, 0.03, 0.15, 0.008, '#c9a24f', X(0.4), 0.868, z + 0.4, -0.1, 'satin');
         B.rbox(0.18, 0.03, 0.14, 0.008, '#26324d', X(0.4), 0.898, z + 0.4, 0.3, 'satin');
       } else if (item === 2) {
         // a small cactus and a pot of pens
@@ -2322,7 +2339,7 @@ export const O3 = (() => {
         B.tor(0.12, 0.014, '#fffaf0', X(0.9), 1.24, z - 0.2, 0, 0.3, 0, 'satin', 18);
         B.box(0.12, 0.08, 0.07, '#2b2f38', X(0.6), 0.86, z + 0.35, 0.3, 'metal');
         B.cyl(0.03, 0.04, '#1b1b22', X(0.6), 0.88, z + 0.4, 'metal', 10, Math.PI / 2, 0, 0.3);
-        ['#e879f9', '#f5b83d', '#38bdf8', '#3fb6a8', '#ff6b5e'].forEach((col, i) =>
+        ['#e879f9', '#c9a24f', '#38bdf8', '#7a9a93', '#ff6b5e'].forEach((col, i) =>
           B.box(0.03, 0.2, 0.01, col, X(0.1 + i * 0.03), 0.84, z + 0.42, -0.5 + i * 0.25, 'satin', 0, 0),
         );
       } else if (key === 'teo') {
@@ -2355,7 +2372,7 @@ export const O3 = (() => {
         B.rbox(0.22, 0.05, 0.1, 0.02, '#fb923c', X(0.55), 0.84, z + 0.38, 0.4, 'satin');
         B.rbox(0.12, 0.045, 0.09, 0.02, '#bfe3ff', X(0.55), 0.885, z + 0.38, 0.4, 'satin');
         B.cyl(0.015, 0.2, '#d7dbe0', X(0.95), 0.92, z - 0.2, 'metal', 6);
-        B.box(0.13, 0.08, 0.004, '#e8604c', X(1.0), 1.0, z - 0.2, 0, 'satin');
+        B.box(0.13, 0.08, 0.004, '#b4614f', X(1.0), 1.0, z - 0.2, 0, 'satin');
         B.box(0.1, 0.04, 0.05, '#2b2f38', X(0.25), 0.835, z + 0.42, 0.1, 'satin');
       } else if (key === 'max') {
         // desk globe, newton's cradle, small trophy
@@ -2404,10 +2421,10 @@ export const O3 = (() => {
     }
 
     _decor(root) {
-      this._rug(root, 3.6, -1.6, 15.6, 9.6, '#efdcc0', '#d9a066', 'diamonds'); // team area
-      this._rug(root, -8.2, -5.2, 7.2, 7.4, '#e7d2b4', '#c9845a', 'kilim'); // owner + CEO
-      this._rug(root, 11.4, 6.6, 6.6, 6.6, '#cfe0d4', '#3fb6a8', 'rings', true); // meeting corner
-      this._rug(root, -9.5, 7.6, 6.4, 4.2, '#f2cf9a', '#e8604c', 'stripes'); // sofa corner
+      this._rug(root, 3.6, -1.6, 15.6, 9.6, '#e6dfd2', '#b5a690', 'diamonds'); // team area
+      this._rug(root, -8.2, -5.2, 7.2, 7.4, '#ded4c4', '#8d7a63', 'kilim'); // owner + CEO
+      this._rug(root, 11.4, 6.6, 6.6, 6.6, '#d8dedb', '#8fa39b', 'rings', true); // meeting corner
+      this._rug(root, -9.5, 7.6, 6.4, 4.2, '#e5dac8', '#a3735a', 'stripes'); // sofa corner
       this._rug(root, -11.6, -9.0, 5.6, 1.1, '#e9e1d2', '#26324d', 'stripes'); // kitchenette runner
       this._rug(root, -5.4, 5.0, 3.6, 3.0, '#e4ecf0', '#26324d', 'diamonds'); // huddle booth
       this._brickWall(root);
@@ -2417,6 +2434,9 @@ export const O3 = (() => {
       this._trophyCase(root);
       this._reception(root);
       this._meeting(root);
+      this._meetingGlass(root);
+      this._armchair(this.S, -7.1, 7.3, -Math.PI / 2);
+      this._plantB(this.S, 'snake', 14.6, 0, -9.6, 1.5, 'white');
       this._huddle(root);
       this._boards(root);
       this._utility(root);
@@ -2539,9 +2559,9 @@ export const O3 = (() => {
       this._plantB(S, 'bush', -1.6, 0.84, -10.45, 0.6);
       this._tower(S, 0.5, 0.85, -10.5, 0.7);
       this._bookRow(S, this._loc(0, -10.5, 0), 0, 1.6, 0.85, 3.2, 0.3, 0.34);
-      S.box(0.5, 0.07, 0.36, '#3fb6a8', 3.8, 0.885, -10.5, 0.1);
-      S.box(0.46, 0.07, 0.34, '#e8604c', 3.8, 0.955, -10.5, -0.12);
-      S.box(0.4, 0.06, 0.3, '#f5b83d', 3.8, 1.02, -10.5, 0.2);
+      S.box(0.5, 0.07, 0.36, '#7a9a93', 3.8, 0.885, -10.5, 0.1);
+      S.box(0.46, 0.07, 0.34, '#b4614f', 3.8, 0.955, -10.5, -0.12);
+      S.box(0.4, 0.06, 0.3, '#c9a24f', 3.8, 1.02, -10.5, 0.2);
       for (let i = 0; i < 3; i++)
         S.cyl(0.05, 0.12, ['#fbfaf6', '#fbfaf6', '#2b6cb0'][i], 4.7 + i * 0.16, 0.9, -10.4, 'satin', 10);
       this._plantB(S, 'pothos', 5.5, 0.84, -10.45, 0.5, 'white');
@@ -2568,7 +2588,7 @@ export const O3 = (() => {
         g.font = '800 54px "Space Grotesk", sans-serif';
         g.textBaseline = 'middle';
         g.fillText('FAST SALES  ·  NEW YORK HQ', 40, H / 2 + 2);
-        g.fillStyle = '#e8604c';
+        g.fillStyle = '#b4614f';
         g.beginPath();
         g.arc(W - 70, H / 2, 26, 0, 7);
         g.fill();
@@ -2628,7 +2648,7 @@ export const O3 = (() => {
       S.box(0.88, 0.012, 0.01, '#9aa3b2', -15.3, 1.25, -10.04); // freezer split
       S.box(0.03, 0.55, 0.04, '#9aa3b2', -14.9, 1.55, -10.02, 0, 'metal');
       S.box(0.03, 0.8, 0.04, '#9aa3b2', -14.9, 0.7, -10.02, 0, 'metal');
-      ['#e8604c', '#f5b83d', '#3fb6a8', '#5aa6e0'].forEach((c, i) =>
+      ['#b4614f', '#c9a24f', '#7a9a93', '#6f93b5'].forEach((c, i) =>
         S.box(0.05, 0.05, 0.012, c, -15.55 + (i % 2) * 0.1, 1.7 - Math.floor(i / 2) * 0.08, -10.034 + 0.0, 0.2 * i),
       );
       S.box(0.18, 0.24, 0.004, '#fbfaf6', -15.45, 1.5, -10.04, 0.05); // list on the door
@@ -2648,12 +2668,12 @@ export const O3 = (() => {
       S.cyl(0.04, 0.012, '#c0392b', -13.3, 1.36, -10.095, 'matte', 10, Math.PI / 2);
       S.rbox(0.18, 0.34, 0.2, 0.04, '#171b22', -12.82, 1.17, -10.35, 0, 'metal');
       S.cone(0.1, 0.06, 0.1, '#171b22', -12.82, 1.4, -10.35, 'metal', 10);
-      S.cyl(0.1, 0.18, '#e8604c', -12.4, 1.1, -10.4, 'satin', 12); // kettle
-      S.cone(0.1, 0.06, 0.06, '#e8604c', -12.4, 1.22, -10.4, 'satin', 12);
+      S.cyl(0.1, 0.18, '#b4614f', -12.4, 1.1, -10.4, 'satin', 12); // kettle
+      S.cone(0.1, 0.06, 0.06, '#b4614f', -12.4, 1.22, -10.4, 'satin', 12);
       S.tor(0.08, 0.012, '#2b2f38', -12.3, 1.12, -10.4, 0, 1.4, 0, 'matte', 10, Math.PI);
       for (let i = 0; i < 3; i++) {
         S.cyl(0.07, 0.2, '#e4ebef', -11.9 + i * 0.17, 1.1, -10.5, 'satin', 10);
-        S.cyl(0.072, 0.03, i === 1 ? '#3fb6a8' : '#e8604c', -11.9 + i * 0.17, 1.21, -10.5, 'satin', 10);
+        S.cyl(0.072, 0.03, i === 1 ? '#7a9a93' : '#b4614f', -11.9 + i * 0.17, 1.21, -10.5, 'satin', 10);
       }
       // NYC-style paper cups: stack, tray and a couple of lids
       this._cupStack(S, -12.9, 1.01, -10.0, 6);
@@ -2678,7 +2698,7 @@ export const O3 = (() => {
       [0, 1, 2].forEach(i =>
         S.sph(
           0.08,
-          ['#e8604c', '#7cc36b', '#f29c38'][i],
+          ['#b4614f', '#86a67a', '#c58a45'][i],
           -11.28 + i * 0.09,
           1.13 + 0.01 * i,
           -10.25 + (i - 1) * 0.05,
@@ -2701,7 +2721,7 @@ export const O3 = (() => {
         S.box(0.34, 0.03, 0.22, '#aab2be', -9.2, 1.025, -10.3, 0, 'metal');
         for (let i = 0; i < 4; i++) S.box(0.012, 0.1, 0.2, '#aab2be', -9.34 + i * 0.09, 1.07, -10.3, 0, 'metal');
         S.cyl(0.035, 0.2, '#4fe3a8', -9.35, 1.1, -10.55, 'satin', 8); // soap
-        S.box(0.3, 0.4, 0.012, '#e8604c', -9.95, 0.5, -9.862, 0, 'satin'); // towel
+        S.box(0.3, 0.4, 0.012, '#b4614f', -9.95, 0.5, -9.862, 0, 'satin'); // towel
         S.rbox(0.5, 0.28, 0.4, 0.03, '#e9ecef', -11.0, 1.16, -10.35, 0, 'satin'); // microwave
         S.box(0.3, 0.2, 0.01, '#16181d', -11.05, 1.16, -10.14, 0, 'matte');
       }
@@ -2779,7 +2799,7 @@ export const O3 = (() => {
         S.sph(0.1, gold, q[0], q[1] + 0.22, q[2], 1, 1, 0.3, 'metal', 5);
         for (let i = 0; i < 4; i++) {
           const m = P(-0.4 + i * 0.15, 1.72, 0.2);
-          S.box(0.02, 0.1, 0.004, ['#e8604c', '#3fb6a8', '#5aa6e0', '#f5b83d'][i], m[0], m[1], m[2], rot);
+          S.box(0.02, 0.1, 0.004, ['#b4614f', '#7a9a93', '#6f93b5', '#c9a24f'][i], m[0], m[1], m[2], rot);
           S.cyl(0.04, 0.008, gold, m[0], m[1] - 0.07, m[2], 'metal', 12, Math.PI / 2, 0, 0, rot);
         }
         // framed certificates + a brass plaque row on the felt
@@ -2821,7 +2841,7 @@ export const O3 = (() => {
           S.cyl(
             0.05,
             0.015,
-            ['#e8604c', '#5aa6e0', '#f5b83d'][i],
+            ['#b4614f', '#6f93b5', '#c9a24f'][i],
             rz[0],
             rz[1],
             rz[2],
@@ -2901,7 +2921,7 @@ export const O3 = (() => {
       const fs = paint(640, 100, (g, W, H) => {
         g.fillStyle = '#12182b';
         g.fillRect(0, 0, W, H);
-        g.fillStyle = '#f5b83d';
+        g.fillStyle = '#c9a24f';
         g.textAlign = 'center';
         g.font = '800 40px "Space Grotesk", sans-serif';
         g.fillText('WELCOME · CHECK IN HERE', W / 2, 66);
@@ -2919,7 +2939,7 @@ export const O3 = (() => {
       S.rbox(0.2, 0.15, 0.015, 0.01, '#16181d', cx + 0.7, 1.26, cz + 0.28, 0, 'matte', -0.3);
       S.cyl(0.05, 0.03, '#d9b45c', cx + 1.2, 1.2, cz + 0.33, 'metal', 14); // bell
       S.sph(0.05, '#d9b45c', cx + 1.2, 1.22, cz + 0.33, 1, 0.8, 1, 'metal', 12);
-      S.box(0.3, 0.04, 0.22, '#e8604c', cx - 1.3, 1.07, cz + 0.2, 0.2);
+      S.box(0.3, 0.04, 0.22, '#b4614f', cx - 1.3, 1.07, cz + 0.2, 0.2);
       S.box(0.28, 0.04, 0.2, '#fbfaf6', cx - 1.3, 1.11, cz + 0.2, -0.1);
       this._tower(S, cx - 1.7, 1.06, cz - 0.1, 0.35);
       this._plantB(S, 'orchid', cx + 1.7, 1.06, cz - 0.1, 0.55, 'white');
@@ -2934,7 +2954,7 @@ export const O3 = (() => {
             0.24,
             0.1,
             0.012,
-            ['#f5b83d', '#3fb6a8', '#e8604c'][i],
+            ['#c9a24f', '#7a9a93', '#b4614f'][i],
             cx + 0.15,
             1.12 + i * 0.07,
             cz + 0.28 - i * 0.02,
@@ -2943,7 +2963,7 @@ export const O3 = (() => {
             -0.25,
           );
         S.cyl(0.015, 0.4, '#d7dbe0', cx - 1.95, 1.25, cz - 0.3, 'metal', 6);
-        S.box(0.2, 0.12, 0.004, '#e8604c', cx - 1.86, 1.4, cz - 0.3, 0, 'satin');
+        S.box(0.2, 0.12, 0.004, '#b4614f', cx - 1.86, 1.4, cz - 0.3, 0, 'satin');
         S.rbox(0.14, 0.03, 0.1, 0.01, '#2b2f38', cx + 0.5, 1.07, cz - 0.1, 0.4, 'satin');
       }
       // receptionist's chair
@@ -2955,7 +2975,7 @@ export const O3 = (() => {
         S.cyl(
           0.012,
           0.8,
-          ['#e8604c', '#26324d', '#2f7a55'][i],
+          ['#b4614f', '#26324d', '#2f7a55'][i],
           0.2 + (i - 1) * 0.06,
           0.8,
           8.8,
@@ -2964,10 +2984,10 @@ export const O3 = (() => {
           0,
           (i - 1) * 0.12,
         );
-      S.rbox(0.38, 0.55, 0.2, 0.04, '#3fb6a8', 0.9, 0.34, 10.6, 0.4, 'satin');
+      S.rbox(0.38, 0.55, 0.2, 0.04, '#7a9a93', 0.9, 0.34, 10.6, 0.4, 'satin');
       S.box(0.04, 0.5, 0.04, '#2b2f38', 0.84, 0.75, 10.6, 0.4, 'metal');
       // sofa corner: tufted mustard sofa with cushions and a throw
-      const sofaC = '#e2a63b';
+      const sofaC = '#cfc7ba';
       S.rbox(3.6, 0.5, 1.1, 0.15, sofaC, -9.5, 0.35, 8.4, 0, 'matte');
       S.rbox(3.6, 0.9, 0.32, 0.14, sofaC, -9.5, 0.85, 8.85, 0, 'matte');
       [-1, 1].forEach(s => S.rbox(0.32, 0.75, 1.1, 0.12, sofaC, -9.5 + s * 1.75, 0.5, 8.4, 0, 'matte'));
@@ -2977,8 +2997,8 @@ export const O3 = (() => {
       });
       for (let i = 0; i < 6; i++) S.sph(0.025, '#a77a1e', -10.2 + i * 0.28, 1.0, 8.68, 1, 1, 1, 'satin', 6);
       [
-        [-0.95, '#3fb6a8', 0.1],
-        [0.9, '#e8604c', -0.12],
+        [-0.95, '#7a9a93', 0.1],
+        [0.9, '#b4614f', -0.12],
         [0.5, '#26324d', 0.2],
         [-0.45, '#f5f0e6', -0.2],
       ].forEach(([x, c, r], i) => {
@@ -3071,14 +3091,14 @@ export const O3 = (() => {
           tx + Math.cos((i * Math.PI) / 2 + 0.6) * 1.9,
           tz + Math.sin((i * Math.PI) / 2 + 0.6) * 1.9,
           -((i * Math.PI) / 2 + 0.6) - Math.PI / 2,
-          '#3fb6a8',
+          '#7a9a93',
         );
       this._laptopB(S, 11.0, 0.82, 6.3, 0.6, '#d7dbe0');
       this._plantB(S, 'bush', 11.6, 0.82, 6.9, 0.35);
       // notebooks, a pen, a speaker puck, cups, a water carafe
       [
-        [0, '#e8604c'],
-        [1.6, '#f5b83d'],
+        [0, '#b4614f'],
+        [1.6, '#c9a24f'],
         [3.1, '#26324d'],
       ].forEach(([a, c], i) => {
         const px = tx + Math.cos(a + 0.5) * 0.85,
@@ -3100,10 +3120,59 @@ export const O3 = (() => {
         );
         S.box(0.8, 0.9, 0.025, '#fbfaf6', ex, 1.35, ez - 0.1, 0.2, 'matte');
         S.box(0.84, 0.04, 0.05, '#2b2f38', ex, 0.88, ez - 0.05, 0.2, 'metal');
-        S.box(0.5, 0.03, 0.01, '#e8604c', ex, 1.55, ez - 0.085, 0.2);
-        S.box(0.42, 0.03, 0.01, '#3fb6a8', ex, 1.45, ez - 0.085, 0.2);
+        S.box(0.5, 0.03, 0.01, '#b4614f', ex, 1.55, ez - 0.085, 0.2);
+        S.box(0.42, 0.03, 0.01, '#7a9a93', ex, 1.45, ez - 0.085, 0.2);
         S.box(0.55, 0.03, 0.01, '#26324d', ex, 1.35, ez - 0.085, 0.2);
       }
+    }
+
+    /** A glass-walled meeting room round the table: slim dark frames, a door gap on the aisle side. */
+    _meetingGlass(root) {
+      const S = this.S;
+      const glass = new THREE.MeshStandardMaterial({
+        color: '#aecde4',
+        transparent: true,
+        opacity: 0.14,
+        roughness: 0.03,
+        metalness: 0.1,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        envMapIntensity: 1.4,
+      });
+      const H = 2.5;
+      const run = (x0, z0, x1, z1) => {
+        const len = Math.hypot(x1 - x0, z1 - z0),
+          cx = (x0 + x1) / 2,
+          cz = (z0 + z1) / 2,
+          ry = Math.atan2(x1 - x0, z1 - z0) - Math.PI / 2;
+        const pane = new THREE.Mesh(new THREE.PlaneGeometry(len, H), glass);
+        pane.position.set(cx, H / 2, cz);
+        pane.rotation.y = -ry;
+        root.add(pane);
+        S.box(len, 0.05, 0.06, '#35322f', cx, H, cz, -ry, 'metal'); // head rail
+        S.box(len, 0.1, 0.06, '#35322f', cx, 0.05, cz, -ry, 'metal'); // base rail
+        const n = Math.max(1, Math.round(len / 1.3));
+        for (let i = 0; i <= n; i++)
+          S.box(0.04, H, 0.06, '#35322f', x0 + ((x1 - x0) / n) * i, H / 2, z0 + ((z1 - z0) / n) * i, 0, 'metal');
+      };
+      run(8.0, 3.4, 15.2, 3.4); // aisle side
+      run(8.0, 3.4, 8.0, 5.6); // west side, with a 2 m door gap before the next run
+      run(8.0, 7.7, 8.0, 10.0);
+    }
+
+    /** A low lounge armchair for the sofa corner: greige upholstery on walnut legs. */
+    _armchair(S, x, z, ry) {
+      const c = '#b9aea0';
+      const R = (w, h, d, ox, oy, oz, col = c, r = 0.1) => {
+        const cos = Math.cos(ry),
+          sin = Math.sin(ry);
+        S.rbox(w, h, d, r, col, x + ox * cos + oz * sin, oy, z - ox * sin + oz * cos, ry, 'matte');
+      };
+      R(0.95, 0.3, 0.9, 0, 0.36, 0); // seat
+      R(0.95, 0.7, 0.22, 0, 0.7, -0.38); // back
+      R(0.2, 0.5, 0.9, -0.42, 0.55, 0); // arms
+      R(0.2, 0.5, 0.9, 0.42, 0.55, 0);
+      [-0.38, 0.38].forEach(ox => [-0.34, 0.34].forEach(oz => R(0.06, 0.2, 0.06, ox, 0.1, oz, '#6b4f36', 0.01)));
     }
 
     /* ---------- huddle booth ---------- */
@@ -3112,7 +3181,7 @@ export const O3 = (() => {
         cx = -5.4,
         cz = 4.9;
       const felt = '#26324d',
-        seat = '#3fb6a8',
+        seat = '#7a9a93',
         wood = '#b97e4e';
       // U of benches around a small table with slatted, low walls
       S.rbox(2.8, 0.4, 0.55, 0.08, seat, cx, 0.2, cz - 0.95, 0, 'matte');
@@ -3141,7 +3210,7 @@ export const O3 = (() => {
           0.45,
           0.12,
           0.05,
-          ['#f5b83d', '#e8604c', '#f5f0e6'][i],
+          ['#c9a24f', '#b4614f', '#f5f0e6'][i],
           cx + x * (i === 2 ? 1 : 1) * 0.9,
           0.55,
           cz - 0.9,
@@ -3166,7 +3235,7 @@ export const O3 = (() => {
         S.cyl(0.04, 0.05, '#16181d', bx + s, 0.03, bz - 0.38, 'matte', 8);
       });
       S.box(2.5, 0.05, 0.12, '#aab2be', bx, 0.9, bz + 0.08, 0, 'metal');
-      ['#e8604c', '#26324d', '#3fb6a8', '#f5b83d'].forEach((c, i) =>
+      ['#b4614f', '#26324d', '#7a9a93', '#c9a24f'].forEach((c, i) =>
         S.cyl(0.012, 0.12, c, bx - 0.5 + i * 0.15, 0.94, bz + 0.1, 'matte', 6, 0, 0, Math.PI / 2),
       );
       S.box(0.12, 0.04, 0.05, '#e8ecf2', bx + 0.5, 0.93, bz + 0.1, 0, 'matte');
@@ -3186,10 +3255,10 @@ export const O3 = (() => {
       this._laptopB(S, sx - 0.1, 1.125, sz, Math.PI, '#c9ced6');
       this._cup(S, sx + 0.5, 1.125, sz + 0.2, true);
       S.rbox(1.0, 0.025, 0.7, 0.01, '#2b3445', sx, 0.014, sz + 0.85, 0, 'matte');
-      S.cyl(0.2, 0.06, '#3fb6a8', 7.4, 0.78, 4.9, 'matte', 14);
+      S.cyl(0.2, 0.06, '#7a9a93', 7.4, 0.78, 4.9, 'matte', 14);
       S.cyl(0.03, 0.74, '#2b2f38', 7.4, 0.4, 4.9, 'metal', 8);
       S.cyl(0.22, 0.03, '#2b2f38', 7.4, 0.015, 4.9, 'metal', 14);
-      S.sph(0.32, '#5aa6e0', 4.2, 0.32, 5.9, 1, 1, 1, 'satin', 16); // balance ball
+      S.sph(0.32, '#6f93b5', 4.2, 0.32, 5.9, 1, 1, 1, 'satin', 16); // balance ball
     }
 
     /* ---------- right side: printer, cooler, lockers, files and a vending machine ---------- */
@@ -3207,8 +3276,8 @@ export const O3 = (() => {
       S.box(0.3, 0.12, 0.4, '#fbfaf6', 14.9, 0.76, -2.4, 0, 'matte');
       // water cooler
       S.rbox(0.5, 1.0, 0.5, 0.06, '#f4f4f4', 14.95, 0.5, -0.9, 0, 'satin');
-      S.box(0.3, 0.06, 0.02, '#3fb6a8', 14.7, 0.82, -0.9, 0, 'satin');
-      S.box(0.3, 0.06, 0.02, '#e8604c', 14.7, 0.72, -0.9, 0, 'satin');
+      S.box(0.3, 0.06, 0.02, '#7a9a93', 14.7, 0.82, -0.9, 0, 'satin');
+      S.box(0.3, 0.06, 0.02, '#b4614f', 14.7, 0.72, -0.9, 0, 'satin');
       S.cyl(0.04, 0.12, '#cfd5dc', 14.7, 0.58, -0.9, 'metal', 8, Math.PI / 2);
       S.cyl(0.07, 0.14, '#ffffff', 14.7, 0.9, -1.2, 'satin', 10);
       for (let i = 0; i < 5; i++) S.cone(0.034, 0.028, 0.03, '#ffffff', 14.7, 0.95 + i * 0.02, -1.2, 'matte', 8);
@@ -3221,7 +3290,7 @@ export const O3 = (() => {
       // lockers (4) and filing cabinets (2) along the right balustrade
       for (let i = 0; i < 4; i++) {
         const z = -5.6 + i * 0.5,
-          c = i % 2 ? '#3fb6a8' : '#26324d';
+          c = i % 2 ? '#7a9a93' : '#26324d';
         S.box(0.5, 1.9, 0.46, c, 15.55, 0.95, z, 0, 'satin');
         S.box(0.012, 1.7, 0.4, '#1b2233', 15.29, 0.95, z, 0, 'satin');
         for (let k = 0; k < 4; k++) S.box(0.014, 0.012, 0.28, '#11151c', 15.285, 1.5 + k * 0.05, z, 0, 'matte');
@@ -3237,10 +3306,10 @@ export const O3 = (() => {
       }
       this._plantB(S, 'succulent', 15.55, 1.05, 0.66, 0.5, 'white');
       // vending machine, lit
-      S.rbox(0.85, 1.95, 1.0, 0.05, '#c94a3b', 15.45, 0.98, 4.6, 0, 'satin');
+      S.rbox(0.85, 1.95, 1.0, 0.05, '#7d6b60', 15.45, 0.98, 4.6, 0, 'satin');
       S.box(0.04, 1.0, 0.7, '#171b22', 14.95, 1.2, 4.6, 0, 'matte');
       S.box(0.04, 0.2, 0.7, '#1b2233', 14.95, 0.15, 4.6, 0, 'matte');
-      S.box(0.04, 0.12, 0.12, '#f5b83d', 14.94, 0.7, 5.05, 0, 'lamp');
+      S.box(0.04, 0.12, 0.12, '#c9a24f', 14.94, 0.7, 5.05, 0, 'lamp');
       const vt = paint(256, 480, ART.vending).t;
       const vm = this._plane(root, vt, 0.62, 1.16, 14.9, 1.2, 4.4, -Math.PI / 2, {
         emissive: '#ffffff',
@@ -3306,6 +3375,10 @@ export const O3 = (() => {
             C.cyl(0.02, 0.06, '#2b2f38', x + 0.1, 5.52, z, 'metal', 6);
           }
       });
+      // indirect cove strips: a warm line of light under every beam and a wash along the left wall (they glow more as it gets dark)
+      [-12.4, -4.2, 4.0, 12.2].forEach(x => C.box(0.1, 0.02, 20.4, '#fff4d6', x, 5.44, 0, 0, 'lamp'));
+      C.box(0.08, 0.03, 20.4, '#fff4d6', -15.45, 4.95, 0, 0, 'lamp');
+      C.box(0.14, 0.06, 20.4, '#d9d2c4', -15.5, 5.0, 0, 0, 'satin');
       // round galvanised ducts along the room, joints and hangers
       [
         [-6.0, 5.1, 0.42],
@@ -3682,18 +3755,18 @@ export const O3 = (() => {
         bottom,
         eyes: '#2a1d14',
         grin: true,
-        lanyard: '#f5b83d',
+        lanyard: '#c9a24f',
         ...extra,
       });
       const look = {
-        sam: L('m', SKIN[0], 'quiff', '#5b3a22', '#5aa6e0', '#2f3a52', { shoeStyle: 'sneaker' }),
+        sam: L('m', SKIN[0], 'quiff', '#5b3a22', '#6f93b5', '#2f3a52', { shoeStyle: 'sneaker' }),
         priya: L('f', SKIN[3], 'pony', '#1d1612', '#e98aa8', '#3a4a6b', { earrings: true, shoeStyle: 'flat' }),
-        marcus: L('m', SKIN[4], 'afro', '#1d1612', '#3fb6a8', '#26324d', { glasses: 'round', shoeStyle: 'sneaker' }),
+        marcus: L('m', SKIN[4], 'afro', '#1d1612', '#7a9a93', '#26324d', { glasses: 'round', shoeStyle: 'sneaker' }),
         elena: L('f', SKIN[5], 'braids', '#8a5a2b', '#9b7fd1', '#2b2f3a', { sleeves: 'three' }),
         tom: L('m', SKIN[2], 'slick', '#2a2a2e', '#ef8f6b', '#3a4a6b', { stubble: true, shoeStyle: 'boot' }),
         yuki: L('f', SKIN[0], 'pony', '#1d1612', '#f6c445', '#2f3a52', { headband: true, outfit: 'hoodie' }),
         omar: L('m', SKIN[3], 'quiff', '#1d1612', '#2f7a55', '#3a4a6b', { beard: true }),
-        hana: L('f', SKIN[1], 'braids', '#3a2618', '#5aa6e0', '#2b2f3a', { glasses: 'tort' }),
+        hana: L('f', SKIN[1], 'braids', '#3a2618', '#6f93b5', '#2b2f3a', { glasses: 'tort' }),
       };
       // meeting table (the chairs stand at 1.9 m round it)
       const tx = 11.4,
@@ -3875,7 +3948,7 @@ export const O3 = (() => {
       gr.addColorStop(1, '#0a0f17');
       g.fillStyle = gr;
       g.fillRect(0, 0, W, H);
-      g.fillStyle = '#e8604c';
+      g.fillStyle = '#b4614f';
       g.beginPath();
       g.arc(26, 26, 7, 0, 7);
       g.fill();
@@ -3891,7 +3964,7 @@ export const O3 = (() => {
         }).format(new Date());
       } catch {}
       g.textAlign = 'right';
-      g.fillStyle = '#f5b83d';
+      g.fillStyle = '#c9a24f';
       g.font = '700 20px "JetBrains Mono", monospace';
       g.fillText('NEW YORK ' + clock, W - 22, 34);
       g.textAlign = 'left';
@@ -3917,7 +3990,7 @@ export const O3 = (() => {
       const tick = Object.values(this.info || {})
         .map(a => `${a.name} · ${a.short || a.role}`)
         .join('    ✦    ');
-      g.fillStyle = '#f5b83d';
+      g.fillStyle = '#c9a24f';
       g.font = '600 15px "JetBrains Mono", monospace';
       const off = -((t * 40) % 900);
       g.fillText(tick, 230 + off, 340);
@@ -3975,7 +4048,7 @@ export const O3 = (() => {
         };
         hand(((h + m / 60) / 12) * Math.PI * 2, 58, 10);
         hand((m / 60) * Math.PI * 2, 84, 6);
-        g.fillStyle = '#f5b83d';
+        g.fillStyle = '#c9a24f';
         g.beginPath();
         g.arc(128, 128, 9, 0, Math.PI * 2);
         g.fill();
@@ -3998,11 +4071,11 @@ export const O3 = (() => {
       g.fillStyle = 'rgba(28,34,48,.88)';
       rr(g, 0, 0, 1024, 256, 28);
       g.fill();
-      g.strokeStyle = '#f5b83d';
+      g.strokeStyle = '#c9a24f';
       g.lineWidth = 6;
       rr(g, 6, 6, 1012, 244, 24);
       g.stroke();
-      g.fillStyle = '#f5b83d';
+      g.fillStyle = '#c9a24f';
       g.font = '700 84px "Space Grotesk", sans-serif';
       g.textAlign = 'center';
       g.fillText('FLOOR BEING SET UP', 512, 118);
@@ -4026,7 +4099,7 @@ export const O3 = (() => {
         H = 512;
       g.fillStyle = '#0a0f17';
       g.fillRect(0, 0, W, H);
-      g.fillStyle = '#f5b83d';
+      g.fillStyle = '#c9a24f';
       g.font = '700 30px "Space Grotesk", sans-serif';
       g.fillText('CONTENT WEEK' + (week ? ' · ' + week : ''), 28, 46);
       g.fillStyle = '#8792a3';
@@ -4051,11 +4124,11 @@ export const O3 = (() => {
         g.fillStyle = '#121a26';
         rr(g, x, y, cw, 380, 14);
         g.fill();
-        const col = p.status === 'approved' ? '#3ccf8e' : p.status === 'changes' ? '#ff6b5e' : '#f5b83d';
+        const col = p.status === 'approved' ? '#3ccf8e' : p.status === 'changes' ? '#ff6b5e' : '#c9a24f';
         g.fillStyle = col;
         rr(g, x, y, cw, 8, 4);
         g.fill();
-        g.fillStyle = '#f5b83d';
+        g.fillStyle = '#c9a24f';
         g.font = '700 22px "JetBrains Mono", monospace';
         g.fillText(
           String(p.day || '')
@@ -4159,7 +4232,7 @@ export const O3 = (() => {
         g.fillStyle = '#8792a3';
         g.font = '600 22px "JetBrains Mono", monospace';
         g.fillText(l, 52, y + 42);
-        g.fillStyle = i === 2 ? '#f5b83d' : '#e8ecf2';
+        g.fillStyle = i === 2 ? '#c9a24f' : '#e8ecf2';
         g.font = '700 74px "Space Grotesk", sans-serif';
         g.fillText(v == null ? '—' : String(v), 52, y + 122);
       });
